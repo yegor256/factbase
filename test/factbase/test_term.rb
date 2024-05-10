@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+#
 # Copyright (c) 2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,27 +21,43 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'fact'
-require_relative 'term'
+require 'minitest/autorun'
+require_relative '../../lib/factbase/term'
 
-# Query.
+# Term test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Query
-  def initialize(maps, mutex, query)
-    @maps = maps
-    @mutex = mutex
-    @query = query
+class TestTerm < Minitest::Test
+  def test_simple_matching
+    t = Factbase::Term.new(:eq, ['foo', 42])
+    assert(t.matches?({ 'foo' => [42] }))
+    assert(!t.matches?({ 'foo' => ['Hello!'] }))
+    assert(!t.matches?({ 'bar' => ['Hello!'] }))
   end
 
-  # Iterate them one by one.
-  # @yield [Fact] Facts one-by-one
-  def each
-    term = Factbase::Syntax.new(@query).to_term
-    @maps.each do |m|
-      next unless term.matches?(m)
-      yield Factbase::Fact.new(@mutex, m)
-    end
+  def test_lt_matching
+    t = Factbase::Term.new(:lt, ['foo', 42])
+    assert(t.matches?({ 'foo' => [10] }))
+    assert(!t.matches?({ 'foo' => [100] }))
+  end
+
+  def test_gt_matching
+    t = Factbase::Term.new(:gt, ['foo', 42])
+    assert(t.matches?({ 'foo' => [100] }))
+    assert(!t.matches?({ 'foo' => [10] }))
+  end
+
+  def test_or_matching
+    t = Factbase::Term.new(
+      :or,
+      [
+        Factbase::Term.new(:eq, ['foo', 4]),
+        Factbase::Term.new(:eq, ['bar', 5])
+      ]
+    )
+    assert(t.matches?({ 'foo' => [4] }))
+    assert(t.matches?({ 'bar' => [5] }))
+    assert(!t.matches?({ 'bar' => [42] }))
   end
 end

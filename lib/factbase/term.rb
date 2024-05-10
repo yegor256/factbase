@@ -21,26 +21,81 @@
 # SOFTWARE.
 
 require_relative 'fact'
-require_relative 'term'
 
-# Query.
+# Term.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Query
-  def initialize(maps, mutex, query)
-    @maps = maps
-    @mutex = mutex
-    @query = query
+class Factbase::Term
+  def initialize(operator, operands)
+    @op = operator
+    @operands = operands
   end
 
-  # Iterate them one by one.
-  # @yield [Fact] Facts one-by-one
-  def each
-    term = Factbase::Syntax.new(@query).to_term
-    @maps.each do |m|
-      next unless term.matches?(m)
-      yield Factbase::Fact.new(@mutex, m)
+  # Does it match the map?
+  # @param [Map] The map
+  # @return [bool] TRUE if matches
+  def matches?(map)
+    send(@op, map)
+  end
+
+  def to_s
+    items = []
+    items << @op
+    items += @operands.map do |o|
+      if o.is_a?(String)
+        "'#{o}'"
+      else
+        o.to_s
+      end
     end
+    "(#{items.join(' ')})"
+  end
+
+  private
+
+  def or(map)
+    @operands.each do |o|
+      return true if o.matches?(map)
+    end
+    false
+  end
+
+  def and(map)
+    @operands.each do |o|
+      return false unless o.matches?(map)
+    end
+    true
+  end
+
+  def exists(map)
+    k = @operands[0].to_s
+    !map[k].nil?
+  end
+
+  def absent(map)
+    k = @operands[0].to_s
+    map[k].nil?
+  end
+
+  def eq(map)
+    k = @operands[0].to_s
+    v = map[k]
+    return false if v.nil?
+    v[0] == @operands[1]
+  end
+
+  def lt(map)
+    k = @operands[0].to_s
+    v = map[k]
+    return false if v.nil?
+    v[0] < @operands[1]
+  end
+
+  def gt(map)
+    k = @operands[0].to_s
+    v = map[k]
+    return false if v.nil?
+    v[0] > @operands[1]
   end
 end

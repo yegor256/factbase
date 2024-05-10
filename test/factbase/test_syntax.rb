@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+#
 # Copyright (c) 2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,27 +21,51 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'fact'
-require_relative 'term'
+require 'minitest/autorun'
+require_relative '../../lib/factbase/syntax'
 
-# Query.
+# Syntax test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Query
-  def initialize(maps, mutex, query)
-    @maps = maps
-    @mutex = mutex
-    @query = query
+class TestSyntax < Minitest::Test
+  def test_simple_parsing
+    [
+      '(foo)',
+      '(foo (bar) (zz 77)   )',
+      "(eq foo    'Hello,&#x20;world!')",
+      "(or ( a 4) (b 5) (and (c 5) (r 7 8s 8is 'Foo')))"
+    ].each do |q|
+      Factbase::Syntax.new(q).to_term
+    end
   end
 
-  # Iterate them one by one.
-  # @yield [Fact] Facts one-by-one
-  def each
-    term = Factbase::Syntax.new(@query).to_term
-    @maps.each do |m|
-      next unless term.matches?(m)
-      yield Factbase::Fact.new(@mutex, m)
+  def test_exact_parsing
+    [
+      '(foo)',
+      '(foo 7)',
+      "(foo 7 'Dude')",
+      '(foo x y z)',
+      "(foo x y z t f 42 'Hi!' 33)",
+      '(foo (x) y z)',
+      "(foo (x (f (t (y 42 'Hey'))) (f) (r 3)) y z)"
+    ].each do |q|
+      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s)
+    end
+  end
+
+  def test_simple_matching
+    m = {
+      'foo' => ['Hello, world!'],
+      'bar' => [42],
+      'z' => [1, 2, 3, 4]
+    }
+    {
+      '(eq z 1)' => true,
+      '(or (eq bar 888) (eq z 1))' => true,
+      "(or (gt bar 100) (eq foo 'Hello,&#x20;world!'))" => true
+    }.each do |k, v|
+      assert_equal(v, Factbase::Syntax.new(k).to_term.matches?(m), k)
     end
   end
 end
