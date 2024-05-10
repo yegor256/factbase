@@ -44,7 +44,7 @@ class Factbase::Term
     items << @op
     items += @operands.map do |o|
       if o.is_a?(String)
-        "'#{o}'"
+        "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"')}'"
       else
         o.to_s
       end

@@ -37,7 +37,9 @@ class Factbase::Syntax
   def to_term
     @tokens ||= to_tokens
     @ast ||= to_ast(@tokens, 0)
-    @ast[0]
+    term = @ast[0]
+    raise 'No terms found' if term.nil?
+    term
   end
 
   private
@@ -50,6 +52,7 @@ class Factbase::Syntax
   # is the term/literal and the second one is the position where the
   # scanning should continue.
   def to_ast(tokens, at)
+    raise "Closing too soon at ##{at}" if tokens[at] == :close
     return [tokens[at], at + 1] unless tokens[at] == :open
     at += 1
     op = tokens[at]
@@ -57,8 +60,11 @@ class Factbase::Syntax
     operands = []
     at += 1
     loop do
+      raise "End of token stream at ##{at}" if tokens[at].nil?
       break if tokens[at] == :close
       (operand, at1) = to_ast(tokens, at)
+      raise "Stuck at position ##{at}" if at == at1
+      raise "Jump back at position ##{at}" if at1 < at
       at = at1
       operands << operand
       break if tokens[at] == :close
@@ -71,7 +77,13 @@ class Factbase::Syntax
     acc = ''
     string = false
     @query.to_s.chars.each do |c|
-      string = !string if ['\'', '"'].include?(c)
+      if ['\'', '"'].include?(c)
+        if string && acc[acc.length - 1] == '\\'
+          acc = acc[0..-2]
+        else
+          string = !string
+        end
+      end
       if string
         acc += c
         next
@@ -91,6 +103,7 @@ class Factbase::Syntax
         acc += c
       end
     end
+    raise 'String not closed' if string
     list.map do |t|
       if t.is_a?(Symbol)
         t

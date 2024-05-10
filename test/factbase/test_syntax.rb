@@ -57,6 +57,8 @@ class TestSyntax < Minitest::Test
       '(foo)',
       '(foo 7)',
       "(foo 7 'Dude')",
+      "(r 'Dude\\'s Friend')",
+      "(r 'I\\'m \\\"good\\\"')",
       '(foo x y z)',
       "(foo x y z t f 42 'Hi!' 33)",
       '(foo (x) y z)',
@@ -78,6 +80,26 @@ class TestSyntax < Minitest::Test
       "(or (gt bar 100) (eq foo 'Hello, world!'))" => true
     }.each do |k, v|
       assert_equal(v, Factbase::Syntax.new(k).to_term.matches?(m), k)
+    end
+  end
+
+  def test_broken_syntax
+    [
+      '',
+      '(foo',
+      '"hello, world!',
+      '(foo 7',
+      "(foo 7 'Dude'",
+      '(foo x y z (',
+      '(foo x y (z t (f 42 ',
+      ')foo ) y z)',
+      ")y 42 'Hey you)",
+      ')',
+      '"'
+    ].each do |q|
+      assert_raises do
+        Factbase::Syntax.new(q).to_term
+      end
     end
   end
 end
