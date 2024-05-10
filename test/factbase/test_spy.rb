@@ -37,9 +37,9 @@ class TestSpy < Minitest::Test
     fb.query('(eq foo "test")').each do |f|
       assert(f.id.positive?)
     end
-    # assert_equal(3, fb.caught_keys.size)
+    assert_equal(3, fb.caught_keys.size)
     assert(fb.caught_keys.include?('hello'))
     assert(fb.caught_keys.include?(42))
-    # assert(fb.caught_keys.include?('test'))
+    assert(fb.caught_keys.include?('test'))
   end
 end

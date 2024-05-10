@@ -38,17 +38,12 @@ class Factbase::Spy
   end
 
   def query(expr)
+    scan(Factbase::Syntax.new(expr).to_term)
     @fb.query(expr)
   end
 
   def insert
     SpyFact.new(@fb.insert, @key, @caught)
-  end
-
-  def each
-    @fb.each do |f|
-      SpyFact.new(f, @key, @caught)
-    end
   end
 
   def export
@@ -84,6 +79,15 @@ class Factbase::Spy
 
     def respond_to_missing?(method, include_private = false)
       @fact.respond_to_missing?(method, include_private)
+    end
+  end
+
+  private
+
+  def scan(term)
+    @caught << term.operands[1] if term.op == :eq && term.operands[0].to_s == @key
+    term.operands.each do |o|
+      scan(o) if o.is_a?(Factbase::Term)
     end
   end
 end

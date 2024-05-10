@@ -28,6 +28,8 @@ require_relative 'fact'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Term
+  attr_reader :op, :operands
+
   def initialize(operator, operands)
     @op = operator
     @operands = operands
