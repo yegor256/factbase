@@ -54,6 +54,14 @@ class Factbase::Term
 
   private
 
+  def nil(_map)
+    true
+  end
+
+  def not(map)
+    !@operands[0].matches?(map)
+  end
+
   def or(map)
     @operands.each do |o|
       return true if o.matches?(map)

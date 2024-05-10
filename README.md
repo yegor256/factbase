@@ -13,6 +13,22 @@
 
 This Ruby gem manages an in-memory database of facts.
 
+Here is how you use it:
+
+```ruby
+fb = Factbase.new
+f = fb.insert
+f.type = 'book'
+f.title = 'Object Thinking'
+fb.query('(eq type "book")').each do |f|
+  f.seen = true
+end
+fb.insert
+fb.query('(not (exists seen))').each do |f|
+  f.title = 'Elegant Objects'
+end
+```
+
 ## How to contribute
 
 Read [these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).

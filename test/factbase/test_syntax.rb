@@ -31,10 +31,11 @@ require_relative '../../lib/factbase/syntax'
 class TestSyntax < Minitest::Test
   def test_simple_parsing
     [
+      '()',
       '(foo)',
       '(foo (bar) (zz 77)   )',
       "(eq foo    'Hello,&#x20;world!')",
-      "(or ( a 4) (b 5) (and (c 5) (r 7 8s 8is 'Foo')))"
+      "(or ( a 4) (b 5) () (and () (c 5) (r 7 8s 8is 'Foo')))"
     ].each do |q|
       Factbase::Syntax.new(q).to_term
     end

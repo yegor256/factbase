@@ -53,6 +53,7 @@ class Factbase::Syntax
     return [tokens[at], at + 1] unless tokens[at] == :open
     at += 1
     op = tokens[at]
+    return [Factbase::Term.new(:nil, []), at + 1] if op == :close
     operands = []
     at += 1
     loop do
