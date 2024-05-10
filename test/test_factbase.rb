@@ -34,7 +34,7 @@ class TestFactbase < Minitest::Test
     fb.insert
     fb.insert
     found = 0
-    fb.query('id IS NOT NULL').each do |f|
+    fb.query('(exists id)').each do |f|
       assert(42, f.id.positive?)
       f.foo = 42
       assert_equal(42, f.foo)

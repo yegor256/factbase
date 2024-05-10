@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require_relative 'fact'
+require_relative 'term'
 
 # Query.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -36,7 +37,9 @@ class Factbase::Query
   # Iterate them one by one.
   # @yield [Fact] Facts one-by-one
   def each
+    term = Factbase::Syntax.new(@query).to_term
     @maps.each do |m|
+      next if !term.matches?(m)
       yield Factbase::Fact.new(@mutex, m)
     end
   end

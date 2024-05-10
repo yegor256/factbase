@@ -47,17 +47,20 @@ class Factbase
 
   # Create a query capable of iterating.
   #
-  # Terms in the query may be joined with +AND+ and +OR+. They may be groupped
-  # with brackets. There is also +IS NULL+ and +IS NOT NULL+ operators.
+  # There is a Lisp-like syntax, for example (all string literals
+  # must be HTML-escaped):
   #
-  # For example:
+  #  (eq title 'Object&#20;Thinking')
+  #  (gt time '2024-03-23T03:21:43')
+  #  (gt cost 42)
+  #  (exists seenBy)
+  #  (and
+  #    (eq foo '42')
+  #    (or
+  #      (gt bar 200)
+  #      (absent zzz)))
   #
-  #  type = 'Foo'
-  #  time > '2024-03-23T03:21:43'
-  #  cost GT 42
-  #  seen-by IS NULL
-  #
-  # @param [String] query The query to use for selections, e.g. "type = 'Foo'"
+  # @param [String] query The query to use for selections
   def query(query)
     Factbase::Query.new(@maps, @mutex, query)
   end
