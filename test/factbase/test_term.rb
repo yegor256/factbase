@@ -61,6 +61,7 @@ class TestTerm < Minitest::Test
 
   def test_not_exists_matching
     t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, ['foo', 100])])
+    assert(t.matches?({ 'foo' => [42, 12, -90] }))
     assert(!t.matches?({ 'foo' => [100] }))
   end
 
