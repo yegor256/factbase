@@ -25,18 +25,21 @@
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase
+  # Current version of the library and of this class.
   VERSION = '0.0.0'
 
   # Insert a new fact.
-  # @param pairs [Array] List of (key,value) tuples
+  #
+  # @param [Array<String, Object>] pairs List of (key,value) tuples
   # @return [Integer] The ID of the newly created fact
   def insert(pairs)
     # empty
   end
 
   # Update an existing fact by adding new pairs to it.
-  # @param id [Integer] The ID of the fact to update
-  # @param pairs [Array] List of (key,value) tuples
+  # @param [Integer] id The ID of the fact to update
+  # @param [Array<String, Object>] pairs List of (key,value) tuples
+  # @return [nil]
   def append(id, fact)
     # empty
   end
@@ -49,7 +52,7 @@ class Factbase
   # ```
   # ```
   #
-  # @param query [String] The query to use for selections, e.g. "type = 'Foo'"
+  # @param [String] query The query to use for selections, e.g. "type = 'Foo'"
   def select(query)
     # empty
   end
