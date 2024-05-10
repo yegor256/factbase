@@ -55,10 +55,12 @@ class Factbase::Term
   private
 
   def nil(_map)
+    assert_args(0)
     true
   end
 
   def not(map)
+    assert_args(1)
     !@operands[0].matches?(map)
   end
 
@@ -77,16 +79,19 @@ class Factbase::Term
   end
 
   def exists(map)
+    assert_args(1)
     k = @operands[0].to_s
     !map[k].nil?
   end
 
   def absent(map)
+    assert_args(1)
     k = @operands[0].to_s
     map[k].nil?
   end
 
   def eq(map)
+    assert_args(2)
     k = @operands[0].to_s
     v = map[k]
     return false if v.nil?
@@ -94,6 +99,7 @@ class Factbase::Term
   end
 
   def lt(map)
+    assert_args(2)
     k = @operands[0].to_s
     v = map[k]
     return false if v.nil?
@@ -101,9 +107,15 @@ class Factbase::Term
   end
 
   def gt(map)
+    assert_args(2)
     k = @operands[0].to_s
     v = map[k]
     return false if v.nil?
     v[0] > @operands[1]
+  end
+
+  def assert_args(num)
+    raise "Too many operands for '#{@op}'" if @operands.size > num
+    raise "Too few operands for '#{@op}'" if @operands.size < num
   end
 end
