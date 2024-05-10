@@ -24,13 +24,14 @@ require 'English'
 
 lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require_relative 'lib/factbase/version'
+
+require_relative 'lib/factbase'
 
 Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
   s.required_ruby_version = '>=2.3'
   s.name = 'factbase'
-  s.version = factbase::VERSION
+  s.version = Factbase::VERSION
   s.license = 'MIT'
   s.summary = 'Factbase'
   s.description = 'Fact base in memory and on disc'
