@@ -36,6 +36,12 @@ class TestTerm < Minitest::Test
     assert(!t.matches?({ 'bar' => ['Hello!'] }))
   end
 
+  def test_eq_matching
+    t = Factbase::Term.new(:eq, ['foo', 42])
+    assert(t.matches?({ 'foo' => [10, 5, 6, -8, 'hey', 42, 9, 'fdsf'] }))
+    assert(!t.matches?({ 'foo' => [100] }))
+  end
+
   def test_lt_matching
     t = Factbase::Term.new(:lt, ['foo', 42])
     assert(t.matches?({ 'foo' => [10] }))

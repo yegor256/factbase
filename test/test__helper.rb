@@ -26,5 +26,7 @@ $stdout.sync = true
 require 'simplecov'
 SimpleCov.start
 
+require 'simplecov-cobertura'
+SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
+
 require 'minitest/autorun'
-require_relative '../lib/factbase'

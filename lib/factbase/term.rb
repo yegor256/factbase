@@ -90,7 +90,7 @@ class Factbase::Term
     k = @operands[0].to_s
     v = map[k]
     return false if v.nil?
-    v[0] == @operands[1]
+    v.include?(@operands[1])
   end
 
   def lt(map)

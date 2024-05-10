@@ -29,4 +29,5 @@ gem 'rspec-rails', '6.1.2', require: false
 gem 'rubocop', '1.63.5', require: false
 gem 'rubocop-rspec', '2.29.2', require: false
 gem 'simplecov', '0.22.0', require: false
+gem 'simplecov-cobertura', '2.1.0', require: false
 gem 'yard', '0.9.36', require: false
