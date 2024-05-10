@@ -23,6 +23,7 @@
 
 require 'minitest/autorun'
 require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/query'
 
 # Query test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative '../factbase'
 require_relative 'fact'
 
 # Term.
@@ -32,11 +33,11 @@ class Factbase::Term
     @operands = operands
   end
 
-  # Does it match the map?
-  # @param [Map] The map
+  # Does it match the fact?
+  # @param [Factbase::Fact] The fact
   # @return [bool] TRUE if matches
-  def matches?(map)
-    send(@op, map)
+  def matches?(fact)
+    send(@op, fact)
   end
 
   def to_s
@@ -54,62 +55,62 @@ class Factbase::Term
 
   private
 
-  def nil(_map)
+  def nil(_fact)
     assert_args(0)
     true
   end
 
-  def not(map)
+  def not(fact)
     assert_args(1)
-    !@operands[0].matches?(map)
+    !@operands[0].matches?(fact)
   end
 
-  def or(map)
+  def or(fact)
     @operands.each do |o|
-      return true if o.matches?(map)
+      return true if o.matches?(fact)
     end
     false
   end
 
-  def and(map)
+  def and(fact)
     @operands.each do |o|
-      return false unless o.matches?(map)
+      return false unless o.matches?(fact)
     end
     true
   end
 
-  def exists(map)
+  def exists(fact)
     assert_args(1)
     k = @operands[0].to_s
-    !map[k].nil?
+    !fact[k].empty?
   end
 
-  def absent(map)
+  def absent(fact)
     assert_args(1)
     k = @operands[0].to_s
-    map[k].nil?
+    fact[k].empty?
   end
 
-  def eq(map)
+  def eq(fact)
     assert_args(2)
     k = @operands[0].to_s
-    v = map[k]
-    return false if v.nil?
+    v = fact[k]
+    return false if v.empty?
     v.include?(@operands[1])
   end
 
-  def lt(map)
+  def lt(fact)
     assert_args(2)
     k = @operands[0].to_s
-    v = map[k]
-    return false if v.nil?
+    v = fact[k]
+    return false if v.empty?
     v[0] < @operands[1]
   end
 
-  def gt(map)
+  def gt(fact)
     assert_args(2)
     k = @operands[0].to_s
-    v = map[k]
+    v = fact[k]
     return false if v.nil?
     v[0] > @operands[1]
   end

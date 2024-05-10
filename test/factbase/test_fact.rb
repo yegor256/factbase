@@ -23,6 +23,7 @@
 
 require 'minitest/autorun'
 require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/fact'
 
 # Fact test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -36,5 +37,6 @@ class TestFact < Minitest::Test
     assert_equal(42, f.foo)
     f.foo = 256
     assert_equal(42, f.foo)
+    assert_equal([42, 256], f['foo'])
   end
 end

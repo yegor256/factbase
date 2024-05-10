@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+#
 # Copyright (c) 2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,47 +21,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../factbase'
+require 'minitest/autorun'
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/spy'
 
-# Fact.
+# Spy test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Fact
-  def initialize(mutex, map)
-    @mutex = mutex
-    @map = map
-  end
-
-  def method_missing(*args)
-    k = args[0].to_s
-    if k.end_with?('=')
-      k = k[0..-2]
-      @mutex.synchronize do
-        @map[k] = [] if @map[k].nil?
-        @map[k] << args[1]
-      end
-      nil
-    elsif k == '[]'
-      kk = args[1].to_s
-      @mutex.synchronize do
-        @map[kk] = [] if @map[kk].nil?
-      end
-      @map[kk]
-    else
-      v = @map[k]
-      raise "Can't find '#{k}'" if v.nil?
-      v[0]
+class TestSpy < Minitest::Test
+  def test_simple_spying
+    fb = Factbase::Spy.new(Factbase.new, 'foo')
+    fb.insert.foo = 42
+    fb.insert.foo = 'hello'
+    fb.query('(eq foo "test")').each do |f|
+      assert(f.id.positive?)
     end
-  end
-
-  # rubocop:disable Style/OptionalBooleanParameter
-  def respond_to?(_method, _include_private = false)
-    # rubocop:enable Style/OptionalBooleanParameter
-    true
-  end
-
-  def respond_to_missing?(_method, _include_private = false)
-    true
+    # assert_equal(3, fb.caught_keys.size)
+    assert(fb.caught_keys.include?('hello'))
+    assert(fb.caught_keys.include?(42))
+    # assert(fb.caught_keys.include?('test'))
   end
 end

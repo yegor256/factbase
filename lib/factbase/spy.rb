@@ -22,45 +22,65 @@
 
 require_relative '../factbase'
 
-# Fact.
+# Spy.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Fact
-  def initialize(mutex, map)
-    @mutex = mutex
-    @map = map
+class Factbase::Spy
+  def initialize(fb, key)
+    @fb = fb
+    @key = key
+    @caught = []
   end
 
-  def method_missing(*args)
-    k = args[0].to_s
-    if k.end_with?('=')
-      k = k[0..-2]
-      @mutex.synchronize do
-        @map[k] = [] if @map[k].nil?
-        @map[k] << args[1]
-      end
-      nil
-    elsif k == '[]'
-      kk = args[1].to_s
-      @mutex.synchronize do
-        @map[kk] = [] if @map[kk].nil?
-      end
-      @map[kk]
-    else
-      v = @map[k]
-      raise "Can't find '#{k}'" if v.nil?
-      v[0]
+  def caught_keys
+    @caught
+  end
+
+  def query(expr)
+    @fb.query(expr)
+  end
+
+  def insert
+    SpyFact.new(@fb.insert, @key, @caught)
+  end
+
+  def each
+    @fb.each do |f|
+      SpyFact.new(f, @key, @caught)
     end
   end
 
-  # rubocop:disable Style/OptionalBooleanParameter
-  def respond_to?(_method, _include_private = false)
-    # rubocop:enable Style/OptionalBooleanParameter
-    true
+  def export
+    @fb.export
   end
 
-  def respond_to_missing?(_method, _include_private = false)
-    true
+  def import(data)
+    @fb.import(data)
+  end
+
+  def to_json(x = nil)
+    @fb.to_json(x)
+  end
+
+  class SpyFact
+    def initialize(fact, key, caught)
+      @fact = fact
+      @key = key
+      @caught = caught
+    end
+
+    def method_missing(*args)
+      @caught << args[1] if args[0].to_s == "#{@key}="
+      @fact.method_missing(*args)
+    end
+
+    def respond_to?(method, include_private = false)
+      @fact.respond_to?(method, include_private)
+    end
+
+    def respond_to_missing?(method, include_private = false)
+      @fact.respond_to_missing?(method, include_private)
+    end
   end
 end

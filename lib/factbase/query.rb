@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative '../factbase'
 require_relative 'syntax'
 require_relative 'fact'
 
@@ -39,8 +40,9 @@ class Factbase::Query
   def each
     term = Factbase::Syntax.new(@query).to_term
     @maps.each do |m|
-      next unless term.matches?(m)
-      yield Factbase::Fact.new(@mutex, m)
+      f = Factbase::Fact.new(@mutex, m)
+      next unless term.matches?(f)
+      yield f
     end
   end
 

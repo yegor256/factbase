@@ -25,9 +25,6 @@
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase
-  # Current version of the library and of this class.
-  VERSION = '0.0.0'
-
   # Constructor.
   def initialize
     @maps = []
@@ -37,6 +34,7 @@ class Factbase
   # Insert a new fact.
   # @return [Factbase::Fact] The fact just inserted
   def insert
+    require_relative 'factbase/fact'
     map = {}
     @mutex.synchronize do
       f = Factbase::Fact.new(Mutex.new, map)
@@ -62,6 +60,7 @@ class Factbase
   #
   # @param [String] query The query to use for selections
   def query(query)
+    require_relative 'factbase/query'
     Factbase::Query.new(@maps, @mutex, query)
   end
 
@@ -81,6 +80,3 @@ class Factbase
     @maps.to_json
   end
 end
-
-require_relative 'factbase/fact'
-require_relative 'factbase/query'
