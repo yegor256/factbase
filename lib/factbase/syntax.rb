@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'cgi'
 require_relative 'fact'
 require_relative 'term'
 
@@ -70,7 +69,13 @@ class Factbase::Syntax
   def to_tokens
     list = []
     acc = ''
+    string = false
     @query.to_s.chars.each do |c|
+      string = !string if ['\'', '"'].include?(c)
+      if string
+        acc += c
+        next
+      end
       if !acc.empty? && [' ', ')'].include?(c)
         list << acc
         acc = ''
@@ -89,8 +94,8 @@ class Factbase::Syntax
     list.map do |t|
       if t.is_a?(Symbol)
         t
-      elsif t.start_with?('\'')
-        CGI.unescapeHTML(t[1..-2])
+      elsif t.start_with?('\'', '"')
+        t[1..-2]
       elsif t.match?(/^[0-9]+$/)
         t.to_i
       else

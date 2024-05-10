@@ -29,12 +29,23 @@ require_relative '../../lib/factbase/syntax'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class TestSyntax < Minitest::Test
+  def test_parses_string_right
+    [
+      "(foo 'abc')",
+      "(foo 'one two')",
+      "(foo 'one two three   ')",
+      "(foo 'one two three   ' 'tail tail')"
+    ].each do |q|
+      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s)
+    end
+  end
+
   def test_simple_parsing
     [
       '()',
       '(foo)',
       '(foo (bar) (zz 77)   )',
-      "(eq foo    'Hello,&#x20;world!')",
+      "(eq foo    'Hello, world!')",
       "(or ( a 4) (b 5) () (and () (c 5) (r 7 8s 8is 'Foo')))"
     ].each do |q|
       Factbase::Syntax.new(q).to_term
@@ -49,7 +60,7 @@ class TestSyntax < Minitest::Test
       '(foo x y z)',
       "(foo x y z t f 42 'Hi!' 33)",
       '(foo (x) y z)',
-      "(foo (x (f (t (y 42 'Hey'))) (f) (r 3)) y z)"
+      "(foo (x (f (t (y 42 'Hey you'))) (f) (r 3)) y z)"
     ].each do |q|
       assert_equal(q, Factbase::Syntax.new(q).to_term.to_s)
     end
@@ -64,7 +75,7 @@ class TestSyntax < Minitest::Test
     {
       '(eq z 1)' => true,
       '(or (eq bar 888) (eq z 1))' => true,
-      "(or (gt bar 100) (eq foo 'Hello,&#x20;world!'))" => true
+      "(or (gt bar 100) (eq foo 'Hello, world!'))" => true
     }.each do |k, v|
       assert_equal(v, Factbase::Syntax.new(k).to_term.matches?(m), k)
     end

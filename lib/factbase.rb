@@ -48,15 +48,14 @@ class Factbase
 
   # Create a query capable of iterating.
   #
-  # There is a Lisp-like syntax, for example (all string literals
-  # must be HTML-escaped):
+  # There is a Lisp-like syntax, for example:
   #
-  #  (eq title 'Object&#20;Thinking')
+  #  (eq title 'Object Thinking')
   #  (gt time '2024-03-23T03:21:43')
   #  (gt cost 42)
   #  (exists seenBy)
   #  (and
-  #    (eq foo '42')
+  #    (eq foo 42)
   #    (or
   #      (gt bar 200)
   #      (absent zzz)))
