@@ -13,7 +13,7 @@
 
 This Ruby gem manages an in-memory database of facts.
 
-Here is how you use it:
+Here is how you use it (it's thread-safe, by the way):
 
 ```ruby
 fb = Factbase.new
@@ -27,6 +27,16 @@ fb.insert
 fb.query('(not (exists seen))').each do |f|
   f.title = 'Elegant Objects'
 end
+```
+
+You can save the factbase to disc and load it back:
+
+```ruby
+f1 = Factbase.new
+f1.insert
+File.save('/tmp/db.txt', f1.export)
+f2 = Factbase.new
+f2.import(File.read('/tmp/db.txt'))
 ```
 
 ## How to contribute

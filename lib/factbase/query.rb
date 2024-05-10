@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative 'syntax'
 require_relative 'fact'
-require_relative 'term'
 
 # Query.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -42,5 +42,13 @@ class Factbase::Query
       next unless term.matches?(m)
       yield Factbase::Fact.new(@mutex, m)
     end
+  end
+
+  # Turn it into an array.
+  # @return [Array] All facts in an array
+  def to_a
+    array = []
+    each { |f| array << f }
+    array
   end
 end

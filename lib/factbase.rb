@@ -65,6 +65,18 @@ class Factbase
   def query(query)
     Factbase::Query.new(@maps, @mutex, query)
   end
+
+  # Export it into a chain of bytes.
+  def export
+    Marshal.dump(@maps)
+  end
+
+  # Import from a chain of bytes.
+  def import(bytes)
+    # rubocop:disable Security/MarshalLoad
+    @maps += Marshal.load(bytes)
+    # rubocop:enable Security/MarshalLoad
+  end
 end
 
 require_relative 'factbase/fact'

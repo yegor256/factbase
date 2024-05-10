@@ -22,6 +22,7 @@
 
 require 'cgi'
 require_relative 'fact'
+require_relative 'term'
 
 # Syntax.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
