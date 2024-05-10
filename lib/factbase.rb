@@ -39,7 +39,8 @@ class Factbase
   def insert
     map = {}
     @mutex.synchronize do
-      map['id'] = @maps.size + 1
+      f = Factbase::Fact.new(Mutex.new, map)
+      f.id = @maps.size + 1
       @maps << map
     end
     Factbase::Fact.new(@mutex, map)
