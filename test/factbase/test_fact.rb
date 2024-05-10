@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+#
 # Copyright (c) 2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,24 +21,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'fact'
+require 'minitest/autorun'
+require_relative '../../lib/factbase'
 
-# Query.
+# Fact test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Query
-  def initialize(maps, mutex, query)
-    @maps = maps
-    @mutex = mutex
-    @query = query
-  end
-
-  # Iterate them one by one.
-  # @yield [Fact] Facts one-by-one
-  def each
-    @maps.each do |m|
-      yield Factbase::Fact.new(@mutex, m)
-    end
+class TestFact < Minitest::Test
+  def test_simple_resetting
+    map = {}
+    f = Factbase::Fact.new(Mutex.new, map)
+    f.foo = 42
+    assert_equal(42, f.foo)
+    f.foo = 256
+    assert_equal(42, f.foo)
   end
 end

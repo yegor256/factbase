@@ -29,10 +29,17 @@ require_relative '../lib/factbase'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class TestFactbase < Minitest::Test
-  def test_basic
-    Factbase.new.query('id IS NOT NULL').each do |f|
+  def test_simple_setting
+    fb = Factbase.new
+    fb.insert
+    fb.insert
+    found = 0
+    fb.query('id IS NOT NULL').each do |f|
+      assert(42, f.id.positive?)
       f.foo = 42
       assert_equal(42, f.foo)
+      found += 1
     end
+    assert_equal(2, found)
   end
 end

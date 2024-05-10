@@ -25,20 +25,23 @@
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Fact
-  def initialize(pairs)
-    @pairs = pairs
+  def initialize(mutex, map)
+    @mutex = mutex
+    @map = map
   end
 
   def method_missing(*args)
-    if args[0].end_with?('=')
-      k = args[0][1..-2]
-      @pairs[k] = [] if @pairs[k].nil?
-      @pairs[k] << args[1]
+    k = args[0].to_s
+    if k.end_with?('=')
+      k = k[0..-2]
+      @mutex.synchronize do
+        @map[k] = [] if @map[k].nil?
+        @map[k] << args[1]
+      end
       nil
     else
-      k = args[0][1..]
-      v = @pairs[k]
-      return v if v.nil?
+      v = @map[k]
+      raise "Can't find '#{k}'" if v.nil?
       v[0]
     end
   end

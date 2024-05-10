@@ -28,12 +28,21 @@ class Factbase
   # Current version of the library and of this class.
   VERSION = '0.0.0'
 
+  # Constructor.
+  def initialize
+    @maps = []
+    @mutex = Mutex.new
+  end
+
   # Insert a new fact.
-  #
-  # @param [Array<String, Object>] pairs List of (key,value) tuples
-  # @return [Integer] The ID of the newly created fact
-  def insert(pairs)
-    # empty
+  # @return [Factbase::Fact] The fact just inserted
+  def insert
+    map = {}
+    @mutex.synchronize do
+      map['id'] = @maps.size + 1
+      @maps << map
+    end
+    Factbase::Fact.new(@mutex, map)
   end
 
   # Create a query capable of iterating.
@@ -50,7 +59,7 @@ class Factbase
   #
   # @param [String] query The query to use for selections, e.g. "type = 'Foo'"
   def query(query)
-    Factbase::Query.new(query)
+    Factbase::Query.new(@maps, @mutex, query)
   end
 end
 
