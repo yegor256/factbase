@@ -26,7 +26,7 @@
 # License:: MIT
 class Factbase
   # Current version of the library and of this class.
-  VERSION = '0.0.0'
+  VERSION = '0.0.1'
 
   # Constructor.
   def initialize
