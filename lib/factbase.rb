@@ -36,24 +36,23 @@ class Factbase
     # empty
   end
 
-  # Update an existing fact by adding new pairs to it.
-  # @param [Integer] id The ID of the fact to update
-  # @param [Array<String, Object>] pairs List of (key,value) tuples
-  # @return [nil]
-  def append(id, fact)
-    # empty
-  end
-
-  # Iterate over facts that satisfy the condition.
+  # Create a query capable of iterating.
   #
-  # Terms in the query may be joined with "AND" and "OR". They may be groupped
-  # with brackets. There is also "IS NULL" and "IS NOT NULL" operators. Examples:
+  # Terms in the query may be joined with +AND+ and +OR+. They may be groupped
+  # with brackets. There is also +IS NULL+ and +IS NOT NULL+ operators.
   #
-  # ```
-  # ```
+  # For example:
+  #
+  #  type = 'Foo'
+  #  time > '2024-03-23T03:21:43'
+  #  cost GT 42
+  #  seen-by IS NULL
   #
   # @param [String] query The query to use for selections, e.g. "type = 'Foo'"
-  def select(query)
-    # empty
+  def query(query)
+    Factbase::Query.new(query)
   end
 end
+
+require_relative 'factbase/fact'
+require_relative 'factbase/query'

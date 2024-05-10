@@ -30,6 +30,9 @@ require_relative '../lib/factbase'
 # License:: MIT
 class TestFactbase < Minitest::Test
   def test_basic
-    # Nothing yet
+    Factbase.new.query('id IS NOT NULL').each do |f|
+      f.foo = 42
+      assert_equal(42, f.foo)
+    end
   end
 end

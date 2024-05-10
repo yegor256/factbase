@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright (c) 2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -12,36 +14,28 @@
 #
 # THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
----
-AllCops:
-  Exclude:
-    - 'bin/**/*'
-    - 'assets/**/*'
-  DisplayCopNames: true
-  TargetRubyVersion: 3.2
-  SuggestExtensions: false
-  NewCops: enable
 
-Gemspec/RequiredRubyVersion:
-  Enabled: false
-Metrics/MethodLength:
-  Enabled: false
-Style/ClassAndModuleChildren:
-  Enabled: false
-Layout/MultilineMethodCallIndentation:
-  Enabled: false
-Metrics/AbcSize:
-  Enabled: false
-Metrics/BlockLength:
-  Max: 30
-Metrics/CyclomaticComplexity:
-  Max: 20
-Metrics/PerceivedComplexity:
-  Max: 20
-Layout/EmptyLineAfterGuardClause:
-  Enabled: false
+require_relative 'fact'
+
+# Query.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# License:: MIT
+class Factbase::Query
+  def initialize(query)
+    @query = query
+  end
+
+  # Iterate them one by one.
+  # @yield [Fact] Facts one-by-one
+  def each
+    (0..2).each do |_|
+      yield Factbase::Fact.new({})
+    end
+  end
+end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright (c) 2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -12,36 +14,42 @@
 #
 # THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
----
-AllCops:
-  Exclude:
-    - 'bin/**/*'
-    - 'assets/**/*'
-  DisplayCopNames: true
-  TargetRubyVersion: 3.2
-  SuggestExtensions: false
-  NewCops: enable
 
-Gemspec/RequiredRubyVersion:
-  Enabled: false
-Metrics/MethodLength:
-  Enabled: false
-Style/ClassAndModuleChildren:
-  Enabled: false
-Layout/MultilineMethodCallIndentation:
-  Enabled: false
-Metrics/AbcSize:
-  Enabled: false
-Metrics/BlockLength:
-  Max: 30
-Metrics/CyclomaticComplexity:
-  Max: 20
-Metrics/PerceivedComplexity:
-  Max: 20
-Layout/EmptyLineAfterGuardClause:
-  Enabled: false
+# Fact.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# License:: MIT
+class Factbase::Fact
+  def initialize(pairs)
+    @pairs = pairs
+  end
+
+  def method_missing(*args)
+    if args[0].end_with?('=')
+      k = args[0][1..-2]
+      @pairs[k] = [] if @pairs[k].nil?
+      @pairs[k] << args[1]
+      nil
+    else
+      k = args[0][1..]
+      v = @pairs[k]
+      return v if v.nil?
+      v[0]
+    end
+  end
+
+  # rubocop:disable Style/OptionalBooleanParameter
+  def respond_to?(_method, _include_private = false)
+    # rubocop:enable Style/OptionalBooleanParameter
+    true
+  end
+
+  def respond_to_missing?(_method, _include_private = false)
+    true
+  end
+end
