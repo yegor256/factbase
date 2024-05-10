@@ -59,10 +59,11 @@ class Factbase::Spy
     @fb.import(data)
   end
 
-  def to_json(x = nil)
-    @fb.to_json(x)
+  def to_json(opt = nil)
+    @fb.to_json(opt)
   end
 
+  # A fact that is spying.
   class SpyFact
     def initialize(fact, key, caught)
       @fact = fact
@@ -75,7 +76,9 @@ class Factbase::Spy
       @fact.method_missing(*args)
     end
 
+    # rubocop:disable Style/OptionalBooleanParameter
     def respond_to?(method, include_private = false)
+      # rubocop:enable Style/OptionalBooleanParameter
       @fact.respond_to?(method, include_private)
     end
 

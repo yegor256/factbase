@@ -45,3 +45,5 @@ Metrics/PerceivedComplexity:
   Max: 20
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
+Naming/MethodParameterName:
+  MinNameLength: 2
