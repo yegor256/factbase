@@ -46,9 +46,11 @@ class Factbase::Query
 
   # Turn it into an array.
   # @return [Array] All facts in an array
+  # rubocop:disable Style/MapIntoArray
   def to_a
     array = []
     each { |f| array << f }
     array
   end
+  # rubocop:enable Style/MapIntoArray
 end
