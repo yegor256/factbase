@@ -22,6 +22,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'json'
 require_relative '../lib/factbase'
 
 # Factbase main module test.
@@ -52,5 +53,14 @@ class TestFactbase < Minitest::Test
       f2.import(File.read(f.path))
     end
     assert_equal(1, f2.query('(eq foo 42)').to_a.count)
+  end
+
+  def test_to_json
+    fb = Factbase.new
+    f = fb.insert
+    f.foo = 42
+    f.foo = 256
+    json = JSON.parse(fb.to_json)
+    assert(42, json[0]['foo'][1])
   end
 end

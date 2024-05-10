@@ -77,6 +77,10 @@ class Factbase
     @maps += Marshal.load(bytes)
     # rubocop:enable Security/MarshalLoad
   end
+
+  def to_json(_ = nil)
+    @maps.to_json
+  end
 end
 
 require_relative 'factbase/fact'
