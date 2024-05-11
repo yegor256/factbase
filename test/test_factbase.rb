@@ -42,6 +42,7 @@ class TestFactbase < Minitest::Test
       found += 1
     end
     assert_equal(2, found)
+    assert_equal(2, fb.size)
   end
 
   def test_serialize_and_deserialize

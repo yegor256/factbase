@@ -31,6 +31,12 @@ class Factbase
     @mutex = Mutex.new
   end
 
+  # Size.
+  # @return [Integer] How many facts are in there
+  def size
+    @maps.size
+  end
+
   # Insert a new fact.
   # @return [Factbase::Fact] The fact just inserted
   def insert
