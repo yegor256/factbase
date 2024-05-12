@@ -38,4 +38,11 @@ class TestFact < Minitest::Test
     assert_equal(42, f.foo)
     assert_equal([42, 256], f['foo'])
   end
+
+  def test_fails_when_missing
+    f = Factbase::Fact.new(Mutex.new, {})
+    assert_raises do
+      f.something
+    end
+  end
 end

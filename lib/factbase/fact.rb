@@ -50,7 +50,7 @@ class Factbase::Fact
       @map[kk]
     else
       v = @map[k]
-      raise "Can't find '#{k}'" if v.nil?
+      raise "Can't find '#{k}' attribute among #{@map.size}" if v.nil?
       v[0]
     end
   end
