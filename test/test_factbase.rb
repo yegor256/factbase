@@ -71,10 +71,22 @@ class TestFactbase < Minitest::Test
     f = fb.insert
     f.foo = 42
     f.foo = 256
-    fb.insert
+    fb.insert.bar = 5
     xml = Nokogiri::XML.parse(fb.to_xml)
     assert(!xml.xpath('/fb[count(f) = 2]').empty?)
     assert(!xml.xpath('/fb/f/foo[v="42"]').empty?)
+  end
+
+  def test_to_xml_with_short_names
+    fb = Factbase.new
+    f = fb.insert
+    f.type = 1
+    f.f = 2
+    f.class = 3
+    xml = Nokogiri::XML.parse(fb.to_xml)
+    assert(!xml.xpath('/fb/f/type').empty?)
+    assert(!xml.xpath('/fb/f/f').empty?)
+    assert(!xml.xpath('/fb/f/class').empty?)
   end
 
   def test_to_yaml

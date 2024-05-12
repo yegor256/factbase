@@ -101,13 +101,13 @@ class Factbase
           xml.f do
             m.each do |k, vv|
               if vv.is_a?(Array)
-                xml.send(:"#{k}") do
+                xml.send(:"#{k}_") do
                   vv.each do |v|
                     xml.send(:v, v)
                   end
                 end
               else
-                xml.send(:"#{k}", vv)
+                xml.send(:"#{k}_", vv)
               end
             end
           end
