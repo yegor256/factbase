@@ -36,6 +36,7 @@ class Factbase::Fact
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
+      raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z][a-zA-Z0-9]+$/)
       @mutex.synchronize do
         @map[kk] = [] if @map[kk].nil?
         @map[kk] << args[1]
