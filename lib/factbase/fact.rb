@@ -42,15 +42,17 @@ class Factbase::Fact
     if k.end_with?('=')
       kk = k[0..-2]
       raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z][a-zA-Z0-9]+$/)
+      v = args[1]
+      raise "Prop value can't be empty" if v == ''
       @mutex.synchronize do
         before = @map[kk]
-        return if before == args[1]
+        return if before == v
         if before.nil?
-          @map[kk] = args[1]
+          @map[kk] = v
           return
         end
         @map[kk] = [@map[kk]] unless @map[kk].is_a?(Array)
-        @map[kk] << args[1]
+        @map[kk] << v
       end
       nil
     elsif k == '[]'
