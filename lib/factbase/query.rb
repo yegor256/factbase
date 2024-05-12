@@ -29,8 +29,6 @@ require_relative 'fact'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Query
-  include Enumerable
-
   def initialize(maps, mutex, query)
     @maps = maps
     @mutex = mutex
