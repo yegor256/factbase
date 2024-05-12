@@ -87,6 +87,6 @@ class TestFactbase < Minitest::Test
     assert_equal(2, yaml['facts'].size)
     assert_equal(42, yaml['facts'][0]['foo'][0])
     assert_equal(256, yaml['facts'][0]['foo'][1])
-    assert_equal(2, yaml['facts'][1]['id'][0])
+    assert_equal(2, yaml['facts'][1]['id'])
   end
 end

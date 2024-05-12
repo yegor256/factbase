@@ -100,10 +100,14 @@ class Factbase
         @maps.each do |m|
           xml.f do
             m.each do |k, vv|
-              xml.send(:"#{k}") do
-                vv.each do |v|
-                  xml.send(:v, v)
+              if vv.is_a?(Array)
+                xml.send(:"#{k}") do
+                  vv.each do |v|
+                    xml.send(:v, v)
+                  end
                 end
+              else
+                xml.send(:"#{k}", vv)
               end
             end
           end

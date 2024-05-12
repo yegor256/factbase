@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'json'
 require_relative '../factbase'
 
 # Fact.
@@ -32,29 +33,35 @@ class Factbase::Fact
     @map = map
   end
 
+  def to_s
+    @map.to_json
+  end
+
   def method_missing(*args)
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
       raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z][a-zA-Z0-9]+$/)
       @mutex.synchronize do
-        @map[kk] = [] if @map[kk].nil?
+        before = @map[kk]
+        return if before == args[1]
+        if before.nil?
+          @map[kk] = args[1]
+          return
+        end
+        @map[kk] = [@map[kk]] unless @map[kk].is_a?(Array)
         @map[kk] << args[1]
       end
       nil
     elsif k == '[]'
-      kk = args[1].to_s
-      @mutex.synchronize do
-        @map[kk] = [] if @map[kk].nil?
-      end
-      @map[kk]
+      @map[args[1].to_s]
     else
       v = @map[k]
       if v.nil?
         raise "Can't get '#{k}', the fact is empty" if @map.empty?
         raise "Can't find '#{k}' attribute in [#{@map.keys.join(', ')}]"
       end
-      v[0]
+      v.is_a?(Array) ? v[0] : v
     end
   end
 

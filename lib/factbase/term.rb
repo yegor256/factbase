@@ -84,7 +84,7 @@ class Factbase::Term
   def exists(fact)
     assert_args(1)
     k = @operands[0].to_s
-    !fact[k].empty?
+    !fact[k].nil?
   end
 
   def absent(fact)
@@ -97,8 +97,9 @@ class Factbase::Term
     assert_args(2)
     k = @operands[0].to_s
     v = fact[k]
-    return false if v.empty?
-    v.include?(@operands[1])
+    return true if v == @operands[1]
+    return v.include?(@operands[1]) if v.is_a?(Array)
+    false
   end
 
   def lt(fact)
