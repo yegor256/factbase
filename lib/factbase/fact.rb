@@ -35,10 +35,10 @@ class Factbase::Fact
   def method_missing(*args)
     k = args[0].to_s
     if k.end_with?('=')
-      k = k[0..-2]
+      kk = k[0..-2]
       @mutex.synchronize do
-        @map[k] = [] if @map[k].nil?
-        @map[k] << args[1]
+        @map[kk] = [] if @map[kk].nil?
+        @map[kk] << args[1]
       end
       nil
     elsif k == '[]'
