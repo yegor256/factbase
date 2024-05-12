@@ -92,6 +92,7 @@ class TestSyntax < Minitest::Test
       '(foo x y z (',
       '(foo x y (z t (f 42 ',
       ')foo ) y z)',
+      '(x "")',
       ")y 42 'Hey you)",
       ')',
       '"'

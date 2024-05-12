@@ -108,6 +108,7 @@ class Factbase::Syntax
       if t.is_a?(Symbol)
         t
       elsif t.start_with?('\'', '"')
+        raise 'String literal can\'t be empty' if t.length <= 2
         t[1..-2]
       elsif t.match?(/^[0-9]+$/)
         t.to_i
