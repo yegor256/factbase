@@ -23,6 +23,7 @@
 require 'minitest/autorun'
 require 'json'
 require 'nokogiri'
+require 'yaml'
 require_relative '../lib/factbase'
 
 # Factbase main module test.
@@ -74,5 +75,18 @@ class TestFactbase < Minitest::Test
     xml = Nokogiri::XML.parse(fb.to_xml)
     assert(!xml.xpath('/fb[count(f) = 2]').empty?)
     assert(!xml.xpath('/fb/f/foo[v="42"]').empty?)
+  end
+
+  def test_to_yaml
+    fb = Factbase.new
+    f = fb.insert
+    f.foo = 42
+    f.foo = 256
+    fb.insert
+    yaml = YAML.load(fb.to_yaml)
+    assert_equal(2, yaml['facts'].size)
+    assert_equal(42, yaml['facts'][0]['foo'][0])
+    assert_equal(256, yaml['facts'][0]['foo'][1])
+    assert_equal(2, yaml['facts'][1]['id'][0])
   end
 end

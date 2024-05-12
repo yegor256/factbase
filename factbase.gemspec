@@ -39,5 +39,6 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = ['README.md', 'LICENSE.txt']
   s.add_runtime_dependency 'json', '~> 2.7'
   s.add_runtime_dependency 'nokogiri', '~> 1.10'
+  s.add_runtime_dependency 'yaml', '~> 0.3'
   s.metadata['rubygems_mfa_required'] = 'true'
 end

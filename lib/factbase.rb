@@ -22,6 +22,7 @@
 
 require 'json'
 require 'nokogiri'
+require 'yaml'
 
 # Factbase.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -109,5 +110,11 @@ class Factbase
         end
       end
     end.to_xml
+  end
+
+  # Convert the entire factbase into YAML.
+  # @return [String] The factbase in YAML format
+  def to_yaml
+    YAML.dump({ 'facts' => @maps })
   end
 end
