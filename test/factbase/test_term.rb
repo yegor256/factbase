@@ -31,12 +31,13 @@ class TestTerm < Minitest::Test
   def test_simple_matching
     t = Factbase::Term.new(:eq, ['foo', 42])
     assert(t.matches?(fact('foo' => [42])))
-    assert(!t.matches?(fact('foo' => ['Hello!'])))
+    assert(!t.matches?(fact('foo' => 'Hello!')))
     assert(!t.matches?(fact('bar' => ['Hello!'])))
   end
 
   def test_eq_matching
     t = Factbase::Term.new(:eq, ['foo', 42])
+    assert(t.matches?(fact('foo' => 42)))
     assert(t.matches?(fact('foo' => [10, 5, 6, -8, 'hey', 42, 9, 'fdsf'])))
     assert(!t.matches?(fact('foo' => [100])))
     assert(!t.matches?(fact('foo' => [])))
@@ -62,7 +63,7 @@ class TestTerm < Minitest::Test
   def test_not_exists_matching
     t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, ['foo', 100])])
     assert(t.matches?(fact('foo' => [42, 12, -90])))
-    assert(!t.matches?(fact('foo' => [100])))
+    assert(!t.matches?(fact('foo' => 100)))
   end
 
   def test_or_matching
