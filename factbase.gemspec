@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
   s.required_ruby_version = '>=2.3'
   s.name = 'factbase'
-  s.version = '0.0.0'
+  s.version = '0.0.8'
   s.license = 'MIT'
   s.summary = 'Factbase'
   s.description = 'Fact base in memory and on disc'
