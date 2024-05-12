@@ -98,7 +98,7 @@ class Factbase
     Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
       xml.fb do
         @maps.each do |m|
-          xml.f do
+          xml.f_ do
             m.each do |k, vv|
               if vv.is_a?(Array)
                 xml.send(:"#{k}_") do
