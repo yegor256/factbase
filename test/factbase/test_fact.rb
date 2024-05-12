@@ -53,4 +53,10 @@ class TestFact < Minitest::Test
       f.second
     end
   end
+
+  def test_set_by_name
+    f = Factbase::Fact.new(Mutex.new, {})
+    f.send('foo=', 42)
+    assert_equal(42, f.foo)
+  end
 end
