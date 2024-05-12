@@ -23,6 +23,7 @@
 
 require 'minitest/autorun'
 require 'json'
+require 'nokogiri'
 require_relative '../lib/factbase'
 
 # Factbase main module test.
@@ -63,5 +64,16 @@ class TestFactbase < Minitest::Test
     f.foo = 256
     json = JSON.parse(fb.to_json)
     assert(42, json[0]['foo'][1])
+  end
+
+  def test_to_xml
+    fb = Factbase.new
+    f = fb.insert
+    f.foo = 42
+    f.foo = 256
+    fb.insert
+    xml = Nokogiri::XML.parse(fb.to_xml)
+    assert(!xml.xpath('/fb[count(f) = 2]').empty?)
+    assert(!xml.xpath('/fb/f/foo[v="42"]').empty?)
   end
 end

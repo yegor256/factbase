@@ -20,6 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'json'
+require 'nokogiri'
+
 # Factbase.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
@@ -82,7 +85,29 @@ class Factbase
     # rubocop:enable Security/MarshalLoad
   end
 
+  # Convert the entire factbase into JSON.
+  # @return [String] The factbase in JSON format
   def to_json(_ = nil)
     @maps.to_json
+  end
+
+  # Convert the entire factbase into XML.
+  # @return [String] The factbase in XML format
+  def to_xml
+    Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
+      xml.fb do
+        @maps.each do |m|
+          xml.f do
+            m.each do |k, vv|
+              xml.send(:"#{k}") do
+                vv.each do |v|
+                  xml.send(:v, v)
+                end
+              end
+            end
+          end
+        end
+      end
+    end.to_xml
   end
 end
