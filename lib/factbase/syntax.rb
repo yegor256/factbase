@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative '../factbase'
 require_relative 'fact'
 require_relative 'term'
 
@@ -72,6 +73,7 @@ class Factbase::Syntax
     [Factbase::Term.new(op, operands), at + 1]
   end
 
+  # Turns a query into an array of tokens.
   def to_tokens
     list = []
     acc = ''
