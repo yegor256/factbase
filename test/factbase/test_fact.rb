@@ -39,10 +39,18 @@ class TestFact < Minitest::Test
     assert_equal([42, 256], f['foo'])
   end
 
-  def test_fails_when_missing
+  def test_fails_when_empty
     f = Factbase::Fact.new(Mutex.new, {})
     assert_raises do
       f.something
+    end
+  end
+
+  def test_fails_when_not_found
+    f = Factbase::Fact.new(Mutex.new, {})
+    f.first = 42
+    assert_raises do
+      f.second
     end
   end
 end
