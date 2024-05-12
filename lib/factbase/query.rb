@@ -29,6 +29,8 @@ require_relative 'fact'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Query
+  include Enumerable
+
   def initialize(maps, mutex, query)
     @maps = maps
     @mutex = mutex
@@ -45,14 +47,4 @@ class Factbase::Query
       yield f
     end
   end
-
-  # Turn it into an array.
-  # @return [Array] All facts in an array
-  # rubocop:disable Style/MapIntoArray
-  def to_a
-    array = []
-    each { |f| array << f }
-    array
-  end
-  # rubocop:enable Style/MapIntoArray
 end
