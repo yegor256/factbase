@@ -38,6 +38,7 @@ class Factbase::Query
   # Iterate them one by one.
   # @yield [Fact] Facts one-by-one
   def each
+    return to_enum(__method__) unless block_given?
     term = Factbase::Syntax.new(@query).to_term
     @maps.each do |m|
       f = Factbase::Fact.new(@mutex, m)

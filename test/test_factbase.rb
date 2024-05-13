@@ -54,7 +54,7 @@ class TestFactbase < Minitest::Test
       File.write(f.path, f1.export)
       f2.import(File.read(f.path))
     end
-    assert_equal(1, f2.query('(eq foo 42)').extend(Enumerable).to_a.count)
+    assert_equal(1, f2.query('(eq foo 42)').each.to_a.count)
   end
 
   def test_to_json
