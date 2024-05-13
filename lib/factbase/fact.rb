@@ -41,7 +41,7 @@ class Factbase::Fact
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
-      raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z][a-zA-Z0-9]*$/)
+      raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z][_a-zA-Z0-9]*$/)
       v = args[1]
       raise "Prop value can't be empty" if v == ''
       @mutex.synchronize do

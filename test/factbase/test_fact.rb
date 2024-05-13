@@ -56,7 +56,7 @@ class TestFact < Minitest::Test
 
   def test_set_by_name
     f = Factbase::Fact.new(Mutex.new, {})
-    f.send('foo=', 42)
-    assert_equal(42, f.foo, f.to_s)
+    f.send('foo_bar=', 42)
+    assert_equal(42, f.foo_bar, f.to_s)
   end
 end
