@@ -43,6 +43,7 @@ class Factbase::Fact
       kk = k[0..-2]
       raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z][_a-zA-Z0-9]*$/)
       v = args[1]
+      raise "Prop value can't be nil" if v.nil?
       raise "Prop value can't be empty" if v == ''
       @mutex.synchronize do
         before = @map[kk]

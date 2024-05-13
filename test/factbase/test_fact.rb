@@ -46,6 +46,20 @@ class TestFact < Minitest::Test
     end
   end
 
+  def test_fails_when_setting_nil
+    f = Factbase::Fact.new(Mutex.new, {})
+    assert_raises do
+      f.foo = nil
+    end
+  end
+
+  def test_fails_when_setting_empty
+    f = Factbase::Fact.new(Mutex.new, {})
+    assert_raises do
+      f.foo = ''
+    end
+  end
+
   def test_fails_when_not_found
     f = Factbase::Fact.new(Mutex.new, {})
     f.first = 42
