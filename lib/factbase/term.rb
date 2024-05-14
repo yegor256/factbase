@@ -96,32 +96,29 @@ class Factbase::Term
   end
 
   def eq(fact)
-    assert_args(2)
-    k = @operands[0].to_s
-    v = fact[k]
-    return true if v == @operands[1]
-    return v.include?(@operands[1]) if v.is_a?(Array)
-    false
+    arithmetic(:==, fact)
   end
 
   def lt(fact)
-    assert_args(2)
-    k = @operands[0].to_s
-    v = fact[k]
-    return false if v.nil?
-    v[0] < @operands[1]
+    arithmetic(:<, fact)
   end
 
   def gt(fact)
+    arithmetic(:>, fact)
+  end
+
+  def arithmetic(op, fact)
     assert_args(2)
     k = @operands[0].to_s
     v = fact[k]
     return false if v.nil?
-    v[0] > @operands[1]
+    v = [v] unless v.is_a?(Array)
+    v.any? { |vv| vv.send(op, @operands[1]) }
   end
 
   def assert_args(num)
-    raise "Too many operands for '#{@op}'" if @operands.size > num
-    raise "Too few operands for '#{@op}'" if @operands.size < num
+    c = @operands.size
+    raise "Too many (#{c}) operands for '#{@op}' (#{num} expected)" if c > num
+    raise "Too few (#{c}) operands for '#{@op}' (#{num} expected)" if c < num
   end
 end

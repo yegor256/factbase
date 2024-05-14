@@ -41,6 +41,25 @@ class TestQuery < Minitest::Test
     )
   end
 
+  def test_complex_parsing
+    maps = []
+    maps << { 'num' => 42 }
+    maps << { 'pi' => 3.14, 'num' => [42, 66, 0] }
+    maps << { 'time' => Time.now - 100, 'num' => 0 }
+    {
+      '(eq num 444)' => 0,
+      '(eq time 0)' => 0,
+      '(gt num 60)' => 1,
+      '(and (lt pi 100) (gt num 1000))' => 0,
+      '(exists pi)' => 1,
+      '(not (exists hello))' => 3,
+      '(and (exists time) (not (exists pi)))' => 1,
+      "(or (eq num 66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1
+    }.each do |q, r|
+      assert_equal(r, Factbase::Query.new(maps, Mutex.new, q).each.to_a.size, q)
+    end
+  end
+
   def test_simple_deleting
     maps = []
     maps << { 'foo' => [42] }

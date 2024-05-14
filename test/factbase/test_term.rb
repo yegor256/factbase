@@ -48,14 +48,17 @@ class TestTerm < Minitest::Test
     t = Factbase::Term.new(:lt, ['foo', 42])
     assert(t.matches?(fact('foo' => [10])))
     assert(!t.matches?(fact('foo' => [100])))
-    assert(!t.matches?(fact('bar' => [100])))
+    assert(!t.matches?(fact('foo' => 100)))
+    assert(!t.matches?(fact('bar' => 100)))
   end
 
   def test_gt_matching
     t = Factbase::Term.new(:gt, ['foo', 42])
     assert(t.matches?(fact('foo' => [100])))
+    assert(t.matches?(fact('foo' => 100)))
     assert(!t.matches?(fact('foo' => [10])))
-    assert(!t.matches?(fact('bar' => [10])))
+    assert(!t.matches?(fact('foo' => 10)))
+    assert(!t.matches?(fact('bar' => 10)))
   end
 
   def test_lt_matching_time
