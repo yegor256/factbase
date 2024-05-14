@@ -50,7 +50,7 @@ class TestQuery < Minitest::Test
       '(eq num 444)' => 0,
       '(eq time 0)' => 0,
       '(gt num 60)' => 1,
-      '(and (lt pi 100) (gt num 1000))' => 0,
+      "(and (lt pi 100) \n\n (gt num 1000))" => 0,
       '(exists pi)' => 1,
       '(not (exists hello))' => 3,
       '(absent time)' => 2,

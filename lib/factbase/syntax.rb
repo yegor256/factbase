@@ -99,7 +99,7 @@ class Factbase::Syntax
         list << :open
       when ')'
         list << :close
-      when ' '
+      when ' ', "\n", "\t", "\r"
         # ignore it
       else
         acc += c

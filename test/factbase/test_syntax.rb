@@ -44,8 +44,8 @@ class TestSyntax < Minitest::Test
       '()',
       '(foo)',
       '(foo (bar) (zz 77)   )',
-      "(eq foo    'Hello, world!')",
-      "(or ( a 4) (b 5) () (and () (c 5) (r 7 8s 8is 'Foo')))"
+      "(eq foo   \n\n 'Hello, world!'\n)\n",
+      "(or ( a 4) (b 5) () (and () (c 5) \t\t(r 7 8s 8is 'Foo')))"
     ].each do |q|
       Factbase::Syntax.new(q).to_term
     end
