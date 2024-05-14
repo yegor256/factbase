@@ -38,6 +38,15 @@ class TestQuery < Minitest::Test
     end
   end
 
+  def test_simple_deleting
+    maps = []
+    maps << { 'foo' => [42] }
+    maps << { 'bar' => [4, 5] }
+    q = Factbase::Query.new(maps, Mutex.new, '(eq bar 5)')
+    q.delete!
+    assert_equal(1, maps.size)
+  end
+
   def test_to_array
     maps = []
     maps << { 'foo' => [42] }

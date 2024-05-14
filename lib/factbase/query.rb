@@ -46,4 +46,15 @@ class Factbase::Query
       yield f
     end
   end
+
+  # Delete all facts that match the query.
+  def delete!
+    term = Factbase::Syntax.new(@query).to_term
+    @mutex.synchronize do
+      @maps.delete_if do |m|
+        f = Factbase::Fact.new(@mutex, m)
+        term.matches?(f)
+      end
+    end
+  end
 end
