@@ -37,24 +37,36 @@ class Factbase::Query
 
   # Iterate them one by one.
   # @yield [Fact] Facts one-by-one
+  # @return [Integer] Total number of facts yielded
   def each
     return to_enum(__method__) unless block_given?
     term = Factbase::Syntax.new(@query).to_term
+    yielded = 0
     @maps.each do |m|
       f = Factbase::Fact.new(@mutex, m)
       next unless term.matches?(f)
       yield f
+      yielded += 1
     end
+    yielded
   end
 
   # Delete all facts that match the query.
+  # @return [Integer] Total number of facts deleted
   def delete!
     term = Factbase::Syntax.new(@query).to_term
+    deleted = 0
     @mutex.synchronize do
       @maps.delete_if do |m|
         f = Factbase::Fact.new(@mutex, m)
-        term.matches?(f)
+        if term.matches?(f)
+          deleted += 1
+          true
+        else
+          false
+        end
       end
     end
+    deleted
   end
 end

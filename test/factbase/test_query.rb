@@ -33,17 +33,21 @@ class TestQuery < Minitest::Test
     maps = []
     maps << { 'foo' => [42] }
     q = Factbase::Query.new(maps, Mutex.new, '(eq foo 42)')
-    q.each do |f|
-      assert_equal(42, f.foo)
-    end
+    assert_equal(
+      1,
+      q.each do |f|
+        assert_equal(42, f.foo)
+      end
+    )
   end
 
   def test_simple_deleting
     maps = []
     maps << { 'foo' => [42] }
     maps << { 'bar' => [4, 5] }
+    maps << { 'bar' => [5] }
     q = Factbase::Query.new(maps, Mutex.new, '(eq bar 5)')
-    q.delete!
+    assert_equal(2, q.delete!)
     assert_equal(1, maps.size)
   end
 
