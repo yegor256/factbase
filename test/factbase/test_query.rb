@@ -45,7 +45,7 @@ class TestQuery < Minitest::Test
     maps = []
     maps << { 'foo' => [42] }
     maps << { 'bar' => [4, 5] }
-    maps << { 'bar' => [5] }
+    maps << { 'bar' => 5 }
     q = Factbase::Query.new(maps, Mutex.new, '(eq bar 5)')
     assert_equal(2, q.delete!)
     assert_equal(1, maps.size)
