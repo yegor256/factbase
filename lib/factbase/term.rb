@@ -108,7 +108,7 @@ class Factbase::Term
     assert_args(2)
     k = @operands[0].to_s
     v = fact[k]
-    return false if v.empty?
+    return false if v.nil?
     v[0] < @operands[1]
   end
 

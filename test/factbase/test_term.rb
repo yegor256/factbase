@@ -41,18 +41,21 @@ class TestTerm < Minitest::Test
     assert(t.matches?(fact('foo' => [10, 5, 6, -8, 'hey', 42, 9, 'fdsf'])))
     assert(!t.matches?(fact('foo' => [100])))
     assert(!t.matches?(fact('foo' => [])))
+    assert(!t.matches?(fact('bar' => [])))
   end
 
   def test_lt_matching
     t = Factbase::Term.new(:lt, ['foo', 42])
     assert(t.matches?(fact('foo' => [10])))
     assert(!t.matches?(fact('foo' => [100])))
+    assert(!t.matches?(fact('bar' => [100])))
   end
 
   def test_gt_matching
     t = Factbase::Term.new(:gt, ['foo', 42])
     assert(t.matches?(fact('foo' => [100])))
     assert(!t.matches?(fact('foo' => [10])))
+    assert(!t.matches?(fact('bar' => [10])))
   end
 
   def test_not_matching
