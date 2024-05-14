@@ -35,6 +35,12 @@ class Factbase
     @mutex = Mutex.new
   end
 
+  # Is it empty?
+  # @return [Boolean] TRUE if there are no facts inside
+  def empty?
+    @maps.empty?
+  end
+
   # Size.
   # @return [Integer] How many facts are in there
   def size

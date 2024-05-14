@@ -57,6 +57,13 @@ class TestFactbase < Minitest::Test
     assert_equal(1, f2.query('(eq foo 42)').each.to_a.count)
   end
 
+  def test_empty_or_not
+    fb = Factbase.new
+    assert(fb.empty?)
+    fb.insert
+    assert(!fb.empty?)
+  end
+
   def test_to_json
     fb = Factbase.new
     f = fb.insert
