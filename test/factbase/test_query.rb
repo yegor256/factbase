@@ -53,6 +53,7 @@ class TestQuery < Minitest::Test
       '(and (lt pi 100) (gt num 1000))' => 0,
       '(exists pi)' => 1,
       '(not (exists hello))' => 3,
+      '(absent time)' => 2,
       '(and (exists time) (not (exists pi)))' => 1,
       "(or (eq num 66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1
     }.each do |q, r|

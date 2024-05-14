@@ -92,7 +92,7 @@ class Factbase::Term
   def absent(fact)
     assert_args(1)
     k = @operands[0].to_s
-    fact[k].empty?
+    fact[k].nil?
   end
 
   def eq(fact)
