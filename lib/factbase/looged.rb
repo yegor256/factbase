@@ -14,32 +14,58 @@
 #
 # THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'English'
+require 'loog'
 
-Gem::Specification.new do |s|
-  s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
-  s.required_ruby_version = '>=2.3'
-  s.name = 'factbase'
-  s.version = '0.0.0'
-  s.license = 'MIT'
-  s.summary = 'Factbase'
-  s.description = 'Fact base in memory and on disc'
-  s.authors = ['Yegor Bugayenko']
-  s.email = 'yegor256@gmail.com'
-  s.homepage = 'http://github.com/yegor256/factbase.rb'
-  s.files = `git ls-files`.split($RS)
-  s.executables = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  s.rdoc_options = ['--charset=UTF-8']
-  s.extra_rdoc_files = ['README.md', 'LICENSE.txt']
-  s.add_runtime_dependency 'json', '~> 2.7'
-  s.add_runtime_dependency 'loog', '~>0.2'
-  s.add_runtime_dependency 'nokogiri', '~> 1.10'
-  s.add_runtime_dependency 'yaml', '~> 0.3'
-  s.metadata['rubygems_mfa_required'] = 'true'
+# A decorator of a Factbase, that logs all operations.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# License:: MIT
+class Factbase::Looged
+  # Constructor.
+  def initialize(fb, loog)
+    @fb = fb
+    @loog = loog
+  end
+
+  def empty?
+    @fb.empty?
+  end
+
+  def size
+    @fb.size
+  end
+
+  def insert
+    @fb.insert
+  end
+
+  def query(query)
+    @fb.query(query)
+  end
+
+  def export
+    @fb.export
+  end
+
+  def import(bytes)
+    @fb.import(bytes)
+  end
+
+  def to_json(opt = nil)
+    @fb.to_json(opt)
+  end
+
+  def to_xml
+    @fb.to_xml
+  end
+
+  def to_yaml
+    @fb.to_yaml
+  end
 end
