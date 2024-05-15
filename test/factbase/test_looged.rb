@@ -50,4 +50,20 @@ class TestLooged < Minitest::Test
     fb.insert
     assert_equal(2, Factbase::Looged.new(fb, Loog::NULL).query('()').each(&:to_s))
   end
+
+  def test_proper_logging
+    log = Loog::Buffer.new
+    fb = Factbase::Looged.new(Factbase.new, log)
+    fb.insert
+    fb.insert.bar = 3
+    fb.insert
+    fb.query('(exists bar)').each(&:to_s)
+    [
+      'Inserted fact #1',
+      'Inserted fact #2',
+      'Set \'bar\' to \'"3"\' (Integer)'
+    ].each do |s|
+      assert(log.to_s.include?(s), log)
+    end
+  end
 end
