@@ -44,6 +44,13 @@ class TestTerm < Minitest::Test
     assert(!t.matches?(fact('bar' => [])))
   end
 
+  def test_eq_matching_time
+    now = Time.now
+    t = Factbase::Term.new(:eq, [:foo, now])
+    assert(t.matches?(fact('foo' => now)))
+    assert(t.matches?(fact('foo' => [now, Time.now])))
+  end
+
   def test_lt_matching
     t = Factbase::Term.new(:lt, [:foo, 42])
     assert(t.matches?(fact('foo' => [10])))

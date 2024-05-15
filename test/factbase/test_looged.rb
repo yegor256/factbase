@@ -74,7 +74,7 @@ class TestLooged < Minitest::Test
     [
       'Inserted fact #1',
       'Inserted fact #2',
-      'Set \'bar\' to \'"3"\' (Integer)',
+      'Set \'bar\' to "3" (Integer)',
       'Found 1 fact(s) by \'(exists bar)\'',
       'Deleted 2 fact(s) by \'(not (exists bar))\''
     ].each do |s|
