@@ -27,7 +27,6 @@ require 'loog'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Looged
-  # Constructor.
   def initialize(fb, loog)
     @fb = fb
     @loog = loog
@@ -42,7 +41,7 @@ class Factbase::Looged
   end
 
   def insert
-    @fb.insert
+    Fact.new(@fb.insert, @loog)
   end
 
   def query(query)
@@ -67,5 +66,34 @@ class Factbase::Looged
 
   def to_yaml
     @fb.to_yaml
+  end
+
+  # Fact decorator.
+  class Fact
+    def initialize(fact, loog)
+      @fact = fact
+      @loog = loog
+    end
+
+    def to_s
+      @fact.to_s
+    end
+
+    def method_missing(*args)
+      r = @fact.method_missing(args)
+      k = args[0].to_s
+      @loog.info("Set #{k} to #{args[1]}") if k.end_with?('=')
+      r
+    end
+
+    # rubocop:disable Style/OptionalBooleanParameter
+    def respond_to?(method, include_private = false)
+      # rubocop:enable Style/OptionalBooleanParameter
+      @fact.respond_to?(method, include_private)
+    end
+
+    def respond_to_missing?(method, include_private = false)
+      @fact.respond_to_missing?(method, include_private)
+    end
   end
 end
