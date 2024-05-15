@@ -41,11 +41,13 @@ class Factbase::Looged
   end
 
   def insert
-    Fact.new(@fb.insert, @loog)
+    f = @fb.insert
+    @loog.debug("Inserted fact ##{f.id}")
+    Fact.new(f, @loog)
   end
 
   def query(query)
-    @fb.query(query)
+    Query.new(@fb.query(query), query, @loog)
   end
 
   def export
@@ -80,9 +82,9 @@ class Factbase::Looged
     end
 
     def method_missing(*args)
-      r = @fact.method_missing(args)
+      r = @fact.method_missing(*args)
       k = args[0].to_s
-      @loog.info("Set #{k} to #{args[1]}") if k.end_with?('=')
+      @loog.debug("Set '#{k[0..-2]}' to '#{args[1]}'") if k.end_with?('=')
       r
     end
 
@@ -94,6 +96,27 @@ class Factbase::Looged
 
     def respond_to_missing?(method, include_private = false)
       @fact.respond_to_missing?(method, include_private)
+    end
+  end
+
+  # Query decorator.
+  class Query
+    def initialize(query, expr, loog)
+      @query = query
+      @expr = expr
+      @loog = loog
+    end
+
+    def each(&)
+      r = @query.each(&)
+      @loog.debug("Found #{r} facts by '#{@expr}'")
+      r
+    end
+
+    def delete!
+      r = @query.delete!
+      @loog.debug("Deleted #{r} facts by '#{@expr}'")
+      r
     end
   end
 end

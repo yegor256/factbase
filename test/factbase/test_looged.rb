@@ -32,7 +32,7 @@ class TestLooged < Minitest::Test
   def test_simple_setting
     fb = Factbase::Looged.new(Factbase.new, Loog::NULL)
     fb.insert
-    fb.insert
+    fb.insert.bar = 3
     found = 0
     fb.query('(exists id)').each do |f|
       assert(42, f.id.positive?)
