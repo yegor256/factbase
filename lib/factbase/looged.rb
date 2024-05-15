@@ -109,13 +109,13 @@ class Factbase::Looged
 
     def each(&)
       r = @query.each(&)
-      @loog.debug("Found #{r} facts by '#{@expr}'")
+      @loog.debug("Found #{r.size} facts by '#{@expr}'")
       r
     end
 
     def delete!
       r = @query.delete!
-      @loog.debug("Deleted #{r} facts by '#{@expr}'")
+      @loog.debug("Deleted #{r.size} facts by '#{@expr}'")
       r
     end
   end
