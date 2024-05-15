@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require 'json'
+require 'time'
 require_relative '../factbase'
 
 # Fact.
