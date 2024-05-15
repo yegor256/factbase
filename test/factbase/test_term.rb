@@ -29,14 +29,14 @@ require_relative '../../lib/factbase/term'
 # License:: MIT
 class TestTerm < Minitest::Test
   def test_simple_matching
-    t = Factbase::Term.new(:eq, ['foo', 42])
+    t = Factbase::Term.new(:eq, [:foo, 42])
     assert(t.matches?(fact('foo' => [42])))
     assert(!t.matches?(fact('foo' => 'Hello!')))
     assert(!t.matches?(fact('bar' => ['Hello!'])))
   end
 
   def test_eq_matching
-    t = Factbase::Term.new(:eq, ['foo', 42])
+    t = Factbase::Term.new(:eq, [:foo, 42])
     assert(t.matches?(fact('foo' => 42)))
     assert(t.matches?(fact('foo' => [10, 5, 6, -8, 'hey', 42, 9, 'fdsf'])))
     assert(!t.matches?(fact('foo' => [100])))
@@ -45,7 +45,7 @@ class TestTerm < Minitest::Test
   end
 
   def test_lt_matching
-    t = Factbase::Term.new(:lt, ['foo', 42])
+    t = Factbase::Term.new(:lt, [:foo, 42])
     assert(t.matches?(fact('foo' => [10])))
     assert(!t.matches?(fact('foo' => [100])))
     assert(!t.matches?(fact('foo' => 100)))
@@ -53,7 +53,7 @@ class TestTerm < Minitest::Test
   end
 
   def test_gt_matching
-    t = Factbase::Term.new(:gt, ['foo', 42])
+    t = Factbase::Term.new(:gt, [:foo, 42])
     assert(t.matches?(fact('foo' => [100])))
     assert(t.matches?(fact('foo' => 100)))
     assert(!t.matches?(fact('foo' => [10])))
@@ -62,14 +62,14 @@ class TestTerm < Minitest::Test
   end
 
   def test_lt_matching_time
-    t = Factbase::Term.new(:lt, ['foo', Time.now])
+    t = Factbase::Term.new(:lt, [:foo, Time.now])
     assert(t.matches?(fact('foo' => [Time.now - 100])))
     assert(!t.matches?(fact('foo' => [Time.now + 100])))
     assert(!t.matches?(fact('bar' => [100])))
   end
 
   def test_gt_matching_time
-    t = Factbase::Term.new(:gt, ['foo', Time.now])
+    t = Factbase::Term.new(:gt, [:foo, Time.now])
     assert(t.matches?(fact('foo' => [Time.now + 100])))
     assert(!t.matches?(fact('foo' => [Time.now - 100])))
     assert(!t.matches?(fact('bar' => [100])))
@@ -81,19 +81,19 @@ class TestTerm < Minitest::Test
   end
 
   def test_not_eq_matching
-    t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, ['foo', 100])])
+    t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 100])])
     assert(t.matches?(fact('foo' => [42, 12, -90])))
     assert(!t.matches?(fact('foo' => 100)))
   end
 
   def test_exists_matching
-    t = Factbase::Term.new(:exists, ['foo'])
+    t = Factbase::Term.new(:exists, [:foo])
     assert(t.matches?(fact('foo' => [42, 12, -90])))
     assert(!t.matches?(fact('bar' => 100)))
   end
 
   def test_absent_matching
-    t = Factbase::Term.new(:absent, ['foo'])
+    t = Factbase::Term.new(:absent, [:foo])
     assert(t.matches?(fact('z' => [42, 12, -90])))
     assert(!t.matches?(fact('foo' => 100)))
   end
@@ -102,8 +102,8 @@ class TestTerm < Minitest::Test
     t = Factbase::Term.new(
       :or,
       [
-        Factbase::Term.new(:eq, ['foo', 4]),
-        Factbase::Term.new(:eq, ['bar', 5])
+        Factbase::Term.new(:eq, [:foo, 4]),
+        Factbase::Term.new(:eq, [:bar, 5])
       ]
     )
     assert(t.matches?(fact('foo' => [4])))

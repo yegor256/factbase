@@ -85,13 +85,17 @@ class Factbase::Term
 
   def exists(fact)
     assert_args(1)
-    k = @operands[0].to_s
+    o = @operands[0]
+    raise "A symbol expected: #{o}" unless o.is_a?(Symbol)
+    k = o.to_s
     !fact[k].nil?
   end
 
   def absent(fact)
     assert_args(1)
-    k = @operands[0].to_s
+    o = @operands[0]
+    raise "A symbol expected: #{o}" unless o.is_a?(Symbol)
+    k = o.to_s
     fact[k].nil?
   end
 
@@ -109,7 +113,9 @@ class Factbase::Term
 
   def arithmetic(op, fact)
     assert_args(2)
-    k = @operands[0].to_s
+    o = @operands[0]
+    raise "A symbol expected by #{op}: #{o}" unless o.is_a?(Symbol)
+    k = o.to_s
     v = fact[k]
     return false if v.nil?
     v = [v] unless v.is_a?(Array)
