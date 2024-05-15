@@ -109,15 +109,29 @@ class Factbase::Looged
     end
 
     def each(&)
-      return to_enum(__method__) unless block_given?
-      r = @query.each(&)
-      raise ".each of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
-      if r.zero?
-        @loog.debug("Nothing found by '#{@expr}'")
+      if block_given?
+        r = @query.each(&)
+        raise ".each of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
+        if r.zero?
+          @loog.debug("Nothing found by '#{@expr}'")
+        else
+          @loog.debug("Found #{r} fact(s) by '#{@expr}'")
+        end
+        r
       else
-        @loog.debug("Found #{r} fact(s) by '#{@expr}'")
+        array = []
+        # rubocop:disable Style/MapIntoArray
+        @query.each do |f|
+          array << f
+        end
+        # rubocop:enable Style/MapIntoArray
+        if array.empty?
+          @loog.debug("Nothing found by '#{@expr}'")
+        else
+          @loog.debug("Found #{array.size} fact(s) by '#{@expr}'")
+        end
+        array
       end
-      r
     end
 
     def delete!
