@@ -84,7 +84,7 @@ class Factbase::Looged
     def method_missing(*args)
       r = @fact.method_missing(*args)
       k = args[0].to_s
-      @loog.debug("Set '#{k[0..-2]}' to '#{args[1]}'") if k.end_with?('=')
+      @loog.debug("Set '#{k[0..-2]}' to '#{args[1].to_s.inspect}'") if k.end_with?('=')
       r
     end
 
