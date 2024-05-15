@@ -47,6 +47,7 @@ class TestLooged < Minitest::Test
   def test_returns_int
     fb = Factbase.new
     fb.insert
-    assert_equal(1, Factbase::Looged.new(fb, Loog::NULL).query('()').each(&:to_s))
+    fb.insert
+    assert_equal(2, Factbase::Looged.new(fb, Loog::NULL).query('()').each(&:to_s))
   end
 end
