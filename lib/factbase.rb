@@ -53,8 +53,6 @@ class Factbase
     require_relative 'factbase/fact'
     map = {}
     @mutex.synchronize do
-      f = Factbase::Fact.new(Mutex.new, map)
-      f.id = @maps.size + 1
       @maps << map
     end
     Factbase::Fact.new(@mutex, map)

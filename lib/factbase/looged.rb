@@ -42,7 +42,7 @@ class Factbase::Looged
 
   def insert
     f = @fb.insert
-    @loog.debug("Inserted fact ##{f.id}")
+    @loog.debug('Inserted new fact')
     Fact.new(f, @loog)
   end
 

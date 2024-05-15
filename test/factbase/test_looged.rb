@@ -34,13 +34,13 @@ class TestLooged < Minitest::Test
     fb.insert
     fb.insert.bar = 3
     found = 0
-    fb.query('(exists id)').each do |f|
-      assert(42, f.id.positive?)
+    fb.query('(exists bar)').each do |f|
+      assert(42, f.bar.positive?)
       f.foo = 42
       assert_equal(42, f.foo)
       found += 1
     end
-    assert_equal(2, found)
+    assert_equal(1, found)
     assert_equal(2, fb.size)
   end
 
@@ -72,8 +72,7 @@ class TestLooged < Minitest::Test
     fb.query('(exists bar)').each(&:to_s)
     fb.query('(not (exists bar))').delete!
     [
-      'Inserted fact #1',
-      'Inserted fact #2',
+      'Inserted new fact',
       'Set \'bar\' to "3" (Integer)',
       'Found 1 fact(s) by \'(exists bar)\'',
       'Deleted 2 fact(s) by \'(not (exists bar))\''

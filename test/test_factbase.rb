@@ -34,15 +34,15 @@ class TestFactbase < Minitest::Test
   def test_simple_setting
     fb = Factbase.new
     fb.insert
-    fb.insert
+    fb.insert.bar = 88
     found = 0
-    fb.query('(exists id)').each do |f|
-      assert(42, f.id.positive?)
+    fb.query('(exists bar)').each do |f|
+      assert(42, f.bar.positive?)
       f.foo = 42
       assert_equal(42, f.foo)
       found += 1
     end
-    assert_equal(2, found)
+    assert_equal(1, found)
     assert_equal(2, fb.size)
   end
 
@@ -106,6 +106,5 @@ class TestFactbase < Minitest::Test
     assert_equal(2, yaml['facts'].size)
     assert_equal(42, yaml['facts'][0]['foo'][0])
     assert_equal(256, yaml['facts'][0]['foo'][1])
-    assert_equal(2, yaml['facts'][1]['id'])
   end
 end
