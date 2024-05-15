@@ -30,18 +30,23 @@ require_relative 'fact'
 class Factbase::Term
   attr_reader :op, :operands
 
+  # Ctor.
+  # @param [Symbol] operator Operator
+  # @param [Array] operands Operands
   def initialize(operator, operands)
     @op = operator
     @operands = operands
   end
 
   # Does it match the fact?
-  # @param [Factbase::Fact] The fact
+  # @param [Factbase::Fact] fact The fact
   # @return [bool] TRUE if matches
   def matches?(fact)
     send(@op, fact)
   end
 
+  # Turns it into a string.
+  # @return [String] The string of it
   def to_s
     items = []
     items << @op

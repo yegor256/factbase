@@ -29,6 +29,8 @@ require_relative 'term'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Syntax
+  # Ctor.
+  # @param [String] query The query, for example "(eq id 42)"
   def initialize(query)
     @query = query
   end
