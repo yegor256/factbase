@@ -73,4 +73,12 @@ class TestFact < Minitest::Test
     f.send('foo_bar=', 42)
     assert_equal(42, f.foo_bar, f.to_s)
   end
+
+  def test_time_in_utc
+    f = Factbase::Fact.new(Mutex.new, {})
+    t = Time.now
+    f.foo = t
+    assert_equal(t.utc, f.foo)
+    assert_equal(t.utc.to_s, f.foo.to_s)
+  end
 end
