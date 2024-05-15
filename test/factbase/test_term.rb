@@ -46,7 +46,7 @@ class TestTerm < Minitest::Test
 
   def test_eq_matching_time
     now = Time.now
-    t = Factbase::Term.new(:eq, [:foo, now])
+    t = Factbase::Term.new(:eq, [:foo, Time.parse(now.iso8601)])
     assert(t.matches?(fact('foo' => now)))
     assert(t.matches?(fact('foo' => [now, Time.now])))
   end

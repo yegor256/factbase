@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'time'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/query'
 
@@ -60,6 +61,14 @@ class TestQuery < Minitest::Test
     }.each do |q, r|
       assert_equal(r, Factbase::Query.new(maps, Mutex.new, q).each.to_a.size, q)
     end
+  end
+
+  def test_simple_parsing_with_time
+    maps = []
+    now = Time.now.utc
+    maps << { 'foo' => now }
+    q = Factbase::Query.new(maps, Mutex.new, "(eq foo #{now.iso8601})")
+    assert_equal(1, q.each.to_a.size)
   end
 
   def test_simple_deleting

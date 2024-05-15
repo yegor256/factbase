@@ -124,7 +124,10 @@ class Factbase::Term
     v = fact[k]
     return false if v.nil?
     v = [v] unless v.is_a?(Array)
-    v.any? { |vv| vv.send(op, @operands[1]) }
+    v.any? do |vv|
+      vv = vv.floor if vv.is_a?(Time) && op == :==
+      vv.send(op, @operands[1])
+    end
   end
 
   def assert_args(num)
