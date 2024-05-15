@@ -77,4 +77,11 @@ class TestQuery < Minitest::Test
     maps << { 'foo' => [42] }
     assert_equal(1, Factbase::Query.new(maps, Mutex.new, '(eq foo 42)').each.to_a.size)
   end
+
+  def test_returns_int
+    maps = []
+    maps << { 'foo' => 1 }
+    q = Factbase::Query.new(maps, Mutex.new, '(eq foo 1)')
+    assert_equal(1, q.each(&:to_s))
+  end
 end
