@@ -46,6 +46,7 @@ class Factbase::Fact
       raise "Prop value can't be nil" if v.nil?
       raise "Prop value can't be empty" if v == ''
       raise "Prop type '#{v.class}' is not allowed" unless [String, Integer, Float, Time].include?(v.class)
+      v = v.utc if v.is_a?(Time)
       @mutex.synchronize do
         before = @map[kk]
         return if before == v
