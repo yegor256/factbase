@@ -51,6 +51,11 @@ class TestLooged < Minitest::Test
     assert_equal(2, Factbase::Looged.new(fb, Loog::NULL).query('()').each(&:to_s))
   end
 
+  def test_returns_int_when_empty
+    fb = Factbase.new
+    assert_equal(0, Factbase::Looged.new(fb, Loog::NULL).query('()').each(&:to_s))
+  end
+
   def test_proper_logging
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)
