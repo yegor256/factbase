@@ -32,11 +32,12 @@ end
 You can save the factbase to disc and load it back:
 
 ```ruby
+file = '/tmp/simple.fb'
 f1 = Factbase.new
 f1.insert
-File.save('/tmp/db.txt', f1.export)
+File.save(file, f1.export)
 f2 = Factbase.new
-f2.import(File.read('/tmp/db.txt'))
+f2.import(File.read(file))
 ```
 
 ## How to contribute
@@ -44,7 +45,7 @@ f2.import(File.read('/tmp/db.txt'))
 Read [these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).
 Make sure you build is green before you contribute
 your pull request. You will need to have
-[Ruby](https://www.ruby-lang.org/en/) 2.3+ and
+[Ruby](https://www.ruby-lang.org/en/) 3.2+ and
 [Bundler](https://bundler.io/) installed. Then:
 
 ```bash
