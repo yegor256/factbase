@@ -109,13 +109,23 @@ class Factbase::Looged
 
     def each(&)
       r = @query.each(&)
-      @loog.debug("Found #{r.size} facts by '#{@expr}'")
+      c = r.size
+      if c.zero?
+        @loog.debug("Nothing found by '#{@expr}'")
+      else
+        @loog.debug("Found #{c} facts by '#{@expr}'")
+      end
       r
     end
 
     def delete!
       r = @query.delete!
-      @loog.debug("Deleted #{r.size} facts by '#{@expr}'")
+      c = r.size
+      if c.zero?
+        @loog.debug("Nothing deleted by '#{@expr}'")
+      else
+        @loog.debug("Deleted #{r.size} facts by '#{@expr}'")
+      end
       r
     end
   end
