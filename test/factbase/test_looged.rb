@@ -58,10 +58,12 @@ class TestLooged < Minitest::Test
     fb.insert.bar = 3
     fb.insert
     fb.query('(exists bar)').each(&:to_s)
+    fb.query('(not (exists bar))').delete!
     [
       'Inserted fact #1',
       'Inserted fact #2',
-      'Set \'bar\' to \'"3"\' (Integer)'
+      'Set \'bar\' to \'"3"\' (Integer)',
+      'Found 1 fact(s) by \'(exists bar)\''
     ].each do |s|
       assert(log.to_s.include?(s), log)
     end
