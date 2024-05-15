@@ -69,7 +69,7 @@ class TestLooged < Minitest::Test
     fb.insert
     fb.insert.bar = 3
     fb.insert
-    fb.query('(exists bar)').each(&:to_s)
+    fb.query('(exists bar)').each.to_a
     fb.query('(not (exists bar))').delete!
     [
       'Inserted fact #1',
