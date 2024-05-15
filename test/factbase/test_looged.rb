@@ -63,7 +63,8 @@ class TestLooged < Minitest::Test
       'Inserted fact #1',
       'Inserted fact #2',
       'Set \'bar\' to \'"3"\' (Integer)',
-      'Found 1 fact(s) by \'(exists bar)\''
+      'Found 1 fact(s) by \'(exists bar)\'',
+      'Deleted 2 fact(s) by \'(not (exists bar))\''
     ].each do |s|
       assert(log.to_s.include?(s), log)
     end
