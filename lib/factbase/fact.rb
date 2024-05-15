@@ -33,10 +33,13 @@ class Factbase::Fact
     @map = map
   end
 
+  # Convert it to a string.
+  # @return [String] String representation of it (in JSON)
   def to_s
     @map.to_json
   end
 
+  # When a method is missing, this method is called.
   def method_missing(*args)
     k = args[0].to_s
     if k.end_with?('=')
