@@ -43,4 +43,8 @@ class TestLooged < Minitest::Test
     assert_equal(2, found)
     assert_equal(2, fb.size)
   end
+
+  def test_returns_int
+    assert_equal(0, Factbase::Looged.new(Factbase.new, Loog::NULL).query('()').each(&:to_s))
+  end
 end
