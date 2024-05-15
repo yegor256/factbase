@@ -56,6 +56,11 @@ class TestLooged < Minitest::Test
     assert_equal(0, Factbase::Looged.new(fb, Loog::NULL).query('()').each(&:to_s))
   end
 
+  def test_logs_when_enumerator
+    fb = Factbase::Looged.new(Factbase.new, Loog::NULL)
+    assert_equal(0, fb.query('()').each.to_a.size)
+  end
+
   def test_proper_logging
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)

@@ -109,6 +109,7 @@ class Factbase::Looged
     end
 
     def each(&)
+      return to_enum(__method__) unless block_given?
       r = @query.each(&)
       raise ".each of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
       if r.zero?
