@@ -31,7 +31,8 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2
-      - run: bundle update
+          bundler-cache: true
+      - run: bundle install
       - run: bundle exec rake
       - uses: codecov/codecov-action@v4.0.0-beta.3
         with:
