@@ -33,12 +33,11 @@ class TestSpy < Minitest::Test
     fb = Factbase::Spy.new(Factbase.new, 'foo')
     fb.insert.foo = 42
     fb.insert.foo = 'hello'
-    fb.query('(eq foo "test")').each do |f|
-      assert(f.id.positive?)
+    fb.query('(eq foo "hello")').each do |f|
+      assert_equal('hello', f.foo)
     end
     assert_equal(3, fb.caught_keys.size)
     assert(fb.caught_keys.include?('hello'))
     assert(fb.caught_keys.include?(42))
-    assert(fb.caught_keys.include?('test'))
   end
 end
