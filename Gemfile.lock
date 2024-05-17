@@ -63,6 +63,8 @@ GEM
     mutex_m (0.2.0)
     nokogiri (1.16.5-arm64-darwin)
       racc (~> 1.4)
+    nokogiri (1.16.5-x64-mingw-ucrt)
+      racc (~> 1.4)
     nokogiri (1.16.5-x86_64-darwin)
       racc (~> 1.4)
     nokogiri (1.16.5-x86_64-linux)
@@ -173,6 +175,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-22
+  x64-mingw-ucrt
   x86_64-darwin-20
   x86_64-linux
 
