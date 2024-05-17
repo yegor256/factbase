@@ -102,6 +102,7 @@ class Factbase::Inv
     end
 
     def each
+      return to_enum(__method__) unless block_given?
       @query.each do |f|
         yield Fact.new(f, @block)
       end

@@ -41,6 +41,7 @@ class TestInv < Minitest::Test
     end
     f.c = 256
     assert_equal(42, f.a)
+    assert_equal(1, fb.query('()').each.to_a.size)
   end
 
   def test_pre_and_inv
