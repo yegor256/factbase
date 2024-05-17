@@ -22,6 +22,8 @@ AllCops:
   Exclude:
     - 'bin/**/*'
     - 'assets/**/*'
+    - 'vendor/**/*.rb'
+    - 'temp/**/*.rb'
   DisplayCopNames: true
   TargetRubyVersion: 3.2
   SuggestExtensions: false
