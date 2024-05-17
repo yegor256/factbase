@@ -19,7 +19,7 @@
 # SOFTWARE.
 ---
 name: rake
-on:
+'on':
   push:
     branches:
       - master
@@ -40,5 +40,6 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           # bundler-cache: true
+      - run: tree
       - run: bundle install
       - run: bundle exec rake
