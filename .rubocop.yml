@@ -44,6 +44,8 @@ Metrics/CyclomaticComplexity:
   Max: 20
 Metrics/PerceivedComplexity:
   Max: 20
+Metrics/ClassLength:
+  Enabled: false
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
 Naming/MethodParameterName:

@@ -93,6 +93,12 @@ class TestTerm < Minitest::Test
     assert(!t.eval(fact('foo' => 100)))
   end
 
+  def test_size_matching
+    t = Factbase::Term.new(:size, [:foo])
+    assert_equal(3, t.eval(fact('foo' => [42, 12, -90])))
+    assert_equal(0, t.eval(fact('bar' => 100)))
+  end
+
   def test_exists_matching
     t = Factbase::Term.new(:exists, [:foo])
     assert(t.eval(fact('foo' => [42, 12, -90])))

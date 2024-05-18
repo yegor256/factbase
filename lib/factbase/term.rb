@@ -123,6 +123,16 @@ class Factbase::Term
     arithmetic(:>, fact)
   end
 
+  def size(fact)
+    assert_args(1)
+    o = @operands[0]
+    raise "A symbol expected: #{o}" unless o.is_a?(Symbol)
+    k = o.to_s
+    return 0 if fact[k].nil?
+    return 1 unless fact[k].is_a?(Array)
+    fact[k].size
+  end
+
   def arithmetic(op, fact)
     assert_args(2)
     o = @operands[0]
