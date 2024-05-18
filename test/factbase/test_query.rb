@@ -54,6 +54,7 @@ class TestQuery < Minitest::Test
       "(and (lt pi 100) \n\n (gt num 1000))" => 0,
       '(exists pi)' => 1,
       '(not (exists hello))' => 3,
+      '(gt (size num) 2)' => 1,
       '(absent time)' => 2,
       '(and (absent time) (exists pi))' => 1,
       "(and (exists time) (not (\t\texists pi)))" => 1,
