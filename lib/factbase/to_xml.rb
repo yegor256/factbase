@@ -20,54 +20,51 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'loog'
+require 'nokogiri'
+require 'time'
 require_relative '../factbase'
 
-# A decorator of a Factbase, that runs a provided block on every +insert+.
+# Factbase to XML converter.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Pre
-  def initialize(fb, &block)
-    @fb = fb
-    @block = block
+class Factbase::ToXML
+  # Constructor.
+  def initialize(maps)
+    @maps = maps
   end
 
-  def empty?
-    @fb.empty?
-  end
-
-  def size
-    @fb.size
-  end
-
-  def insert
-    f = @fb.insert
-    @block.call(f)
-    f
-  end
-
-  def query(query)
-    @fb.query(query)
-  end
-
-  def export
-    @fb.export
-  end
-
-  def import(bytes)
-    @fb.import(bytes)
-  end
-
-  def to_json(opt = nil)
-    @fb.to_json(opt)
-  end
-
+  # Convert the entire factbase into XML.
+  # @return [String] The factbase in XML format
   def to_xml
-    @fb.to_xml
+    Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
+      xml.fb do
+        @maps.each do |m|
+          xml.f_ do
+            m.each do |k, vv|
+              if vv.is_a?(Array)
+                xml.send(:"#{k}_") do
+                  vv.each do |v|
+                    xml.send(:v, to_str(v))
+                  end
+                end
+              else
+                xml.send(:"#{k}_", to_str(vv))
+              end
+            end
+          end
+        end
+      end
+    end.to_xml
   end
 
-  def to_yaml
-    @fb.to_yaml
+  private
+
+  def to_str(val)
+    if val.is_a?(Time)
+      val.utc.iso8601
+    else
+      val.to_s
+    end
   end
 end

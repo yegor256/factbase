@@ -20,54 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'minitest/autorun'
 require 'loog'
-require_relative '../factbase'
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/to_xml'
 
-# A decorator of a Factbase, that runs a provided block on every +insert+.
+# Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Pre
-  def initialize(fb, &block)
-    @fb = fb
-    @block = block
-  end
-
-  def empty?
-    @fb.empty?
-  end
-
-  def size
-    @fb.size
-  end
-
-  def insert
-    f = @fb.insert
-    @block.call(f)
-    f
-  end
-
-  def query(query)
-    @fb.query(query)
-  end
-
-  def export
-    @fb.export
-  end
-
-  def import(bytes)
-    @fb.import(bytes)
-  end
-
-  def to_json(opt = nil)
-    @fb.to_json(opt)
-  end
-
-  def to_xml
-    @fb.to_xml
-  end
-
-  def to_yaml
-    @fb.to_yaml
+class TestToXML < Minitest::Test
+  def test_simple_rendering
+    to = Factbase::ToXML.new([{ t: Time.now }])
+    xml = to.to_xml
+    assert(!Nokogiri::XML.parse(xml).xpath('/fb/f[t]').empty?)
   end
 end

@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 require 'json'
-require 'nokogiri'
 require 'yaml'
 
 # Factbase.
@@ -99,25 +98,8 @@ class Factbase
   # Convert the entire factbase into XML.
   # @return [String] The factbase in XML format
   def to_xml
-    Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
-      xml.fb do
-        @maps.each do |m|
-          xml.f_ do
-            m.each do |k, vv|
-              if vv.is_a?(Array)
-                xml.send(:"#{k}_") do
-                  vv.each do |v|
-                    xml.send(:v, v)
-                  end
-                end
-              else
-                xml.send(:"#{k}_", vv)
-              end
-            end
-          end
-        end
-      end
-    end.to_xml
+    require_relative 'factbase/to_xml'
+    ToXML.new(@maps).to_xml
   end
 
   # Convert the entire factbase into YAML.

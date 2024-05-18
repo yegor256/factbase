@@ -22,6 +22,7 @@
 
 require 'minitest/autorun'
 require 'loog'
+require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/inv'
 require_relative '../../lib/factbase/pre'
 
