@@ -41,7 +41,7 @@ class Factbase::Term
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
   # @return [bool] TRUE if matches
-  def matches?(fact)
+  def eval(fact)
     send(@op, fact)
   end
 
@@ -71,19 +71,19 @@ class Factbase::Term
 
   def not(fact)
     assert_args(1)
-    !@operands[0].matches?(fact)
+    !@operands[0].eval(fact)
   end
 
   def or(fact)
     @operands.each do |o|
-      return true if o.matches?(fact)
+      return true if o.eval(fact)
     end
     false
   end
 
   def and(fact)
     @operands.each do |o|
-      return false unless o.matches?(fact)
+      return false unless o.eval(fact)
     end
     true
   end
@@ -92,7 +92,7 @@ class Factbase::Term
     assert_args(2)
     a = @operands[0]
     b = @operands[1]
-    !a.matches?(fact) || (a.matches?(fact) && b.matches?(fact))
+    !a.eval(fact) || (a.eval(fact) && b.eval(fact))
   end
 
   def exists(fact)

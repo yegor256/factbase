@@ -124,7 +124,7 @@ class Factbase::Rules
     end
 
     def it(fact)
-      return if Factbase::Syntax.new(@expr).to_term.matches?(fact)
+      return if Factbase::Syntax.new(@expr).to_term.eval(fact)
       raise "The fact is in invalid state: #{fact}"
     end
   end

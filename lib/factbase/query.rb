@@ -44,7 +44,7 @@ class Factbase::Query
     yielded = 0
     @maps.each do |m|
       f = Factbase::Fact.new(@mutex, m)
-      next unless term.matches?(f)
+      next unless term.eval(f)
       yield f
       yielded += 1
     end
@@ -59,7 +59,7 @@ class Factbase::Query
     @mutex.synchronize do
       @maps.delete_if do |m|
         f = Factbase::Fact.new(@mutex, m)
-        if term.matches?(f)
+        if term.eval(f)
           deleted += 1
           true
         else
