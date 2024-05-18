@@ -56,6 +56,7 @@ class TestQuery < Minitest::Test
       '(not (exists hello))' => 3,
       '(gt (size num) 2)' => 1,
       '(lt (size num) 2)' => 2,
+      '(eq (size hello) 0)' => 3,
       '(absent time)' => 2,
       '(and (absent time) (exists pi))' => 1,
       "(and (exists time) (not (\t\texists pi)))" => 1,
