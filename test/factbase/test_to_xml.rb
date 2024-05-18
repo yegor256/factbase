@@ -34,6 +34,10 @@ class TestToXML < Minitest::Test
     to = Factbase::ToXML.new([{ t: Time.now }])
     xml = to.to_xml
     assert(!Nokogiri::XML.parse(xml).xpath('/fb/f[t]').empty?)
-    assert(Nokogiri::XML.parse(xml).xpath('/fb/f[t]').text.match?(/^.*$/))
+    assert(
+      Nokogiri::XML.parse(xml).xpath('/fb/f/t/text()').text.match?(
+        /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/
+      )
+    )
   end
 end
