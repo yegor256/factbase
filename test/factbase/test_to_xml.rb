@@ -40,4 +40,10 @@ class TestToXML < Minitest::Test
       )
     )
   end
+
+  def test_complex_rendering
+    to = Factbase::ToXML.new([{ t: "\uffff < > & ' \"" }])
+    xml = to.to_xml
+    assert(!Nokogiri::XML.parse(xml).xpath('/fb/f[t]').empty?)
+  end
 end
