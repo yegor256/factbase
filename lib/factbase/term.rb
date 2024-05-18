@@ -126,9 +126,13 @@ class Factbase::Term
   def arithmetic(op, fact)
     assert_args(2)
     o = @operands[0]
-    raise "A symbol expected by #{op}: #{o}" unless o.is_a?(Symbol)
-    k = o.to_s
-    v = fact[k]
+    if o.is_a?(Factbase::Term)
+      v = o.eval(fact)
+    else
+      raise "A symbol expected by #{op}: #{o}" unless o.is_a?(Symbol)
+      k = o.to_s
+      v = fact[k]
+    end
     return false if v.nil?
     v = [v] unless v.is_a?(Array)
     v.any? do |vv|
