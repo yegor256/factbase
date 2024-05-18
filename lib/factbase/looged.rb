@@ -85,7 +85,9 @@ class Factbase::Looged
       r = @fact.method_missing(*args)
       k = args[0].to_s
       v = args[1]
-      @loog.debug("Set '#{k[0..-2]}' to #{v.to_s.inspect} (#{v.class})") if k.end_with?('=')
+      s = v.is_a?(Time) ? v.utc.iso8601 : v.to_s
+      s = v.to_s.inspect if v.is_a?(String)
+      @loog.debug("Set '#{k[0..-2]}' to #{s} (#{v.class})") if k.end_with?('=')
       r
     end
 

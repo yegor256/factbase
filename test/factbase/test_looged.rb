@@ -73,7 +73,7 @@ class TestLooged < Minitest::Test
     fb.query('(not (exists bar))').delete!
     [
       'Inserted new fact',
-      'Set \'bar\' to "3" (Integer)',
+      'Set \'bar\' to 3 (Integer)',
       'Found 1 fact(s) by \'(exists bar)\'',
       'Deleted 2 fact(s) by \'(not (exists bar))\''
     ].each do |s|
