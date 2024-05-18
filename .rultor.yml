@@ -31,8 +31,8 @@ release:
     [[ "${tag}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit -1
     bundle exec rake
     rm -rf *.gem
-    sed -i "s/0\.0\.0/${tag}/g" factbase.gemspec
-    git add factbase.gemspec
+    sed -i "s/0\.0\.0/${tag}/g" lib/factbase.rb
+    git add lib/factbase.rb
     git commit -m "version set to ${tag}"
     gem build factbase.gemspec
     chmod 0600 ../rubygems.yml

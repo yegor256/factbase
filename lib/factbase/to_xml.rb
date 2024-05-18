@@ -37,8 +37,12 @@ class Factbase::ToXML
   # Convert the entire factbase into XML.
   # @return [String] The factbase in XML format
   def to_xml
+    meta = {
+      'factbase_version' => Factbase::VERSION,
+      'dob' => Time.now.utc.iso8601
+    }
     Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
-      xml.fb do
+      xml.fb(meta) do
         @maps.each do |m|
           xml.f_ do
             m.each do |k, vv|

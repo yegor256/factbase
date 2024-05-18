@@ -46,4 +46,11 @@ class TestToXML < Minitest::Test
     xml = to.to_xml
     assert(!Nokogiri::XML.parse(xml).xpath('/fb/f[t]').empty?)
   end
+
+  def test_meta_data_presence
+    to = Factbase::ToXML.new([{ x: { y: 42 } }])
+    xml = to.to_xml
+    assert(!Nokogiri::XML.parse(xml).xpath('/fb[@dob]').empty?)
+    assert(!Nokogiri::XML.parse(xml).xpath('/fb[@factbase_version]').empty?)
+  end
 end
