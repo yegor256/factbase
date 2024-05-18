@@ -118,6 +118,19 @@ class TestTerm < Minitest::Test
     assert(!t.matches?(fact('bar' => [42])))
   end
 
+  def test_when_matching
+    t = Factbase::Term.new(
+      :when,
+      [
+        Factbase::Term.new(:eq, [:foo, 4]),
+        Factbase::Term.new(:eq, [:bar, 5])
+      ]
+    )
+    assert(t.matches?(fact('foo' => 4, 'bar' => 5)))
+    assert(!t.matches?(fact('foo' => 4)))
+    assert(t.matches?(fact('foo' => 5, 'bar' => 5)))
+  end
+
   private
 
   def fact(map)

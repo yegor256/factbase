@@ -88,6 +88,13 @@ class Factbase::Term
     true
   end
 
+  def when(fact)
+    assert_args(2)
+    a = @operands[0]
+    b = @operands[1]
+    !a.matches?(fact) || (a.matches?(fact) && b.matches?(fact))
+  end
+
   def exists(fact)
     assert_args(1)
     o = @operands[0]
