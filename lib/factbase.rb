@@ -59,11 +59,11 @@ class Factbase
   # There is a Lisp-like syntax, for example:
   #
   #  (eq title 'Object Thinking')
-  #  (gt time '2024-03-23T03:21:43')
+  #  (gt time 2024-03-23T03:21:43Z)
   #  (gt cost 42)
   #  (exists seenBy)
   #  (and
-  #    (eq foo 42)
+  #    (eq foo 42.998)
   #    (or
   #      (gt bar 200)
   #      (absent zzz)))

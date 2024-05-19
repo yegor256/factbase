@@ -62,6 +62,7 @@ class TestSyntax < Minitest::Test
       "(foo x y z t f 42 'Hi!' 33)",
       '(foo (x) y z)',
       '(eq t 2024-05-25T19:43:48Z)',
+      '(eq t 2024-05-25T19:43:48Z)',
       '(eq t 3.1415926)',
       '(eq t 3.0e+21)',
       "(foo (x (f (t (y 42 'Hey you'))) (f) (r 3)) y z)"
