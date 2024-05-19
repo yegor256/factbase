@@ -97,18 +97,12 @@ class Factbase::Term
 
   def exists(fact)
     assert_args(1)
-    o = @operands[0]
-    raise "A symbol expected: #{o}" unless o.is_a?(Symbol)
-    k = o.to_s
-    !fact[k].nil?
+    !by_symbol(0, fact).nil?
   end
 
   def absent(fact)
     assert_args(1)
-    o = @operands[0]
-    raise "A symbol expected: #{o}" unless o.is_a?(Symbol)
-    k = o.to_s
-    fact[k].nil?
+    by_symbol(0, fact).nil?
   end
 
   def eq(fact)
@@ -125,21 +119,17 @@ class Factbase::Term
 
   def size(fact)
     assert_args(1)
-    o = @operands[0]
-    raise "A symbol expected: #{o}" unless o.is_a?(Symbol)
-    k = o.to_s
-    return 0 if fact[k].nil?
-    return 1 unless fact[k].is_a?(Array)
-    fact[k].size
+    v = by_symbol(0, fact)
+    return 0 if v.nil?
+    return 1 unless v.is_a?(Array)
+    v.size
   end
 
   def type(fact)
     assert_args(1)
-    o = @operands[0]
-    raise "A symbol expected: #{o}" unless o.is_a?(Symbol)
-    k = o.to_s
-    return 'nil' if fact[k].nil?
-    fact[k].class.to_s
+    v = by_symbol(0, fact)
+    return 'nil' if v.nil?
+    v.class.to_s
   end
 
   def arithmetic(op, fact)
@@ -164,5 +154,12 @@ class Factbase::Term
     c = @operands.size
     raise "Too many (#{c}) operands for '#{@op}' (#{num} expected)" if c > num
     raise "Too few (#{c}) operands for '#{@op}' (#{num} expected)" if c < num
+  end
+
+  def by_symbol(pos, fact)
+    o = @operands[pos]
+    raise "A symbol expected at ##{pos}, but provided: #{o}" unless o.is_a?(Symbol)
+    k = o.to_s
+    fact[k]
   end
 end
