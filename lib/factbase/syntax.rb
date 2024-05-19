@@ -43,6 +43,7 @@ class Factbase::Syntax
     @ast ||= to_ast(@tokens, 0)
     term = @ast[0]
     raise 'No terms found' if term.nil?
+    raise 'Not a term' unless term.is_a?(Factbase::Term)
     term
   end
 
@@ -81,7 +82,7 @@ class Factbase::Syntax
     list = []
     acc = ''
     string = false
-    @query.to_s.chars.each do |c|
+    @query.to_s.gsub(/#.*$/, '').chars.each do |c|
       if ['\'', '"'].include?(c)
         if string && acc[acc.length - 1] == '\\'
           acc = acc[0..-2]
