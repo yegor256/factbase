@@ -33,6 +33,10 @@ class Factbase::Pre
     @block = block
   end
 
+  def dup
+    Factbase::Pre.new(@fb.dup, &@block)
+  end
+
   def size
     @fb.size
   end
@@ -45,6 +49,10 @@ class Factbase::Pre
 
   def query(query)
     @fb.query(query)
+  end
+
+  def txn(this = self, &)
+    @fb.txn(this, &)
   end
 
   def export

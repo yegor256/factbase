@@ -32,6 +32,10 @@ class Factbase::Rules
     @check = Check.new(fb, rules)
   end
 
+  def dup
+    Factbase::Pre.new(@fb.dup, &@block)
+  end
+
   def size
     @fb.size
   end
@@ -42,6 +46,10 @@ class Factbase::Rules
 
   def query(query)
     Query.new(@fb.query(query), @check)
+  end
+
+  def txn(this = self, &)
+    @fb.txn(this, &)
   end
 
   def export

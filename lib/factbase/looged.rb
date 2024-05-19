@@ -32,6 +32,10 @@ class Factbase::Looged
     @loog = loog
   end
 
+  def dup
+    Factbase::Pre.new(@fb.dup, &@block)
+  end
+
   def size
     @fb.size
   end
@@ -46,24 +50,16 @@ class Factbase::Looged
     Query.new(@fb.query(query), query, @loog)
   end
 
+  def txn(this = self, &)
+    @fb.txn(this, &)
+  end
+
   def export
     @fb.export
   end
 
   def import(bytes)
     @fb.import(bytes)
-  end
-
-  def to_json(opt = nil)
-    @fb.to_json(opt)
-  end
-
-  def to_xml
-    @fb.to_xml
-  end
-
-  def to_yaml
-    @fb.to_yaml
   end
 
   # Fact decorator.

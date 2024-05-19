@@ -37,6 +37,10 @@ class Factbase::Spy
     @caught
   end
 
+  def dup
+    Factbase::Spy.new(@fb.dup, @key)
+  end
+
   def query(expr)
     scan(Factbase::Syntax.new(expr).to_term)
     @fb.query(expr)
@@ -50,12 +54,12 @@ class Factbase::Spy
     @fb.export
   end
 
-  def import(data)
-    @fb.import(data)
+  def txn(this = self, &)
+    @fb.txn(this, &)
   end
 
-  def to_json(opt = nil)
-    @fb.to_json(opt)
+  def import(data)
+    @fb.import(data)
   end
 
   # A fact that is spying.
