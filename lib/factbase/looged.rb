@@ -32,10 +32,6 @@ class Factbase::Looged
     @loog = loog
   end
 
-  def empty?
-    @fb.empty?
-  end
-
   def size
     @fb.size
   end

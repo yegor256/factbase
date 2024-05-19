@@ -20,38 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'loog'
+require 'json'
+require 'time'
 require_relative '../factbase'
 
-# A decorator of a Factbase, that runs a provided block on every +insert+.
+# Factbase to JSON converter.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Pre
-  def initialize(fb, &block)
+class Factbase::ToJSON
+  # Constructor.
+  def initialize(fb)
     @fb = fb
-    @block = block
   end
 
-  def size
-    @fb.size
-  end
-
-  def insert
-    f = @fb.insert
-    @block.call(f)
-    f
-  end
-
-  def query(query)
-    @fb.query(query)
-  end
-
-  def export
-    @fb.export
-  end
-
-  def import(bytes)
-    @fb.import(bytes)
+  # Convert the entire factbase into JSON.
+  # @return [String] The factbase in JSON format
+  def json
+    maps = Marshal.load(@fb.export)
+    maps.to_json
   end
 end

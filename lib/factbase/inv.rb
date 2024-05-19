@@ -32,10 +32,6 @@ class Factbase::Inv
     @block = block
   end
 
-  def empty?
-    @fb.empty?
-  end
-
   def size
     @fb.size
   end

@@ -20,38 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'loog'
+require 'yaml'
+require 'time'
 require_relative '../factbase'
 
-# A decorator of a Factbase, that runs a provided block on every +insert+.
+# Factbase to YAML converter.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Pre
-  def initialize(fb, &block)
+class Factbase::ToYAML
+  # Constructor.
+  def initialize(fb)
     @fb = fb
-    @block = block
   end
 
-  def size
-    @fb.size
-  end
-
-  def insert
-    f = @fb.insert
-    @block.call(f)
-    f
-  end
-
-  def query(query)
-    @fb.query(query)
-  end
-
-  def export
-    @fb.export
-  end
-
-  def import(bytes)
-    @fb.import(bytes)
+  # Convert the entire factbase into YAML.
+  # @return [String] The factbase in YAML format
+  def yaml
+    maps = Marshal.load(@fb.export)
+    YAML.dump({ 'facts' => maps })
   end
 end

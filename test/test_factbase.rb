@@ -59,8 +59,8 @@ class TestFactbase < Minitest::Test
 
   def test_empty_or_not
     fb = Factbase.new
-    assert(fb.empty?)
+    assert_equal(0, fb.size)
     fb.insert
-    assert(!fb.empty?)
+    assert_equal(1, fb.size)
   end
 end

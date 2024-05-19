@@ -32,10 +32,6 @@ class Factbase::Rules
     @check = Check.new(fb, rules)
   end
 
-  def empty?
-    @fb.empty?
-  end
-
   def size
     @fb.size
   end
