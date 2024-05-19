@@ -134,19 +134,16 @@ class Factbase::Term
 
   def arithmetic(op, fact)
     assert_args(2)
-    o = @operands[0]
-    if o.is_a?(Factbase::Term)
-      v = o.eval(fact)
-    else
-      raise "A symbol expected by #{op}: #{o}" unless o.is_a?(Symbol)
-      k = o.to_s
-      v = fact[k]
-    end
-    return false if v.nil?
-    v = [v] unless v.is_a?(Array)
-    v.any? do |vv|
-      vv = vv.floor if vv.is_a?(Time) && op == :==
-      vv.send(op, @operands[1])
+    lefts = the_value(0, fact)
+    return false if lefts.nil?
+    rights = the_value(1, fact)
+    return false if rights.nil?
+    lefts.any? do |l|
+      l = l.floor if l.is_a?(Time) && op == :==
+      rights.any? do |r|
+        r = r.floor if r.is_a?(Time) && op == :==
+        l.send(op, r)
+      end
     end
   end
 
@@ -161,5 +158,14 @@ class Factbase::Term
     raise "A symbol expected at ##{pos}, but provided: #{o}" unless o.is_a?(Symbol)
     k = o.to_s
     fact[k]
+  end
+
+  def the_value(pos, fact)
+    v = @operands[pos]
+    v = v.eval(fact) if v.is_a?(Factbase::Term)
+    v = fact[v.to_s] if v.is_a?(Symbol)
+    return v if v.nil?
+    v = [v] unless v.is_a?(Array)
+    v
   end
 end
