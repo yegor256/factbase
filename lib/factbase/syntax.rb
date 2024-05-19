@@ -42,8 +42,8 @@ class Factbase::Syntax
     @tokens ||= to_tokens
     @ast ||= to_ast(@tokens, 0)
     term = @ast[0]
-    raise 'No terms found' if term.nil?
-    raise 'Not a term' unless term.is_a?(Factbase::Term)
+    raise "No terms found: #{@query}" if term.nil?
+    raise "Not a term: #{@query}" unless term.is_a?(Factbase::Term)
     term
   end
 
