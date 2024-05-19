@@ -41,6 +41,10 @@ class Factbase::Spy
     Factbase::Spy.new(@fb.dup, @key)
   end
 
+  def size
+    @fb.size
+  end
+
   def query(expr)
     scan(Factbase::Syntax.new(expr).to_term)
     @fb.query(expr)
