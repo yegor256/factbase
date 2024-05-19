@@ -74,6 +74,16 @@ class Factbase
     Factbase::Query.new(@maps, @mutex, query)
   end
 
+  # Run an ACID transaction, which will either modify the factbase
+  # or rollback in case of an error.
+  def txn(this = self)
+    copy = Marshal.load(Marshal.dump(this))
+    yield copy
+    @mutex.synchronize do
+      @maps = copy.maps
+    end
+  end
+
   # Export it into a chain of bytes.
   def export
     Marshal.dump(@maps)

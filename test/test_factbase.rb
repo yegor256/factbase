@@ -63,4 +63,15 @@ class TestFactbase < Minitest::Test
     fb.insert
     assert_equal(1, fb.size)
   end
+
+  def test_run_txn
+    fb = Factbase.new
+    assert_raises do
+      fb.txn do
+        fb.insert.foo = 42
+        throw 'intentionally'
+      end
+    end
+    assert_equal(0, fb.size)
+  end
 end
