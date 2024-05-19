@@ -39,6 +39,16 @@ class TestFact < Minitest::Test
     assert_equal([42, 256], f['foo'], f.to_s)
   end
 
+  def test_keeps_values_unique
+    map = {}
+    f = Factbase::Fact.new(Mutex.new, map)
+    f.foo = 42
+    f.foo = 'Hello'
+    assert_equal(2, map['foo'].size)
+    f.foo = 42
+    assert_equal(2, map['foo'].size)
+  end
+
   def test_fails_when_empty
     f = Factbase::Fact.new(Mutex.new, {})
     assert_raises do

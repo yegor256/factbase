@@ -61,6 +61,7 @@ class Factbase::Fact
         end
         @map[kk] = [@map[kk]] unless @map[kk].is_a?(Array)
         @map[kk] << v
+        @map[kk].uniq!
       end
       nil
     elsif k == '[]'
