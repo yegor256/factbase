@@ -111,6 +111,16 @@ class TestTerm < Minitest::Test
     assert(!t.eval(fact('foo' => 100)))
   end
 
+  def test_type_matching
+    t = Factbase::Term.new(:type, [:foo])
+    assert_equal('Integer', t.eval(fact('foo' => 42)))
+    assert_equal('Array', t.eval(fact('foo' => [1, 2, 3])))
+    assert_equal('String', t.eval(fact('foo' => 'Hello, world!')))
+    assert_equal('Float', t.eval(fact('foo' => 3.14)))
+    assert_equal('Time', t.eval(fact('foo' => Time.now)))
+    assert_equal('nil', t.eval(fact))
+  end
+
   def test_or_matching
     t = Factbase::Term.new(
       :or,
@@ -139,7 +149,7 @@ class TestTerm < Minitest::Test
 
   private
 
-  def fact(map)
+  def fact(map = {})
     Factbase::Fact.new(Mutex.new, map)
   end
 end
