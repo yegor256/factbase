@@ -75,4 +75,16 @@ class TestFactbase < Minitest::Test
     end
     assert_equal(1, fb.size)
   end
+
+  def test_run_txn_with_inv
+    fb = Factbase::Inv.new(Factbase.new) { |_p, v| throw 'oops' if v == 42 }
+    fb.insert.bar = 3
+    fb.insert.foo = 5
+    assert_raises do
+      fb.txn do
+        fb.insert.foo = 42
+      end
+    end
+    assert_equal(2, fb.size)
+  end
 end
