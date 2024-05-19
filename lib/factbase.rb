@@ -32,9 +32,15 @@ class Factbase
   VERSION = '0.0.0'
 
   # Constructor.
-  def initialize
-    @maps = []
+  def initialize(facts = [])
+    @maps = facts
     @mutex = Mutex.new
+  end
+
+  # Make a duplicate of this factbase.
+  # @return [Factbase] A new factbase
+  def dup
+    Factbase.new(@maps.dup)
   end
 
   # Size.
@@ -77,10 +83,11 @@ class Factbase
   # Run an ACID transaction, which will either modify the factbase
   # or rollback in case of an error.
   def txn(this = self)
-    copy = Marshal.load(Marshal.dump(this))
+    copy = this.dup
     yield copy
     @mutex.synchronize do
-      @maps = copy.maps
+      @maps = []
+      import(copy.export)
     end
   end
 

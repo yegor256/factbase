@@ -64,27 +64,46 @@ class TestFactbase < Minitest::Test
     assert_equal(1, fb.size)
   end
 
+  def test_makes_duplicate
+    fb1 = Factbase.new
+    fb1.insert
+    assert_equal(1, fb1.size)
+    fb2 = fb1.dup
+    fb2.insert
+    assert_equal(1, fb1.size)
+    assert_equal(2, fb2.size)
+  end
+
   def test_run_txn
     fb = Factbase.new
-    fb.insert.bar = 42
-    assert_raises do
-      fb.txn do
-        fb.insert.foo = 42
-        throw 'intentionally'
-      end
+    fb.txn do |fbt|
+      fbt.insert.bar = 42
+      fbt.insert.z = 42
     end
-    assert_equal(1, fb.size)
+    assert_equal(2, fb.size)
+    assert(
+      assert_raises do
+        fb.txn do |fbt|
+          fbt.insert.foo = 42
+          throw 'intentionally'
+        end
+      end.message.include?('intentionally')
+    )
+    assert_equal(2, fb.size)
   end
 
   def test_run_txn_with_inv
     fb = Factbase::Inv.new(Factbase.new) { |_p, v| throw 'oops' if v == 42 }
     fb.insert.bar = 3
     fb.insert.foo = 5
-    assert_raises do
-      fb.txn do
-        fb.insert.foo = 42
-      end
-    end
+    assert_equal(2, fb.size)
+    assert(
+      assert_raises do
+        fb.txn do |fbt|
+          fbt.insert.foo = 42
+        end
+      end.message.include?('oops')
+    )
     assert_equal(2, fb.size)
   end
 end

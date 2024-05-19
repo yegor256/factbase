@@ -32,6 +32,10 @@ class Factbase::Inv
     @block = block
   end
 
+  def dup
+    Factbase::Inv.new(@fb.dup, &@block)
+  end
+
   def size
     @fb.size
   end
@@ -45,7 +49,7 @@ class Factbase::Inv
   end
 
   def txn(this = self, &block)
-    @fb.txn(this, block)
+    @fb.txn(this, &block)
   end
 
   def export
