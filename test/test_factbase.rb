@@ -21,9 +21,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'json'
-require 'nokogiri'
-require 'yaml'
+require 'loog'
 require_relative '../lib/factbase'
 
 # Factbase main module test.
@@ -105,5 +103,21 @@ class TestFactbase < Minitest::Test
       end.message.include?('oops')
     )
     assert_equal(2, fb.size)
+  end
+
+  def test_all_decorators
+    [
+      Factbase::Inv.new(Factbase.new) { |_, _| true },
+      Factbase::Pre.new(Factbase.new) { |_| true },
+      Factbase::Looged.new(Factbase.new, Loog::NULL)
+    ].each do |d|
+      f = d.insert
+      f.foo = 42
+      d.txn do |fbt|
+        fbt.insert.bar = 455
+      end
+      d.import(d.export)
+      assert_equal(4, d.size)
+    end
   end
 end

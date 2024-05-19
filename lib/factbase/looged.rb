@@ -33,7 +33,7 @@ class Factbase::Looged
   end
 
   def dup
-    Factbase::Pre.new(@fb.dup, &@block)
+    Factbase::Looged.new(@fb.dup, @loog)
   end
 
   def size
