@@ -119,6 +119,7 @@ class TestFactbase < Minitest::Test
       end
       d.import(d.export)
       assert_equal(4, d.size)
+      assert_equal(4, d.query('()').each.to_a.size)
     end
   end
 end
