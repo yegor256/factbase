@@ -54,6 +54,7 @@ class TestQuery < Minitest::Test
       "(and (lt pi 100) \n\n (gt num 1000))" => 0,
       '(exists pi)' => 1,
       '(not (exists hello))' => 3,
+      '(eq "Integer" (type num))' => 2,
       '(gt (size num) 2)' => 1,
       '(lt (size num) 2)' => 2,
       '(eq (size hello) 0)' => 3,
