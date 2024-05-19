@@ -118,6 +118,12 @@ class TestFactbase < Minitest::Test
       d.txn do |fbt|
         fbt.insert.bar = 455
       end
+      assert_raises do
+        d.txn do |fbt|
+          fbt.insert
+          throw 'oops'
+        end
+      end
       d.import(d.export)
       assert_equal(4, d.size)
       assert_equal(4, d.query('()').each.to_a.size)
