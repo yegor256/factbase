@@ -29,11 +29,12 @@ require_relative '../factbase'
 class Factbase::Rules
   def initialize(fb, rules)
     @fb = fb
-    @check = Check.new(fb, rules)
+    @rules = rules
+    @check = Check.new(fb, @rules)
   end
 
   def dup
-    Factbase::Pre.new(@fb.dup, &@block)
+    Factbase::Rules.new(@fb.dup, @rules)
   end
 
   def size

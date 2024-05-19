@@ -107,6 +107,7 @@ class TestFactbase < Minitest::Test
 
   def test_all_decorators
     [
+      Factbase::Rules.new(Factbase.new, '()'),
       Factbase::Inv.new(Factbase.new) { |_, _| true },
       Factbase::Pre.new(Factbase.new) { |_| true },
       Factbase::Looged.new(Factbase.new, Loog::NULL),
