@@ -44,6 +44,10 @@ class Factbase::Inv
     Query.new(@fb.query(query), @block)
   end
 
+  def txn(this = self, &block)
+    @fb.txn(this, block)
+  end
+
   def export
     @fb.export
   end
