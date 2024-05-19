@@ -56,18 +56,6 @@ class Factbase::Inv
     @fb.import(bytes)
   end
 
-  def to_json(opt = nil)
-    @fb.to_json(opt)
-  end
-
-  def to_xml
-    @fb.to_xml
-  end
-
-  def to_yaml
-    @fb.to_yaml
-  end
-
   # Fact decorator.
   class Fact
     def initialize(fact, block)

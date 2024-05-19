@@ -30,20 +30,21 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::ToXML
   # Constructor.
-  def initialize(maps)
-    @maps = maps
+  def initialize(fb)
+    @fb = fb
   end
 
   # Convert the entire factbase into XML.
   # @return [String] The factbase in XML format
-  def to_xml
+  def xml
     meta = {
       factbase_version: Factbase::VERSION,
       dob: Time.now.utc.iso8601
     }
+    maps = Marshal.load(@fb.export)
     Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
       xml.fb(meta) do
-        @maps.each do |m|
+        maps.each do |m|
           xml.f_ do
             m.each do |k, vv|
               if vv.is_a?(Array)

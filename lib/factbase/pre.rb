@@ -58,16 +58,4 @@ class Factbase::Pre
   def import(bytes)
     @fb.import(bytes)
   end
-
-  def to_json(opt = nil)
-    @fb.to_json(opt)
-  end
-
-  def to_xml
-    @fb.to_xml
-  end
-
-  def to_yaml
-    @fb.to_yaml
-  end
 end

@@ -52,3 +52,5 @@ Naming/MethodParameterName:
   MinNameLength: 2
 Layout/EndOfLine:
   EnforcedStyle: lf
+Security/MarshalLoad:
+  Enabled: false

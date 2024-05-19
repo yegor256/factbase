@@ -87,27 +87,6 @@ class Factbase
 
   # Import from a chain of bytes.
   def import(bytes)
-    # rubocop:disable Security/MarshalLoad
     @maps += Marshal.load(bytes)
-    # rubocop:enable Security/MarshalLoad
-  end
-
-  # Convert the entire factbase into JSON.
-  # @return [String] The factbase in JSON format
-  def to_json(_ = nil)
-    @maps.to_json
-  end
-
-  # Convert the entire factbase into XML.
-  # @return [String] The factbase in XML format
-  def to_xml
-    require_relative 'factbase/to_xml'
-    ToXML.new(@maps).to_xml
-  end
-
-  # Convert the entire factbase into YAML.
-  # @return [String] The factbase in YAML format
-  def to_yaml
-    YAML.dump({ 'facts' => @maps })
   end
 end

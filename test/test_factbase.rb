@@ -63,48 +63,4 @@ class TestFactbase < Minitest::Test
     fb.insert
     assert(!fb.empty?)
   end
-
-  def test_to_json
-    fb = Factbase.new
-    f = fb.insert
-    f.foo = 42
-    f.foo = 256
-    json = JSON.parse(fb.to_json)
-    assert(42, json[0]['foo'][1])
-  end
-
-  def test_to_xml
-    fb = Factbase.new
-    f = fb.insert
-    f.foo = 42
-    f.foo = 256
-    fb.insert.bar = 5
-    xml = Nokogiri::XML.parse(fb.to_xml)
-    assert(!xml.xpath('/fb[count(f) = 2]').empty?)
-    assert(!xml.xpath('/fb/f/foo[v="42"]').empty?)
-  end
-
-  def test_to_xml_with_short_names
-    fb = Factbase.new
-    f = fb.insert
-    f.type = 1
-    f.f = 2
-    f.class = 3
-    xml = Nokogiri::XML.parse(fb.to_xml)
-    assert(!xml.xpath('/fb/f/type').empty?)
-    assert(!xml.xpath('/fb/f/f').empty?)
-    assert(!xml.xpath('/fb/f/class').empty?)
-  end
-
-  def test_to_yaml
-    fb = Factbase.new
-    f = fb.insert
-    f.foo = 42
-    f.foo = 256
-    fb.insert
-    yaml = YAML.load(fb.to_yaml)
-    assert_equal(2, yaml['facts'].size)
-    assert_equal(42, yaml['facts'][0]['foo'][0])
-    assert_equal(256, yaml['facts'][0]['foo'][1])
-  end
 end

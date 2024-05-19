@@ -31,26 +31,45 @@ require_relative '../../lib/factbase/to_xml'
 # License:: MIT
 class TestToXML < Minitest::Test
   def test_simple_rendering
-    to = Factbase::ToXML.new([{ t: Time.now }])
-    xml = to.to_xml
-    assert(!Nokogiri::XML.parse(xml).xpath('/fb/f[t]').empty?)
+    fb = Factbase.new
+    fb.insert.t = Time.now
+    to = Factbase::ToXML.new(fb)
+    xml = Nokogiri::XML.parse(to.xml)
+    assert(!xml.xpath('/fb/f[t]').empty?)
     assert(
-      Nokogiri::XML.parse(xml).xpath('/fb/f/t/text()').text.match?(
+      xml.xpath('/fb/f/t/text()').text.match?(
         /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/
       )
     )
   end
 
   def test_complex_rendering
-    to = Factbase::ToXML.new([{ t: "\uffff < > & ' \"" }])
-    xml = to.to_xml
-    assert(!Nokogiri::XML.parse(xml).xpath('/fb/f[t]').empty?)
+    fb = Factbase.new
+    fb.insert.t = "\uffff < > & ' \""
+    to = Factbase::ToXML.new(fb)
+    xml = Nokogiri::XML.parse(to.xml)
+    assert(!xml.xpath('/fb/f[t]').empty?)
   end
 
   def test_meta_data_presence
-    to = Factbase::ToXML.new([{ x: { y: 42 } }])
-    xml = to.to_xml
-    assert(!Nokogiri::XML.parse(xml).xpath('/fb[@dob]').empty?)
-    assert(!Nokogiri::XML.parse(xml).xpath('/fb[@factbase_version]').empty?)
+    fb = Factbase.new
+    fb.insert.x = 42
+    to = Factbase::ToXML.new(fb)
+    xml = Nokogiri::XML.parse(to.xml)
+    assert(!xml.xpath('/fb[@dob]').empty?)
+    assert(!xml.xpath('/fb[@factbase_version]').empty?)
+  end
+
+  def test_to_xml_with_short_names
+    fb = Factbase.new
+    f = fb.insert
+    f.type = 1
+    f.f = 2
+    f.class = 3
+    to = Factbase::ToXML.new(fb)
+    xml = Nokogiri::XML.parse(to.xml)
+    assert(!xml.xpath('/fb/f/type').empty?)
+    assert(!xml.xpath('/fb/f/f').empty?)
+    assert(!xml.xpath('/fb/f/class').empty?)
   end
 end
