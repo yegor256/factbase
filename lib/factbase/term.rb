@@ -71,19 +71,25 @@ class Factbase::Term
 
   def not(fact)
     assert_args(1)
-    !@operands[0].evaluate(fact)
+    r = @operands[0].evaluate(fact)
+    raise 'Boolean expected' unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+    !r
   end
 
   def or(fact)
     @operands.each do |o|
-      return true if o.evaluate(fact)
+      r = o.evaluate(fact)
+      raise 'Boolean expected' unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+      return true if r
     end
     false
   end
 
   def and(fact)
     @operands.each do |o|
-      return false unless o.evaluate(fact)
+      r = o.evaluate(fact)
+      raise 'Boolean expected' unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+      return false unless r
     end
     true
   end

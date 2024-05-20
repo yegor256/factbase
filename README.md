@@ -12,15 +12,18 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/yegor256/factbase/blob/master/LICENSE.txt)
 
 This Ruby gem manages an in-memory database of facts.
+A fact is simply a map of properties and values.
+The values are either atomic literals or non-empty sets of literals.
+It is possible to delete a fact, but impossible to delete a property from a fact.
 
 Here is how you use it (it's thread-safe, by the way):
 
 ```ruby
 fb = Factbase.new
 f = fb.insert
-f.type = 'book'
+f.kind = 'book'
 f.title = 'Object Thinking'
-fb.query('(eq type "book")').each do |f|
+fb.query('(eq kind "book")').each do |f|
   f.seen = true
 end
 fb.insert
@@ -29,16 +32,35 @@ fb.query('(not (exists seen))').each do |f|
 end
 ```
 
-You can save the factbase to disc and load it back:
+You can save the factbase to the disc and then load it back:
 
 ```ruby
 file = '/tmp/simple.fb'
 f1 = Factbase.new
-f1.insert
+f = f1.insert
+f.foo = 42
 File.save(file, f1.export)
 f2 = Factbase.new
 f2.import(File.read(file))
+assert(f2.query('(eq foo 42)').each.to_a.size == 1)
 ```
+
+All terms available in a query:
+
+* `()` is true
+* `(nil)` is false
+* `(not t)` inverses the `t` if it's boolean (exception otherwise)
+* `(or t1 t2 ...)` returns true if at least one argument is true
+* `(and t1 t2 ...)` returns true if all arguments are true
+* `(when t1 t2)` returns true if `t1` is true and `t2` is true or `t1` is false
+* `(exists k)` returns true if `k` property exists in the fact
+* `(absent k)` returns true if `k` property is absent
+* `(eq a b)` returns true if `a` equals to `b`
+* `(lt a b)` returns true if `a` is less than `b`
+* `(gt a b)` returns true if `a` is greater than `b`
+* `(size k)` returns cardinality of `k` property (zero if property is absent)
+* `(type a)` returns type of `a` ("String", "Integer", "Float", or "Time")
+* `(defn foo "self.to_s")` defines a new term using Ruby syntax and returns true
 
 ## How to contribute
 
