@@ -41,9 +41,9 @@ Metrics/AbcSize:
 Metrics/BlockLength:
   Max: 30
 Metrics/CyclomaticComplexity:
-  Max: 20
+  Max: 25
 Metrics/PerceivedComplexity:
-  Max: 20
+  Max: 25
 Metrics/ClassLength:
   Enabled: false
 Layout/EmptyLineAfterGuardClause:

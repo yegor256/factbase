@@ -41,6 +41,7 @@ class Factbase::Syntax
   def to_term
     @tokens ||= to_tokens
     @ast ||= to_ast(@tokens, 0)
+    raise "Too many terms: #{@query}" if @ast[1] != @tokens.size
     term = @ast[0]
     raise "No terms found: #{@query}" if term.nil?
     raise "Not a term: #{@query}" unless term.is_a?(Factbase::Term)
@@ -123,6 +124,7 @@ class Factbase::Syntax
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/)
         Time.parse(t)
       else
+        raise "Wrong symbol format (#{t}): #{@query}" unless t.match?(/^[a-z][a-zA-Z0-9_]*$/)
         t.to_sym
       end
     end

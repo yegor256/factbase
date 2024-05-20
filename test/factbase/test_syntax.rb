@@ -47,7 +47,7 @@ class TestSyntax < Minitest::Test
       "(eq foo   \n\n 'Hello, world!'\n)\n",
       "(eq x 'Hello, \\' \n) \\' ( world!')",
       "# this is a comment\n(eq foo # test\n 42)\n\n# another comment\n",
-      "(or ( a 4) (b 5) () (and () (c 5) \t\t(r 7 8s 8is 'Foo')))"
+      "(or ( a 4) (b 5) () (and () (c 5) \t\t(r 7 w8s w8is 'Foo')))"
     ].each do |q|
       Factbase::Syntax.new(q).to_term
     end
@@ -92,11 +92,13 @@ class TestSyntax < Minitest::Test
     [
       '',
       '(foo',
+      '(foo 1) (bar 2)',
       'some text',
       '"hello, world!',
       '(foo 7',
       "(foo 7 'Dude'",
       '(foo x y z (',
+      '(bad-term-name 42)',
       '(foo x y (z t (f 42 ',
       ')foo ) y z)',
       '(x "")',
@@ -104,7 +106,7 @@ class TestSyntax < Minitest::Test
       ')',
       '"'
     ].each do |q|
-      assert_raises do
+      assert_raises(q) do
         Factbase::Syntax.new(q).to_term
       end
     end
