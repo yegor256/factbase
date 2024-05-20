@@ -57,7 +57,8 @@ class TestToXML < Minitest::Test
     to = Factbase::ToXML.new(fb)
     xml = Nokogiri::XML.parse(to.xml)
     assert(!xml.xpath('/fb[@dob]').empty?)
-    assert(!xml.xpath('/fb[@factbase_version]').empty?)
+    assert(!xml.xpath('/fb[@version]').empty?)
+    assert(!xml.xpath('/fb[@size]').empty?)
   end
 
   def test_to_xml_with_short_names

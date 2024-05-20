@@ -37,11 +37,13 @@ class Factbase::ToXML
   # Convert the entire factbase into XML.
   # @return [String] The factbase in XML format
   def xml
+    bytes = @fb.export
+    maps = Marshal.load(bytes)
     meta = {
-      factbase_version: Factbase::VERSION,
-      dob: Time.now.utc.iso8601
+      version: Factbase::VERSION,
+      dob: Time.now.utc.iso8601,
+      size: bytes.size
     }
-    maps = Marshal.load(@fb.export)
     Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
       xml.fb(meta) do
         maps.each do |m|
