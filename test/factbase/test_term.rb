@@ -30,95 +30,95 @@ require_relative '../../lib/factbase/term'
 class TestTerm < Minitest::Test
   def test_simple_matching
     t = Factbase::Term.new(:eq, [:foo, 42])
-    assert(t.eval(fact('foo' => [42])))
-    assert(!t.eval(fact('foo' => 'Hello!')))
-    assert(!t.eval(fact('bar' => ['Hello!'])))
+    assert(t.evaluate(fact('foo' => [42])))
+    assert(!t.evaluate(fact('foo' => 'Hello!')))
+    assert(!t.evaluate(fact('bar' => ['Hello!'])))
   end
 
   def test_eq_matching
     t = Factbase::Term.new(:eq, [:foo, 42])
-    assert(t.eval(fact('foo' => 42)))
-    assert(t.eval(fact('foo' => [10, 5, 6, -8, 'hey', 42, 9, 'fdsf'])))
-    assert(!t.eval(fact('foo' => [100])))
-    assert(!t.eval(fact('foo' => [])))
-    assert(!t.eval(fact('bar' => [])))
+    assert(t.evaluate(fact('foo' => 42)))
+    assert(t.evaluate(fact('foo' => [10, 5, 6, -8, 'hey', 42, 9, 'fdsf'])))
+    assert(!t.evaluate(fact('foo' => [100])))
+    assert(!t.evaluate(fact('foo' => [])))
+    assert(!t.evaluate(fact('bar' => [])))
   end
 
   def test_eq_matching_time
     now = Time.now
     t = Factbase::Term.new(:eq, [:foo, Time.parse(now.iso8601)])
-    assert(t.eval(fact('foo' => now)))
-    assert(t.eval(fact('foo' => [now, Time.now])))
+    assert(t.evaluate(fact('foo' => now)))
+    assert(t.evaluate(fact('foo' => [now, Time.now])))
   end
 
   def test_lt_matching
     t = Factbase::Term.new(:lt, [:foo, 42])
-    assert(t.eval(fact('foo' => [10])))
-    assert(!t.eval(fact('foo' => [100])))
-    assert(!t.eval(fact('foo' => 100)))
-    assert(!t.eval(fact('bar' => 100)))
+    assert(t.evaluate(fact('foo' => [10])))
+    assert(!t.evaluate(fact('foo' => [100])))
+    assert(!t.evaluate(fact('foo' => 100)))
+    assert(!t.evaluate(fact('bar' => 100)))
   end
 
   def test_gt_matching
     t = Factbase::Term.new(:gt, [:foo, 42])
-    assert(t.eval(fact('foo' => [100])))
-    assert(t.eval(fact('foo' => 100)))
-    assert(!t.eval(fact('foo' => [10])))
-    assert(!t.eval(fact('foo' => 10)))
-    assert(!t.eval(fact('bar' => 10)))
+    assert(t.evaluate(fact('foo' => [100])))
+    assert(t.evaluate(fact('foo' => 100)))
+    assert(!t.evaluate(fact('foo' => [10])))
+    assert(!t.evaluate(fact('foo' => 10)))
+    assert(!t.evaluate(fact('bar' => 10)))
   end
 
   def test_lt_matching_time
     t = Factbase::Term.new(:lt, [:foo, Time.now])
-    assert(t.eval(fact('foo' => [Time.now - 100])))
-    assert(!t.eval(fact('foo' => [Time.now + 100])))
-    assert(!t.eval(fact('bar' => [100])))
+    assert(t.evaluate(fact('foo' => [Time.now - 100])))
+    assert(!t.evaluate(fact('foo' => [Time.now + 100])))
+    assert(!t.evaluate(fact('bar' => [100])))
   end
 
   def test_gt_matching_time
     t = Factbase::Term.new(:gt, [:foo, Time.now])
-    assert(t.eval(fact('foo' => [Time.now + 100])))
-    assert(!t.eval(fact('foo' => [Time.now - 100])))
-    assert(!t.eval(fact('bar' => [100])))
+    assert(t.evaluate(fact('foo' => [Time.now + 100])))
+    assert(!t.evaluate(fact('foo' => [Time.now - 100])))
+    assert(!t.evaluate(fact('bar' => [100])))
   end
 
   def test_not_matching
     t = Factbase::Term.new(:not, [Factbase::Term.new(:nil, [])])
-    assert(!t.eval(fact('foo' => [100])))
+    assert(!t.evaluate(fact('foo' => [100])))
   end
 
   def test_not_eq_matching
     t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 100])])
-    assert(t.eval(fact('foo' => [42, 12, -90])))
-    assert(!t.eval(fact('foo' => 100)))
+    assert(t.evaluate(fact('foo' => [42, 12, -90])))
+    assert(!t.evaluate(fact('foo' => 100)))
   end
 
   def test_size_matching
     t = Factbase::Term.new(:size, [:foo])
-    assert_equal(3, t.eval(fact('foo' => [42, 12, -90])))
-    assert_equal(0, t.eval(fact('bar' => 100)))
+    assert_equal(3, t.evaluate(fact('foo' => [42, 12, -90])))
+    assert_equal(0, t.evaluate(fact('bar' => 100)))
   end
 
   def test_exists_matching
     t = Factbase::Term.new(:exists, [:foo])
-    assert(t.eval(fact('foo' => [42, 12, -90])))
-    assert(!t.eval(fact('bar' => 100)))
+    assert(t.evaluate(fact('foo' => [42, 12, -90])))
+    assert(!t.evaluate(fact('bar' => 100)))
   end
 
   def test_absent_matching
     t = Factbase::Term.new(:absent, [:foo])
-    assert(t.eval(fact('z' => [42, 12, -90])))
-    assert(!t.eval(fact('foo' => 100)))
+    assert(t.evaluate(fact('z' => [42, 12, -90])))
+    assert(!t.evaluate(fact('foo' => 100)))
   end
 
   def test_type_matching
     t = Factbase::Term.new(:type, [:foo])
-    assert_equal('Integer', t.eval(fact('foo' => 42)))
-    assert_equal('Array', t.eval(fact('foo' => [1, 2, 3])))
-    assert_equal('String', t.eval(fact('foo' => 'Hello, world!')))
-    assert_equal('Float', t.eval(fact('foo' => 3.14)))
-    assert_equal('Time', t.eval(fact('foo' => Time.now)))
-    assert_equal('nil', t.eval(fact))
+    assert_equal('Integer', t.evaluate(fact('foo' => 42)))
+    assert_equal('Array', t.evaluate(fact('foo' => [1, 2, 3])))
+    assert_equal('String', t.evaluate(fact('foo' => 'Hello, world!')))
+    assert_equal('Float', t.evaluate(fact('foo' => 3.14)))
+    assert_equal('Time', t.evaluate(fact('foo' => Time.now)))
+    assert_equal('nil', t.evaluate(fact))
   end
 
   def test_or_matching
@@ -129,9 +129,9 @@ class TestTerm < Minitest::Test
         Factbase::Term.new(:eq, [:bar, 5])
       ]
     )
-    assert(t.eval(fact('foo' => [4])))
-    assert(t.eval(fact('bar' => [5])))
-    assert(!t.eval(fact('bar' => [42])))
+    assert(t.evaluate(fact('foo' => [4])))
+    assert(t.evaluate(fact('bar' => [5])))
+    assert(!t.evaluate(fact('bar' => [42])))
   end
 
   def test_when_matching
@@ -142,9 +142,16 @@ class TestTerm < Minitest::Test
         Factbase::Term.new(:eq, [:bar, 5])
       ]
     )
-    assert(t.eval(fact('foo' => 4, 'bar' => 5)))
-    assert(!t.eval(fact('foo' => 4)))
-    assert(t.eval(fact('foo' => 5, 'bar' => 5)))
+    assert(t.evaluate(fact('foo' => 4, 'bar' => 5)))
+    assert(!t.evaluate(fact('foo' => 4)))
+    assert(t.evaluate(fact('foo' => 5, 'bar' => 5)))
+  end
+
+  def test_defn_simple
+    t = Factbase::Term.new(:defn, [:foo, 'self.to_s'])
+    assert_equal(true, t.evaluate(fact('foo' => 4)))
+    t1 = Factbase::Term.new(:foo, ['hello, world!'])
+    assert_equal('(foo \'hello, world!\')', t1.evaluate(fact))
   end
 
   private

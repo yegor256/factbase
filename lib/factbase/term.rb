@@ -41,7 +41,7 @@ class Factbase::Term
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
   # @return [bool] TRUE if matches
-  def eval(fact)
+  def evaluate(fact)
     send(@op, fact)
   end
 
@@ -71,19 +71,19 @@ class Factbase::Term
 
   def not(fact)
     assert_args(1)
-    !@operands[0].eval(fact)
+    !@operands[0].evaluate(fact)
   end
 
   def or(fact)
     @operands.each do |o|
-      return true if o.eval(fact)
+      return true if o.evaluate(fact)
     end
     false
   end
 
   def and(fact)
     @operands.each do |o|
-      return false unless o.eval(fact)
+      return false unless o.evaluate(fact)
     end
     true
   end
@@ -92,7 +92,7 @@ class Factbase::Term
     assert_args(2)
     a = @operands[0]
     b = @operands[1]
-    !a.eval(fact) || (a.eval(fact) && b.eval(fact))
+    !a.evaluate(fact) || (a.evaluate(fact) && b.evaluate(fact))
   end
 
   def exists(fact)
@@ -147,6 +147,16 @@ class Factbase::Term
     end
   end
 
+  def defn(_fact)
+    fn = @operands[0]
+    raise 'A symbol expected as first argument of defn' unless fn.is_a?(Symbol)
+    e = "class Factbase::Term\nprivate\ndef #{fn}(fact)\n#{@operands[1]}\nend\nend"
+    # rubocop:disable Security/Eval
+    eval(e)
+    # rubocop:enable Security/Eval
+    true
+  end
+
   def assert_args(num)
     c = @operands.size
     raise "Too many (#{c}) operands for '#{@op}' (#{num} expected)" if c > num
@@ -162,7 +172,7 @@ class Factbase::Term
 
   def the_value(pos, fact)
     v = @operands[pos]
-    v = v.eval(fact) if v.is_a?(Factbase::Term)
+    v = v.evaluate(fact) if v.is_a?(Factbase::Term)
     v = fact[v.to_s] if v.is_a?(Symbol)
     return v if v.nil?
     v = [v] unless v.is_a?(Array)
