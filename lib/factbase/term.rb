@@ -71,24 +71,19 @@ class Factbase::Term
 
   def not(fact)
     assert_args(1)
-    r = @operands[0].evaluate(fact)
-    raise 'Boolean expected' unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
-    !r
+    !only_bool(the_value(0, fact))
   end
 
   def or(fact)
-    (0..@operands.size).each do |i|
-      r = only_bool(the_value(i, fact))
-      return true if r
+    (0..@operands.size - 1).each do |i|
+      return true if only_bool(the_value(i, fact))
     end
     false
   end
 
   def and(fact)
-    @operands.each do |o|
-      r = o.evaluate(fact)
-      raise 'Boolean expected' unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
-      return false unless r
+    (0..@operands.size - 1).each do |i|
+      return false unless only_bool(the_value(i, fact))
     end
     true
   end
@@ -197,7 +192,7 @@ class Factbase::Term
 
   def only_bool(val)
     val = val[0] if val.is_a?(Array)
-    return val if val.nil?
+    return false if val.nil?
     raise "Boolean expected while #{val.class} received" unless val.is_a?(TrueClass) || val.is_a?(FalseClass)
     val
   end
