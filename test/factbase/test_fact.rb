@@ -84,6 +84,13 @@ class TestFact < Minitest::Test
     assert_equal(42, f.foo_bar, f.to_s)
   end
 
+  def test_set_twice_same_value
+    f = Factbase::Fact.new(Mutex.new, {})
+    f.foo = 42
+    f.foo = 42
+    assert_equal(42, f.foo)
+  end
+
   def test_time_in_utc
     f = Factbase::Fact.new(Mutex.new, {})
     t = Time.now
