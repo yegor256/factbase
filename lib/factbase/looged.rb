@@ -103,13 +103,14 @@ class Factbase::Looged
     end
 
     def each(&)
+      q = Factbase::Syntax.new(@expr).to_term.to_s
       if block_given?
         r = @query.each(&)
         raise ".each of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
-          @loog.debug("Nothing found by '#{@expr}'")
+          @loog.debug("Nothing found by '#{q}'")
         else
-          @loog.debug("Found #{r} fact(s) by '#{@expr}'")
+          @loog.debug("Found #{r} fact(s) by '#{q}'")
         end
         r
       else
@@ -120,9 +121,9 @@ class Factbase::Looged
         end
         # rubocop:enable Style/MapIntoArray
         if array.empty?
-          @loog.debug("Nothing found by '#{@expr}'")
+          @loog.debug("Nothing found by '#{q}'")
         else
-          @loog.debug("Found #{array.size} fact(s) by '#{@expr}'")
+          @loog.debug("Found #{array.size} fact(s) by '#{q}'")
         end
         array
       end
