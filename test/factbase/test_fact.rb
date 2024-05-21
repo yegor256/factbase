@@ -85,11 +85,11 @@ class TestFact < Minitest::Test
   end
 
   def test_set_twice_same_value
-    f = Factbase::Fact.new(Mutex.new, {})
+    map = {}
+    f = Factbase::Fact.new(Mutex.new, map)
     f.foo = 42
     f.foo = 42
-    f.foo = 43
-    assert_equal(42, f.foo)
+    assert_equal(42, map['foo'])
   end
 
   def test_time_in_utc
