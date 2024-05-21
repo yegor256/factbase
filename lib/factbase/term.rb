@@ -77,9 +77,8 @@ class Factbase::Term
   end
 
   def or(fact)
-    @operands.each do |o|
-      r = o.evaluate(fact)
-      raise 'Boolean expected' unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+    (0..@operands.size).each do |i|
+      r = only_bool(the_value(i, fact))
       return true if r
     end
     false
@@ -194,5 +193,12 @@ class Factbase::Term
     return v if v.nil?
     v = [v] unless v.is_a?(Array)
     v
+  end
+
+  def only_bool(val)
+    val = val[0] if val.is_a?(Array)
+    return val if val.nil?
+    raise "Boolean expected while #{val.class} received" unless val.is_a?(TrueClass) || val.is_a?(FalseClass)
+    val
   end
 end

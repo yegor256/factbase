@@ -63,6 +63,12 @@ All terms available in a query:
 * `(matches a re)` returns true when `a` matches regular expression `re`
 * `(defn foo "self.to_s")` defines a new term using Ruby syntax and returns true
 
+There are also terms that match the entire factbase:
+
+* `(max k)` returns the maximum value of the `k` property in all facts
+* `(min k)` returns the minium value of `k`
+* `(count k)` returns the number of facts where the `k` property exists
+
 ## How to contribute
 
 Read [these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).
