@@ -79,6 +79,7 @@ class Factbase::Looged
       v = args[1]
       s = v.is_a?(Time) ? v.utc.iso8601 : v.to_s
       s = v.to_s.inspect if v.is_a?(String)
+      s = "#{s[0..64]}...#{s[-64..]}" if s.length > 128
       @loog.debug("Set '#{k[0..-2]}' to #{s} (#{v.class})") if k.end_with?('=')
       r
     end
