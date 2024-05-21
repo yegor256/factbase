@@ -124,6 +124,7 @@ class TestTerm < Minitest::Test
   def test_regexp_matching
     t = Factbase::Term.new(:matches, [:foo, '[a-z]+'])
     assert(t.evaluate(fact('foo' => 'hello')))
+    assert(t.evaluate(fact('foo' => 'hello 42')))
     assert(!t.evaluate(fact('foo' => 42)))
   end
 
