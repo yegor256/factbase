@@ -65,9 +65,8 @@ All terms available in a query:
 
 There are also terms that match the entire factbase:
 
-* `(max k)` returns the maximum value of the `k` property in all facts
-* `(min k)` returns the minium value of `k`
-* `(count k)` returns the number of facts where the `k` property exists
+* `(max k)` returns true if the value of `k` property is the largest in the entire factbase
+* `(min k)` returns true if the value of `k` is the smallest
 
 ## How to contribute
 

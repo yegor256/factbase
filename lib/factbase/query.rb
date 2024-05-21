@@ -40,7 +40,7 @@ class Factbase::Query
   # @return [Integer] Total number of facts yielded
   def each
     return to_enum(__method__) unless block_given?
-    term = Factbase::Syntax.new(@query).to_term
+    term = Factbase::Syntax.new(@query).to_term.on(@maps)
     yielded = 0
     @maps.each do |m|
       f = Factbase::Fact.new(@mutex, m)

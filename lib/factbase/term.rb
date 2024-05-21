@@ -45,6 +45,18 @@ class Factbase::Term
     send(@op, fact)
   end
 
+  # Put it into the context: let it see the entire array of maps.
+  # @param [Array] maps The maps
+  # @return [Factbase::Term] Itself
+  def on(maps)
+    m = "#{@op}_on"
+    send(m, maps) if respond_to?(m, true)
+    @operands.each do |o|
+      o.on(maps) if o.is_a?(Factbase::Term)
+    end
+    self
+  end
+
   # Turns it into a string.
   # @return [String] The string of it
   def to_s
@@ -166,6 +178,25 @@ class Factbase::Term
     eval(e)
     # rubocop:enable Security/Eval
     true
+  end
+
+  def max(fact)
+    vv = the_value(0, fact)
+    vv.any? { |v| v == @max }
+  end
+
+  def max_on(maps)
+    k = @operands[0]
+    raise "A symbol expected, but provided: #{k}" unless k.is_a?(Symbol)
+    @max = nil
+    maps.each do |m|
+      vv = m[k.to_s]
+      next if vv.nil?
+      vv = [vv] unless vv.is_a?(Array)
+      vv.each do |v|
+        @max = v if @max.nil? || v > @max
+      end
+    end
   end
 
   def assert_args(num)
