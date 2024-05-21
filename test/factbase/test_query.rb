@@ -61,6 +61,7 @@ class TestQuery < Minitest::Test
       '(eq num pi)' => 0,
       '(absent time)' => 2,
       '(max num)' => 1,
+      '(min time)' => 1,
       '(and (absent time) (exists pi))' => 1,
       "(and (exists time) (not (\t\texists pi)))" => 1,
       "(or (eq num 66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1

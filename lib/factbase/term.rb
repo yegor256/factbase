@@ -180,8 +180,15 @@ class Factbase::Term
     true
   end
 
+  def min(fact)
+    vv = the_value(0, fact)
+    return nil if vv.nil?
+    vv.any? { |v| v == @min }
+  end
+
   def max(fact)
     vv = the_value(0, fact)
+    return nil if vv.nil?
     vv.any? { |v| v == @max }
   end
 
@@ -195,6 +202,20 @@ class Factbase::Term
       vv = [vv] unless vv.is_a?(Array)
       vv.each do |v|
         @max = v if @max.nil? || v > @max
+      end
+    end
+  end
+
+  def min_on(maps)
+    k = @operands[0]
+    raise "A symbol expected, but provided: #{k}" unless k.is_a?(Symbol)
+    @min = nil
+    maps.each do |m|
+      vv = m[k.to_s]
+      next if vv.nil?
+      vv = [vv] unless vv.is_a?(Array)
+      vv.each do |v|
+        @min = v if @min.nil? || v < @min
       end
     end
   end
