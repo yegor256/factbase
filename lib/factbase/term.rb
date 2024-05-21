@@ -138,6 +138,17 @@ class Factbase::Term
     v.class.to_s
   end
 
+  def matches(fact)
+    assert_args(2)
+    str = the_value(0, fact)
+    raise 'String is nil' if str.nil?
+    raise 'Exactly one string expected' unless str.size == 1
+    re = the_value(1, fact)
+    raise 'Regexp is nil' if re.nil?
+    raise 'Exactly one regexp expected' unless re.size == 1
+    str[0].to_s.match?(re[0])
+  end
+
   def arithmetic(op, fact)
     assert_args(2)
     lefts = the_value(0, fact)

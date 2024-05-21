@@ -121,6 +121,12 @@ class TestTerm < Minitest::Test
     assert_equal('nil', t.evaluate(fact))
   end
 
+  def test_regexp_matching
+    t = Factbase::Term.new(:matches, [:foo, '[a-z]+'])
+    assert(t.evaluate(fact('foo' => 'hello')))
+    assert(!t.evaluate(fact('foo' => 42)))
+  end
+
   def test_or_matching
     t = Factbase::Term.new(
       :or,

@@ -60,6 +60,7 @@ All terms available in a query:
 * `(gt a b)` returns true if `a` is greater than `b`
 * `(size k)` returns cardinality of `k` property (zero if property is absent)
 * `(type a)` returns type of `a` ("String", "Integer", "Float", or "Time")
+* `(matches a re)` returns type when `a` matches regular expression `re`
 * `(defn foo "self.to_s")` defines a new term using Ruby syntax and returns true
 
 ## How to contribute
