@@ -88,6 +88,7 @@ class TestFact < Minitest::Test
     f = Factbase::Fact.new(Mutex.new, {})
     f.foo = 42
     f.foo = 42
+    f.foo = 43
     assert_equal(42, f.foo)
   end
 
