@@ -193,31 +193,11 @@ class Factbase::Term
   end
 
   def max_on(maps)
-    k = @operands[0]
-    raise "A symbol expected, but provided: #{k}" unless k.is_a?(Symbol)
-    @max = nil
-    maps.each do |m|
-      vv = m[k.to_s]
-      next if vv.nil?
-      vv = [vv] unless vv.is_a?(Array)
-      vv.each do |v|
-        @max = v if @max.nil? || v > @max
-      end
-    end
+    @max = best(maps) { |v, b| v > b }
   end
 
   def min_on(maps)
-    k = @operands[0]
-    raise "A symbol expected, but provided: #{k}" unless k.is_a?(Symbol)
-    @min = nil
-    maps.each do |m|
-      vv = m[k.to_s]
-      next if vv.nil?
-      vv = [vv] unless vv.is_a?(Array)
-      vv.each do |v|
-        @min = v if @min.nil? || v < @min
-      end
-    end
+    @min = best(maps) { |v, b| v < b }
   end
 
   def assert_args(num)
@@ -247,5 +227,20 @@ class Factbase::Term
     return false if val.nil?
     raise "Boolean expected, while #{val.class} received" unless val.is_a?(TrueClass) || val.is_a?(FalseClass)
     val
+  end
+
+  def best(maps)
+    k = @operands[0]
+    raise "A symbol expected, but provided: #{k}" unless k.is_a?(Symbol)
+    best = nil
+    maps.each do |m|
+      vv = m[k.to_s]
+      next if vv.nil?
+      vv = [vv] unless vv.is_a?(Array)
+      vv.each do |v|
+        best = v if best.nil? || yield(v, best)
+      end
+    end
+    best
   end
 end
