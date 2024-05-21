@@ -69,14 +69,30 @@ class TestLooged < Minitest::Test
     fb.insert
     fb.insert.bar = 3
     fb.insert
+    fb.insert.str =
+      "Он поскорей звонит. Вбегает
+      К нему слуга француз Гильо,
+      Халат и туфли предлагает
+      И подает ему белье.
+      Спешит Онегин одеваться,
+      Слуге велит приготовляться
+      С ним вместе ехать и с собой
+      Взять также ящик боевой.
+      Готовы санки беговые.
+      Он сел, на мельницу летит.
+      Примчались. Он слуге велит
+      Лепажа стволы роковые
+      Нести за ним, а лошадям
+      Отъехать в поле к двум дубкам."
     fb.query('(exists bar)').each(&:to_s)
     fb.query('(not (exists bar))').delete!
     [
       'Inserted new fact #1',
       'Inserted new fact #2',
       'Set \'bar\' to 3 (Integer)',
+      'Set \'str\' to "Он поскорей звонит. Вбегает\n      К нем...м\n      Отъехать в поле к двум дубкам." (String)',
       'Found 1 fact(s) by \'(exists bar)\'',
-      'Deleted 2 fact(s) by \'(not (exists bar))\''
+      'Deleted 3 fact(s) by \'(not (exists bar))\''
     ].each do |s|
       assert(log.to_s.include?("#{s}\n"), "#{log}\n")
     end
