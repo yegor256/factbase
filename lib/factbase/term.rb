@@ -193,7 +193,7 @@ class Factbase::Term
   def only_bool(val)
     val = val[0] if val.is_a?(Array)
     return false if val.nil?
-    raise "Boolean expected while #{val.class} received" unless val.is_a?(TrueClass) || val.is_a?(FalseClass)
+    raise "Boolean expected, while #{val.class} received" unless val.is_a?(TrueClass) || val.is_a?(FalseClass)
     val
   end
 end
