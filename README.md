@@ -14,7 +14,8 @@
 This Ruby gem manages an in-memory database of facts.
 A fact is simply a map of properties and values.
 The values are either atomic literals or non-empty sets of literals.
-It is possible to delete a fact, but impossible to delete a property from a fact.
+It is possible to delete a fact, but impossible to delete a property
+from a fact.
 
 **ATTENTION**: The current implemention is naive and,
 because of that, very slow. I will be very happy
@@ -73,12 +74,14 @@ All terms available in a query:
 
 There are also terms that match the entire factbase:
 
-* `(max k)` returns true if the value of `k` property is the largest in the entire factbase
+* `(max k)` returns true if the value of `k` property
+is the largest in the entire factbase
 * `(min k)` returns true if the value of `k` is the smallest
 
 ## How to contribute
 
-Read [these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).
+Read
+[these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).
 Make sure you build is green before you contribute
 your pull request. You will need to have
 [Ruby](https://www.ruby-lang.org/en/) 3.2+ and
