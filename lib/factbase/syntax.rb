@@ -39,7 +39,7 @@ class Factbase::Syntax
   # Convert it to a term.
   # @return [Term] The term detected
   def to_term
-    build
+    build.simplify
   rescue StandardError => e
     raise "#{e.message} in \"#{@query}\""
   end

@@ -57,6 +57,17 @@ class Factbase::Term
     self
   end
 
+  # Simplify it if possible.
+  # @return [Factbase::Term] New term or itself
+  def simplify
+    m = "#{@op}_simplify"
+    if respond_to?(m, true)
+      send(m, maps)
+    else
+      self
+    end
+  end
+
   # Turns it into a string.
   # @return [String] The string of it
   def to_s
