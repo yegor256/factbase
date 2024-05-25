@@ -110,8 +110,7 @@ class TestFactbase < Minitest::Test
       Factbase::Rules.new(Factbase.new, '(always)'),
       Factbase::Inv.new(Factbase.new) { |_, _| true },
       Factbase::Pre.new(Factbase.new) { |_| true },
-      Factbase::Looged.new(Factbase.new, Loog::NULL),
-      Factbase::Spy.new(Factbase.new, 'ff')
+      Factbase::Looged.new(Factbase.new, Loog::NULL)
     ].each do |d|
       f = d.insert
       f.foo = 42
