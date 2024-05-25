@@ -39,16 +39,24 @@ class Factbase::Syntax
   # Convert it to a term.
   # @return [Term] The term detected
   def to_term
-    @tokens ||= to_tokens
-    @ast ||= to_ast(@tokens, 0)
-    raise "Too many terms: #{@query}" if @ast[1] != @tokens.size
-    term = @ast[0]
-    raise "No terms found: #{@query}" if term.nil?
-    raise "Not a term: #{@query}" unless term.is_a?(Factbase::Term)
-    term
+    build
+  rescue StandardError => e
+    raise "#{e.message} in #{@query}"
   end
 
   private
+
+  # Convert it to a term.
+  # @return [Term] The term detected
+  def build
+    @tokens ||= to_tokens
+    @ast ||= to_ast(@tokens, 0)
+    raise 'Too many terms' if @ast[1] != @tokens.size
+    term = @ast[0]
+    raise 'No terms found' if term.nil?
+    raise 'Not a term' unless term.is_a?(Factbase::Term)
+    term
+  end
 
   # Reads the stream of tokens, starting at the +at+ position. If the
   # token at the position is not a literal (like 42 or "Hello") but a term,
@@ -58,7 +66,7 @@ class Factbase::Syntax
   # is the term/literal and the second one is the position where the
   # scanning should continue.
   def to_ast(tokens, at)
-    raise "Closing too soon at ##{at}: #{@query}" if tokens[at] == :close
+    raise "Closing too soon at ##{at}" if tokens[at] == :close
     return [tokens[at], at + 1] unless tokens[at] == :open
     at += 1
     op = tokens[at]
@@ -66,11 +74,11 @@ class Factbase::Syntax
     operands = []
     at += 1
     loop do
-      raise "End of token stream at ##{at}: #{@query}" if tokens[at].nil?
+      raise "End of token stream at ##{at}" if tokens[at].nil?
       break if tokens[at] == :close
       (operand, at1) = to_ast(tokens, at)
-      raise "Stuck at position ##{at}: #{@query}" if at == at1
-      raise "Jump back at position ##{at}: #{@query}" if at1 < at
+      raise "Stuck at position ##{at}" if at == at1
+      raise "Jump back at position ##{at}" if at1 < at
       at = at1
       operands << operand
       break if tokens[at] == :close
@@ -110,12 +118,12 @@ class Factbase::Syntax
         acc += c
       end
     end
-    raise "String not closed: : #{@query}" if string
+    raise 'String not closed' if string
     list.map do |t|
       if t.is_a?(Symbol)
         t
       elsif t.start_with?('\'', '"')
-        raise "String literal can't be empty: #{@query}" if t.length <= 2
+        raise 'String literal can\'t be empty' if t.length <= 2
         t[1..-2]
       elsif t.match?(/^[0-9]+$/)
         t.to_i
@@ -124,7 +132,7 @@ class Factbase::Syntax
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/)
         Time.parse(t)
       else
-        raise "Wrong symbol format (#{t}): #{@query}" unless t.match?(/^[a-z][a-zA-Z0-9_]*$/)
+        raise "Wrong symbol format (#{t})" unless t.match?(/^[a-z][a-zA-Z0-9_]*$/)
         t.to_sym
       end
     end
