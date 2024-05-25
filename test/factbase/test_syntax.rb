@@ -106,9 +106,11 @@ class TestSyntax < Minitest::Test
       ')',
       '"'
     ].each do |q|
-      assert_raises(q) do
-        Factbase::Syntax.new(q).to_term
-      end
+      assert(
+        assert_raises(q) do
+          Factbase::Syntax.new(q).to_term
+        end.message.include?(q)
+      )
     end
   end
 end
