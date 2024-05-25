@@ -47,7 +47,7 @@ class TestSyntax < Minitest::Test
       "(eq foo   \n\n 'Hello, world!'\n)\n",
       "(eq x 'Hello, \\' \n) \\' ( world!')",
       "# this is a comment\n(eq foo # test\n 42)\n\n# another comment\n",
-      "(or ( a 4) (b 5) () (and () (c 5) \t\t(r 7 w8s w8is 'Foo')))"
+      "(or ( a 4) (b 5) (always) (and (always) (c 5) \t\t(r 7 w8s w8is 'Foo')))"
     ].each do |q|
       Factbase::Syntax.new(q).to_term
     end
@@ -67,7 +67,7 @@ class TestSyntax < Minitest::Test
       '(eq t 2024-05-25T19:43:48Z)',
       '(eq t 3.1415926)',
       '(eq t 3.0e+21)',
-      "(foo (x (f (t (y 42 'Hey you'))) (f) (r 3)) y z)"
+      "(foo (x (f (t (y 42 'Hey you'))) (never) (r 3)) y z)"
     ].each do |q|
       assert_equal(q, Factbase::Syntax.new(q).to_term.to_s)
     end

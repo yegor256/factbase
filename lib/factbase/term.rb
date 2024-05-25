@@ -43,6 +43,8 @@ class Factbase::Term
   # @return [bool] TRUE if matches
   def evaluate(fact)
     send(@op, fact)
+  rescue NoMethodError => _e
+    raise "Term '#{@op}' is not defined"
   end
 
   # Put it into the context: let it see the entire array of maps.
@@ -87,9 +89,14 @@ class Factbase::Term
 
   private
 
-  def nil(_fact)
+  def always(_fact)
     assert_args(0)
     true
+  end
+
+  def never(_fact)
+    assert_args(0)
+    false
   end
 
   def not(fact)

@@ -107,7 +107,7 @@ class TestFactbase < Minitest::Test
 
   def test_all_decorators
     [
-      Factbase::Rules.new(Factbase.new, '()'),
+      Factbase::Rules.new(Factbase.new, '(always)'),
       Factbase::Inv.new(Factbase.new) { |_, _| true },
       Factbase::Pre.new(Factbase.new) { |_| true },
       Factbase::Looged.new(Factbase.new, Loog::NULL),
@@ -126,7 +126,7 @@ class TestFactbase < Minitest::Test
       end
       d.import(d.export)
       assert_equal(4, d.size)
-      assert_equal(4, d.query('()').each.to_a.size)
+      assert_equal(4, d.query('(always)').each.to_a.size)
     end
   end
 end

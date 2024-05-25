@@ -82,8 +82,13 @@ class TestTerm < Minitest::Test
     assert(!t.evaluate(fact('bar' => [100])))
   end
 
+  def test_false_matching
+    t = Factbase::Term.new(:never, [])
+    assert(!t.evaluate(fact('foo' => [100])))
+  end
+
   def test_not_matching
-    t = Factbase::Term.new(:not, [Factbase::Term.new(:nil, [])])
+    t = Factbase::Term.new(:not, [Factbase::Term.new(:always, [])])
     assert(!t.evaluate(fact('foo' => [100])))
   end
 

@@ -48,19 +48,19 @@ class TestLooged < Minitest::Test
     fb = Factbase.new
     fb.insert
     fb.insert
-    assert_equal(2, Factbase::Looged.new(fb, Loog::NULL).query('()').each(&:to_s))
+    assert_equal(2, Factbase::Looged.new(fb, Loog::NULL).query('(always)').each(&:to_s))
   end
 
   def test_returns_int_when_empty
     fb = Factbase.new
-    assert_equal(0, Factbase::Looged.new(fb, Loog::NULL).query('()').each(&:to_s))
+    assert_equal(0, Factbase::Looged.new(fb, Loog::NULL).query('(always)').each(&:to_s))
   end
 
   def test_logs_when_enumerator
     fb = Factbase::Looged.new(Factbase.new, Loog::NULL)
-    assert_equal(0, fb.query('()').each.to_a.size)
+    assert_equal(0, fb.query('(always)').each.to_a.size)
     fb.insert
-    assert_equal(1, fb.query('()').each.to_a.size)
+    assert_equal(1, fb.query('(always)').each.to_a.size)
   end
 
   def test_proper_logging

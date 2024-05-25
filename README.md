@@ -56,8 +56,7 @@ assert(f2.query('(eq foo 42)').each.to_a.size == 1)
 
 All terms available in a query:
 
-* `()` is true
-* `(nil)` is false
+* `(always)` and `(never)` are "true" and "false"
 * `(not t)` inverses the `t` if it's boolean (exception otherwise)
 * `(or t1 t2 ...)` returns true if at least one argument is true
 * `(and t1 t2 ...)` returns true if all arguments are true

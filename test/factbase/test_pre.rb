@@ -33,6 +33,6 @@ class TestPre < Minitest::Test
     fb = Factbase::Pre.new(Factbase.new) { |f| f.foo = 42 }
     f = fb.insert
     assert_equal(42, f.foo)
-    assert_equal(1, fb.query('()').each.to_a.size)
+    assert_equal(1, fb.query('(always)').each.to_a.size)
   end
 end
