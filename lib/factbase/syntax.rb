@@ -50,6 +50,7 @@ class Factbase::Syntax
   # @return [Term] The term detected
   def build
     @tokens ||= to_tokens
+    raise 'No tokens' if @tokens.empty?
     @ast ||= to_ast(@tokens, 0)
     raise 'Too many terms' if @ast[1] != @tokens.size
     term = @ast[0]

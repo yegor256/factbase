@@ -62,7 +62,7 @@ class Factbase::Term
   def simplify
     m = "#{@op}_simplify"
     if respond_to?(m, true)
-      send(m, maps)
+      send(m)
     else
       self
     end
@@ -109,6 +109,19 @@ class Factbase::Term
       return false unless only_bool(the_value(i, fact))
     end
     true
+  end
+
+  def and_simplify
+    strs = []
+    ops = []
+    @operands.each do |o|
+      s = o.to_s
+      next if strs.include?(s)
+      strs << s
+      ops << o
+    end
+    return ops[0] if ops.size == 1
+    Factbase::Term.new(@op, ops)
   end
 
   def when(fact)

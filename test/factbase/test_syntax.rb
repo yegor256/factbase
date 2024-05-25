@@ -113,4 +113,13 @@ class TestSyntax < Minitest::Test
       )
     end
   end
+
+  def test_simplification
+    {
+      '(foo)' => '(foo)',
+      '(and (foo) (foo))' => '(foo)'
+    }.each do |s, t|
+      assert_equal(t, Factbase::Syntax.new(s).to_term.to_s)
+    end
+  end
 end
