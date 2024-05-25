@@ -111,10 +111,11 @@ class Factbase::Term
     true
   end
 
-  def and_simplify
+  def and_or_simplify
     strs = []
     ops = []
     @operands.each do |o|
+      o = o.simplify
       s = o.to_s
       next if strs.include?(s)
       strs << s
@@ -122,6 +123,14 @@ class Factbase::Term
     end
     return ops[0] if ops.size == 1
     Factbase::Term.new(@op, ops)
+  end
+
+  def and_simplify
+    and_or_simplify
+  end
+
+  def or_simplify
+    and_or_simplify
   end
 
   def when(fact)
