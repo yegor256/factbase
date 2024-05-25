@@ -41,7 +41,7 @@ class Factbase::Syntax
   def to_term
     build
   rescue StandardError => e
-    raise "#{e.message} in #{@query}"
+    raise "#{e.message} in \"#{@query}\""
   end
 
   private
