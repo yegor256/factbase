@@ -63,6 +63,9 @@ class Factbase::Looged
   end
 
   # Fact decorator.
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  #
   class Fact
     MAX_LENGTH = 64
 
@@ -98,6 +101,9 @@ class Factbase::Looged
   end
 
   # Query decorator.
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  #
   class Query
     def initialize(query, expr, loog)
       @query = query

@@ -25,6 +25,13 @@ require 'time'
 require_relative '../factbase'
 
 # Factbase to YAML converter.
+#
+# This class helps converting an entire Factbase to YAML format, for example:
+#
+#  require 'factbase/to_yaml'
+#  fb = Factbase.new
+#  puts Factbase::ToYAML.new(fb).yaml
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT

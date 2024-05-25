@@ -61,6 +61,9 @@ class Factbase::Inv
   end
 
   # Fact decorator.
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  #
   class Fact
     def initialize(fact, block)
       @fact = fact
@@ -89,6 +92,9 @@ class Factbase::Inv
   end
 
   # Query decorator.
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  #
   class Query
     def initialize(query, block)
       @query = query

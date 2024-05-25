@@ -62,6 +62,9 @@ class Factbase::Rules
   end
 
   # Fact decorator.
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  #
   class Fact
     def initialize(fact, check)
       @fact = fact
@@ -91,6 +94,9 @@ class Factbase::Rules
   end
 
   # Query decorator.
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  #
   class Query
     def initialize(query, check)
       @query = query
@@ -110,6 +116,9 @@ class Factbase::Rules
   end
 
   # Check one fact.
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  #
   class Check
     def initialize(fb, expr)
       @fb = fb

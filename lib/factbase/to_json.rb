@@ -25,6 +25,13 @@ require 'time'
 require_relative '../factbase'
 
 # Factbase to JSON converter.
+#
+# This class helps converting an entire Factbase to YAML format, for example:
+#
+#  require 'factbase/to_json'
+#  fb = Factbase.new
+#  puts Factbase::ToJSON.new(fb).json
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT

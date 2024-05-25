@@ -25,6 +25,9 @@ require 'time'
 require_relative '../factbase'
 
 # Fact.
+#
+# This is an internal class, it is not supposed to be instantiated directly.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
