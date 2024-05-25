@@ -90,7 +90,7 @@ class TestLooged < Minitest::Test
       'Inserted new fact #1',
       'Inserted new fact #2',
       'Set \'bar\' to 3 (Integer)',
-      'Set \'str\' to "Он поскорей звонит. Вбегает\n      К нем...м\n      Отъехать в поле к двум дубкам." (String)',
+      'Set \'str\' to "Он поскорей звонит. Вбегает\n   ... Отъехать в поле к двум дубкам." (String)',
       'Found 1 fact(s) by \'(exists bar)\'',
       'Deleted 3 fact(s) by \'(not (exists bar))\''
     ].each do |s|

@@ -64,6 +64,8 @@ class Factbase::Looged
 
   # Fact decorator.
   class Fact
+    MAX_LENGTH = 64
+
     def initialize(fact, loog)
       @fact = fact
       @loog = loog
@@ -79,7 +81,7 @@ class Factbase::Looged
       v = args[1]
       s = v.is_a?(Time) ? v.utc.iso8601 : v.to_s
       s = v.to_s.inspect if v.is_a?(String)
-      s = "#{s[0..40]}...#{s[-40..]}" if s.length > 80
+      s = "#{s[0..MAX_LENGTH / 2]}...#{s[-MAX_LENGTH / 2..]}" if s.length > MAX_LENGTH
       @loog.debug("Set '#{k[0..-2]}' to #{s} (#{v.class})") if k.end_with?('=')
       r
     end
