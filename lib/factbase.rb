@@ -86,8 +86,13 @@ class Factbase
     copy = this.dup
     yield copy
     @mutex.synchronize do
-      @maps = []
-      import(copy.export)
+      after = Marshal.load(copy.export)
+      after.each_with_index do |m, i|
+        @maps << {} if i >= @maps.size
+        m.each do |k, v|
+          @maps[i][k] = v
+        end
+      end
     end
   end
 

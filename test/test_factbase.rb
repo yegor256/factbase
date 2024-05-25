@@ -129,4 +129,16 @@ class TestFactbase < Minitest::Test
       assert_equal(4, d.query('(always)').each.to_a.size)
     end
   end
+
+  def test_txn_inside_query
+    fb = Factbase.new
+    fb.insert.foo = 42
+    fb.query('(exists foo)').each do |f|
+      fb.txn do |fbt|
+        fbt.insert.bar = 33
+      end
+      f.xyz = 1
+    end
+    assert_equal(1, fb.query('(exists xyz)').each.to_a.size)
+  end
 end
