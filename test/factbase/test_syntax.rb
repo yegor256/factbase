@@ -41,7 +41,6 @@ class TestSyntax < Minitest::Test
 
   def test_simple_parsing
     [
-      '()',
       '(foo)',
       '(foo (bar) (zz 77)   )',
       "(eq foo   \n\n 'Hello, world!'\n)\n",
@@ -91,6 +90,7 @@ class TestSyntax < Minitest::Test
   def test_broken_syntax
     [
       '',
+      '()',
       '(foo',
       '(foo 1) (bar 2)',
       'some text',
