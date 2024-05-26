@@ -27,6 +27,15 @@ require_relative 'fact'
 #
 # This is an internal class, it is not supposed to be instantiated directly.
 #
+# It is possible to use for testing directly, for example to make a
+# term with two arguments:
+#
+#  require 'factbase/fact'
+#  require 'factbase/term'
+#  f = Factbase::Fact.new(Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
+#  t = Factbase::Term.new(:lt, [:foo, 50])
+#  assert(t.evaluate(f))
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT

@@ -28,10 +28,20 @@ require_relative '../factbase'
 #
 # This is an internal class, it is not supposed to be instantiated directly.
 #
+# It is possible to use for testing directly, for example to make a
+# fact with a single key/value pair inside:
+#
+#  require 'factbase/fact'
+#  f = Factbase::Fact.new(Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
+#  assert_equal(42, f.foo)
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Fact
+  # Ctor.
+  # @param [Mutex] mutex A mutex to use for maps synchronization
+  # @param [Hash] map A map of key/value pairs
   def initialize(mutex, map)
     @mutex = mutex
     @map = map

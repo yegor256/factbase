@@ -25,17 +25,21 @@ require_relative 'lib/factbase'
 
 Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
-  s.required_ruby_version = '>=2.3'
+  s.required_ruby_version = '>=3.0'
   s.name = 'factbase'
   s.version = Factbase::VERSION
   s.license = 'MIT'
   s.summary = 'Factbase'
-  s.description = 'Fact base in memory and on disc'
+  s.description =
+    'A primitive in-memory collection of key-value records ' \
+    'known as "facts," with an ability to insert facts, add properties ' \
+    'to facts, and delete facts. There is no ability to modify facts. ' \
+    'It is also possible to find facts using Lisp-alike query predicates. ' \
+    'An entire factbase may be exported to a binary file and imported back.'
   s.authors = ['Yegor Bugayenko']
   s.email = 'yegor256@gmail.com'
   s.homepage = 'http://github.com/yegor256/factbase.rb'
   s.files = `git ls-files`.split($RS)
-  s.executables = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
   s.rdoc_options = ['--charset=UTF-8']
   s.extra_rdoc_files = ['README.md', 'LICENSE.txt']
   s.add_runtime_dependency 'json', '~> 2.7'
