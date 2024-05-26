@@ -165,6 +165,18 @@ class Factbase::Term
     arithmetic(:+, fact, maps)
   end
 
+  def minus(fact, maps)
+    arithmetic(:-, fact, maps)
+  end
+
+  def times(fact, maps)
+    arithmetic(:*, fact, maps)
+  end
+
+  def div(fact, maps)
+    arithmetic(:/, fact, maps)
+  end
+
   def eq(fact, maps)
     cmp(:==, fact, maps)
   end

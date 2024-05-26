@@ -53,12 +53,16 @@ class TestQuery < Minitest::Test
       '(gt num 60)' => 1,
       "(and (lt pi 100) \n\n (gt num 1000))" => 0,
       '(exists pi)' => 1,
+      '(eq pi +3.14)' => 1,
       '(not (exists hello))' => 3,
       '(eq "Integer" (type num))' => 2,
       '(when (eq num 0) (exists time))' => 2,
       '(many num)' => 1,
       '(one num)' => 2,
-      '(and (not (many num)) (eq num (plus 21 21)))' => 1,
+      '(and (not (many num)) (eq num (plus 21 +21)))' => 1,
+      '(and (not (many num)) (eq num (minus -100 -142)))' => 1,
+      '(and (one num) (eq num (times 7 6)))' => 1,
+      '(and (one pi) (eq pi (div -6.28 -2)))' => 1,
       '(gt (size num) 2)' => 1,
       '(matches name "^[a-z]+$")' => 1,
       '(lt (size num) 2)' => 2,
@@ -71,7 +75,7 @@ class TestQuery < Minitest::Test
       '(eq time (min time))' => 1,
       '(and (absent time) (exists pi))' => 1,
       "(and (exists time) (not (\t\texists pi)))" => 1,
-      "(or (eq num 66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1
+      "(or (eq num +66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1
     }.each do |q, r|
       assert_equal(r, Factbase::Query.new(maps, Mutex.new, q).each.to_a.size, q)
     end

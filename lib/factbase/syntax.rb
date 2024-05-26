@@ -129,9 +129,9 @@ class Factbase::Syntax
       elsif t.start_with?('\'', '"')
         raise 'String literal can\'t be empty' if t.length <= 2
         t[1..-2]
-      elsif t.match?(/^[0-9]+$/)
+      elsif t.match?(/^(\+|-)?[0-9]+$/)
         t.to_i
-      elsif t.match?(/^[0-9]+\.[0-9]+(e\+[0-9]+)?$/)
+      elsif t.match?(/^(\+|-)?[0-9]+\.[0-9]+(e\+[0-9]+)?$/)
         t.to_f
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/)
         Time.parse(t)
