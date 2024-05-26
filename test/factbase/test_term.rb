@@ -166,6 +166,23 @@ class TestTerm < Minitest::Test
     assert_equal('(foo \'hello, world!\')', t1.evaluate(fact, []))
   end
 
+  def test_past
+    t = Factbase::Term.new(:prev, [:foo])
+    assert_nil(t.evaluate(fact('foo' => 4), []))
+    assert_equal([4], t.evaluate(fact('foo' => 5), []))
+  end
+
+  def test_at
+    t = Factbase::Term.new(:at, [1, :foo])
+    assert_nil(t.evaluate(fact('foo' => 4), []))
+    assert_equal(5, t.evaluate(fact('foo' => [4, 5]), []))
+  end
+
+  def test_nonil
+    t = Factbase::Term.new(:nonil, [Factbase::Term.new(:at, [5, :foo]), 42])
+    assert_equal([42], t.evaluate(fact('foo' => 4), []))
+  end
+
   private
 
   def fact(map = {})

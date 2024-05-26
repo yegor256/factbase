@@ -149,6 +149,32 @@ class Factbase::Term
     by_symbol(0, fact).nil?
   end
 
+  def nonil(fact, maps)
+    assert_args(2)
+    v = the_values(0, fact, maps)
+    return v unless v.nil?
+    the_values(1, fact, maps)
+  end
+
+  def at(fact, maps)
+    assert_args(2)
+    i = the_values(0, fact, maps)
+    raise 'Too many values at first position, one expected' unless i.size == 1
+    i = i[0]
+    return nil if i.nil?
+    v = the_values(1, fact, maps)
+    return nil if v.nil?
+    v[i]
+  end
+
+  def prev(fact, maps)
+    assert_args(1)
+    before = @prev
+    v = the_values(0, fact, maps)
+    @prev = v
+    before
+  end
+
   def many(fact, maps)
     assert_args(1)
     v = the_values(0, fact, maps)

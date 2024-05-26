@@ -69,7 +69,9 @@ There are some terms available in a query:
 * `(size k)` returns cardinality of `k` property (zero if property is absent)
 * `(type a)` returns type of `a` ("String", "Integer", "Float", or "Time")
 * `(many a)` return true if there are many values in the `a` property
-* `(one a)` return true if there is only one value in the `a` property
+* `(one a)` returns true if there is only one value in the `a` property
+* `(at i a)` returns the `i`-th value of the `a` property
+* `(nonil a b)` returns `b` if `a` is `nil`
 * `(matches a re)` returns true when `a` matches regular expression `re`
 * `(defn foo "self.to_s")` defines a new term using Ruby syntax and returns true
 
@@ -79,6 +81,10 @@ Also, some simple arithmetic:
 * `(minus a b)` is a deducation of `b` from `a`
 * `(times a b)` is a multiplication of `a` and `b`
 * `(div a b)` is a division of `a` by `b`
+
+There are terms that are history of search aware:
+
+* `(prev a)` returns the value of `a` in the previously seen fact
 
 There are also terms that match the entire factbase
 and must be used inside the `(agg ..)` term:

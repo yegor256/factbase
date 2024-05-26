@@ -59,6 +59,7 @@ class TestQuery < Minitest::Test
       '(when (eq num 0) (exists time))' => 2,
       '(many num)' => 1,
       '(one num)' => 2,
+      '(gt num (minus 1 (nonil (at 0 (prev num)) 0)))' => 3,
       '(and (not (many num)) (eq num (plus 21 +21)))' => 1,
       '(and (not (many num)) (eq num (minus -100 -142)))' => 1,
       '(and (one num) (eq num (times 7 6)))' => 1,
