@@ -48,7 +48,7 @@ class Factbase::Fact
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
-      raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z][_a-zA-Z0-9]*$/)
+      raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z_][_a-zA-Z0-9]*$/)
       raise "Prohibited prop name '#{kk}'" if kk == 'to_s'
       v = args[1]
       raise "Prop value can't be nil" if v.nil?
