@@ -83,7 +83,7 @@ class TestSyntax < Minitest::Test
       '(or (eq bar 888) (eq z 1))' => true,
       "(or (gt bar 100) (eq foo 'Hello, world!'))" => true
     }.each do |k, v|
-      assert_equal(v, Factbase::Syntax.new(k).to_term.evaluate(m), k)
+      assert_equal(v, Factbase::Syntax.new(k).to_term.evaluate(m, []), k)
     end
   end
 

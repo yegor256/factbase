@@ -43,11 +43,13 @@ class Factbase::Query
   # @return [Integer] Total number of facts yielded
   def each
     return to_enum(__method__) unless block_given?
-    term = Factbase::Syntax.new(@query).to_term.on(@maps)
+    term = Factbase::Syntax.new(@query).to_term
     yielded = 0
     @maps.each do |m|
       f = Factbase::Fact.new(@mutex, m)
-      next unless term.evaluate(f)
+      r = term.evaluate(f, @maps)
+      raise 'Unexpected evaluation result, must be boolean' unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+      next unless r
       yield f
       yielded += 1
     end
@@ -62,7 +64,7 @@ class Factbase::Query
     @mutex.synchronize do
       @maps.delete_if do |m|
         f = Factbase::Fact.new(@mutex, m)
-        if term.evaluate(f)
+        if term.evaluate(f, @maps)
           deleted += 1
           true
         else

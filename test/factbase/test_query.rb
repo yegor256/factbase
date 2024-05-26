@@ -44,8 +44,8 @@ class TestQuery < Minitest::Test
 
   def test_complex_parsing
     maps = []
-    maps << { 'num' => 42 }
-    maps << { 'pi' => 3.14, 'num' => [42, 66, 0] }
+    maps << { 'num' => 42, 'name' => 'Jeff' }
+    maps << { 'pi' => 3.14, 'num' => [42, 66, 0], 'name' => 'peter' }
     maps << { 'time' => Time.now - 100, 'num' => 0 }
     {
       '(eq num 444)' => 0,
@@ -55,15 +55,16 @@ class TestQuery < Minitest::Test
       '(exists pi)' => 1,
       '(not (exists hello))' => 3,
       '(eq "Integer" (type num))' => 2,
+      '(when (eq num 0) (exists time))' => 2,
       '(gt (size num) 2)' => 1,
+      '(matches name "^[a-z]+$")' => 1,
       '(lt (size num) 2)' => 2,
       '(eq (size hello) 0)' => 3,
       '(eq num pi)' => 0,
       '(absent time)' => 2,
-      '(max num)' => 1,
-      '(and (exists time) (max num))' => 0,
-      '(and (exists pi) (max num))' => 1,
-      '(min time)' => 1,
+      '(eq num (agg (exists oops) (count)))' => 2,
+      '(lt num (agg (eq num 0) (max pi)))' => 2,
+      '(eq time (min time))' => 1,
       '(and (absent time) (exists pi))' => 1,
       "(and (exists time) (not (\t\texists pi)))" => 1,
       "(or (eq num 66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1

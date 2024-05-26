@@ -40,7 +40,7 @@ class Factbase::Fact
   # Convert it to a string.
   # @return [String] String representation of it (in JSON)
   def to_s
-    @map.to_json
+    "[ #{@map.map { |k, v| "#{k}: #{v}" }.join(', ')} ]"
   end
 
   # When a method is missing, this method is called.

@@ -43,23 +43,12 @@ class Factbase::Term
 
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
+  # @param [Array<Factbase::Fact>] maps All maps available
   # @return [bool] TRUE if matches
-  def evaluate(fact)
-    send(@op, fact)
-  rescue NoMethodError => _e
-    raise "Term '#{@op}' is not defined"
-  end
-
-  # Put it into the context: let it see the entire array of maps.
-  # @param [Array] maps The maps
-  # @return [Factbase::Term] Itself
-  def on(maps)
-    m = "#{@op}_on"
-    send(m, maps) if respond_to?(m, true)
-    @operands.each do |o|
-      o.on(maps) if o.is_a?(Factbase::Term)
-    end
-    self
+  def evaluate(fact, maps)
+    send(@op, fact, maps)
+  rescue NoMethodError => e
+    raise "Term '#{@op}' is not defined: #{e.message}"
   end
 
   # Simplify it if possible.
@@ -92,31 +81,31 @@ class Factbase::Term
 
   private
 
-  def always(_fact)
+  def always(_fact, _maps)
     assert_args(0)
     true
   end
 
-  def never(_fact)
+  def never(_fact, _maps)
     assert_args(0)
     false
   end
 
-  def not(fact)
+  def not(fact, maps)
     assert_args(1)
-    !only_bool(the_value(0, fact))
+    !only_bool(the_value(0, fact, maps))
   end
 
-  def or(fact)
+  def or(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return true if only_bool(the_value(i, fact))
+      return true if only_bool(the_value(i, fact, maps))
     end
     false
   end
 
-  def and(fact)
+  def and(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return false unless only_bool(the_value(i, fact))
+      return false unless only_bool(the_value(i, fact, maps))
     end
     true
   end
@@ -143,36 +132,36 @@ class Factbase::Term
     and_or_simplify
   end
 
-  def when(fact)
+  def when(fact, maps)
     assert_args(2)
     a = @operands[0]
     b = @operands[1]
-    !a.evaluate(fact) || (a.evaluate(fact) && b.evaluate(fact))
+    !a.evaluate(fact, maps) || (a.evaluate(fact, maps) && b.evaluate(fact, maps))
   end
 
-  def exists(fact)
+  def exists(fact, _maps)
     assert_args(1)
     !by_symbol(0, fact).nil?
   end
 
-  def absent(fact)
+  def absent(fact, _maps)
     assert_args(1)
     by_symbol(0, fact).nil?
   end
 
-  def eq(fact)
-    arithmetic(:==, fact)
+  def eq(fact, maps)
+    arithmetic(:==, fact, maps)
   end
 
-  def lt(fact)
-    arithmetic(:<, fact)
+  def lt(fact, maps)
+    arithmetic(:<, fact, maps)
   end
 
-  def gt(fact)
-    arithmetic(:>, fact)
+  def gt(fact, maps)
+    arithmetic(:>, fact, maps)
   end
 
-  def size(fact)
+  def size(fact, _maps)
     assert_args(1)
     v = by_symbol(0, fact)
     return 0 if v.nil?
@@ -180,29 +169,29 @@ class Factbase::Term
     v.size
   end
 
-  def type(fact)
+  def type(fact, _maps)
     assert_args(1)
     v = by_symbol(0, fact)
     return 'nil' if v.nil?
     v.class.to_s
   end
 
-  def matches(fact)
+  def matches(fact, maps)
     assert_args(2)
-    str = the_value(0, fact)
-    raise 'String is nil' if str.nil?
+    str = the_value(0, fact, maps)
+    return false if str.nil?
     raise 'Exactly one string expected' unless str.size == 1
-    re = the_value(1, fact)
+    re = the_value(1, fact, maps)
     raise 'Regexp is nil' if re.nil?
     raise 'Exactly one regexp expected' unless re.size == 1
     str[0].to_s.match?(re[0])
   end
 
-  def arithmetic(op, fact)
+  def arithmetic(op, fact, maps)
     assert_args(2)
-    lefts = the_value(0, fact)
+    lefts = the_value(0, fact, maps)
     return false if lefts.nil?
-    rights = the_value(1, fact)
+    rights = the_value(1, fact, maps)
     return false if rights.nil?
     lefts.any? do |l|
       l = l.floor if l.is_a?(Time) && op == :==
@@ -213,34 +202,36 @@ class Factbase::Term
     end
   end
 
-  def defn(_fact)
+  def defn(_fact, _maps)
     fn = @operands[0]
     raise 'A symbol expected as first argument of defn' unless fn.is_a?(Symbol)
-    e = "class Factbase::Term\nprivate\ndef #{fn}(fact)\n#{@operands[1]}\nend\nend"
+    e = "class Factbase::Term\nprivate\ndef #{fn}(fact, maps)\n#{@operands[1]}\nend\nend"
     # rubocop:disable Security/Eval
     eval(e)
     # rubocop:enable Security/Eval
     true
   end
 
-  def min(fact)
-    vv = the_value(0, fact)
-    return nil if vv.nil?
-    vv.any? { |v| v == @min }
+  def min(_fact, maps)
+    best(maps) { |v, b| v < b }
   end
 
-  def max(fact)
-    vv = the_value(0, fact)
-    return nil if vv.nil?
-    vv.any? { |v| v == @max }
+  def max(_fact, maps)
+    best(maps) { |v, b| v > b }
   end
 
-  def max_on(maps)
-    @max = best(maps) { |v, b| v > b }
+  def count(_fact, maps)
+    maps.size
   end
 
-  def min_on(maps)
-    @min = best(maps) { |v, b| v < b }
+  def agg(_fact, maps)
+    selector = @operands[0]
+    raise "A term expected, but #{selector} provided" unless selector.is_a?(Factbase::Term)
+    term = @operands[1]
+    raise "A term expected, but #{term} provided" unless term.is_a?(Factbase::Term)
+    subset = maps.select { |m| selector.evaluate(m, maps) }
+    return term.evaluate(Factbase::Fact.new(Mutex.new, {}), subset) if subset.empty?
+    term.evaluate(subset.first, subset)
   end
 
   def assert_args(num)
@@ -256,9 +247,9 @@ class Factbase::Term
     fact[k]
   end
 
-  def the_value(pos, fact)
+  def the_value(pos, fact, maps)
     v = @operands[pos]
-    v = v.evaluate(fact) if v.is_a?(Factbase::Term)
+    v = v.evaluate(fact, maps) if v.is_a?(Factbase::Term)
     v = fact[v.to_s] if v.is_a?(Symbol)
     return v if v.nil?
     v = [v] unless v.is_a?(Array)
