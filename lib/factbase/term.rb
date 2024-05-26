@@ -213,15 +213,15 @@ class Factbase::Term
   end
 
   def min(_fact, maps)
-    best(maps) { |v, b| v < b }
+    @min ||= best(maps) { |v, b| v < b }
   end
 
   def max(_fact, maps)
-    best(maps) { |v, b| v > b }
+    @max ||= best(maps) { |v, b| v > b }
   end
 
   def count(_fact, maps)
-    maps.size
+    @count ||= maps.size
   end
 
   def agg(_fact, maps)
@@ -230,8 +230,12 @@ class Factbase::Term
     term = @operands[1]
     raise "A term expected, but #{term} provided" unless term.is_a?(Factbase::Term)
     subset = maps.select { |m| selector.evaluate(m, maps) }
-    return term.evaluate(Factbase::Fact.new(Mutex.new, {}), subset) if subset.empty?
-    term.evaluate(subset.first, subset)
+    @agg ||=
+      if subset.empty?
+        term.evaluate(Factbase::Fact.new(Mutex.new, {}), subset)
+      else
+        term.evaluate(subset.first, subset)
+      end
   end
 
   def assert_args(num)
