@@ -71,11 +71,21 @@ All terms available in a query:
 * `(matches a re)` returns true when `a` matches regular expression `re`
 * `(defn foo "self.to_s")` defines a new term using Ruby syntax and returns true
 
-There are also terms that match the entire factbase:
+There are also terms that match the entire factbase
+and must be used inside the `(agg ..)` term:
 
-* `(max k)` returns true if the value of `k` property
-is the largest in the entire factbase
-* `(min k)` returns true if the value of `k` is the smallest
+* `(count)` returns the tally of facts
+* `(max k)` returns the maximum value of the `k` property in all facts
+* `(min k)` returns the minimum
+* `(sum k)` returns the arithmetic sum of all values of the `k` property
+
+The `agg` term enables sub-queries by evaluating the first argument (term)
+over all available facts, passing the entire subset to the second argument,
+and then returning the result as an atomic value:
+
+* `(lt age (agg (eq gender 'F') (max age)))` selects all facts where
+the `age` is smaller than the maximum `age` of all women
+* `(eq id (agg (always) (max id)))` selects the fact with the largest `id`
 
 ## How to contribute
 
