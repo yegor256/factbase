@@ -54,7 +54,7 @@ f2.import(File.read(file))
 assert(f2.query('(eq foo 42)').each.to_a.size == 1)
 ```
 
-All terms available in a query:
+There are some terms available in a query:
 
 * `(always)` and `(never)` are "true" and "false"
 * `(not t)` inverses the `t` if it's boolean (exception otherwise)
@@ -68,8 +68,17 @@ All terms available in a query:
 * `(gt a b)` returns true if `a` is greater than `b`
 * `(size k)` returns cardinality of `k` property (zero if property is absent)
 * `(type a)` returns type of `a` ("String", "Integer", "Float", or "Time")
+* `(many a)` return true if there are many values in the `a` property
+* `(one a)` return true if there is only one value in the `a` property
 * `(matches a re)` returns true when `a` matches regular expression `re`
 * `(defn foo "self.to_s")` defines a new term using Ruby syntax and returns true
+
+Also, some simple arithmetic:
+
+* `(plus a b)` is a sum of `a` and `b`
+* `(minus a b)` is a deducation of `b` from `a`
+* `(times a b)` is a multiplication of `a` and `b`
+* `(div a b)` is a division of `a` by `b`
 
 There are also terms that match the entire factbase
 and must be used inside the `(agg ..)` term:

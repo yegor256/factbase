@@ -93,19 +93,19 @@ class Factbase::Term
 
   def not(fact, maps)
     assert_args(1)
-    !only_bool(the_value(0, fact, maps))
+    !only_bool(the_values(0, fact, maps))
   end
 
   def or(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return true if only_bool(the_value(i, fact, maps))
+      return true if only_bool(the_values(i, fact, maps))
     end
     false
   end
 
   def and(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return false unless only_bool(the_value(i, fact, maps))
+      return false unless only_bool(the_values(i, fact, maps))
     end
     true
   end
@@ -149,16 +149,32 @@ class Factbase::Term
     by_symbol(0, fact).nil?
   end
 
+  def many(fact, maps)
+    assert_args(1)
+    v = the_values(0, fact, maps)
+    !v.nil? && v.size > 1
+  end
+
+  def one(fact, maps)
+    assert_args(1)
+    v = the_values(0, fact, maps)
+    !v.nil? && v.size == 1
+  end
+
+  def plus(fact, maps)
+    arithmetic(:+, fact, maps)
+  end
+
   def eq(fact, maps)
-    arithmetic(:==, fact, maps)
+    cmp(:==, fact, maps)
   end
 
   def lt(fact, maps)
-    arithmetic(:<, fact, maps)
+    cmp(:<, fact, maps)
   end
 
   def gt(fact, maps)
-    arithmetic(:>, fact, maps)
+    cmp(:>, fact, maps)
   end
 
   def size(fact, _maps)
@@ -178,20 +194,20 @@ class Factbase::Term
 
   def matches(fact, maps)
     assert_args(2)
-    str = the_value(0, fact, maps)
+    str = the_values(0, fact, maps)
     return false if str.nil?
     raise 'Exactly one string expected' unless str.size == 1
-    re = the_value(1, fact, maps)
+    re = the_values(1, fact, maps)
     raise 'Regexp is nil' if re.nil?
     raise 'Exactly one regexp expected' unless re.size == 1
     str[0].to_s.match?(re[0])
   end
 
-  def arithmetic(op, fact, maps)
+  def cmp(op, fact, maps)
     assert_args(2)
-    lefts = the_value(0, fact, maps)
+    lefts = the_values(0, fact, maps)
     return false if lefts.nil?
-    rights = the_value(1, fact, maps)
+    rights = the_values(1, fact, maps)
     return false if rights.nil?
     lefts.any? do |l|
       l = l.floor if l.is_a?(Time) && op == :==
@@ -200,6 +216,17 @@ class Factbase::Term
         l.send(op, r)
       end
     end
+  end
+
+  def arithmetic(op, fact, maps)
+    assert_args(2)
+    lefts = the_values(0, fact, maps)
+    raise 'The first argument is NIL, while literal expected' if lefts.nil?
+    raise 'Too many values at first position, one expected' unless lefts.size == 1
+    rights = the_values(1, fact, maps)
+    raise 'The second argument is NIL, while literal expected' if rights.nil?
+    raise 'Too many values at second position, one expected' unless rights.size == 1
+    lefts[0].send(op, rights[0])
   end
 
   def defn(_fact, _maps)
@@ -269,7 +296,7 @@ class Factbase::Term
     fact[k]
   end
 
-  def the_value(pos, fact, maps)
+  def the_values(pos, fact, maps)
     v = @operands[pos]
     v = v.evaluate(fact, maps) if v.is_a?(Factbase::Term)
     v = fact[v.to_s] if v.is_a?(Symbol)
