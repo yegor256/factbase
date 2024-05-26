@@ -62,6 +62,7 @@ class TestQuery < Minitest::Test
       '(eq (size hello) 0)' => 3,
       '(eq num pi)' => 0,
       '(absent time)' => 2,
+      '(eq pi (agg (eq num 0) (sum pi)))' => 1,
       '(eq num (agg (exists oops) (count)))' => 2,
       '(lt num (agg (eq num 0) (max pi)))' => 2,
       '(eq time (min time))' => 1,

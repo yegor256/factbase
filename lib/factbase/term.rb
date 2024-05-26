@@ -224,6 +224,24 @@ class Factbase::Term
     @count ||= maps.size
   end
 
+  def sum(_fact, maps)
+    @sum ||=
+      begin
+        k = @operands[0]
+        raise "A symbol expected, but provided: #{k}" unless k.is_a?(Symbol)
+        sum = 0
+        maps.each do |m|
+          vv = m[k.to_s]
+          next if vv.nil?
+          vv = [vv] unless vv.is_a?(Array)
+          vv.each do |v|
+            sum += v
+          end
+        end
+        sum
+      end
+  end
+
   def agg(_fact, maps)
     selector = @operands[0]
     raise "A term expected, but #{selector} provided" unless selector.is_a?(Factbase::Term)
