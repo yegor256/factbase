@@ -42,7 +42,8 @@ class TestSyntax < Minitest::Test
   def test_simple_parsing
     [
       '(foo)',
-      '(foo (bar) (zz 77)   )',
+      '(foo (bar) (zz 77)   ) # hey',
+      "# hello\n\n\n(foo (bar))",
       "(eq foo   \n\n 'Hello, world!'\n)\n",
       "(eq x 'Hello, \\' \n) \\' ( world!')",
       "# this is a comment\n(eq foo # test\n 42)\n\n# another comment\n",
@@ -60,7 +61,7 @@ class TestSyntax < Minitest::Test
       "(r 'Dude\\'s Friend')",
       "(r 'I\\'m \\\"good\\\"')",
       '(foo x y z)',
-      "(foo x y z t f 42 'Hi!' 33)",
+      "(foo x y z t f 42 'Hi!# you' 33)",
       '(foo (x) y z)',
       '(eq t 2024-05-25T19:43:48Z)',
       '(eq t 2024-05-25T19:43:48Z)',
@@ -106,11 +107,10 @@ class TestSyntax < Minitest::Test
       ')',
       '"'
     ].each do |q|
-      assert(
-        assert_raises(q) do
-          Factbase::Syntax.new(q).to_term
-        end.message.include?(q)
-      )
+      msg = assert_raises(q) do
+        Factbase::Syntax.new(q).to_term
+      end.message
+      assert(msg.include?(q), msg)
     end
   end
 

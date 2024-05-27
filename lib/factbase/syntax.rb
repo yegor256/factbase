@@ -44,7 +44,9 @@ class Factbase::Syntax
   def to_term
     build.simplify
   rescue StandardError => e
-    raise "#{e.message} in \"#{@query}\""
+    err = "#{e.message} in #{@query}"
+    err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
+    raise err
   end
 
   private
@@ -95,7 +97,11 @@ class Factbase::Syntax
     list = []
     acc = ''
     string = false
-    @query.to_s.gsub(/#.*$/, '').chars.each do |c|
+    comment = false
+    @query.to_s.chars.each do |c|
+      comment = true if !string && c == '#'
+      comment = false if comment && c == "\n"
+      next if comment
       if ['\'', '"'].include?(c)
         if string && acc[acc.length - 1] == '\\'
           acc = acc[0..-2]
