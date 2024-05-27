@@ -47,6 +47,7 @@ class TestSyntax < Minitest::Test
       "(eq foo   \n\n 'Hello, world!'\n)\n",
       "(eq x 'Hello, \\' \n) \\' ( world!')",
       "# this is a comment\n(eq foo # test\n 42)\n\n# another comment\n",
+      "(foo 'Hello,\n\nworld!\r\t\n')\n",
       "(or ( a 4) (b 5) (always) (and (always) (c 5) \t\t(r 7 w8s w8is 'Foo')))"
     ].each do |q|
       Factbase::Syntax.new(q).to_term
