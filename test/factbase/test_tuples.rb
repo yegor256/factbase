@@ -94,9 +94,13 @@ class TestTuples < Minitest::Test
     f3 = fb.insert
     f3.name = 'Donny'
     f3.group = 1
-    Factbase::Tuples.new(fb, ['(eq name "Jeff")', '(eq name "{f0.friend}")', '(eq group {f1.group})']).each do |fs|
+    tuples = Factbase::Tuples.new(
+      fb, ['(eq name "Jeff")', '(eq name "{f0.friend}")', '(eq group {f1.group})']
+    )
+    tuples.each do |fs|
       assert_equal('Walter', fs[1].name)
       assert(%w[Walter Donny].include?(fs[2].name))
     end
+    assert_equal(2, tuples.each.to_a.size)
   end
 end
