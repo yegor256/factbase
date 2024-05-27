@@ -24,6 +24,26 @@ require 'json'
 require 'yaml'
 
 # Factbase.
+#
+# This is an entry point to a factbase:
+#
+#  fb = Factbase.new
+#  f = fb.insert # new fact created
+#  f.name = 'Jeff Lebowski'
+#  f.age = 42
+#  found = f.query('(gt 20 age)').each.to_a[0]
+#  assert(found.age == 42)
+#
+# A factbase may be exported to a file and then imported back:
+#
+#  fb1 = Factbase.new
+#  File.writebin(file, fb1.export)
+#  fb2 = Factbase.new # it's empty
+#  fb2.import(File.readbin(file))
+#
+# It's important to use +writebin+ and +readbin+, because the content is
+# a chain of bytes, not a text.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT

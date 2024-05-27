@@ -49,8 +49,8 @@ class TestFactbase < Minitest::Test
     f2 = Factbase.new
     f1.insert.foo = 42
     Tempfile.open do |f|
-      File.write(f.path, f1.export)
-      f2.import(File.read(f.path))
+      File.binwrite(f.path, f1.export)
+      f2.import(File.binread(f.path))
     end
     assert_equal(1, f2.query('(eq foo 42)').each.to_a.count)
   end

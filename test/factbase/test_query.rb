@@ -67,7 +67,7 @@ class TestQuery < Minitest::Test
       '(gt (size num) 2)' => 1,
       '(matches name "^[a-z]+$")' => 1,
       '(lt (size num) 2)' => 2,
-      '(eq (size hello) 0)' => 3,
+      '(eq (size _hello) 0)' => 3,
       '(eq num pi)' => 0,
       '(absent time)' => 2,
       '(eq pi (agg (eq num 0) (sum pi)))' => 1,
