@@ -158,7 +158,7 @@ class Factbase::Term
     by_symbol(0, fact).nil?
   end
 
-  def nonil(fact, maps)
+  def either(fact, maps)
     assert_args(2)
     v = the_values(0, fact, maps)
     return v unless v.nil?

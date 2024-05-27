@@ -71,7 +71,7 @@ There are some terms available in a query:
 * `(many a)` return true if there are many values in the `a` property
 * `(one a)` returns true if there is only one value in the `a` property
 * `(at i a)` returns the `i`-th value of the `a` property
-* `(nonil a b)` returns `b` if `a` is `nil`
+* `(either a b)` returns `b` if `a` is `nil`
 * `(matches a re)` returns true when `a` matches regular expression `re`
 * `(defn foo "self.to_s")` defines a new term using Ruby syntax and returns true
 
