@@ -82,4 +82,21 @@ class TestTuples < Minitest::Test
     assert_equal(1, fb.query('(exists bar)').each.to_a.size)
     assert_equal(1, fb.query('(exists xyz)').each.to_a.size)
   end
+
+  def test_with_chaining
+    fb = Factbase.new
+    f1 = fb.insert
+    f1.name = 'Jeff'
+    f1.friend = 'Walter'
+    f2 = fb.insert
+    f2.name = 'Walter'
+    f2.group = 1
+    f3 = fb.insert
+    f3.name = 'Donny'
+    f3.group = 1
+    Factbase::Tuples.new(fb, ['(eq name "Jeff")', '(eq name "{f0.friend}")', '(eq group {f1.group})']).each do |fs|
+      assert_equal('Walter', fs[1].name)
+      assert(%w[Walter Donny].include?(fs[2].name))
+    end
+  end
 end

@@ -102,6 +102,7 @@ class Factbase
 
   # Run an ACID transaction, which will either modify the factbase
   # or rollback in case of an error.
+  # @param [Factbase] this The factbase to use (don't provide this param)
   def txn(this = self)
     copy = this.dup
     yield copy
@@ -122,6 +123,7 @@ class Factbase
   end
 
   # Import from a chain of bytes.
+  # @param [Bytes] bytes Byte array to import
   def import(bytes)
     @maps += Marshal.load(bytes)
   end
