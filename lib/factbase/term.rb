@@ -111,19 +111,19 @@ class Factbase::Term
 
   def not(fact, maps)
     assert_args(1)
-    !only_bool(the_values(0, fact, maps))
+    !only_bool(the_values(0, fact, maps), 0)
   end
 
   def or(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return true if only_bool(the_values(i, fact, maps))
+      return true if only_bool(the_values(i, fact, maps), 0)
     end
     false
   end
 
   def and(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return false unless only_bool(the_values(i, fact, maps))
+      return false unless only_bool(the_values(i, fact, maps), 0)
     end
     true
   end
@@ -375,10 +375,12 @@ class Factbase::Term
     v
   end
 
-  def only_bool(val)
+  def only_bool(val, pos)
     val = val[0] if val.is_a?(Array)
     return false if val.nil?
-    raise "Boolean expected, while #{val.class} received" unless val.is_a?(TrueClass) || val.is_a?(FalseClass)
+    unless val.is_a?(TrueClass) || val.is_a?(FalseClass)
+      raise "Boolean expected, while #{val.class} received from #{@operands[pos]}"
+    end
     val
   end
 
