@@ -23,9 +23,12 @@
 require 'json'
 require 'yaml'
 
-# Factbase.
+# A factbase, which essentially is a NoSQL one-table in-memory database
+# with a Lisp-ish query interface.
 #
-# This is an entry point to a factbase:
+# This class is an entry point to a factbase. For example, this is how you
+# add a new "fact" to a factbase, then put two properties into it, and then
+# find this fact with a simple search.
 #
 #  fb = Factbase.new
 #  f = fb.insert # new fact created
@@ -34,14 +37,41 @@ require 'yaml'
 #  found = f.query('(gt 20 age)').each.to_a[0]
 #  assert(found.age == 42)
 #
+# Every fact is a key-value hash map. Every value is a non-empty set of values.
+# Consider this example of creating a factbase with a single fact inside:
+#
+#  fb = Factbase.new
+#  f = fb.insert
+#  f.name = 'Jeff'
+#  f.name = 'Walter'
+#  f.age = 42
+#  f.age = 'unknown'
+#  f.place = 'LA'
+#  puts f.to_json
+#
+# This will print the following JSON:
+#
+#  {
+#    'name': ['Jeff', 'Walter'],
+#    'age': [42, 'unknown'],
+#    'place: 'LA'
+#  }
+#
+# Value sets, as you can see, allow data of different types. However, there
+# are only four types are allowed: Integer, Float, String, and Time.
+#
 # A factbase may be exported to a file and then imported back:
 #
 #  fb1 = Factbase.new
-#  File.writebin(file, fb1.export)
+#  File.binwrite(file, fb1.export)
 #  fb2 = Factbase.new # it's empty
-#  fb2.import(File.readbin(file))
+#  fb2.import(File.binread(file))
 #
-# It's important to use +writebin+ and +readbin+, because the content is
+# It's impossible to delete properties of a fact. It is however possible to
+# delete the entire fact, with the help of the +query()+ and then +delete!()+
+# methods.
+#
+# It's important to use +binwrite+ and +binread+, because the content is
 # a chain of bytes, not a text.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -147,11 +177,30 @@ class Factbase
   end
 
   # Export it into a chain of bytes.
+  #
+  # Here is how you can export it to a file, for example:
+  #
+  #  fb = Factbase.new
+  #  fb.insert.foo = 42
+  #  File.binwrite("foo.fb", fb.export)
+  #
+  # The data is binary, it's not a text!
+  #
+  # @return [Bytes] The chain of bytes
   def export
     Marshal.dump(@maps)
   end
 
   # Import from a chain of bytes.
+  #
+  # Here is how you can read it from a file, for example:
+  #
+  #  fb = Factbase.new
+  #  fb.import(File.binread("foo.fb"))
+  #
+  # The facts that existed in the factbase before importing will remain there.
+  # The facts from the incoming byte stream will added to them.
+  #
   # @param [Bytes] bytes Byte array to import
   def import(bytes)
     @maps += Marshal.load(bytes)
