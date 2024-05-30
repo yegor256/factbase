@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'time'
 require 'loog'
 
 # A decorator of a Factbase, that logs all operations.
@@ -114,39 +115,51 @@ class Factbase::Looged
     def each(&)
       q = Factbase::Syntax.new(@expr).to_term.to_s
       if block_given?
-        r = @query.each(&)
+        r = nil
+        tail = Factbase::Looged.elapsed do
+          r = @query.each(&)
+        end
         raise ".each of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
-          @loog.debug("Nothing found by '#{q}'")
+          @loog.debug("Nothing found by '#{q}' #{tail}")
         else
-          @loog.debug("Found #{r} fact(s) by '#{q}'")
+          @loog.debug("Found #{r} fact(s) by '#{q}' #{tail}")
         end
         r
       else
         array = []
-        # rubocop:disable Style/MapIntoArray
-        @query.each do |f|
-          array << f
+        tail = Factbase::Looged.elapsed do
+          @query.each do |f|
+            array << f
+          end
         end
-        # rubocop:enable Style/MapIntoArray
         if array.empty?
-          @loog.debug("Nothing found by '#{q}'")
+          @loog.debug("Nothing found by '#{q}' #{tail}")
         else
-          @loog.debug("Found #{array.size} fact(s) by '#{q}'")
+          @loog.debug("Found #{array.size} fact(s) by '#{q}' #{tail}")
         end
         array
       end
     end
 
     def delete!
-      r = @query.delete!
+      r = nil
+      tail = Factbase::Looged.elapsed do
+        r = @query.delete!
+      end
       raise ".delete! of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
       if r.zero?
-        @loog.debug("Nothing deleted by '#{@expr}'")
+        @loog.debug("Nothing deleted by '#{@expr}' #{tail}")
       else
-        @loog.debug("Deleted #{r} fact(s) by '#{@expr}'")
+        @loog.debug("Deleted #{r} fact(s) by '#{@expr}' #{tail}")
       end
       r
     end
+  end
+
+  def self.elapsed
+    start = Time.now
+    yield
+    "in #{format('%.2f', (Time.now - start) * 1000)}ms"
   end
 end

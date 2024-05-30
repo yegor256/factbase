@@ -94,7 +94,7 @@ class TestLooged < Minitest::Test
       'Found 1 fact(s) by \'(exists bar)\'',
       'Deleted 3 fact(s) by \'(not (exists bar))\''
     ].each do |s|
-      assert(log.to_s.include?("#{s}\n"), "#{log}\n")
+      assert(log.to_s.include?(s), "#{log}\n")
     end
   end
 end
