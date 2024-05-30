@@ -36,6 +36,15 @@ require_relative 'fact'
 #  t = Factbase::Term.new(:lt, [:foo, 50])
 #  assert(t.evaluate(f))
 #
+# The design of this class may look ugly, since it has a large number of
+# methods, each of which corresponds to a different type of a +Term+. A much
+# better design would definitely involve many classes, one per each type
+# of a term. It's not done this way because of an experimental nature of
+# the project. Most probably we should keep current design intact, since it
+# works well and is rather simple to extend (by adding new term types).
+# Moreover, it looks like the number of possible term types is rather limited
+# and currently we implement most of them.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
