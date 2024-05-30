@@ -140,4 +140,13 @@ class TestFactbase < Minitest::Test
     end
     assert_equal(1, fb.query('(exists xyz)').each.to_a.size)
   end
+
+  def test_txn_with_rollback
+    fb = Factbase.new
+    fb.txn do |fbt|
+      fbt.insert.bar = 33
+      raise Factbase::Rollback
+    end
+    assert_equal(0, fb.query('(always)').each.to_a.size)
+  end
 end

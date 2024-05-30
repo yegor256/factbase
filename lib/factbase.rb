@@ -51,6 +51,9 @@ class Factbase
   # Current version of the gem (changed by .rultor.yml on every release)
   VERSION = '0.0.0'
 
+  # An exception that may be thrown in a transaction, to roll it back.
+  class Rollback < StandardError; end
+
   # Constructor.
   def initialize(facts = [])
     @maps = facts
@@ -102,10 +105,27 @@ class Factbase
 
   # Run an ACID transaction, which will either modify the factbase
   # or rollback in case of an error.
+  #
+  # If necessary to terminate a transaction and roolback all changes,
+  # you should raise the +Factbase::Rollback+ exception:
+  #
+  #  fb = Factbase.new
+  #  fb.txn do |fbt|
+  #    fbt.insert.bar = 42
+  #    raise Factbase::Rollback
+  #  end
+  #
+  # A the end of this script, the factbase will be empty. No facts will
+  # inserted and all changes that happened in the block will be rolled back.
+  #
   # @param [Factbase] this The factbase to use (don't provide this param)
   def txn(this = self)
     copy = this.dup
-    yield copy
+    begin
+      yield copy
+    rescue Factbase::Rollback
+      return
+    end
     @mutex.synchronize do
       after = Marshal.load(copy.export)
       after.each_with_index do |m, i|
