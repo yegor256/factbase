@@ -339,6 +339,7 @@ class Factbase::Term
   end
 
   def agg(_fact, maps)
+    assert_args(2)
     selector = @operands[0]
     raise "A term expected, but #{selector} provided" unless selector.is_a?(Factbase::Term)
     term = @operands[1]
