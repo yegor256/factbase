@@ -184,6 +184,19 @@ class Factbase::Term
     before
   end
 
+  def unique(fact, _maps)
+    @uniques = [] if @uniques.nil?
+    assert_args(1)
+    vv = by_symbol(0, fact)
+    return false if vv.nil?
+    vv = [vv] unless vv.is_a?(Array)
+    vv.each do |v|
+      return false if @uniques.include?(v)
+      @uniques << v
+    end
+    true
+  end
+
   def many(fact, maps)
     assert_args(1)
     v = the_values(0, fact, maps)

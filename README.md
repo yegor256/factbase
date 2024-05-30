@@ -92,6 +92,7 @@ One term is for meta-programming:
 There are terms that are history of search aware:
 
 * `(prev a)` returns the value of `a` in the previously seen fact
+* `(unique k)` returns true if the value of `k` property hasn't been seen yet
 
 There are also terms that match the entire factbase
 and must be used inside the `(agg ..)` term:
