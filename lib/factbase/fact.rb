@@ -24,16 +24,19 @@ require 'json'
 require 'time'
 require_relative '../factbase'
 
-# Fact.
+# A single fact in a factbase.
 #
-# This is an internal class, it is not supposed to be instantiated directly.
-#
-# It is possible to use for testing directly, for example to make a
+# This is an internal class, it is not supposed to be instantiated directly,
+# by the +Factbase+ class.
+# However, it is possible to use it for testing directly, for example to make a
 # fact with a single key/value pair inside:
 #
 #  require 'factbase/fact'
 #  f = Factbase::Fact.new(Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
 #  assert_equal(42, f.foo)
+#
+# A fact is basically a key/value hash map, where values are non-empty
+# sets of values.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
