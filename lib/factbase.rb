@@ -72,7 +72,13 @@ class Factbase
     @maps.size
   end
 
-  # Insert a new fact.
+  # Insert a new fact and return it.
+  #
+  # A fact, when inserted, is empty. It doesn't contain any properties.
+  #
+  # The operation is thread-safe, meaning that you different threads may
+  # insert facts parallel without breaking the consistency of the factbase.
+  #
   # @return [Factbase::Fact] The fact just inserted
   def insert
     require_relative 'factbase/fact'
@@ -96,6 +102,9 @@ class Factbase
   #    (or
   #      (gt bar 200)
   #      (absent zzz)))
+  #
+  # The full list of terms available in the query you can find in the
+  # +README.md+ file of the repository.
   #
   # @param [String] query The query to use for selections
   def query(query)
