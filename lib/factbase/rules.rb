@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require_relative '../factbase'
+require_relative '../factbase/syntax'
 
 # A decorator of a Factbase, that checks rules on every set.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
