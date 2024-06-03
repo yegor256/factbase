@@ -303,7 +303,8 @@ class Factbase::Term
   def defn(_fact, _maps)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'defn'" unless fn.is_a?(Symbol)
-    raise "Term '#{fn}' is already defined" if Factbase::Term.method_defined?(fn)
+    raise "Can't use '#{fn}' name as a term" if Factbase::Term.instance_methods(true).include?(fn)
+    raise "Term '#{fn}' is already defined" if Factbase::Term.private_instance_methods(false).include?(fn)
     e = "class Factbase::Term\nprivate\ndef #{fn}(fact, maps)\n#{@operands[1]}\nend\nend"
     # rubocop:disable Security/Eval
     eval(e)
@@ -314,7 +315,7 @@ class Factbase::Term
   def undef(_fact, _maps)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'undef'" unless fn.is_a?(Symbol)
-    Factbase::Term.instance_eval { undef fn } if Factbase::Term.method_defined?(fn)
+    Factbase::Term.instance_eval { undef fn } if Factbase::Term.private_instance_methods(false).include?(fn)
     true
   end
 

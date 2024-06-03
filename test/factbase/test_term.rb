@@ -166,6 +166,20 @@ class TestTerm < Minitest::Test
     assert_equal('(foo \'hello, world!\')', t1.evaluate(fact, []))
   end
 
+  def test_defn_again_by_mistake
+    t = Factbase::Term.new(:defn, [:and, 'self.to_s'])
+    assert_raises do
+      t.evaluate(fact, [])
+    end
+  end
+
+  def test_defn_bad_name_by_mistake
+    t = Factbase::Term.new(:defn, [:to_s, 'self.to_s'])
+    assert_raises do
+      t.evaluate(fact, [])
+    end
+  end
+
   def test_past
     t = Factbase::Term.new(:prev, [:foo])
     assert_nil(t.evaluate(fact('foo' => 4), []))
