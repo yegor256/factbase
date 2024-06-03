@@ -179,7 +179,7 @@ class Factbase::Term
   def at(fact, maps)
     assert_args(2)
     i = the_values(0, fact, maps)
-    raise 'Too many values at first position, one expected' unless i.size == 1
+    raise "Too many values (#{i.size}) at first position, one expected" unless i.size == 1
     i = i[0]
     return nil if i.nil?
     v = the_values(1, fact, maps)
@@ -302,7 +302,7 @@ class Factbase::Term
 
   def defn(_fact, _maps)
     fn = @operands[0]
-    raise 'A symbol expected as first argument of defn' unless fn.is_a?(Symbol)
+    raise "A symbol expected as first argument of 'defn'" unless fn.is_a?(Symbol)
     e = "class Factbase::Term\nprivate\ndef #{fn}(fact, maps)\n#{@operands[1]}\nend\nend"
     # rubocop:disable Security/Eval
     eval(e)
@@ -312,7 +312,7 @@ class Factbase::Term
 
   def undef(_fact, _maps)
     fn = @operands[0]
-    raise 'A symbol expected as first argument of defn' unless fn.is_a?(Symbol)
+    raise "A symbol expected as first argument of 'undef'" unless fn.is_a?(Symbol)
     m = @operands[0]
     Factbase::Term.instance_eval { undef m } if Factbase::Term.method_defined?(m)
     true
@@ -334,7 +334,7 @@ class Factbase::Term
     @sum ||=
       begin
         k = @operands[0]
-        raise "A symbol expected, but provided: #{k}" unless k.is_a?(Symbol)
+        raise "A symbol expected, but '#{k}' provided" unless k.is_a?(Symbol)
         sum = 0
         maps.each do |m|
           vv = m[k.to_s]
@@ -351,9 +351,9 @@ class Factbase::Term
   def agg(_fact, maps)
     assert_args(2)
     selector = @operands[0]
-    raise "A term expected, but #{selector} provided" unless selector.is_a?(Factbase::Term)
+    raise "A term expected, but '#{selector}' provided" unless selector.is_a?(Factbase::Term)
     term = @operands[1]
-    raise "A term expected, but #{term} provided" unless term.is_a?(Factbase::Term)
+    raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
     subset = maps.select { |m| selector.evaluate(m, maps) }
     @agg ||=
       if subset.empty?
@@ -371,7 +371,7 @@ class Factbase::Term
 
   def by_symbol(pos, fact)
     o = @operands[pos]
-    raise "A symbol expected at ##{pos}, but provided: #{o}" unless o.is_a?(Symbol)
+    raise "A symbol expected at ##{pos}, but '#{o}' provided" unless o.is_a?(Symbol)
     k = o.to_s
     fact[k]
   end
@@ -396,7 +396,7 @@ class Factbase::Term
 
   def best(maps)
     k = @operands[0]
-    raise "A symbol expected, but provided: #{k}" unless k.is_a?(Symbol)
+    raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
     best = nil
     maps.each do |m|
       vv = m[k.to_s]
