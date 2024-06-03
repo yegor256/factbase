@@ -26,12 +26,17 @@ require_relative 'fact'
 
 # Query.
 #
-# This is an internal class, it is not supposed to be instantiated directly.
+# This is an internal class, it is not supposed to be instantiated directly. It
+# is created by the +query()+ method of the +Factbase+ class.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Query
+  # Constructor.
+  # @param [Array<Fact>] maps Array of facts to start with
+  # @param [Mutex] mutex Mutex to sync all modifications to the +maps+
+  # @param [String] query The query as a string
   def initialize(maps, mutex, query)
     @maps = maps
     @mutex = mutex
@@ -48,7 +53,9 @@ class Factbase::Query
     @maps.each do |m|
       f = Factbase::Fact.new(@mutex, m)
       r = term.evaluate(f, @maps)
-      raise 'Unexpected evaluation result, must be boolean' unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+      unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+        raise "Unexpected evaluation result, must be boolean at #{@query}"
+      end
       next unless r
       yield f
       yielded += 1

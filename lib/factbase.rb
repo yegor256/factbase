@@ -85,6 +85,7 @@ class Factbase
   class Rollback < StandardError; end
 
   # Constructor.
+  # @param [Array<Hash>] facts Array of facts to start with
   def initialize(facts = [])
     @maps = facts
     @mutex = Mutex.new
