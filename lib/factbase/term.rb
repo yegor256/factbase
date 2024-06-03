@@ -318,7 +318,9 @@ class Factbase::Term
     assert_args(1)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'undef'" unless fn.is_a?(Symbol)
-    Factbase::Term.class_eval("undef :#{fn}") if Factbase::Term.private_instance_methods(false).include?(fn)
+    if Factbase::Term.private_instance_methods(false).include?(fn)
+      Factbase::Term.class_eval("undef :#{fn}", __FILE__, __LINE__ - 1) # undef :foo
+    end
     true
   end
 
