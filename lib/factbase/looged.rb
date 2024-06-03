@@ -91,13 +91,13 @@ class Factbase::Looged
     end
 
     # rubocop:disable Style/OptionalBooleanParameter
-    def respond_to?(method, include_private = false)
+    def respond_to?(_method, _include_private = false)
       # rubocop:enable Style/OptionalBooleanParameter
-      @fact.respond_to?(method, include_private)
+      true
     end
 
-    def respond_to_missing?(method, include_private = false)
-      @fact.respond_to_missing?(method, include_private)
+    def respond_to_missing?(_method, _include_private = false)
+      true
     end
   end
 
