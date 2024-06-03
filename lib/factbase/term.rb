@@ -301,6 +301,7 @@ class Factbase::Term
   end
 
   def defn(_fact, _maps)
+    assert_args(2)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'defn'" unless fn.is_a?(Symbol)
     raise "Can't use '#{fn}' name as a term" if Factbase::Term.instance_methods(true).include?(fn)
@@ -313,6 +314,7 @@ class Factbase::Term
   end
 
   def undef(_fact, _maps)
+    assert_args(1)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'undef'" unless fn.is_a?(Symbol)
     Factbase::Term.instance_eval { undef fn } if Factbase::Term.private_instance_methods(false).include?(fn)
