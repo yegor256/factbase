@@ -183,6 +183,14 @@ class TestTerm < Minitest::Test
     assert_equal([42], t.evaluate(fact('foo' => 4), []))
   end
 
+  def test_report_missing_term
+    t = Factbase::Term.new(:something, [])
+    msg = assert_raises do
+      t.evaluate(fact, [])
+    end.message
+    assert(msg.include?('not defined at (something)'), msg)
+  end
+
   private
 
   def fact(map = {})
