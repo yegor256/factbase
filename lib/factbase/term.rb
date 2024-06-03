@@ -310,6 +310,14 @@ class Factbase::Term
     true
   end
 
+  def undef(_fact, _maps)
+    fn = @operands[0]
+    raise 'A symbol expected as first argument of defn' unless fn.is_a?(Symbol)
+    m = @operands[0]
+    Factbase::Term.instance_eval { undef m } if Factbase::Term.method_defined?(m)
+    true
+  end
+
   def min(_fact, maps)
     @min ||= best(maps) { |v, b| v < b }
   end

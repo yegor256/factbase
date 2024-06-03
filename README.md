@@ -88,6 +88,7 @@ Also, some simple arithmetic:
 One term is for meta-programming:
 
 * `(defn foo "self.to_s")` defines a new term using Ruby syntax and returns true
+* `(undef foo)` undefines a term (nothing happens if it's not defined yet)
 
 There are terms that are history of search aware:
 
