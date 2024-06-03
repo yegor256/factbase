@@ -68,7 +68,7 @@ class Factbase::Term
   rescue NoMethodError => e
     raise "Term '#{@op}' is not defined at #{self}: #{e.message}"
   rescue StandardError => e
-    raise "#{e.message} at #{self}"
+    raise "#{e.message} at #{self} (#{e.backtrace[0]})"
   end
 
   # Simplify it if possible.
@@ -318,7 +318,7 @@ class Factbase::Term
     assert_args(1)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'undef'" unless fn.is_a?(Symbol)
-    Factbase::Term.instance_eval { undef fn } if Factbase::Term.private_instance_methods(false).include?(fn)
+    Factbase::Term.class_eval("undef :#{fn}") if Factbase::Term.private_instance_methods(false).include?(fn)
     true
   end
 

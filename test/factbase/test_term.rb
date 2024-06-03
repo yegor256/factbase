@@ -187,6 +187,13 @@ class TestTerm < Minitest::Test
     end
   end
 
+  def test_undef_simple
+    t = Factbase::Term.new(:defn, [:hello, 'self.to_s'])
+    assert_equal(true, t.evaluate(fact, []))
+    t = Factbase::Term.new(:undef, [:hello])
+    assert_equal(true, t.evaluate(fact, []))
+  end
+
   def test_past
     t = Factbase::Term.new(:prev, [:foo])
     assert_nil(t.evaluate(fact('foo' => 4), []))
