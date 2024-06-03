@@ -39,4 +39,14 @@ class TestToJSON < Minitest::Test
     json = JSON.parse(to.json)
     assert(42, json[0]['foo'][1])
   end
+
+  def test_sort_keys
+    fb = Factbase.new
+    f = fb.insert
+    f.c = 42
+    f.b = 1
+    f.a = 256
+    json = Factbase::ToJSON.new(fb).json
+    assert(json.include?('{"a":256,"b":1,"c":42}'), json)
+  end
 end

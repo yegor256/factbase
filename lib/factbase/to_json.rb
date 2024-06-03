@@ -45,6 +45,6 @@ class Factbase::ToJSON
   # @return [String] The factbase in JSON format
   def json
     maps = Marshal.load(@fb.export)
-    maps.to_json
+    maps.map { |m| m.sort.to_h }.to_json
   end
 end
