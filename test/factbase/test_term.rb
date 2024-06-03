@@ -180,6 +180,13 @@ class TestTerm < Minitest::Test
     end
   end
 
+  def test_defn_bad_name_spelling_by_mistake
+    t = Factbase::Term.new(:defn, [:'some-key', 'self.to_s'])
+    assert_raises do
+      t.evaluate(fact, [])
+    end
+  end
+
   def test_past
     t = Factbase::Term.new(:prev, [:foo])
     assert_nil(t.evaluate(fact('foo' => 4), []))
