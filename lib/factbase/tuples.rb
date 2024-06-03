@@ -22,8 +22,6 @@
 
 require_relative '../factbase'
 
-# Tuples.
-#
 # With the help of this class, it's possible to select a few facts
 # from a factbase at a time, which depend on each other. For example,
 # it's necessary to find a fact where the +name+ is set and then find
@@ -36,8 +34,9 @@ require_relative '../factbase'
 #  end
 #
 # Here, the +{f0.salary}+ is a special substitution place, which is replaced
-# by the +salary+ of the fact that is found by the previous query. The indexing
-# of queries starts from zero.
+# by the +salary+ of the fact that is found by the previous query.
+#
+# The indexing of queries starts from zero.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
