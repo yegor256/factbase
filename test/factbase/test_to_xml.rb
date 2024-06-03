@@ -81,7 +81,7 @@ class TestToXML < Minitest::Test
     f.t = 40
     f.a = 10
     f.c = 1
-    to = Factbase::ToXML.new(fb)
-    assert(to.xml.gsub(/\s*/, '').include?('<f><a>10</a><c>1</c><t>40</t><x>20</x></f>'))
+    xml = Factbase::ToXML.new(fb).xml
+    assert(xml.gsub(/\s*/, '').include?('<f><a>10</a><c>1</c><t>40</t><x>20</x></f>'), xml)
   end
 end

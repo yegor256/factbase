@@ -42,4 +42,14 @@ class TestToYAML < Minitest::Test
     assert_equal(42, yaml['facts'][0]['foo'][0])
     assert_equal(256, yaml['facts'][0]['foo'][1])
   end
+
+  def test_sorts_keys
+    fb = Factbase.new
+    f = fb.insert
+    f.b = 42
+    f.a = 256
+    f.c = 10
+    yaml = Factbase::ToYAML.new(fb).yaml
+    assert(yaml.include?("a: 256\n  b: 42\n  c: 10"), yaml)
+  end
 end

@@ -45,6 +45,6 @@ class Factbase::ToYAML
   # @return [String] The factbase in YAML format
   def yaml
     maps = Marshal.load(@fb.export)
-    YAML.dump({ 'facts' => maps })
+    YAML.dump({ 'facts' => maps.map { |m| m.sort.to_h } })
   end
 end
