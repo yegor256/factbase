@@ -73,4 +73,15 @@ class TestToXML < Minitest::Test
     assert(!xml.xpath('/fb/f/f').empty?)
     assert(!xml.xpath('/fb/f/class').empty?)
   end
+
+  def test_sorts_keys
+    fb = Factbase.new
+    f = fb.insert
+    f.x = 20
+    f.t = 40
+    f.a = 10
+    f.c = 1
+    to = Factbase::ToXML.new(fb)
+    assert(to.xml.gsub(/\s*/, '').include?('<f><a>10</a><c>1</c><t>40</t><x>20</x></f>'))
+  end
 end

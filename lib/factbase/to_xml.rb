@@ -55,7 +55,7 @@ class Factbase::ToXML
       xml.fb(meta) do
         maps.each do |m|
           xml.f_ do
-            m.each do |k, vv|
+            m.sort.to_h.each do |k, vv|
               if vv.is_a?(Array)
                 xml.send(:"#{k}_") do
                   vv.each do |v|
