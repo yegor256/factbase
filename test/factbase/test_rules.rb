@@ -42,4 +42,13 @@ class TestRules < Minitest::Test
       f2.first = 1
     end
   end
+
+  def test_to_string
+    fb = Factbase::Rules.new(
+      Factbase.new,
+      '(when (exists a) (exists b))'
+    )
+    f = fb.insert
+    assert(f.to_s.length.positive?)
+  end
 end
