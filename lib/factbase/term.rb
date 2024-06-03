@@ -313,8 +313,7 @@ class Factbase::Term
   def undef(_fact, _maps)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'undef'" unless fn.is_a?(Symbol)
-    m = @operands[0]
-    Factbase::Term.instance_eval { undef m } if Factbase::Term.method_defined?(m)
+    Factbase::Term.instance_eval { undef fn } if Factbase::Term.method_defined?(fn)
     true
   end
 
