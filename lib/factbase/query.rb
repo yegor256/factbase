@@ -54,7 +54,7 @@ class Factbase::Query
       f = Factbase::Fact.new(@mutex, m)
       r = term.evaluate(f, @maps)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
-        raise "Unexpected evaluation result, must be boolean at #{@query}"
+        raise "Unexpected evaluation result (#{r.class}), must be Boolean at #{@query}"
       end
       next unless r
       yield f
