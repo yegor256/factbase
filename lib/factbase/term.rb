@@ -303,6 +303,7 @@ class Factbase::Term
   def defn(_fact, _maps)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'defn'" unless fn.is_a?(Symbol)
+    raise "Term '#{fn}' is already defined" if Factbase::Term.method_defined?(fn)
     e = "class Factbase::Term\nprivate\ndef #{fn}(fact, maps)\n#{@operands[1]}\nend\nend"
     # rubocop:disable Security/Eval
     eval(e)
