@@ -67,6 +67,8 @@ class Factbase::Term
     send(@op, fact, maps)
   rescue NoMethodError => e
     raise "Term '#{@op}' is not defined at #{self}: #{e.message}"
+  rescue StandardError => e
+    raise "#{e.message} at #{self}"
   end
 
   # Simplify it if possible.

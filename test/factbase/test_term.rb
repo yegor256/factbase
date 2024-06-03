@@ -191,6 +191,14 @@ class TestTerm < Minitest::Test
     assert(msg.include?('not defined at (something)'), msg)
   end
 
+  def test_report_other_error
+    t = Factbase::Term.new(:at, [])
+    msg = assert_raises do
+      t.evaluate(fact, [])
+    end.message
+    assert(msg.include?('at (at)'), msg)
+  end
+
   private
 
   def fact(map = {})
