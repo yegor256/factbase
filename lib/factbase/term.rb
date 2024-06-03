@@ -118,14 +118,14 @@ class Factbase::Term
 
   def or(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return true if only_bool(the_values(i, fact, maps), 0)
+      return true if only_bool(the_values(i, fact, maps), i)
     end
     false
   end
 
   def and(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return false unless only_bool(the_values(i, fact, maps), 0)
+      return false unless only_bool(the_values(i, fact, maps), i)
     end
     true
   end
