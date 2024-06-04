@@ -239,6 +239,7 @@ class TestTerm < Minitest::Test
     ]
     {
       '(eq x (agg (eq y 42) (min x)))' => '(eq x 2)',
+      '(eq z (agg (eq y 0) (max z)))' => '(eq x 8)',
       '(and (eq x (agg (eq y 42) (min x))) (eq z 3))' => '(eq x 2)'
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term
