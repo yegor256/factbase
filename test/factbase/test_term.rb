@@ -22,6 +22,7 @@
 
 require 'minitest/autorun'
 require_relative '../../lib/factbase/term'
+require_relative '../../lib/factbase/syntax'
 
 # Term test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -225,6 +226,24 @@ class TestTerm < Minitest::Test
       t.evaluate(fact, [])
     end.message
     assert(msg.include?('at (at)'), msg)
+  end
+
+  def test_aggregation
+    maps = [
+      { 'x' => 5, 'y' => 42, 'z' => 1 },
+      { 'x' => 4, 'y' => 42, 'z' => 2 },
+      { 'x' => 2, 'y' => 42, 'z' => 3 },
+      { 'x' => 1, 'y' => 0, 'z' => 4 },
+      { 'x' => 3, 'y' => 42, 'z' => 5 },
+      { 'x' => 8, 'y' => 0, 'z' => 6 }
+    ]
+    {
+      '(eq x (agg (eq y 42) (min x)))' => '(eq x 2)'
+    }.each do |q, r|
+      t = Factbase::Syntax.new(q).to_term
+      f = maps.find { |m| t.evaluate(fact(m), maps) }
+      assert(Factbase::Syntax.new(r).to_term.evaluate(fact(f), []))
+    end
   end
 
   private
