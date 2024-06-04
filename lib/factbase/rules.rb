@@ -28,14 +28,14 @@ require_relative '../factbase/syntax'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Rules
-  def initialize(fb, rules)
+  def initialize(fb, rules, check = Check.new(rules))
     @fb = fb
     @rules = rules
-    @check = Check.new(@rules)
+    @check = check
   end
 
   def dup
-    Factbase::Rules.new(@fb.dup, @rules)
+    Factbase::Rules.new(@fb.dup, @rules, @check)
   end
 
   def size
@@ -50,8 +50,11 @@ class Factbase::Rules
     Query.new(@fb.query(query), @check)
   end
 
-  def txn(_this = self, &)
-    @fb.txn(@fb, &)
+  def txn(this = self, &)
+    before = @check
+    @check = Blind.new
+    @fb.txn(this, &)
+    @check = before
     @fb.query('(always)').each do |f|
       @check.it(f)
     end
@@ -122,7 +125,6 @@ class Factbase::Rules
   # Check one fact.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
-  #
   class Check
     def initialize(expr)
       @expr = expr
@@ -131,6 +133,15 @@ class Factbase::Rules
     def it(fact)
       return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [])
       raise "The fact doesn't match the '#{@expr}' rule: #{fact}"
+    end
+  end
+
+  # Check one fact (never complaining).
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  class Blind
+    def it(_fact)
+      true
     end
   end
 end

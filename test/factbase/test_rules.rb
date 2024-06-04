@@ -65,4 +65,22 @@ class TestRules < Minitest::Test
     end
     assert(ok)
   end
+
+  def test_in_combination_with_pre
+    fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
+    fb = Factbase::Pre.new(fb) do |f|
+      f.hello = 42
+    end
+    ok = false
+    assert_raises do
+      fb.txn do |fbt|
+        f = fbt.insert
+        f.a = 1
+        f.c = 2
+        ok = true
+      end
+    end
+    assert(ok)
+    assert_equal(1, fb.query('(eq hello 42)').each.to_a.size)
+  end
 end
