@@ -31,7 +31,7 @@ class Factbase::Rules
   def initialize(fb, rules)
     @fb = fb
     @rules = rules
-    @check = Check.new(fb, @rules)
+    @check = Check.new(@rules)
   end
 
   def dup
@@ -50,8 +50,11 @@ class Factbase::Rules
     Query.new(@fb.query(query), @check)
   end
 
-  def txn(this = self, &)
-    @fb.txn(this, &)
+  def txn(_this = self, &)
+    @fb.txn(@fb, &)
+    @fb.query('(always)').each do |f|
+      @check.it(f)
+    end
   end
 
   def export
@@ -121,14 +124,13 @@ class Factbase::Rules
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Check
-    def initialize(fb, expr)
-      @fb = fb
+    def initialize(expr)
       @expr = expr
     end
 
     def it(fact)
       return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [])
-      raise "The fact is in invalid state: #{fact}"
+      raise "The fact doesn't match the '#{@expr}' rule: #{fact}"
     end
   end
 end

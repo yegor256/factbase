@@ -51,4 +51,18 @@ class TestRules < Minitest::Test
     f = fb.insert
     assert(f.to_s.length.positive?)
   end
+
+  def test_check_only_when_txn_is_closed
+    fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
+    ok = false
+    assert_raises do
+      fb.txn do |fbt|
+        f = fbt.insert
+        f.a = 1
+        f.c = 2
+        ok = true
+      end
+    end
+    assert(ok)
+  end
 end
