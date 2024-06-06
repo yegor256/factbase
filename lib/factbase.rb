@@ -159,22 +159,30 @@ class Factbase
   # inserted and all changes that happened in the block will be rolled back.
   #
   # @param [Factbase] this The factbase to use (don't provide this param)
+  # @return [Boolean] TRUE if some changes have been made, FALSE otherwise
   def txn(this = self)
     copy = this.dup
     begin
       yield copy
     rescue Factbase::Rollback
-      return
+      return false
     end
+    modified = false
     @mutex.synchronize do
       after = Marshal.load(copy.export)
       after.each_with_index do |m, i|
-        @maps << {} if i >= @maps.size
+        if i >= @maps.size
+          @maps << {}
+          modified = true
+        end
         m.each do |k, v|
+          next if @maps[i][k] == v
           @maps[i][k] = v
+          modified = true
         end
       end
     end
+    modified
   end
 
   # Export it into a chain of bytes.

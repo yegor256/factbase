@@ -53,11 +53,14 @@ class Factbase::Rules
   def txn(this = self, &)
     before = @check
     @check = Blind.new
-    @fb.txn(this, &)
+    modified = @fb.txn(this, &)
     @check = before
-    @fb.query('(always)').each do |f|
-      @check.it(f)
+    if modified
+      @fb.query('(always)').each do |f|
+        @check.it(f)
+      end
     end
+    modified
   end
 
   def export
