@@ -37,8 +37,9 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::ToXML
   # Constructor.
-  def initialize(fb)
+  def initialize(fb, sorter = '_id')
     @fb = fb
+    @sorter = sorter
   end
 
   # Convert the entire factbase into XML.
@@ -53,7 +54,7 @@ class Factbase::ToXML
     }
     Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
       xml.fb(meta) do
-        maps.each do |m|
+        maps.sort_by { |m| m[@sorter] }.each do |m|
           xml.f_ do
             m.sort.to_h.each do |k, vv|
               if vv.is_a?(Array)

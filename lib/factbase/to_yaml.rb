@@ -37,14 +37,15 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::ToYAML
   # Constructor.
-  def initialize(fb)
+  def initialize(fb, sorter = '_id')
     @fb = fb
+    @sorter = sorter
   end
 
   # Convert the entire factbase into YAML.
   # @return [String] The factbase in YAML format
   def yaml
     maps = Marshal.load(@fb.export)
-    YAML.dump({ 'facts' => maps.map { |m| m.sort.to_h } })
+    YAML.dump({ 'facts' => maps.sort_by { |m| m[@sorter] }.map { |m| m.sort.to_h } })
   end
 end

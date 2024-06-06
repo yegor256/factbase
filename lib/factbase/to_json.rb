@@ -37,14 +37,15 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::ToJSON
   # Constructor.
-  def initialize(fb)
+  def initialize(fb, sorter = '_id')
     @fb = fb
+    @sorter = sorter
   end
 
   # Convert the entire factbase into JSON.
   # @return [String] The factbase in JSON format
   def json
     maps = Marshal.load(@fb.export)
-    maps.map { |m| m.sort.to_h }.to_json
+    maps.sort_by { |m| m[@sorter] }.map { |m| m.sort.to_h }.to_json
   end
 end
