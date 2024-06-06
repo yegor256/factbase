@@ -33,9 +33,10 @@ class TestToYAML < Minitest::Test
   def test_simple_rendering
     fb = Factbase.new
     f = fb.insert
+    f._id = 1
     f.foo = 42
     f.foo = 256
-    fb.insert
+    fb.insert._id = 2
     to = Factbase::ToYAML.new(fb)
     yaml = YAML.load(to.yaml)
     assert_equal(2, yaml['facts'].size)
