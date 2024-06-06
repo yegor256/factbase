@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 require 'yaml'
-require 'time'
 require_relative '../factbase'
 
 # Factbase to YAML converter.

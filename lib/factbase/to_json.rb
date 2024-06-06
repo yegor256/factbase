@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 require 'json'
-require 'time'
 require_relative '../factbase'
 
 # Factbase to JSON converter.

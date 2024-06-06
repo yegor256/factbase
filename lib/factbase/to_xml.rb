@@ -49,7 +49,6 @@ class Factbase::ToXML
     maps = Marshal.load(bytes)
     meta = {
       version: Factbase::VERSION,
-      dob: Time.now.utc.iso8601,
       size: bytes.size
     }
     Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|

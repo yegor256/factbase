@@ -56,7 +56,6 @@ class TestToXML < Minitest::Test
     fb.insert.x = 42
     to = Factbase::ToXML.new(fb)
     xml = Nokogiri::XML.parse(to.xml)
-    assert(!xml.xpath('/fb[@dob]').empty?)
     assert(!xml.xpath('/fb[@version]').empty?)
     assert(!xml.xpath('/fb[@size]').empty?)
   end
