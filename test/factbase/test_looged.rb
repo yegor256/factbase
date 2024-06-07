@@ -44,6 +44,13 @@ class TestLooged < Minitest::Test
     assert_equal(2, fb.size)
   end
 
+  def test_with_txn
+    fb = Factbase::Looged.new(Factbase.new, Loog::NULL)
+    fb.txn do |fbt|
+      fbt.insert.foo = 42
+    end
+  end
+
   def test_returns_int
     fb = Factbase.new
     fb.insert

@@ -52,7 +52,14 @@ class Factbase::Looged
   end
 
   def txn(this = self, &)
-    @fb.txn(this, &)
+    r = false
+    @fb.txn(this) do |x|
+      tail = Factbase::Looged.elapsed do
+        r = yield x
+      end
+      @loog.debug("Txn #{r ? 'modified' : 'did nothing'} #{tail}")
+    end
+    r
   end
 
   def export
