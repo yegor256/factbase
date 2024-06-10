@@ -102,7 +102,7 @@ class TestLooged < Minitest::Test
       'Set \'bar\' to 3 (Integer)',
       'Set \'str\' to "Он поскорей звонит. Вбегает\n   ... Отъехать в поле к двум дубкам." (String)',
       'Found 1 fact(s) by \'(exists bar)\'',
-      'Deleted 3 fact(s) by \'(not (exists bar))\''
+      'Deleted 3 fact(s) out of 4 by \'(not (exists bar))\''
     ].each do |s|
       assert(log.to_s.include?(s), "#{log}\n")
     end

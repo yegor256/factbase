@@ -48,7 +48,7 @@ class Factbase::Looged
   end
 
   def query(query)
-    Query.new(@fb.query(query), query, @loog)
+    Query.new(@fb, query, @loog)
   end
 
   def txn(this = self, &)
@@ -113,8 +113,8 @@ class Factbase::Looged
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Query
-    def initialize(query, expr, loog)
-      @query = query
+    def initialize(fb, expr, loog)
+      @fb = fb
       @expr = expr
       @loog = loog
     end
@@ -124,7 +124,7 @@ class Factbase::Looged
       if block_given?
         r = nil
         tail = Factbase::Looged.elapsed do
-          r = @query.each(&)
+          r = @fb.query(@expr).each(&)
         end
         raise ".each of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
@@ -136,7 +136,7 @@ class Factbase::Looged
       else
         array = []
         tail = Factbase::Looged.elapsed do
-          @query.each do |f|
+          @fb.query(@expr).each do |f|
             array << f
           end
         end
@@ -151,14 +151,17 @@ class Factbase::Looged
 
     def delete!
       r = nil
+      before = @fb.size
       tail = Factbase::Looged.elapsed do
-        r = @query.delete!
+        r = @fb.query(@expr).delete!
       end
       raise ".delete! of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
-      if r.zero?
-        @loog.debug("Nothing deleted by '#{@expr}' #{tail}")
+      if before.zero?
+        @loog.debug("There were no facts, nothing deleted by '#{@expr}' #{tail}")
+      elsif r.zero?
+        @loog.debug("No facts out of #{before} deleted by '#{@expr}' #{tail}")
       else
-        @loog.debug("Deleted #{r} fact(s) by '#{@expr}' #{tail}")
+        @loog.debug("Deleted #{r} fact(s) out of #{before} by '#{@expr}' #{tail}")
       end
       r
     end
