@@ -22,6 +22,7 @@
 
 require 'minitest/autorun'
 require 'loog'
+require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/looged'
 
 # Test.
@@ -45,13 +46,22 @@ class TestLooged < Minitest::Test
   end
 
   def test_with_txn
-    fb = Factbase::Looged.new(Factbase.new, Loog::NULL)
+    log = Loog::Buffer.new
+    fb = Factbase::Looged.new(Factbase.new, log)
     assert(
       fb.txn do |fbt|
         fbt.insert.foo = 42
       end
     )
     assert_equal(1, fb.size)
+    assert(log.to_s.include?('modified'), log)
+  end
+
+  def test_with_empty_txn
+    log = Loog::Buffer.new
+    fb = Factbase::Looged.new(Factbase.new, log)
+    assert(!fb.txn { |fbt| fbt.query('(always)').each.to_a })
+    assert(log.to_s.include?('didn\'t touch'), log)
   end
 
   def test_returns_int

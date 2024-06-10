@@ -72,6 +72,14 @@ class TestFactbase < Minitest::Test
     assert_equal(2, fb2.size)
   end
 
+  def test_txn_returns_boolean
+    fb = Factbase.new
+    assert(fb.txn { true }.is_a?(FalseClass))
+    assert(fb.txn(&:insert).is_a?(TrueClass))
+    assert(fb.txn { |fbt| fbt.insert.bar = 42 })
+    assert(!fb.txn { |fbt| fbt.query('(always)').each.to_a })
+  end
+
   def test_run_txn
     fb = Factbase.new
     fb.txn do |fbt|

@@ -22,6 +22,7 @@
 
 require 'time'
 require 'loog'
+require_relative 'syntax'
 
 # A decorator of a Factbase, that logs all operations.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -52,14 +53,14 @@ class Factbase::Looged
   end
 
   def txn(this = self, &)
-    r = false
     before = @fb.size
-    @fb.txn(this) do |x|
+    tail = nil
+    r = @fb.txn(this) do |x|
       tail = Factbase::Looged.elapsed do
-        r = yield x
+        yield x
       end
-      @loog.debug("Txn #{r ? 'modified' : 'didn\'t touch'} #{before} facts #{tail}")
     end
+    @loog.debug("Txn #{r ? 'modified' : 'didn\'t touch'} #{before} facts #{tail}")
     r
   end
 
