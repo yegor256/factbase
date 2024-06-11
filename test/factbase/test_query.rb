@@ -46,11 +46,13 @@ class TestQuery < Minitest::Test
     maps = []
     maps << { 'num' => 42, 'name' => 'Jeff' }
     maps << { 'pi' => 3.14, 'num' => [42, 66, 0], 'name' => 'peter' }
-    maps << { 'time' => Time.now - 100, 'num' => 0, 'hi' => [4] }
+    maps << { 'time' => Time.now - 100, 'num' => 0, 'hi' => [4], 'nome' => ['Walter'] }
     {
       '(eq num 444)' => 0,
+      '(eq hi 4)' => 1,
       '(eq time 0)' => 0,
       '(gt num 60)' => 1,
+      '(gt hi 3)' => 1,
       "(and (lt pi 100) \n\n (gt num 1000))" => 0,
       '(exists pi)' => 1,
       '(eq pi +3.14)' => 1,
@@ -70,6 +72,7 @@ class TestQuery < Minitest::Test
       '(and (one pi) (eq pi (div -6.28 -2)))' => 1,
       '(gt (size num) 2)' => 1,
       '(matches name "^[a-z]+$")' => 1,
+      '(matches nome "^Walter$")' => 1,
       '(lt (size num) 2)' => 2,
       '(eq (size _hello) 0)' => 3,
       '(eq num pi)' => 0,
