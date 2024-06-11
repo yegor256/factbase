@@ -22,6 +22,7 @@
 
 require 'time'
 require 'loog'
+require 'tago'
 require_relative 'syntax'
 
 # A decorator of a Factbase, that logs all operations.
@@ -175,6 +176,6 @@ class Factbase::Looged
   def self.elapsed
     start = Time.now
     yield
-    "in #{format('%.2f', (Time.now - start) * 1000)}ms"
+    "in #{start.ago}"
   end
 end
