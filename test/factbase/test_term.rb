@@ -120,6 +120,7 @@ class TestTerm < Minitest::Test
   def test_type_matching
     t = Factbase::Term.new(:type, [:foo])
     assert_equal('Integer', t.evaluate(fact('foo' => 42), []))
+    assert_equal('Integer', t.evaluate(fact('foo' => [42]), []))
     assert_equal('Array', t.evaluate(fact('foo' => [1, 2, 3]), []))
     assert_equal('String', t.evaluate(fact('foo' => 'Hello, world!'), []))
     assert_equal('Float', t.evaluate(fact('foo' => 3.14), []))

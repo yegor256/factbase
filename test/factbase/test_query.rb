@@ -46,7 +46,7 @@ class TestQuery < Minitest::Test
     maps = []
     maps << { 'num' => 42, 'name' => 'Jeff' }
     maps << { 'pi' => 3.14, 'num' => [42, 66, 0], 'name' => 'peter' }
-    maps << { 'time' => Time.now - 100, 'num' => 0 }
+    maps << { 'time' => Time.now - 100, 'num' => 0, 'hi' => [4] }
     {
       '(eq num 444)' => 0,
       '(eq time 0)' => 0,
@@ -56,6 +56,7 @@ class TestQuery < Minitest::Test
       '(eq pi +3.14)' => 1,
       '(not (exists hello))' => 3,
       '(eq "Integer" (type num))' => 2,
+      '(eq "Integer" (type hi))' => 1,
       '(when (eq num 0) (exists time))' => 2,
       '(unique num)' => 2,
       '(unique name)' => 2,

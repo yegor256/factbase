@@ -260,6 +260,7 @@ class Factbase::Term
     assert_args(1)
     v = by_symbol(0, fact)
     return 'nil' if v.nil?
+    v = v[0] if v.is_a?(Array) && v.size == 1
     v.class.to_s
   end
 
