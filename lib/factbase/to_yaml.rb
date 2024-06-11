@@ -22,6 +22,7 @@
 
 require 'yaml'
 require_relative '../factbase'
+require_relative '../factbase/flatten'
 
 # Factbase to YAML converter.
 #
@@ -45,6 +46,6 @@ class Factbase::ToYAML
   # @return [String] The factbase in YAML format
   def yaml
     maps = Marshal.load(@fb.export)
-    YAML.dump({ 'facts' => maps.sort_by { |m| m[@sorter] }.map { |m| m.sort.to_h } })
+    YAML.dump(Factbase::Flatten.new(Marshal.load(@fb.export)).it)
   end
 end

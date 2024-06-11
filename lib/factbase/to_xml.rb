@@ -23,6 +23,7 @@
 require 'nokogiri'
 require 'time'
 require_relative '../factbase'
+require_relative '../factbase/flatten'
 
 # Factbase to XML converter.
 #
@@ -53,7 +54,7 @@ class Factbase::ToXML
     }
     Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
       xml.fb(meta) do
-        maps.sort_by { |m| m[@sorter] }.each do |m|
+        Factbase::Flatten.new(Marshal.load(@fb.export)).it.each do |m|
           xml.f_ do
             m.sort.to_h.each do |k, vv|
               if vv.is_a?(Array)

@@ -23,12 +23,31 @@
 require 'minitest/autorun'
 require 'loog'
 require_relative '../lib/factbase'
+require_relative '../lib/factbase/rules'
+require_relative '../lib/factbase/inv'
+require_relative '../lib/factbase/pre'
+require_relative '../lib/factbase/looged'
 
 # Factbase main module test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class TestFactbase < Minitest::Test
+  def test_injects_data_correctly
+    maps = []
+    fb = Factbase.new(maps)
+    fb.insert
+    f = fb.insert
+    f.foo = 1
+    f.bar = 2
+    f.bar = 3
+    assert_equal(2, maps.size)
+    assert_equal(0, maps[0].size)
+    assert_equal(2, maps[1].size)
+    assert_equal([1], maps[1]['foo'])
+    assert_equal([2, 3], maps[1]['bar'])
+  end
+
   def test_simple_setting
     fb = Factbase.new
     fb.insert
@@ -42,6 +61,22 @@ class TestFactbase < Minitest::Test
     end
     assert_equal(1, found)
     assert_equal(2, fb.size)
+  end
+
+  def test_modify_via_query
+    fb = Factbase.new
+    fb.insert.bar = 1
+    fb.query('(exists bar)').each do |f|
+      f.bar = 42
+      assert_equal([1, 42], f['bar'])
+    end
+    found = 0
+    fb.query('(always)').each do |f|
+      assert_equal([1, 42], f['bar'])
+      found += 1
+    end
+    assert_equal(1, found)
+    assert_equal([1, 42], fb.query('(always)').each.to_a[0]['bar'])
   end
 
   def test_serialize_and_deserialize
@@ -78,6 +113,8 @@ class TestFactbase < Minitest::Test
     assert(fb.txn(&:insert).is_a?(TrueClass))
     assert(fb.txn { |fbt| fbt.insert.bar = 42 })
     assert(!fb.txn { |fbt| fbt.query('(always)').each.to_a })
+    assert(fb.txn { |fbt| fbt.query('(always)').each { |f| f.hello = 33 } })
+    assert(fb.txn { |fbt| fbt.query('(always)').each.to_a[0].zzz = 33 })
   end
 
   def test_run_txn
@@ -96,6 +133,17 @@ class TestFactbase < Minitest::Test
       end.message.include?('intentionally')
     )
     assert_equal(2, fb.size)
+  end
+
+  def test_run_txn_via_query
+    fb = Factbase.new
+    fb.insert.foo = 1
+    assert(
+      fb.txn do |fbt|
+        fbt.query('(always)').each { |f| f.foo = 42 }
+      end
+    )
+    assert_equal([1, 42], fb.query('(always)').each.to_a[0]['foo'])
   end
 
   def test_run_txn_with_inv

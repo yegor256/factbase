@@ -91,10 +91,10 @@ class Factbase
     @mutex = Mutex.new
   end
 
-  # Make a duplicate of this factbase.
+  # Make a deep duplicate of this factbase.
   # @return [Factbase] A new factbase
   def dup
-    Factbase.new(@maps.dup)
+    Factbase.new(@maps.map { |m| m.map { |k, v| [k, v.dup] }.to_h })
   end
 
   # Size.
@@ -175,9 +175,9 @@ class Factbase
           @maps << {}
           modified = true
         end
-        m.each do |k, v|
-          next if @maps[i][k] == v
-          @maps[i][k] = v
+        m.each do |k, vv|
+          next if @maps[i][k] == vv
+          @maps[i][k] = vv
           modified = true
         end
       end

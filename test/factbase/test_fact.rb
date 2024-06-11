@@ -29,6 +29,17 @@ require_relative '../../lib/factbase/fact'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class TestFact < Minitest::Test
+  def test_injects_data_correctly
+    map = {}
+    f = Factbase::Fact.new(Mutex.new, map)
+    f.foo = 1
+    f.bar = 2
+    f.bar = 3
+    assert_equal(2, map.size)
+    assert_equal([1], map['foo'])
+    assert_equal([2, 3], map['bar'])
+  end
+
   def test_simple_resetting
     map = {}
     f = Factbase::Fact.new(Mutex.new, map)
@@ -89,7 +100,7 @@ class TestFact < Minitest::Test
     f = Factbase::Fact.new(Mutex.new, map)
     f.foo = 42
     f.foo = 42
-    assert_equal(42, map['foo'])
+    assert_equal([42], map['foo'])
   end
 
   def test_time_in_utc

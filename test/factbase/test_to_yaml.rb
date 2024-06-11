@@ -39,9 +39,9 @@ class TestToYAML < Minitest::Test
     fb.insert._id = 2
     to = Factbase::ToYAML.new(fb)
     yaml = YAML.load(to.yaml)
-    assert_equal(2, yaml['facts'].size)
-    assert_equal(42, yaml['facts'][0]['foo'][0])
-    assert_equal(256, yaml['facts'][0]['foo'][1])
+    assert_equal(2, yaml.size)
+    assert_equal(42, yaml[0]['foo'][0])
+    assert_equal(256, yaml[0]['foo'][1])
   end
 
   def test_sorts_keys

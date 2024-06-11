@@ -55,9 +55,9 @@ class Factbase::Looged
   def txn(this = self, &)
     before = @fb.size
     tail = nil
-    r = @fb.txn(this) do |x|
+    r = @fb.txn(this) do |fbt|
       tail = Factbase::Looged.elapsed do
-        yield x
+        yield fbt
       end
     end
     @loog.debug("Txn #{r ? 'modified' : 'didn\'t touch'} #{before} facts #{tail}")

@@ -20,31 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'json'
 require_relative '../factbase'
-require_relative '../factbase/flatten'
 
-# Factbase to JSON converter.
-#
-# This class helps converting an entire Factbase to YAML format, for example:
-#
-#  require 'factbase/to_json'
-#  fb = Factbase.new
-#  puts Factbase::ToJSON.new(fb).json
+# Make maps suitable for printing.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::ToJSON
+class Factbase::Flatten
   # Constructor.
-  def initialize(fb, sorter = '_id')
-    @fb = fb
-    @sorter = sorter
+  def initialize(maps)
+    @maps = maps
   end
 
-  # Convert the entire factbase into JSON.
-  # @return [String] The factbase in JSON format
-  def json
-    Factbase::Flatten.new(Marshal.load(@fb.export)).it.to_json
+  # Improve the maps.
+  # @return [Array<HashMap>] The hashmaps, but improved
+  def it
+    @maps
+      .sort_by { |m| m[@sorter] }
+      .map { |m| m.sort.to_h }
+      .map { |m| m.map { |k, v| [k, v.size == 1 ? v[0] : v] }.to_h }
   end
 end

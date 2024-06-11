@@ -57,6 +57,15 @@ class TestLooged < Minitest::Test
     assert(log.to_s.include?('modified'), log)
   end
 
+  def test_with_modifying_txn
+    log = Loog::Buffer.new
+    fb = Factbase::Looged.new(Factbase.new, log)
+    fb.insert.foo = 1
+    assert(!fb.txn { |fbt| fbt.query('(always)').each.to_a }, log)
+    assert(fb.txn { |fbt| fbt.query('(always)').each.to_a[0].foo = 42 }, log)
+    assert(log.to_s.include?('modified'), log)
+  end
+
   def test_with_empty_txn
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)

@@ -72,12 +72,11 @@ class Factbase::Fact
         before = @map[kk]
         return if before == v
         if before.nil?
-          @map[kk] = v
-          return
+          @map[kk] = [v]
+        else
+          @map[kk] << v
+          @map[kk].uniq!
         end
-        @map[kk] = [@map[kk]] unless @map[kk].is_a?(Array)
-        @map[kk] << v
-        @map[kk].uniq!
       end
       nil
     elsif k == '[]'
