@@ -18,7 +18,7 @@ It is possible to delete a fact, but impossible to delete a property
 from a fact.
 
 **ATTENTION**: The current implemention is naive and,
-because of that, very slow. I will be very happy
+because of that, **very slow**. I will be very happy
 if you suggest a better implementation without the change of the interface.
 The `Factbase::query()` method is what mostly needs performance optimization:
 currently it simply iterates through all facts in the factbase in order
