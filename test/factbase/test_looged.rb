@@ -57,6 +57,14 @@ class TestLooged < Minitest::Test
     assert(log.to_s.include?('modified'), log)
   end
 
+  def test_with_txn_rollback
+    log = Loog::Buffer.new
+    fb = Factbase::Looged.new(Factbase.new, log)
+    assert(!fb.txn { raise Factbase::Rollback })
+    assert_equal(0, fb.size)
+    assert(log.to_s.include?('rolled back'), log)
+  end
+
   def test_with_modifying_txn
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)

@@ -59,6 +59,9 @@ class Factbase::Looged
       tail = Factbase::Looged.elapsed do
         yield fbt
       end
+    rescue Factbase::Rollback => e
+      @loog.debug('Txn rolled back')
+      raise e
     end
     @loog.debug("Txn #{r ? 'modified' : 'didn\'t touch'} #{before} facts #{tail}")
     r
