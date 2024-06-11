@@ -1,4 +1,4 @@
-# Single-Table NoSQL In-Memory Database
+# Single-Table NoSQL-ish In-Memory Database
 
 [![DevOps By Rultor.com](http://www.rultor.com/b/yegor256/factbase)](http://www.rultor.com/p/yegor256/factbase)
 [![We recommend RubyMine](https://www.elegantobjects.org/rubymine.svg)](https://www.jetbrains.com/ruby/)
