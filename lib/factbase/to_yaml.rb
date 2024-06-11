@@ -45,6 +45,6 @@ class Factbase::ToYAML
   # Convert the entire factbase into YAML.
   # @return [String] The factbase in YAML format
   def yaml
-    YAML.dump(Factbase::Flatten.new(Marshal.load(@fb.export)).it)
+    YAML.dump(Factbase::Flatten.new(Marshal.load(@fb.export), @sorter).it)
   end
 end

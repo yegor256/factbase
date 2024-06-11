@@ -29,8 +29,9 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::Flatten
   # Constructor.
-  def initialize(maps)
+  def initialize(maps, sorter = '_id')
     @maps = maps
+    @sorter = sorter
   end
 
   # Improve the maps.
