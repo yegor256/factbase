@@ -94,7 +94,7 @@ class Factbase
   # Make a deep duplicate of this factbase.
   # @return [Factbase] A new factbase
   def dup
-    Factbase.new(@maps.map { |m| m.map { |k, v| [k, v.dup] }.to_h })
+    Factbase.new(@maps.map { |m| m.transform_values(&:dup) })
   end
 
   # Size.

@@ -39,6 +39,6 @@ class Factbase::Flatten
     @maps
       .sort_by { |m| m[@sorter] }
       .map { |m| m.sort.to_h }
-      .map { |m| m.map { |k, v| [k, v.size == 1 ? v[0] : v] }.to_h }
+      .map { |m| m.transform_values { |v| v.size == 1 ? v[0] : v } }
   end
 end

@@ -30,7 +30,7 @@ require_relative '../../lib/factbase/flatten'
 # License:: MIT
 class TestFlatten < Minitest::Test
   def test_mapping
-    maps = [{'b' => [42]}, {'a' => 33}, {'c' => ['hey', 'you']}]
+    maps = [{ 'b' => [42] }, { 'a' => 33 }, { 'c' => %w[hey you] }]
     to = Factbase::Flatten.new(maps).it
     assert(33, to[0]['a'])
     assert(42, to[1]['b'])
