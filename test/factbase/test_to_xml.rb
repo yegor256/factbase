@@ -73,6 +73,27 @@ class TestToXML < Minitest::Test
     assert(!xml.xpath('/fb/f/class').empty?)
   end
 
+  def test_show_types_as_attributes
+    fb = Factbase.new
+    f = fb.insert
+    f.a = 42
+    f.b = 3.14
+    f.c = 'Hello'
+    f.d = Time.now
+    f.e = 'e'
+    f.e = 4
+    out = Factbase::ToXML.new(fb).xml
+    xml = Nokogiri::XML.parse(out)
+    [
+      '/fb/f/a[@t="I"]',
+      '/fb/f/b[@t="F"]',
+      '/fb/f/c[@t="S"]',
+      '/fb/f/d[@t="T"]',
+      '/fb/f/e/v[@t="S"]',
+      '/fb/f/e/v[@t="I"]'
+    ].each { |x| assert(!xml.xpath(x).empty?, out) }
+  end
+
   def test_sorts_keys
     fb = Factbase.new
     f = fb.insert
@@ -80,7 +101,10 @@ class TestToXML < Minitest::Test
     f.t = 40
     f.a = 10
     f.c = 1
-    xml = Factbase::ToXML.new(fb).xml
-    assert(xml.gsub(/\s*/, '').include?('<f><a>10</a><c>1</c><t>40</t><x>20</x></f>'), xml)
+    to = Factbase::ToXML.new(fb)
+    xml = Nokogiri::XML.parse(to.xml)
+    %w[a c t x].each_with_index do |e, i|
+      assert(!xml.xpath("/fb/f/#{e}[count(preceding-sibling::*) = #{i}]").empty?, e)
+    end
   end
 end

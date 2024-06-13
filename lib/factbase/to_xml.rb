@@ -59,11 +59,11 @@ class Factbase::ToXML
               if vv.is_a?(Array)
                 xml.send(:"#{k}_") do
                   vv.each do |v|
-                    xml.send(:v, to_str(v))
+                    xml.send(:v, to_str(v), t: type_of(v))
                   end
                 end
               else
-                xml.send(:"#{k}_", to_str(vv))
+                xml.send(:"#{k}_", to_str(vv), t: type_of(vv))
               end
             end
           end
@@ -80,5 +80,9 @@ class Factbase::ToXML
     else
       val.to_s
     end
+  end
+
+  def type_of(val)
+    val.class.to_s[0]
   end
 end
