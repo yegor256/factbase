@@ -63,6 +63,7 @@ class TestLooged < Minitest::Test
     assert(!fb.txn { raise Factbase::Rollback })
     assert_equal(0, fb.size)
     assert(log.to_s.include?('rolled back'), log)
+    assert(!log.to_s.include?('didn\'t touch'), log)
   end
 
   def test_with_modifying_txn

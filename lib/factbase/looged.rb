@@ -57,13 +57,19 @@ class Factbase::Looged
     start = Time.now
     before = @fb.size
     id = nil
+    rollback = false
     r = @fb.txn(this) do |fbt|
+      id = fbt.object_id
       yield fbt
     rescue Factbase::Rollback => e
-      @loog.debug("Txn #{fbt.object_id} rolled back in #{start.ago}")
+      rollback = true
       raise e
     end
-    @loog.debug("Txn #{id} #{r ? 'modified' : 'didn\'t touch'} #{before} facts in #{start.ago}")
+    if rollback
+      @loog.debug("Txn ##{id} rolled back in #{start.ago}")
+    else
+      @loog.debug("Txn ##{id} #{r ? 'modified' : 'didn\'t touch'} #{before} facts in #{start.ago}")
+    end
     r
   end
 
