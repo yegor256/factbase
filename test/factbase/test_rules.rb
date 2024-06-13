@@ -23,6 +23,7 @@
 require 'minitest/autorun'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/rules'
+require_relative '../../lib/factbase/pre'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -66,6 +67,18 @@ class TestRules < Minitest::Test
     assert(ok)
   end
 
+  def test_rollback_on_violation
+    fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
+    assert_raises do
+      fb.txn do |fbt|
+        f = fbt.insert
+        f.a = 1
+        f.c = 2
+      end
+    end
+    assert_equal(0, fb.size)
+  end
+
   def test_in_combination_with_pre
     fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
     fb = Factbase::Pre.new(fb) do |f|
@@ -81,6 +94,6 @@ class TestRules < Minitest::Test
       end
     end
     assert(ok)
-    assert_equal(1, fb.query('(eq hello 42)').each.to_a.size)
+    assert_equal(0, fb.query('(eq hello 42)').each.to_a.size)
   end
 end

@@ -24,18 +24,30 @@ require_relative '../factbase'
 require_relative '../factbase/syntax'
 
 # A decorator of a Factbase, that checks rules on every set.
+#
+# Say, you want every fact to have +foo+ property. You want any attempt
+# to insert a fact without this property to lead to a runtime error. Here is how:
+#
+#  fb = Factbase.new
+#  fb = Factabase::Rules.new(fb, '(exists foo)')
+#  fb.txn do |fbt|
+#    f = fbt.insert
+#    f.bar = 3
+#  end # Runtime exception here (transaction won't commit)
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Rules
-  def initialize(fb, rules, check = Check.new(rules))
+  def initialize(fb, rules, check = Check.new(rules), uid: nil)
     @fb = fb
     @rules = rules
     @check = check
+    @uid = uid
   end
 
   def dup
-    Factbase::Rules.new(@fb.dup, @rules, @check)
+    Factbase::Rules.new(@fb.dup, @rules, @check, uid: @uid)
   end
 
   def size
@@ -52,15 +64,16 @@ class Factbase::Rules
 
   def txn(this = self, &)
     before = @check
-    @check = Blind.new
-    modified = @fb.txn(this, &)
-    @check = before
-    if modified
-      @fb.query('(always)').each do |f|
+    later = Later.new(@uid)
+    @check = later
+    @fb.txn(this) do |fbt|
+      yield fbt
+      @check = before
+      fbt.query('(always)').each do |f|
+        next unless later.include?(f)
         @check.it(f)
       end
     end
-    modified
   end
 
   def export
@@ -88,7 +101,7 @@ class Factbase::Rules
     def method_missing(*args)
       r = @fact.method_missing(*args)
       k = args[0].to_s
-      @check.it(self) if k.end_with?('=')
+      @check.it(@fact) if k.end_with?('=')
       r
     end
 
@@ -143,9 +156,19 @@ class Factbase::Rules
   # Check one fact (never complaining).
   #
   # This is an internal class, it is not supposed to be instantiated directly.
-  class Blind
-    def it(_fact)
-      true
+  class Later
+    def initialize(uid)
+      @uid = uid
+      @facts = Set.new
+    end
+
+    def it(fact)
+      @facts << fact.send(@uid) unless @uid.nil?
+    end
+
+    def include?(fact)
+      return true if @uid.nil?
+      @facts.include?(fact.send(@uid))
     end
   end
 end
