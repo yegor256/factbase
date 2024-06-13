@@ -125,6 +125,7 @@ class TestTerm < Minitest::Test
     assert_equal('String', t.evaluate(fact('foo' => 'Hello, world!'), []))
     assert_equal('Float', t.evaluate(fact('foo' => 3.14), []))
     assert_equal('Time', t.evaluate(fact('foo' => Time.now), []))
+    assert_equal('Integer', t.evaluate(fact('foo' => 1_000_000_000_000_000), []))
     assert_equal('nil', t.evaluate(fact, []))
   end
 
