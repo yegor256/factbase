@@ -45,7 +45,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'json', '~>2.7'
   s.add_runtime_dependency 'loog', '~>0.2'
   s.add_runtime_dependency 'nokogiri', '~>1.10'
-  s.add_runtime_dependency 'stringio', '3.1.0'
   s.add_runtime_dependency 'tago', '~>0.0'
   s.add_runtime_dependency 'yaml', '~>0.3'
   s.metadata['rubygems_mfa_required'] = 'true'
