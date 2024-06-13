@@ -56,15 +56,16 @@ class Factbase::Looged
   def txn(this = self, &)
     before = @fb.size
     tail = nil
+    id = nil
     r = @fb.txn(this) do |fbt|
       tail = Factbase::Looged.elapsed do
         yield fbt
       end
     rescue Factbase::Rollback => e
-      @loog.debug('Txn rolled back')
+      @loog.debug("Txn #{fbt.object_id} rolled back")
       raise e
     end
-    @loog.debug("Txn #{r ? 'modified' : 'didn\'t touch'} #{before} facts #{tail}")
+    @loog.debug("Txn #{id} #{r ? 'modified' : 'didn\'t touch'} #{before} facts #{tail}")
     r
   end
 
