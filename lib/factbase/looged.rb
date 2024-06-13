@@ -55,7 +55,6 @@ class Factbase::Looged
 
   def txn(this = self, &)
     start = Time.now
-    before = @fb.size
     id = nil
     rollback = false
     r = @fb.txn(this) do |fbt|
@@ -68,7 +67,7 @@ class Factbase::Looged
     if rollback
       @loog.debug("Txn ##{id} rolled back in #{start.ago}")
     else
-      @loog.debug("Txn ##{id} #{r ? 'modified' : 'didn\'t touch'} #{before} facts in #{start.ago}")
+      @loog.debug("Txn ##{id} #{r ? 'modified' : 'didn\'t touch'} the factbase in #{start.ago}")
     end
     r
   end
