@@ -98,6 +98,7 @@ There are terms that are history of search aware:
 There are also terms that match the entire factbase
 and must be used inside the `(agg ..)` term:
 
+* `(nth p k)` returns the `k` property of the _n_-th fact
 * `(count)` returns the tally of facts
 * `(max k)` returns the maximum value of the `k` property in all facts
 * `(min k)` returns the minimum

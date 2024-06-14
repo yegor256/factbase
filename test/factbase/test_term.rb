@@ -243,7 +243,8 @@ class TestTerm < Minitest::Test
       '(eq x (agg (eq y 42) (min x)))' => '(eq x 2)',
       '(eq z (agg (eq y 0) (max z)))' => '(eq x 8)',
       '(eq x (agg (and (eq y 42) (gt z 1)) (max x)))' => '(eq x 4)',
-      '(and (eq x (agg (eq y 42) (min x))) (eq z 3))' => '(eq x 2)'
+      '(and (eq x (agg (eq y 42) (min x))) (eq z 3))' => '(eq x 2)',
+      '(eq x (agg (eq y 0) (nth 0 x)))' => '(eq x 1)'
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term
       f = maps.find { |m| t.evaluate(fact(m), maps) }

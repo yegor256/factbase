@@ -326,15 +326,29 @@ class Factbase::Term
   end
 
   def min(_fact, maps)
+    assert_args(1)
     @min ||= best(maps) { |v, b| v < b }
   end
 
   def max(_fact, maps)
+    assert_args(1)
     @max ||= best(maps) { |v, b| v > b }
   end
 
   def count(_fact, maps)
     @count ||= maps.size
+  end
+
+  def nth(_fact, maps)
+    assert_args(2)
+    @nth ||=
+      begin
+        pos = @operands[0]
+        raise "An integer expected, but #{pos} provided" unless pos.is_a?(Integer)
+        k = @operands[1]
+        raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
+        maps[pos][k.to_s]
+      end
   end
 
   def sum(_fact, maps)
