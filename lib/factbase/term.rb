@@ -351,6 +351,16 @@ class Factbase::Term
       end
   end
 
+  def first(_fact, maps)
+    assert_args(1)
+    @first ||=
+      begin
+        k = @operands[0]
+        raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
+        maps[0][k.to_s]
+      end
+  end
+
   def sum(_fact, maps)
     @sum ||=
       begin
