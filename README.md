@@ -84,6 +84,7 @@ It's possible to modify the facts retrieved, on fly:
 
 Also, some simple arithmetic:
 
+* `(nil a)` returns true if the value is nil
 * `(plus a b)` is a sum of `a` and `b`
 * `(minus a b)` is a deducation of `b` from `a`
 * `(times a b)` is a multiplication of `a` and `b`

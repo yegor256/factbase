@@ -65,6 +65,7 @@ class TestQuery < Minitest::Test
       '(unique pi)' => 1,
       '(many num)' => 1,
       '(one num)' => 2,
+      '(nil (agg (exists hello) (min num)))' => 3,
       '(gt num (minus 1 (either (at 0 (prev num)) 0)))' => 3,
       '(and (not (many num)) (eq num (plus 21 +21)))' => 1,
       '(and (not (many num)) (eq num (minus -100 -142)))' => 1,

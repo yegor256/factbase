@@ -273,6 +273,11 @@ class Factbase::Term
     true
   end
 
+  def nil(fact, maps)
+    assert_args(1)
+    the_values(0, fact, maps).nil?
+  end
+
   def matches(fact, maps)
     assert_args(2)
     str = the_values(0, fact, maps)
