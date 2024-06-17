@@ -101,7 +101,7 @@ There are terms that are history of search aware:
 * `(unique k)` returns true if the value of `k` property hasn't been seen yet
 
 There are also terms that match the entire factbase
-and must be used inside the `(agg ..)` term:
+and must be used primarily inside the `(agg ..)` term:
 
 * `(nth p k)` returns the `k` property of the _n_-th fact
 * `(first k)` returns the `k` property of the first fact
@@ -117,6 +117,8 @@ and then returning the result as an atomic value:
 * `(lt age (agg (eq gender 'F') (max age)))` selects all facts where
 the `age` is smaller than the maximum `age` of all women
 * `(eq id (agg (always) (max id)))` selects the fact with the largest `id`
+* `(eq salary (agg (eq dept $dept) (avg salary)))` selects the facts
+with the salary average in their departments
 
 ## How to contribute
 

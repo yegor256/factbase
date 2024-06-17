@@ -142,7 +142,7 @@ class Factbase::Syntax
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/)
         Time.parse(t)
       else
-        raise "Wrong symbol format (#{t})" unless t.match?(/^[_a-z][a-zA-Z0-9_]*$/)
+        raise "Wrong symbol format (#{t})" unless t.match?(/^[_a-z\$][a-zA-Z0-9_]*$/)
         t.to_sym
       end
     end

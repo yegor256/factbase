@@ -22,20 +22,18 @@
 
 require_relative '../factbase'
 
-# Accumulator of props.
+# Tee of two facts.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Accum
+class Factbase::Tee
   # Ctor.
-  # @param [Factbase::Fact] fact The fact to decorate
-  # @param [Hash] props Hash of props that were set
-  # @param [Boolean] pass TRUE if all "set" operations must go through, to the +fact+
-  def initialize(fact, props, pass)
+  # @param [Factbase::Fact] fact Primary fact to use for reading
+  # @param [Factbase::Fact] upper Fact to access with a "$" prefix
+  def initialize(fact, upper)
     @fact = fact
-    @props = props
-    @pass = pass
+    @upper = upper
   end
 
   def to_s
@@ -43,23 +41,7 @@ class Factbase::Accum
   end
 
   def method_missing(*args)
-    k = args[0].to_s
-    if k.end_with?('=')
-      kk = k[0..-2]
-      @props[kk] = [] if @props[kk].nil?
-      @props[kk] << args[1]
-      @fact.method_missing(*args) if @pass
-      return
-    end
-    if k == '[]'
-      kk = args[1].to_s
-      vv = @props[kk].nil? ? [] : @props[kk]
-      vvv = @fact.method_missing(*args)
-      vv += vvv unless vvv.nil?
-      vv.uniq!
-      return vv.empty? ? nil : vv
-    end
-    return @props[k][0] unless @props[k].nil?
+    return @upper[args[1].to_s[1..]] if args[0].to_s == '[]' && args[1].to_s.start_with?('$')
     @fact.method_missing(*args)
   end
 

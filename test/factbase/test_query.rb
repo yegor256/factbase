@@ -85,7 +85,8 @@ class TestQuery < Minitest::Test
       '(and (absent time) (exists pi))' => 1,
       "(and (exists time) (not (\t\texists pi)))" => 1,
       '(undef something)' => 3,
-      "(or (eq num +66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1
+      "(or (eq num +66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1,
+      '(eq 3 (agg (eq num $num) (count)))' => 1
     }.each do |q, r|
       assert_equal(r, Factbase::Query.new(maps, Mutex.new, q).each.to_a.size, q)
     end

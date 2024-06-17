@@ -20,56 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../factbase'
+require 'minitest/autorun'
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/tee'
+require_relative '../../lib/factbase/fact'
 
-# Accumulator of props.
-#
+# Tee test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Accum
-  # Ctor.
-  # @param [Factbase::Fact] fact The fact to decorate
-  # @param [Hash] props Hash of props that were set
-  # @param [Boolean] pass TRUE if all "set" operations must go through, to the +fact+
-  def initialize(fact, props, pass)
-    @fact = fact
-    @props = props
-    @pass = pass
-  end
-
-  def to_s
-    @fact.to_s
-  end
-
-  def method_missing(*args)
-    k = args[0].to_s
-    if k.end_with?('=')
-      kk = k[0..-2]
-      @props[kk] = [] if @props[kk].nil?
-      @props[kk] << args[1]
-      @fact.method_missing(*args) if @pass
-      return
-    end
-    if k == '[]'
-      kk = args[1].to_s
-      vv = @props[kk].nil? ? [] : @props[kk]
-      vvv = @fact.method_missing(*args)
-      vv += vvv unless vvv.nil?
-      vv.uniq!
-      return vv.empty? ? nil : vv
-    end
-    return @props[k][0] unless @props[k].nil?
-    @fact.method_missing(*args)
-  end
-
-  # rubocop:disable Style/OptionalBooleanParameter
-  def respond_to?(_method, _include_private = false)
-    # rubocop:enable Style/OptionalBooleanParameter
-    true
-  end
-
-  def respond_to_missing?(_method, _include_private = false)
-    true
+class TestTee < Minitest::Test
+  def test_two_facts
+    map = {}
+    prim = Factbase::Fact.new(Mutex.new, map)
+    prim.foo = 42
+    upper = Factbase::Fact.new(Mutex.new, map)
+    upper.bar = 13
+    t = Factbase::Tee.new(prim, upper)
+    assert_equal(42, t.foo)
+    assert_equal([13], t['$bar'])
   end
 end

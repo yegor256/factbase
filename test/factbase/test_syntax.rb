@@ -43,7 +43,7 @@ class TestSyntax < Minitest::Test
     [
       '(foo)',
       '(foo (bar) (zz 77)   ) # hey',
-      "# hello\n\n\n(foo (bar))",
+      "# hello\n\n\n(foo ($bar))",
       "(eq foo   \n\n 'Hello, world!'\n)\n",
       "(eq x 'Hello, \\' \n) \\' ( world!')",
       "# this is a comment\n(eq foo # test\n 42)\n\n# another comment\n",

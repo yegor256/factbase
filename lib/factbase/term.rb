@@ -341,71 +341,66 @@ class Factbase::Term
 
   def min(_fact, maps)
     assert_args(1)
-    @min ||= best(maps) { |v, b| v < b }
+    best(maps) { |v, b| v < b }
   end
 
   def max(_fact, maps)
     assert_args(1)
-    @max ||= best(maps) { |v, b| v > b }
+    best(maps) { |v, b| v > b }
   end
 
   def count(_fact, maps)
-    @count ||= maps.size
+    maps.size
   end
 
   def nth(_fact, maps)
     assert_args(2)
-    @nth ||=
-      begin
-        pos = @operands[0]
-        raise "An integer expected, but #{pos} provided" unless pos.is_a?(Integer)
-        k = @operands[1]
-        raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
-        maps[pos][k.to_s]
-      end
+    pos = @operands[0]
+    raise "An integer expected, but #{pos} provided" unless pos.is_a?(Integer)
+    k = @operands[1]
+    raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
+    maps[pos][k.to_s]
   end
 
   def first(_fact, maps)
     assert_args(1)
-    @first ||=
-      begin
-        k = @operands[0]
-        raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
-        maps[0][k.to_s]
-      end
+    k = @operands[0]
+    raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
+    maps[0][k.to_s]
   end
 
   def sum(_fact, maps)
-    @sum ||=
-      begin
-        k = @operands[0]
-        raise "A symbol expected, but '#{k}' provided" unless k.is_a?(Symbol)
-        sum = 0
-        maps.each do |m|
-          vv = m[k.to_s]
-          next if vv.nil?
-          vv = [vv] unless vv.is_a?(Array)
-          vv.each do |v|
-            sum += v
-          end
-        end
-        sum
+    k = @operands[0]
+    raise "A symbol expected, but '#{k}' provided" unless k.is_a?(Symbol)
+    sum = 0
+    maps.each do |m|
+      vv = m[k.to_s]
+      next if vv.nil?
+      vv = [vv] unless vv.is_a?(Array)
+      vv.each do |v|
+        sum += v
       end
+    end
+    sum
   end
 
-  def agg(_fact, maps)
+  def traced(fact, maps)
+    assert_args(1)
+    t = @operands[0]
+    raise "A term expected, but '#{t}' provided" unless t.is_a?(Factbase::Term)
+    r = t.evaluate(fact, maps)
+    puts "#{self} -> #{r}"
+    r
+  end
+
+  def agg(fact, maps)
     assert_args(2)
     selector = @operands[0]
     raise "A term expected, but '#{selector}' provided" unless selector.is_a?(Factbase::Term)
     term = @operands[1]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    subset = maps.select { |m| selector.evaluate(m, maps) }
-    @agg ||=
-      if subset.empty?
-        term.evaluate(Factbase::Fact.new(Mutex.new, {}), subset)
-      else
-        term.evaluate(subset.first, subset)
-      end
+    subset = maps.select { |m| selector.evaluate(Factbase::Tee.new(Factbase::Fact.new(Mutex.new, m), fact), maps) }
+    term.evaluate(nil, subset)
   end
 
   def assert_args(num)
