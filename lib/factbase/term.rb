@@ -22,6 +22,7 @@
 
 require_relative '../factbase'
 require_relative 'fact'
+require_relative 'tee'
 
 # Term.
 #

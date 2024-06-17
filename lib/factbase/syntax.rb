@@ -44,7 +44,7 @@ class Factbase::Syntax
   def to_term
     build.simplify
   rescue StandardError => e
-    err = "#{e.message} in #{@query}"
+    err = "#{e.message} in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
     raise err
   end
