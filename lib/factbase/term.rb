@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'backtrace'
 require_relative '../factbase'
 require_relative 'fact'
 require_relative 'tee'
@@ -69,6 +70,7 @@ class Factbase::Term
   rescue NoMethodError => e
     raise "Term '#{@op}' is not defined at #{self}: #{e.message}"
   rescue StandardError => e
+    puts Backtrace.new(e)
     raise "#{e.message} at #{self} (#{e.backtrace[0]})"
   end
 
@@ -367,7 +369,9 @@ class Factbase::Term
     assert_args(1)
     k = @operands[0]
     raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
-    maps[0][k.to_s]
+    first = maps[0]
+    return nil if first.nil?
+    first[k.to_s]
   end
 
   def sum(_fact, maps)
