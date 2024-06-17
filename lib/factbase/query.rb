@@ -23,11 +23,14 @@
 require_relative '../factbase'
 require_relative 'syntax'
 require_relative 'fact'
+require_relative 'accum'
 
 # Query.
 #
 # This is an internal class, it is not supposed to be instantiated directly. It
 # is created by the +query()+ method of the +Factbase+ class.
+#
+# It is NOT thread-safe!
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
@@ -51,13 +54,15 @@ class Factbase::Query
     term = Factbase::Syntax.new(@query).to_term
     yielded = 0
     @maps.each do |m|
+      extras = {}
       f = Factbase::Fact.new(@mutex, m)
-      r = term.evaluate(f, @maps)
+      a = Factbase::Accum.new(f, extras, false)
+      r = term.evaluate(a, @maps)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
         raise "Unexpected evaluation result (#{r.class}), must be Boolean at #{@query}"
       end
       next unless r
-      yield f
+      yield Factbase::Accum.new(f, extras, true)
       yielded += 1
     end
     yielded

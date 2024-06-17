@@ -78,6 +78,10 @@ There are a few terms that return non-boolean values:
 * `(type a)` returns type of `a` ("String", "Integer", "Float", or "Time")
 * `(either a b)` returns `b` if `a` is `nil`
 
+It's possible to modify the facts retrieved, on fly:
+
+* `(as k a)` adds property `k` with the value `a`
+
 Also, some simple arithmetic:
 
 * `(plus a b)` is a sum of `a` and `b`

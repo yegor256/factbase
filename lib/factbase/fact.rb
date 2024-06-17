@@ -69,14 +69,9 @@ class Factbase::Fact
       raise "Prop type '#{v.class}' is not allowed" unless [String, Integer, Float, Time].include?(v.class)
       v = v.utc if v.is_a?(Time)
       @mutex.synchronize do
-        before = @map[kk]
-        return if before == v
-        if before.nil?
-          @map[kk] = [v]
-        else
-          @map[kk] << v
-          @map[kk].uniq!
-        end
+        @map[kk] = [] if @map[kk].nil?
+        @map[kk] << v
+        @map[kk].uniq!
       end
       nil
     elsif k == '[]'
@@ -87,7 +82,7 @@ class Factbase::Fact
         raise "Can't get '#{k}', the fact is empty" if @map.empty?
         raise "Can't find '#{k}' attribute out of [#{@map.keys.join(', ')}]"
       end
-      v.is_a?(Array) ? v[0] : v
+      v[0]
     end
   end
 

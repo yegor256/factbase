@@ -264,6 +264,15 @@ class Factbase::Term
     v.class.to_s
   end
 
+  def as(fact, maps)
+    assert_args(2)
+    a = @operands[0]
+    raise "A symbol expected as first argument of 'as'" unless a.is_a?(Symbol)
+    vv = the_values(1, fact, maps)
+    vv.each { |v| fact.send("#{a}=", v) }
+    true
+  end
+
   def matches(fact, maps)
     assert_args(2)
     str = the_values(0, fact, maps)

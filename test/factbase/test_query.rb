@@ -44,9 +44,9 @@ class TestQuery < Minitest::Test
 
   def test_complex_parsing
     maps = []
-    maps << { 'num' => 42, 'name' => 'Jeff' }
-    maps << { 'pi' => 3.14, 'num' => [42, 66, 0], 'name' => 'peter' }
-    maps << { 'time' => Time.now - 100, 'num' => 0, 'hi' => [4], 'nome' => ['Walter'] }
+    maps << { 'num' => [42], 'name' => ['Jeff'] }
+    maps << { 'pi' => [3.14], 'num' => [42, 66, 0], 'name' => ['peter'] }
+    maps << { 'time' => [Time.now - 100], 'num' => [0], 'hi' => [4], 'nome' => ['Walter'] }
     {
       '(eq num 444)' => 0,
       '(eq hi 4)' => 1,
@@ -93,7 +93,7 @@ class TestQuery < Minitest::Test
   def test_simple_parsing_with_time
     maps = []
     now = Time.now.utc
-    maps << { 'foo' => now }
+    maps << { 'foo' => [now] }
     q = Factbase::Query.new(maps, Mutex.new, "(eq foo #{now.iso8601})")
     assert_equal(1, q.each.to_a.size)
   end
@@ -102,7 +102,7 @@ class TestQuery < Minitest::Test
     maps = []
     maps << { 'foo' => [42] }
     maps << { 'bar' => [4, 5] }
-    maps << { 'bar' => 5 }
+    maps << { 'bar' => [5] }
     q = Factbase::Query.new(maps, Mutex.new, '(eq bar 5)')
     assert_equal(2, q.delete!)
     assert_equal(1, maps.size)
@@ -112,7 +112,7 @@ class TestQuery < Minitest::Test
     maps = []
     maps << { 'foo' => [42] }
     maps << { 'bar' => [4, 5] }
-    maps << { 'bar' => 5 }
+    maps << { 'bar' => [5] }
     q = Factbase::Query.new(maps, Mutex.new, '(never)')
     assert_equal(0, q.delete!)
     assert_equal(3, maps.size)
@@ -126,8 +126,15 @@ class TestQuery < Minitest::Test
 
   def test_returns_int
     maps = []
-    maps << { 'foo' => 1 }
+    maps << { 'foo' => [1] }
     q = Factbase::Query.new(maps, Mutex.new, '(eq foo 1)')
     assert_equal(1, q.each(&:to_s))
+  end
+
+  def test_with_aliases
+    maps = []
+    maps << { 'foo' => [42] }
+    assert_equal(45, Factbase::Query.new(maps, Mutex.new, '(as bar (plus foo 3))').each.to_a[0].bar)
+    assert_equal(1, maps[0].size)
   end
 end

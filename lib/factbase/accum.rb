@@ -20,57 +20,58 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'json'
+require 'time'
 require_relative '../factbase'
 
-# With the help of this class, it's possible to select a few facts
-# from a factbase at a time, which depend on each other. For example,
-# it's necessary to find a fact where the +name+ is set and then find
-# another fact, where the salary is the +salary+ is the same as in the
-# first found fact. Here is how:
-#
-#  Factbase::Tuples.new(qt, ['(exists name)', '(eq salary, {f0.salary})']).each do |a, b|
-#    puts a.name
-#    puts b.salary
-#  end
-#
-# Here, the +{f0.salary}+ is a special substitution place, which is replaced
-# by the +salary+ of the fact that is found by the previous query.
-#
-# The indexing of queries starts from zero.
+# Accumulator of props.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class Factbase::Tuples
-  def initialize(fb, queries)
-    @fb = fb
-    @queries = queries
+class Factbase::Accum
+  # Ctor.
+  # @param [Factbase::Fact] fact The fact to decorate
+  # @param [Hash] props Hash of props that were set
+  # @param [Boolean] pass TRUE if all "set" operations must go through, to the +fact+
+  def initialize(fact, props, pass)
+    @fact = fact
+    @props = props
+    @pass = pass
   end
 
-  # Iterate them one by one.
-  # @yield [Array<Fact>] Arrays of facts one-by-one
-  # @return [Integer] Total number of arrays yielded
-  def each(&)
-    return to_enum(__method__) unless block_given?
-    each_rec([], @queries, &)
+  def to_s
+    @fact.to_s
   end
 
-  private
+  def method_missing(*args)
+    k = args[0].to_s
+    if k.end_with?('=')
+      kk = k[0..-2]
+      @props[kk] = [] if @props[kk].nil?
+      @props[kk] << args[1]
+      @fact.method_missing(*args) if @pass
+      return
+    end
+    if k == '[]'
+      kk = args[1].to_s
+      vv = @props[kk].nil? ? [] : @props[kk]
+      vvv = @fact.method_missing(*args)
+      vv += vvv unless vvv.nil?
+      vv.uniq!
+      return vv.empty? ? nil : vv
+    end
+    return @props[k][0] unless @props[k].nil?
+    @fact.method_missing(*args)
+  end
 
-  def each_rec(facts, tail, &)
-    qq = tail.dup
-    q = qq.shift
-    return if q.nil?
-    qt = q.gsub(/\{f([0-9]+).([a-z0-9_]+)\}/) do
-      facts[Regexp.last_match[1].to_i].send(Regexp.last_match[2])
-    end
-    @fb.query(qt).each do |f|
-      fs = facts + [f]
-      if qq.empty?
-        yield fs
-      else
-        each_rec(fs, qq, &)
-      end
-    end
+  # rubocop:disable Style/OptionalBooleanParameter
+  def respond_to?(_method, _include_private = false)
+    # rubocop:enable Style/OptionalBooleanParameter
+    true
+  end
+
+  def respond_to_missing?(_method, _include_private = false)
+    true
   end
 end

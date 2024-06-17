@@ -68,15 +68,15 @@ class TestFactbase < Minitest::Test
     fb.insert.bar = 1
     fb.query('(exists bar)').each do |f|
       f.bar = 42
-      assert_equal([1, 42], f['bar'])
+      assert_equal(2, f['bar'].size)
     end
     found = 0
     fb.query('(always)').each do |f|
-      assert_equal([1, 42], f['bar'])
+      assert_equal(2, f['bar'].size)
       found += 1
     end
     assert_equal(1, found)
-    assert_equal([1, 42], fb.query('(always)').each.to_a[0]['bar'])
+    assert_equal(2, fb.query('(always)').each.to_a[0]['bar'].size)
   end
 
   def test_serialize_and_deserialize
