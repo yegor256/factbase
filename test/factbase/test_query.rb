@@ -137,4 +137,10 @@ class TestQuery < Minitest::Test
     assert_equal(45, Factbase::Query.new(maps, Mutex.new, '(as bar (plus foo 3))').each.to_a[0].bar)
     assert_equal(1, maps[0].size)
   end
+
+  def test_with_nil_alias
+    maps = []
+    maps << { 'foo' => [42] }
+    assert(Factbase::Query.new(maps, Mutex.new, '(as bar (plus xxx 3))').each.to_a[0]['bar'].nil?)
+  end
 end

@@ -214,6 +214,12 @@ class TestTerm < Minitest::Test
     assert_equal([42], t.evaluate(fact('foo' => 4), []))
   end
 
+  def test_plus
+    t = Factbase::Term.new(:plus, [:foo, 42])
+    assert_equal(46, t.evaluate(fact('foo' => 4), []))
+    assert_equal(nil, t.evaluate(fact, []))
+  end
+
   def test_report_missing_term
     t = Factbase::Term.new(:something, [])
     msg = assert_raises do

@@ -269,7 +269,7 @@ class Factbase::Term
     a = @operands[0]
     raise "A symbol expected as first argument of 'as'" unless a.is_a?(Symbol)
     vv = the_values(1, fact, maps)
-    vv.each { |v| fact.send("#{a}=", v) }
+    vv&.each { |v| fact.send("#{a}=", v) }
     true
   end
 
@@ -302,10 +302,10 @@ class Factbase::Term
   def arithmetic(op, fact, maps)
     assert_args(2)
     lefts = the_values(0, fact, maps)
-    raise 'The first argument is NIL, while literal expected' if lefts.nil?
+    return nil if lefts.nil?
     raise 'Too many values at first position, one expected' unless lefts.size == 1
     rights = the_values(1, fact, maps)
-    raise 'The second argument is NIL, while literal expected' if rights.nil?
+    return nil if rights.nil?
     raise 'Too many values at second position, one expected' unless rights.size == 1
     lefts[0].send(op, rights[0])
   end
