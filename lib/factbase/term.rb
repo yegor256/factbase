@@ -70,8 +70,7 @@ class Factbase::Term
   rescue NoMethodError => e
     raise "Term '#{@op}' is not defined at #{self}: #{e.message}"
   rescue StandardError => e
-    puts Backtrace.new(e)
-    raise "#{e.message} at #{self} (#{e.backtrace[0]})"
+    raise "#{e.message} at #{self}:\n#{Backtrace.new(e)}"
   end
 
   # Simplify it if possible.
