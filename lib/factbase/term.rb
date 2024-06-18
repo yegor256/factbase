@@ -180,7 +180,7 @@ class Factbase::Term
 
   def by_symbol(pos, fact)
     o = @operands[pos]
-    raise "A symbol expected at ##{pos}, but '#{o}' provided" unless o.is_a?(Symbol)
+    raise "A symbol expected at ##{pos}, but '#{o}' (#{o.class}) provided" unless o.is_a?(Symbol)
     k = o.to_s
     fact[k]
   end
@@ -197,9 +197,7 @@ class Factbase::Term
   def only_bool(val, pos)
     val = val[0] if val.is_a?(Array)
     return false if val.nil?
-    unless val.is_a?(TrueClass) || val.is_a?(FalseClass)
-      raise "Boolean expected, while #{val.class} received from #{@operands[pos]}"
-    end
-    val
+    return val if val.is_a?(TrueClass) || val.is_a?(FalseClass)
+    raise "Boolean expected, while #{val.class} received from #{@operands[pos]}"
   end
 end
