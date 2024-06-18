@@ -68,6 +68,9 @@ class Factbase::Term
   require_relative 'terms/meta'
   include Factbase::Term::Meta
 
+  require_relative 'terms/aliases'
+  include Factbase::Term::Aliases
+
   require_relative 'terms/ordering'
   include Factbase::Term::Ordering
 
@@ -145,15 +148,6 @@ class Factbase::Term
     v[i]
   end
 
-  def as(fact, maps)
-    assert_args(2)
-    a = @operands[0]
-    raise "A symbol expected as first argument of 'as'" unless a.is_a?(Symbol)
-    vv = the_values(1, fact, maps)
-    vv&.each { |v| fact.send("#{a}=", v) }
-    true
-  end
-
   def assert_args(num)
     c = @operands.size
     raise "Too many (#{c}) operands for '#{@op}' (#{num} expected)" if c > num
@@ -174,12 +168,5 @@ class Factbase::Term
     return v if v.nil?
     v = [v] unless v.is_a?(Array)
     v
-  end
-
-  def only_bool(val, pos)
-    val = val[0] if val.is_a?(Array)
-    return false if val.nil?
-    return val if val.is_a?(TrueClass) || val.is_a?(FalseClass)
-    raise "Boolean expected, while #{val.class} received from #{@operands[pos]}"
   end
 end
