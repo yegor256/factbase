@@ -28,60 +28,6 @@ require_relative '../../lib/factbase/term'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class TestTerm < Minitest::Test
-  def test_simple_matching
-    t = Factbase::Term.new(:eq, [:foo, 42])
-    assert(t.evaluate(fact('foo' => [42]), []))
-    assert(!t.evaluate(fact('foo' => 'Hello!'), []))
-    assert(!t.evaluate(fact('bar' => ['Hello!']), []))
-  end
-
-  def test_eq_matching
-    t = Factbase::Term.new(:eq, [:foo, 42])
-    assert(t.evaluate(fact('foo' => 42), []))
-    assert(t.evaluate(fact('foo' => [10, 5, 6, -8, 'hey', 42, 9, 'fdsf']), []))
-    assert(!t.evaluate(fact('foo' => [100]), []))
-    assert(!t.evaluate(fact('foo' => []), []))
-    assert(!t.evaluate(fact('bar' => []), []))
-  end
-
-  def test_eq_matching_time
-    now = Time.now
-    t = Factbase::Term.new(:eq, [:foo, Time.parse(now.iso8601)])
-    assert(t.evaluate(fact('foo' => now), []))
-    assert(t.evaluate(fact('foo' => [now, Time.now]), []))
-  end
-
-  def test_lt_matching
-    t = Factbase::Term.new(:lt, [:foo, 42])
-    assert(t.evaluate(fact('foo' => [10]), []))
-    assert(!t.evaluate(fact('foo' => [100]), []))
-    assert(!t.evaluate(fact('foo' => 100), []))
-    assert(!t.evaluate(fact('bar' => 100), []))
-  end
-
-  def test_gt_matching
-    t = Factbase::Term.new(:gt, [:foo, 42])
-    assert(t.evaluate(fact('foo' => [100]), []))
-    assert(t.evaluate(fact('foo' => 100), []))
-    assert(!t.evaluate(fact('foo' => [10]), []))
-    assert(!t.evaluate(fact('foo' => 10), []))
-    assert(!t.evaluate(fact('bar' => 10), []))
-  end
-
-  def test_lt_matching_time
-    t = Factbase::Term.new(:lt, [:foo, Time.now])
-    assert(t.evaluate(fact('foo' => [Time.now - 100]), []))
-    assert(!t.evaluate(fact('foo' => [Time.now + 100]), []))
-    assert(!t.evaluate(fact('bar' => [100]), []))
-  end
-
-  def test_gt_matching_time
-    t = Factbase::Term.new(:gt, [:foo, Time.now])
-    assert(t.evaluate(fact('foo' => [Time.now + 100]), []))
-    assert(!t.evaluate(fact('foo' => [Time.now - 100]), []))
-    assert(!t.evaluate(fact('bar' => [100]), []))
-  end
-
   def test_false_matching
     t = Factbase::Term.new(:never, [])
     assert(!t.evaluate(fact('foo' => [100]), []))
