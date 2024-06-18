@@ -62,6 +62,9 @@ class Factbase::Term
   require_relative 'terms/aggregates'
   include Factbase::Term::Aggregates
 
+  require_relative 'terms/defn'
+  include Factbase::Term::Defn
+
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
@@ -212,30 +215,6 @@ class Factbase::Term
     raise 'Regexp is nil' if re.nil?
     raise 'Exactly one regexp expected' unless re.size == 1
     str[0].to_s.match?(re[0])
-  end
-
-  def defn(_fact, _maps)
-    assert_args(2)
-    fn = @operands[0]
-    raise "A symbol expected as first argument of 'defn'" unless fn.is_a?(Symbol)
-    raise "Can't use '#{fn}' name as a term" if Factbase::Term.instance_methods(true).include?(fn)
-    raise "Term '#{fn}' is already defined" if Factbase::Term.private_instance_methods(false).include?(fn)
-    raise "The '#{fn}' is a bad name for a term" unless fn.match?(/^[a-z_]+$/)
-    e = "class Factbase::Term\nprivate\ndef #{fn}(fact, maps)\n#{@operands[1]}\nend\nend"
-    # rubocop:disable Security/Eval
-    eval(e)
-    # rubocop:enable Security/Eval
-    true
-  end
-
-  def undef(_fact, _maps)
-    assert_args(1)
-    fn = @operands[0]
-    raise "A symbol expected as first argument of 'undef'" unless fn.is_a?(Symbol)
-    if Factbase::Term.private_instance_methods(false).include?(fn)
-      Factbase::Term.class_eval("undef :#{fn}", __FILE__, __LINE__ - 1) # undef :foo
-    end
-    true
   end
 
   def traced(fact, maps)
