@@ -62,6 +62,9 @@ class Factbase::Term
   require_relative 'terms/aggregates'
   include Factbase::Term::Aggregates
 
+  require_relative 'terms/meta'
+  include Factbase::Term::Meta
+
   require_relative 'terms/defn'
   include Factbase::Term::Defn
 
@@ -118,16 +121,6 @@ class Factbase::Term
 
   private
 
-  def exists(fact, _maps)
-    assert_args(1)
-    !by_symbol(0, fact).nil?
-  end
-
-  def absent(fact, _maps)
-    assert_args(1)
-    by_symbol(0, fact).nil?
-  end
-
   def either(fact, maps)
     assert_args(2)
     v = the_values(0, fact, maps)
@@ -167,34 +160,6 @@ class Factbase::Term
     true
   end
 
-  def many(fact, maps)
-    assert_args(1)
-    v = the_values(0, fact, maps)
-    !v.nil? && v.size > 1
-  end
-
-  def one(fact, maps)
-    assert_args(1)
-    v = the_values(0, fact, maps)
-    !v.nil? && v.size == 1
-  end
-
-  def size(fact, _maps)
-    assert_args(1)
-    v = by_symbol(0, fact)
-    return 0 if v.nil?
-    return 1 unless v.is_a?(Array)
-    v.size
-  end
-
-  def type(fact, _maps)
-    assert_args(1)
-    v = by_symbol(0, fact)
-    return 'nil' if v.nil?
-    v = v[0] if v.is_a?(Array) && v.size == 1
-    v.class.to_s
-  end
-
   def as(fact, maps)
     assert_args(2)
     a = @operands[0]
@@ -202,11 +167,6 @@ class Factbase::Term
     vv = the_values(1, fact, maps)
     vv&.each { |v| fact.send("#{a}=", v) }
     true
-  end
-
-  def nil(fact, maps)
-    assert_args(1)
-    the_values(0, fact, maps).nil?
   end
 
   def matches(fact, maps)
