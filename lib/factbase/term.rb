@@ -56,6 +56,9 @@ class Factbase::Term
   require_relative 'terms/math'
   include Factbase::Term::Math
 
+  require_relative 'terms/logical'
+  include Factbase::Term::Logical
+
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
@@ -105,64 +108,6 @@ class Factbase::Term
   end
 
   private
-
-  def always(_fact, _maps)
-    assert_args(0)
-    true
-  end
-
-  def never(_fact, _maps)
-    assert_args(0)
-    false
-  end
-
-  def not(fact, maps)
-    assert_args(1)
-    !only_bool(the_values(0, fact, maps), 0)
-  end
-
-  def or(fact, maps)
-    (0..@operands.size - 1).each do |i|
-      return true if only_bool(the_values(i, fact, maps), i)
-    end
-    false
-  end
-
-  def and(fact, maps)
-    (0..@operands.size - 1).each do |i|
-      return false unless only_bool(the_values(i, fact, maps), i)
-    end
-    true
-  end
-
-  def and_or_simplify
-    strs = []
-    ops = []
-    @operands.each do |o|
-      o = o.simplify
-      s = o.to_s
-      next if strs.include?(s)
-      strs << s
-      ops << o
-    end
-    return ops[0] if ops.size == 1
-    Factbase::Term.new(@op, ops)
-  end
-
-  def and_simplify
-    and_or_simplify
-  end
-
-  def or_simplify
-    and_or_simplify
-  end
-
-  def when(fact, maps)
-    assert_args(2)
-    a = @operands[0]
-    b = @operands[1]
-    !a.evaluate(fact, maps) || (a.evaluate(fact, maps) && b.evaluate(fact, maps))
-  end
 
   def exists(fact, _maps)
     assert_args(1)
