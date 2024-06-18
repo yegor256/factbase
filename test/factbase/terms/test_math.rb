@@ -35,6 +35,15 @@ class TestMath < Minitest::Test
     assert(!t.evaluate(fact('bar' => ['Hello!']), []))
   end
 
+  def test_zero
+    t = Factbase::Term.new(:zero, [:foo])
+    assert(t.evaluate(fact('foo' => [0]), []))
+    assert(t.evaluate(fact('foo' => [10, 5, 6, -8, 'hey', 0, 9, 'fdsf']), []))
+    assert(!t.evaluate(fact('foo' => [100]), []))
+    assert(!t.evaluate(fact('foo' => []), []))
+    assert(!t.evaluate(fact('bar' => []), []))
+  end
+
   def test_eq
     t = Factbase::Term.new(:eq, [:foo, 42])
     assert(t.evaluate(fact('foo' => 42), []))

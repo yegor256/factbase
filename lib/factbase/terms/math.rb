@@ -44,6 +44,13 @@ module Factbase::Term::Math
     arithmetic(:/, fact, maps)
   end
 
+  def zero(fact, maps)
+    assert_args(1)
+    vv = the_values(0, fact, maps)
+    return false if vv.nil?
+    vv.any? { |v| (v.is_a?(Integer) || v.is_a?(Float)) && v.zero? }
+  end
+
   def eq(fact, maps)
     cmp(:==, fact, maps)
   end

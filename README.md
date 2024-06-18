@@ -66,6 +66,7 @@ There are some boolean terms available in a query
 or `b1` is `false`
 * `(exists p)` — if `p` property exists
 * `(absent p)` — if `p` property is absent
+* `(zero v)` — if any `v` equals to zero
 * `(eq v1 v2)` — if any `v1` equals to any `v2`
 * `(lt v1 v2)` — if any `v1` is less than any `v2`
 * `(gt v1 v2)` — if any `v1` is greater than any `v2`

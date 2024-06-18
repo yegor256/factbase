@@ -51,5 +51,6 @@ module Factbase::Term::Aliases
         end
       end
     end
+    true
   end
 end

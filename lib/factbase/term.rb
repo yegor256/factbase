@@ -95,7 +95,7 @@ class Factbase::Term
   def evaluate(fact, maps)
     send(@op, fact, maps)
   rescue NoMethodError => e
-    raise "Term '#{@op}' is not defined at #{self}: #{e.message}"
+    raise "Term '#{@op}' is not defined at #{self}:\n#{Backtrace.new(e)}"
   rescue StandardError => e
     raise "#{e.message} at #{self}:\n#{Backtrace.new(e)}"
   end
