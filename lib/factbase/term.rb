@@ -68,6 +68,9 @@ class Factbase::Term
   require_relative 'terms/meta'
   include Factbase::Term::Meta
 
+  require_relative 'terms/ordering'
+  include Factbase::Term::Ordering
+
   require_relative 'terms/defn'
   include Factbase::Term::Defn
 
@@ -140,27 +143,6 @@ class Factbase::Term
     v = the_values(1, fact, maps)
     return nil if v.nil?
     v[i]
-  end
-
-  def prev(fact, maps)
-    assert_args(1)
-    before = @prev
-    v = the_values(0, fact, maps)
-    @prev = v
-    before
-  end
-
-  def unique(fact, _maps)
-    @uniques = [] if @uniques.nil?
-    assert_args(1)
-    vv = by_symbol(0, fact)
-    return false if vv.nil?
-    vv = [vv] unless vv.is_a?(Array)
-    vv.each do |v|
-      return false if @uniques.include?(v)
-      @uniques << v
-    end
-    true
   end
 
   def as(fact, maps)
