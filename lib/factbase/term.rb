@@ -65,6 +65,9 @@ class Factbase::Term
   require_relative 'terms/defn'
   include Factbase::Term::Defn
 
+  require_relative 'terms/debug'
+  include Factbase::Term::Debug
+
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
@@ -215,15 +218,6 @@ class Factbase::Term
     raise 'Regexp is nil' if re.nil?
     raise 'Exactly one regexp expected' unless re.size == 1
     str[0].to_s.match?(re[0])
-  end
-
-  def traced(fact, maps)
-    assert_args(1)
-    t = @operands[0]
-    raise "A term expected, but '#{t}' provided" unless t.is_a?(Factbase::Term)
-    r = t.evaluate(fact, maps)
-    puts "#{self} -> #{r}"
-    r
   end
 
   def assert_args(num)
