@@ -53,6 +53,9 @@ require_relative 'tee'
 class Factbase::Term
   attr_reader :op, :operands
 
+  require_relative 'terms/math'
+  include Factbase::Term::Math
+
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
@@ -222,34 +225,6 @@ class Factbase::Term
     !v.nil? && v.size == 1
   end
 
-  def plus(fact, maps)
-    arithmetic(:+, fact, maps)
-  end
-
-  def minus(fact, maps)
-    arithmetic(:-, fact, maps)
-  end
-
-  def times(fact, maps)
-    arithmetic(:*, fact, maps)
-  end
-
-  def div(fact, maps)
-    arithmetic(:/, fact, maps)
-  end
-
-  def eq(fact, maps)
-    cmp(:==, fact, maps)
-  end
-
-  def lt(fact, maps)
-    cmp(:<, fact, maps)
-  end
-
-  def gt(fact, maps)
-    cmp(:>, fact, maps)
-  end
-
   def size(fact, _maps)
     assert_args(1)
     v = by_symbol(0, fact)
@@ -289,32 +264,6 @@ class Factbase::Term
     raise 'Regexp is nil' if re.nil?
     raise 'Exactly one regexp expected' unless re.size == 1
     str[0].to_s.match?(re[0])
-  end
-
-  def cmp(op, fact, maps)
-    assert_args(2)
-    lefts = the_values(0, fact, maps)
-    return false if lefts.nil?
-    rights = the_values(1, fact, maps)
-    return false if rights.nil?
-    lefts.any? do |l|
-      l = l.floor if l.is_a?(Time) && op == :==
-      rights.any? do |r|
-        r = r.floor if r.is_a?(Time) && op == :==
-        l.send(op, r)
-      end
-    end
-  end
-
-  def arithmetic(op, fact, maps)
-    assert_args(2)
-    lefts = the_values(0, fact, maps)
-    return nil if lefts.nil?
-    raise 'Too many values at first position, one expected' unless lefts.size == 1
-    rights = the_values(1, fact, maps)
-    return nil if rights.nil?
-    raise 'Too many values at second position, one expected' unless rights.size == 1
-    lefts[0].send(op, rights[0])
   end
 
   def defn(_fact, _maps)

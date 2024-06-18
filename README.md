@@ -55,60 +55,53 @@ assert(f2.query('(eq foo 42)').each.to_a.size == 1)
 ```
 
 There are some boolean terms available in a query
-(they return either TRUE or FALSE):
+(they return either `true` or `false`):
 
-* `(always)` and `(never)` are "true" and "false"
-* `(not t)` inverses the `t` if it's boolean (exception otherwise)
-* `(or t1 t2 ...)` returns true if at least one argument is true
-* `(and t1 t2 ...)` returns true if all arguments are true
-* `(when t1 t2)` returns true if `t1` is true and `t2` is true or `t1` is false
-* `(exists k)` returns true if `k` property exists in the fact
-* `(absent k)` returns true if `k` property is absent
-* `(eq a b)` returns true if `a` equals to `b`
-* `(lt a b)` returns true if `a` is less than `b`
-* `(gt a b)` returns true if `a` is greater than `b`
-* `(many a)` return true if there are many values in the `a` property
-* `(one a)` returns true if there is only one value in the `a` property
-* `(matches a re)` returns true when `a` matches regular expression `re`
+* `(always)` and `(never)` are `true` and `false`
+* `(nil v)` is `true` if `v` is `nil`
+* `(not b)` is the inverse of `b`
+* `(or b1 b2 ...)` is `true` if at least one argument is `true`
+* `(and b1 b2 ...)` — if all arguments are `true`
+* `(when b1 b2)` — if `b1` is `true` and `b2` is `true`
+or `b1` is `false`
+* `(exists p)` — if `p` property exists
+* `(absent p)` — if `p` property is absent
+* `(eq v1 v2)` — if any `v1` equals to any `v2`
+* `(lt v1 v2)` — if any `v1` is less than any `v2`
+* `(gt v1 v2)` — if any `v1` is greater than any `v2`
+* `(many v)` — if `v` has many values
+* `(one v)` — if `v` has one value
+* `(matches v s)` — if any `v` matches the `s` regular expression
 
 There are a few terms that return non-boolean values:
 
-* `(at i a)` returns the `i`-th value of the `a` property
-* `(size k)` returns cardinality of `k` property (zero if property is absent)
-* `(type a)` returns type of `a` ("String", "Integer", "Float", or "Time")
-* `(either a b)` returns `b` if `a` is `nil`
+* `(at i v)` is the `i`-th value of `v`
+* `(size v)` is the cardinality of `v` (zero if `v` is `nil`)
+* `(type v)` is the type of `v`
+(`"String"`, `"Integer"`, `"Float"`, `"Time"`, or `"Array"`)
+* `(either v1 v1)` is `v2` if `v1` is `nil`
 
 It's possible to modify the facts retrieved, on fly:
 
-* `(as k a)` adds property `k` with the value `a`
+* `(as p v)` adds property `p` with the value `v`
 
 Also, some simple arithmetic:
 
-* `(nil a)` returns true if the value is nil
-* `(plus a b)` is a sum of `a` and `b`
-* `(minus a b)` is a deducation of `b` from `a`
-* `(times a b)` is a multiplication of `a` and `b`
-* `(div a b)` is a division of `a` by `b`
+* `(plus v1 v2)` is a sum of `∑v1` and `∑v2`
+* `(minus v1 v2)` is a deducation of `∑v2` from `∑v1`
+* `(times v1 v2)` is a multiplication of `∏v1` and `∏v2`
+* `(div v1 v2)` is a division of `∏v1` by `∏v2`
 
 One term is for meta-programming:
 
-* `(defn foo "self.to_s")` defines a new term using Ruby syntax and returns true
-* `(undef foo)` undefines a term (nothing happens if it's not defined yet)
+* `(defn f "self.to_s")` defines a new term using Ruby syntax and returns `true`
+* `(undef f)` undefines a term (nothing happens if it's not defined yet),
+returns `true`
 
 There are terms that are history of search aware:
 
-* `(prev a)` returns the value of `a` in the previously seen fact
-* `(unique k)` returns true if the value of `k` property hasn't been seen yet
-
-There are also terms that match the entire factbase
-and must be used primarily inside the `(agg ..)` term:
-
-* `(nth p k)` returns the `k` property of the _n_-th fact
-* `(first k)` returns the `k` property of the first fact
-* `(count)` returns the tally of facts
-* `(max k)` returns the maximum value of the `k` property in all facts
-* `(min k)` returns the minimum
-* `(sum k)` returns the arithmetic sum of all values of the `k` property
+* `(prev p)` returns the value of `p` property in the previously seen fact
+* `(unique p)` returns true if the value of `p` property hasn't been seen yet
 
 The `agg` term enables sub-queries by evaluating the first argument (term)
 over all available facts, passing the entire subset to the second argument,
@@ -119,6 +112,17 @@ the `age` is smaller than the maximum `age` of all women
 * `(eq id (agg (always) (max id)))` selects the fact with the largest `id`
 * `(eq salary (agg (eq dept $dept) (avg salary)))` selects the facts
 with the salary average in their departments
+
+There are also terms that match the entire factbase
+and must be used primarily inside the `(agg ..)` term:
+
+* `(nth v p)` returns the `p` property of the _v_-th fact (must be
+a positive integer)
+* `(first p)` returns the `p` property of the first fact
+* `(count)` returns the tally of facts
+* `(max p)` returns the maximum value of the `p` property in all facts
+* `(min p)` returns the minimum
+* `(sum p)` returns the arithmetic sum of all values of the `p` property
 
 ## How to contribute
 
