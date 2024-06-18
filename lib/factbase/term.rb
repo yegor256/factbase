@@ -62,6 +62,9 @@ class Factbase::Term
   require_relative 'terms/aggregates'
   include Factbase::Term::Aggregates
 
+  require_relative 'terms/strings'
+  include Factbase::Term::Strings
+
   require_relative 'terms/meta'
   include Factbase::Term::Meta
 
@@ -167,17 +170,6 @@ class Factbase::Term
     vv = the_values(1, fact, maps)
     vv&.each { |v| fact.send("#{a}=", v) }
     true
-  end
-
-  def matches(fact, maps)
-    assert_args(2)
-    str = the_values(0, fact, maps)
-    return false if str.nil?
-    raise 'Exactly one string expected' unless str.size == 1
-    re = the_values(1, fact, maps)
-    raise 'Regexp is nil' if re.nil?
-    raise 'Exactly one regexp expected' unless re.size == 1
-    str[0].to_s.match?(re[0])
   end
 
   def assert_args(num)
