@@ -56,7 +56,8 @@ class TestAliases < Minitest::Test
     ]
     {
       '(join "foo_*" (gt x 1))' => '(exists foo_x)',
-      '(join "foo_*" (exists bar))' => '(and (eq foo_bar 44) (eq foo_bar 55))'
+      '(join "foo_*" (exists bar))' => '(and (eq foo_bar 44) (eq foo_bar 55))',
+      '(join "foo_*" (eq fff 1))' => '(absent foo_bar)'
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term
       maps.each do |m|
