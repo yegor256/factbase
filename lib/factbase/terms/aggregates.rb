@@ -84,4 +84,19 @@ module Factbase::Term::Aggregates
     subset = maps.select { |m| selector.evaluate(Factbase::Tee.new(Factbase::Fact.new(Mutex.new, m), fact), maps) }
     term.evaluate(nil, subset)
   end
+
+  def best(maps)
+    k = @operands[0]
+    raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
+    best = nil
+    maps.each do |m|
+      vv = m[k.to_s]
+      next if vv.nil?
+      vv = [vv] unless vv.is_a?(Array)
+      vv.each do |v|
+        best = v if best.nil? || yield(v, best)
+      end
+    end
+    best
+  end
 end
