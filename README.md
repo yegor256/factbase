@@ -84,6 +84,9 @@ There are a few terms that return non-boolean values:
 It's possible to modify the facts retrieved, on fly:
 
 * `(as p v)` adds property `p` with the value `v`
+* `(join s t)` adds properties named by the `s` mask with the values retrieved
+by the `t` term, for example, `(join "foo_*" (gt x 5))` will add `foo_x` and
+all other properties found in the facts that match `(gt x 5)`
 
 Also, some simple arithmetic:
 

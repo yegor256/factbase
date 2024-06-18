@@ -36,4 +36,20 @@ module Factbase::Term::Aliases
     vv&.each { |v| fact.send("#{a}=", v) }
     true
   end
+
+  def join(fact, maps)
+    assert_args(2)
+    mask = @operands[0]
+    raise "A string expected as first argument of 'join'" unless mask.is_a?(String)
+    term = @operands[1]
+    raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
+    subset = maps.select { |m| term.evaluate(Factbase::Tee.new(Factbase::Fact.new(Mutex.new, m), fact), maps) }
+    subset.each do |m|
+      m.each do |k, vv|
+        vv.each do |v|
+          fact.send("#{mask.gsub('*', k)}=", v)
+        end
+      end
+    end
+  end
 end
