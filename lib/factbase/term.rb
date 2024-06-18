@@ -59,6 +59,9 @@ class Factbase::Term
   require_relative 'terms/logical'
   include Factbase::Term::Logical
 
+  require_relative 'terms/aggregates'
+  include Factbase::Term::Aggregates
+
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
@@ -235,53 +238,6 @@ class Factbase::Term
     true
   end
 
-  def min(_fact, maps)
-    assert_args(1)
-    best(maps) { |v, b| v < b }
-  end
-
-  def max(_fact, maps)
-    assert_args(1)
-    best(maps) { |v, b| v > b }
-  end
-
-  def count(_fact, maps)
-    maps.size
-  end
-
-  def nth(_fact, maps)
-    assert_args(2)
-    pos = @operands[0]
-    raise "An integer expected, but #{pos} provided" unless pos.is_a?(Integer)
-    k = @operands[1]
-    raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
-    maps[pos][k.to_s]
-  end
-
-  def first(_fact, maps)
-    assert_args(1)
-    k = @operands[0]
-    raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
-    first = maps[0]
-    return nil if first.nil?
-    first[k.to_s]
-  end
-
-  def sum(_fact, maps)
-    k = @operands[0]
-    raise "A symbol expected, but '#{k}' provided" unless k.is_a?(Symbol)
-    sum = 0
-    maps.each do |m|
-      vv = m[k.to_s]
-      next if vv.nil?
-      vv = [vv] unless vv.is_a?(Array)
-      vv.each do |v|
-        sum += v
-      end
-    end
-    sum
-  end
-
   def traced(fact, maps)
     assert_args(1)
     t = @operands[0]
@@ -289,16 +245,6 @@ class Factbase::Term
     r = t.evaluate(fact, maps)
     puts "#{self} -> #{r}"
     r
-  end
-
-  def agg(fact, maps)
-    assert_args(2)
-    selector = @operands[0]
-    raise "A term expected, but '#{selector}' provided" unless selector.is_a?(Factbase::Term)
-    term = @operands[1]
-    raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    subset = maps.select { |m| selector.evaluate(Factbase::Tee.new(Factbase::Fact.new(Mutex.new, m), fact), maps) }
-    term.evaluate(nil, subset)
   end
 
   def assert_args(num)
