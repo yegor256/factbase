@@ -41,8 +41,10 @@ class Factbase::Tee
   end
 
   def method_missing(*args)
-    return @upper[args[1].to_s[1..]] if args[0].to_s == '[]' && args[1].to_s.start_with?('$')
-    @fact.method_missing(*args)
+    return @fact.method_missing(*args) unless args[0].to_s == '[]' && args[1].to_s.start_with?('$')
+    n = args[1].to_s
+    n = n[1..] unless @upper.is_a?(Factbase::Tee)
+    @upper[n]
   end
 
   # rubocop:disable Style/OptionalBooleanParameter

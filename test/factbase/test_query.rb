@@ -114,8 +114,15 @@ class TestQuery < Minitest::Test
     maps = []
     maps << { 'foo' => [42] }
     maps << { 'bar' => [4, 5] }
-    assert_equal([42], Factbase::Query.new(maps, Mutex.new, '(agg (exists foo) (first foo))').one)
-    assert_nil(Factbase::Query.new(maps, Mutex.new, '(agg (exists z) (first z))').one)
+    {
+      '(agg (exists foo) (first foo))' => [42],
+      '(agg (exists z) (first z))' => nil,
+      '(agg (always) (count))' => 2,
+      '(agg (eq bar $v) (count))' => 1,
+      '(agg (eq z 40) (count))' => 0
+    }.each do |q, r|
+      assert_equal(r, Factbase::Query.new(maps, Mutex.new, q).one(v: 4), "#{q} -> #{r}")
+    end
   end
 
   def test_deleting_nothing

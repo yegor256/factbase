@@ -126,8 +126,12 @@ class Factbase::Rules
       @check = check
     end
 
-    def each
-      return to_enum(__method__) unless block_given?
+    def one(params = {})
+      @query.one(params)
+    end
+
+    def each(params = {})
+      return to_enum(__method__, params) unless block_given?
       @query.each do |f|
         yield Fact.new(f, @check)
       end

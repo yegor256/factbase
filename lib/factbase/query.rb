@@ -78,7 +78,11 @@ class Factbase::Query
   def one(params = {})
     term = Factbase::Syntax.new(@query).to_term
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    term.evaluate(Factbase::Tee.new(nil, params), @maps)
+    r = term.evaluate(Factbase::Tee.new(nil, params), @maps)
+    unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
+      raise "Incorrect type #{r.class} returned by #{@query}"
+    end
+    r
   end
 
   # Delete all facts that match the query.

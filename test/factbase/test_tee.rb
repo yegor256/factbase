@@ -40,4 +40,14 @@ class TestTee < Minitest::Test
     assert_equal(42, t.foo)
     assert_equal([13], t['$bar'])
   end
+
+  def test_recursively
+    map = {}
+    prim = Factbase::Fact.new(Mutex.new, map)
+    prim.foo = 42
+    t = Factbase::Tee.new(nil, { 'bar' => 7 })
+    assert_equal(7, t['$bar'])
+    t = Factbase::Tee.new(prim, t)
+    assert_equal(7, t['$bar'])
+  end
 end

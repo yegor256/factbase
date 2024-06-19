@@ -53,6 +53,13 @@ class TestRules < Minitest::Test
     assert(f.to_s.length.positive?)
   end
 
+  def test_query_one
+    fb = Factbase::Rules.new(Factbase.new, '(always)')
+    f = fb.insert
+    f.foo = 42
+    assert_equal(1, fb.query('(agg (eq foo $v) (count))').one(v: 42))
+  end
+
   def test_check_only_when_txn_is_closed
     fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
     ok = false
@@ -94,6 +101,6 @@ class TestRules < Minitest::Test
       end
     end
     assert(ok)
-    assert_equal(0, fb.query('(eq hello 42)').each.to_a.size)
+    assert_equal(0, fb.query('(eq hello $v)').each(v: 42).to_a.size)
   end
 end
