@@ -47,7 +47,7 @@ class Factbase::Query
     @query = query
   end
 
-  # Iterate them one by one.
+  # Iterate facts one by one.
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
@@ -70,6 +70,15 @@ class Factbase::Query
       yielded += 1
     end
     yielded
+  end
+
+  # Read a single value.
+  # @param [Hash] params Optional params accessible in the query via the "$" symbol
+  # @return The value evaluated
+  def one(params = {})
+    term = Factbase::Syntax.new(@query).to_term
+    params = params.transform_keys(&:to_s) if params.is_a?(Hash)
+    term.evaluate(Factbase::Tee.new(nil, params), @maps)
   end
 
   # Delete all facts that match the query.

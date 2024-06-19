@@ -110,6 +110,14 @@ class TestQuery < Minitest::Test
     assert_equal(1, maps.size)
   end
 
+  def test_reading_one
+    maps = []
+    maps << { 'foo' => [42] }
+    maps << { 'bar' => [4, 5] }
+    r = Factbase::Query.new(maps, Mutex.new, '(agg (exists foo) (first foo))').one
+    assert_equal([42], r)
+  end
+
   def test_deleting_nothing
     maps = []
     maps << { 'foo' => [42] }
