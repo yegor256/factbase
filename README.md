@@ -129,6 +129,10 @@ a positive integer)
 * `(min p)` returns the minimum
 * `(sum p)` returns the arithmetic sum of all values of the `p` property
 
+It's also possible to use a sub-query in a shorter form than with the `agg`:
+
+* `(empty q)` is true if the subquery `q` is empty
+
 ## How to contribute
 
 Read

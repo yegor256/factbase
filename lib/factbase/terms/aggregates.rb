@@ -85,6 +85,13 @@ module Factbase::Term::Aggregates
     term.evaluate(nil, subset)
   end
 
+  def empty(fact, maps)
+    assert_args(1)
+    term = @operands[0]
+    raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
+    Factbase::Query.new(maps, Mutex.new, term.to_s).each(fact).to_a.empty?
+  end
+
   def best(maps)
     k = @operands[0]
     raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)

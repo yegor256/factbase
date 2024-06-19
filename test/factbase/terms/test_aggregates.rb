@@ -54,6 +54,20 @@ class TestAggregates < Minitest::Test
     end
   end
 
+  def test_empty
+    maps = [
+      { 'x' => [1], 'y' => [0], 'z' => [4] },
+      { 'x' => [8], 'y' => [0] }
+    ]
+    {
+      '(empty (eq y 42))' => true,
+      '(empty (eq x 1))' => false
+    }.each do |q, r|
+      t = Factbase::Syntax.new(q).to_term
+      assert_equal(r, t.evaluate(nil, maps), q)
+    end
+  end
+
   private
 
   def fact(map = {})
