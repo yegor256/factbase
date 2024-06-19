@@ -48,6 +48,7 @@ class Factbase::Query
   end
 
   # Iterate them one by one.
+  # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
   def each(params = {})
