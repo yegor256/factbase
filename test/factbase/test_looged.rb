@@ -45,6 +45,14 @@ class TestLooged < Minitest::Test
     assert_equal(2, fb.size)
   end
 
+  def test_reading_one
+    fb = Factbase::Looged.new(Factbase.new, Loog::NULL)
+    fb.insert
+    fb.insert.bar = 42
+    assert_equal(1, fb.query('(agg (exists bar) (count))').one)
+    assert_equal([42], fb.query('(agg (exists bar) (first bar))').one)
+  end
+
   def test_with_txn
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)

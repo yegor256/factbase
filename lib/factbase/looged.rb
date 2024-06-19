@@ -129,12 +129,26 @@ class Factbase::Looged
       @loog = loog
     end
 
-    def each(&)
+    def one(params = {})
+      q = Factbase::Syntax.new(@expr).to_term.to_s
+      r = nil
+      tail = Factbase::Looged.elapsed do
+        r = @fb.query(@expr).one(params)
+      end
+      if r.nil?
+        @loog.debug("Nothing found by '#{q}' #{tail}")
+      else
+        @loog.debug("Found #{r} (#{r.class}) by '#{q}' #{tail}")
+      end
+      r
+    end
+
+    def each(params = {}, &)
       q = Factbase::Syntax.new(@expr).to_term.to_s
       if block_given?
         r = nil
         tail = Factbase::Looged.elapsed do
-          r = @fb.query(@expr).each(&)
+          r = @fb.query(@expr).each(params, &)
         end
         raise ".each of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
@@ -146,7 +160,7 @@ class Factbase::Looged
       else
         array = []
         tail = Factbase::Looged.elapsed do
-          @fb.query(@expr).each do |f|
+          @fb.query(@expr).each(params) do |f|
             array << f
           end
         end
