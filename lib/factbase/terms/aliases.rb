@@ -39,15 +39,16 @@ module Factbase::Term::Aliases
 
   def join(fact, maps)
     assert_args(2)
-    mask = @operands[0]
-    raise "A string expected as first argument of 'join'" unless mask.is_a?(String)
+    jumps = @operands[0]
+    raise "A string expected as first argument of 'join'" unless jumps.is_a?(String)
+    jumps = jumps.split(',').map(&:strip).map { |j| j.split('<=').map(&:strip) }
     term = @operands[1]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    subset = maps.select { |m| term.evaluate(Factbase::Tee.new(Factbase::Fact.new(Mutex.new, m), fact), maps) }
-    subset.each do |m|
-      m.each do |k, vv|
-        vv.each do |v|
-          fact.send("#{mask.gsub('*', k)}=", v)
+    subset = Factbase::Query.new(maps, Mutex.new, term.to_s).each(fact).to_a
+    subset.each do |s|
+      jumps.each do |to, from|
+        s[from].each do |v|
+          fact.send("#{to}=", v)
         end
       end
     end

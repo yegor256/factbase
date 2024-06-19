@@ -55,15 +55,17 @@ class TestAliases < Minitest::Test
       { 'x' => [2], 'bar' => [44, 55, 66] }
     ]
     {
-      '(join "foo_*" (gt x 1))' => '(exists foo_x)',
-      '(join "foo_*" (exists bar))' => '(and (eq foo_bar 44) (eq foo_bar 55))',
-      '(join "foo_*" (eq fff 1))' => '(absent foo_bar)'
+      '(join "foo_x<=x" (gt x 1))' => '(exists foo_x)',
+      '(join "foo <=bar  " (exists bar))' => '(and (eq foo 44) (eq foo 55))',
+      '(join "uuu <= fff" (eq fff 1))' => '(absent uuu)'
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term
       maps.each do |m|
         f = Factbase::Accum.new(fact(m), {}, false)
+        require_relative '../../../lib/factbase/looged'
+        f = Factbase::Looged::Fact.new(f, Loog::NULL)
         next unless t.evaluate(f, maps)
-        assert(Factbase::Syntax.new(r).to_term.evaluate(f, []), "#{q} -> #{f}")
+        assert(Factbase::Syntax.new(r).to_term.evaluate(f, []), "#{q} -> #{f} doesn't match #{r}")
       end
     end
   end

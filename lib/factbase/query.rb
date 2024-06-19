@@ -24,6 +24,7 @@ require_relative '../factbase'
 require_relative 'syntax'
 require_relative 'fact'
 require_relative 'accum'
+require_relative 'tee'
 
 # Query.
 #
@@ -49,13 +50,14 @@ class Factbase::Query
   # Iterate them one by one.
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
-  def each
-    return to_enum(__method__) unless block_given?
+  def each(params = {})
+    return to_enum(__method__, params) unless block_given?
     term = Factbase::Syntax.new(@query).to_term
     yielded = 0
     @maps.each do |m|
       extras = {}
       f = Factbase::Fact.new(@mutex, m)
+      f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
       r = term.evaluate(a, @maps)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)

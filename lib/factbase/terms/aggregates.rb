@@ -81,7 +81,7 @@ module Factbase::Term::Aggregates
     raise "A term expected, but '#{selector}' provided" unless selector.is_a?(Factbase::Term)
     term = @operands[1]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    subset = maps.select { |m| selector.evaluate(Factbase::Tee.new(Factbase::Fact.new(Mutex.new, m), fact), maps) }
+    subset = Factbase::Query.new(maps, Mutex.new, selector.to_s).each(fact).to_a
     term.evaluate(nil, subset)
   end
 
