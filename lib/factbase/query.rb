@@ -57,6 +57,7 @@ class Factbase::Query
     @maps.each do |m|
       extras = {}
       f = Factbase::Fact.new(@mutex, m)
+      params = params.transform_keys(&:to_s) if params.is_a?(Hash)
       f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
       r = term.evaluate(a, @maps)

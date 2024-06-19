@@ -51,7 +51,7 @@ class TestAliases < Minitest::Test
 
   def test_join
     maps = [
-      { 'x' => [1], 'y' => [0], 'z' => [4] },
+      { 'x' => 1, 'y' => 0, 'z' => 4 },
       { 'x' => [2], 'bar' => [44, 55, 66] }
     ]
     {

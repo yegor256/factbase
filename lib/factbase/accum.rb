@@ -55,7 +55,7 @@ class Factbase::Accum
       kk = args[1].to_s
       vv = @props[kk].nil? ? [] : @props[kk]
       vvv = @fact.method_missing(*args)
-      raise "Not array returned by #{args} from #{@fact}" unless vvv.nil? || vvv.is_a?(Array)
+      vvv = [vvv] unless vvv.nil? || vvv.is_a?(Array)
       vv += vvv unless vvv.nil?
       vv.uniq!
       return vv.empty? ? nil : vv

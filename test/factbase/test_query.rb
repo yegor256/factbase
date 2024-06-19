@@ -140,6 +140,19 @@ class TestQuery < Minitest::Test
     assert_equal(1, maps[0].size)
   end
 
+  def test_with_params
+    maps = []
+    maps << { 'foo' => [42] }
+    maps << { 'foo' => [17] }
+    found = 0
+    Factbase::Query.new(maps, Mutex.new, '(eq foo $bar)').each(bar: [42]) do
+      found += 1
+    end
+    assert_equal(1, found)
+    assert_equal(1, Factbase::Query.new(maps, Mutex.new, '(eq foo $bar)').each(bar: 42).to_a.size)
+    assert_equal(0, Factbase::Query.new(maps, Mutex.new, '(eq foo $bar)').each(bar: 555).to_a.size)
+  end
+
   def test_with_nil_alias
     maps = []
     maps << { 'foo' => [42] }
