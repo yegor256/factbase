@@ -57,6 +57,7 @@ class TestAliases < Minitest::Test
     {
       '(join "foo_x<=x" (gt x 1))' => '(exists foo_x)',
       '(join "foo <=bar  " (exists bar))' => '(and (eq foo 44) (eq foo 55))',
+      '(join "uuu" (eq x 1))' => '(absent uuu)',
       '(join "uuu <= fff" (eq fff 1))' => '(absent uuu)'
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term

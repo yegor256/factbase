@@ -41,13 +41,16 @@ module Factbase::Term::Aliases
     assert_args(2)
     jumps = @operands[0]
     raise "A string expected as first argument of 'join'" unless jumps.is_a?(String)
-    jumps = jumps.split(',').map(&:strip).map { |j| j.split('<=').map(&:strip) }
+    jumps = jumps.split(',')
+      .map(&:strip)
+      .map { |j| j.split('<=').map(&:strip) }
+      .map { |j| j.size == 1 ? [j[0], j[0]] : j }
     term = @operands[1]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
     subset = Factbase::Query.new(maps, Mutex.new, term.to_s).each(fact).to_a
     subset.each do |s|
       jumps.each do |to, from|
-        s[from].each do |v|
+        s[from]&.each do |v|
           fact.send("#{to}=", v)
         end
       end
