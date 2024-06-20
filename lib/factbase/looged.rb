@@ -31,7 +31,9 @@ require_relative 'syntax'
 # License:: MIT
 class Factbase::Looged
   def initialize(fb, loog)
+    raise 'The "fb" is nil' if fb.nil?
     @fb = fb
+    raise 'The "loog" is nil' if loog.nil?
     @loog = loog
   end
 

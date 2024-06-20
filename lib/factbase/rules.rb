@@ -40,8 +40,11 @@ require_relative '../factbase/syntax'
 # License:: MIT
 class Factbase::Rules
   def initialize(fb, rules, check = Check.new(rules), uid: nil)
+    raise 'The "fb" is nil' if fb.nil?
     @fb = fb
+    raise 'The "rules" is nil' if rules.nil?
     @rules = rules
+    raise 'The "check" is nil' if check.nil?
     @check = check
     @uid = uid
   end

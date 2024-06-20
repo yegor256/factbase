@@ -29,6 +29,7 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::Pre
   def initialize(fb, &block)
+    raise 'The "fb" is nil' if fb.nil?
     @fb = fb
     @block = block
   end
