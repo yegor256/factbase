@@ -64,7 +64,7 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
     loog (0.5.1)
-    minitest (5.23.1)
+    minitest (5.24.0)
     mutex_m (0.2.0)
     nokogiri (1.16.6-arm64-darwin)
       racc (~> 1.4)
@@ -178,7 +178,7 @@ PLATFORMS
 
 DEPENDENCIES
   factbase!
-  minitest (= 5.23.1)
+  minitest (= 5.24.0)
   rake (= 13.2.1)
   rspec-rails (= 6.1.2)
   rubocop (= 1.64.1)
