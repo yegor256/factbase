@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'decoor'
 require_relative '../factbase'
 
 # A decorator of a Factbase, that checks invariants on every set.
@@ -27,6 +28,8 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Inv
+  decoor(:fb)
+
   def initialize(fb, &block)
     @fb = fb
     @block = block
@@ -34,10 +37,6 @@ class Factbase::Inv
 
   def dup
     Factbase::Inv.new(@fb.dup, &@block)
-  end
-
-  def size
-    @fb.size
   end
 
   def insert
@@ -52,19 +51,13 @@ class Factbase::Inv
     @fb.txn(this, &)
   end
 
-  def export
-    @fb.export
-  end
-
-  def import(bytes)
-    @fb.import(bytes)
-  end
-
   # Fact decorator.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Fact
+    decoor(:fact)
+
     def initialize(fact, block)
       @fact = fact
       @block = block
@@ -79,16 +72,6 @@ class Factbase::Inv
       @block.call(k[0..-2], args[1]) if k.end_with?('=')
       @fact.method_missing(*args)
     end
-
-    # rubocop:disable Style/OptionalBooleanParameter
-    def respond_to?(_method, _include_private = false)
-      # rubocop:enable Style/OptionalBooleanParameter
-      true
-    end
-
-    def respond_to_missing?(_method, _include_private = false)
-      true
-    end
   end
 
   # Query decorator.
@@ -96,6 +79,8 @@ class Factbase::Inv
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Query
+    decoor(:query)
+
     def initialize(query, block)
       @query = query
       @block = block
@@ -106,10 +91,6 @@ class Factbase::Inv
       @query.each do |f|
         yield Fact.new(f, @block)
       end
-    end
-
-    def delete!
-      @query.delete!
     end
   end
 end

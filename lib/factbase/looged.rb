@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'decoor'
 require 'time'
 require 'loog'
 require 'tago'
@@ -37,12 +38,10 @@ class Factbase::Looged
     @loog = loog
   end
 
+  decoor(:fb)
+
   def dup
     Factbase::Looged.new(@fb.dup, @loog)
-  end
-
-  def size
-    @fb.size
   end
 
   def insert
@@ -74,14 +73,6 @@ class Factbase::Looged
     r
   end
 
-  def export
-    @fb.export
-  end
-
-  def import(bytes)
-    @fb.import(bytes)
-  end
-
   # Fact decorator.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
@@ -89,13 +80,11 @@ class Factbase::Looged
   class Fact
     MAX_LENGTH = 64
 
+    decoor(:fact)
+
     def initialize(fact, loog)
       @fact = fact
       @loog = loog
-    end
-
-    def to_s
-      @fact.to_s
     end
 
     def method_missing(*args)
@@ -107,16 +96,6 @@ class Factbase::Looged
       s = "#{s[0..MAX_LENGTH / 2]}...#{s[-MAX_LENGTH / 2..]}" if s.length > MAX_LENGTH
       @loog.debug("Set '#{k[0..-2]}' to #{s} (#{v.class})") if k.end_with?('=')
       r
-    end
-
-    # rubocop:disable Style/OptionalBooleanParameter
-    def respond_to?(_method, _include_private = false)
-      # rubocop:enable Style/OptionalBooleanParameter
-      true
-    end
-
-    def respond_to_missing?(_method, _include_private = false)
-      true
     end
   end
 

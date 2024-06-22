@@ -34,6 +34,8 @@ Metrics/MethodLength:
   Enabled: false
 Style/ClassAndModuleChildren:
   Enabled: false
+Style/MissingRespondToMissing:
+  Enabled: false
 Layout/MultilineMethodCallIndentation:
   Enabled: false
 Metrics/AbcSize:

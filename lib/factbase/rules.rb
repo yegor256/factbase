@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'decoor'
 require_relative '../factbase'
 require_relative '../factbase/syntax'
 
@@ -39,6 +40,8 @@ require_relative '../factbase/syntax'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Rules
+  decoor(:fb)
+
   def initialize(fb, rules, check = Check.new(rules), uid: nil)
     raise 'The "fb" is nil' if fb.nil?
     @fb = fb
@@ -51,10 +54,6 @@ class Factbase::Rules
 
   def dup
     Factbase::Rules.new(@fb.dup, @rules, @check, uid: @uid)
-  end
-
-  def size
-    @fb.size
   end
 
   def insert
@@ -79,26 +78,16 @@ class Factbase::Rules
     end
   end
 
-  def export
-    @fb.export
-  end
-
-  def import(bytes)
-    @fb.import(bytes)
-  end
-
   # Fact decorator.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Fact
+    decoor(:fact)
+
     def initialize(fact, check)
       @fact = fact
       @check = check
-    end
-
-    def to_s
-      @fact.to_s
     end
 
     def method_missing(*args)
@@ -107,16 +96,6 @@ class Factbase::Rules
       @check.it(@fact) if k.end_with?('=')
       r
     end
-
-    # rubocop:disable Style/OptionalBooleanParameter
-    def respond_to?(_method, _include_private = false)
-      # rubocop:enable Style/OptionalBooleanParameter
-      true
-    end
-
-    def respond_to_missing?(_method, _include_private = false)
-      true
-    end
   end
 
   # Query decorator.
@@ -124,13 +103,11 @@ class Factbase::Rules
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Query
+    decoor(:query)
+
     def initialize(query, check)
       @query = query
       @check = check
-    end
-
-    def one(params = {})
-      @query.one(params)
     end
 
     def each(params = {})
@@ -138,10 +115,6 @@ class Factbase::Rules
       @query.each do |f|
         yield Fact.new(f, @check)
       end
-    end
-
-    def delete!
-      @query.delete!
     end
   end
 

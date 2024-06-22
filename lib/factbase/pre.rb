@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require 'loog'
+require 'decoor'
 require_relative '../factbase'
 
 # A decorator of a Factbase, that runs a provided block on every +insert+.
@@ -28,6 +29,8 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Pre
+  decoor(:fb)
+
   def initialize(fb, &block)
     raise 'The "fb" is nil' if fb.nil?
     @fb = fb
@@ -38,29 +41,13 @@ class Factbase::Pre
     Factbase::Pre.new(@fb.dup, &@block)
   end
 
-  def size
-    @fb.size
-  end
-
   def insert
     f = @fb.insert
     @block.call(f)
     f
   end
 
-  def query(query)
-    @fb.query(query)
-  end
-
   def txn(this = self, &)
     @fb.txn(this, &)
-  end
-
-  def export
-    @fb.export
-  end
-
-  def import(bytes)
-    @fb.import(bytes)
   end
 end
