@@ -22,6 +22,7 @@
 
 require 'json'
 require 'time'
+require 'others'
 require_relative '../factbase'
 
 # A single fact in a factbase.
@@ -57,7 +58,7 @@ class Factbase::Fact
   end
 
   # When a method is missing, this method is called.
-  def method_missing(*args)
+  others do |*args|
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
@@ -84,15 +85,5 @@ class Factbase::Fact
       end
       v[0]
     end
-  end
-
-  # rubocop:disable Style/OptionalBooleanParameter
-  def respond_to?(_method, _include_private = false)
-    # rubocop:enable Style/OptionalBooleanParameter
-    true
-  end
-
-  def respond_to_missing?(_method, _include_private = false)
-    true
   end
 end

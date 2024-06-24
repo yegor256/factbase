@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'others'
 require_relative '../factbase'
 
 # Tee of two facts.
@@ -40,20 +41,13 @@ class Factbase::Tee
     @fact.to_s
   end
 
-  def method_missing(*args)
-    return @fact.method_missing(*args) unless args[0].to_s == '[]' && args[1].to_s.start_with?('$')
-    n = args[1].to_s
-    n = n[1..] unless @upper.is_a?(Factbase::Tee)
-    @upper[n]
-  end
-
-  # rubocop:disable Style/OptionalBooleanParameter
-  def respond_to?(_method, _include_private = false)
-    # rubocop:enable Style/OptionalBooleanParameter
-    true
-  end
-
-  def respond_to_missing?(_method, _include_private = false)
-    true
+  others do |*args|
+    if args[0].to_s == '[]' && args[1].to_s.start_with?('$')
+      n = args[1].to_s
+      n = n[1..] unless @upper.is_a?(Factbase::Tee)
+      @upper[n]
+    else
+      @fact.method_missing(*args)
+    end
   end
 end

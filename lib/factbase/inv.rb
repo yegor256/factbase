@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'others'
 require 'decoor'
 require_relative '../factbase'
 
@@ -65,20 +66,10 @@ class Factbase::Inv
       @fact.to_s
     end
 
-    def method_missing(*args)
+    others do |*args|
       k = args[0].to_s
       @block.call(k[0..-2], args[1]) if k.end_with?('=')
       @fact.method_missing(*args)
-    end
-
-    # rubocop:disable Style/OptionalBooleanParameter
-    def respond_to?(_method, _include_private = false)
-      # rubocop:enable Style/OptionalBooleanParameter
-      true
-    end
-
-    def respond_to_missing?(_method, _include_private = false)
-      true
     end
   end
 

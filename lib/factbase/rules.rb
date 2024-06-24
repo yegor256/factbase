@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require 'decoor'
+require 'others'
 require_relative '../factbase'
 require_relative '../factbase/syntax'
 
@@ -88,21 +89,11 @@ class Factbase::Rules
       @check = check
     end
 
-    def method_missing(*args)
+    others do |*args|
       r = @fact.method_missing(*args)
       k = args[0].to_s
       @check.it(@fact) if k.end_with?('=')
       r
-    end
-
-    # rubocop:disable Style/OptionalBooleanParameter
-    def respond_to?(_method, _include_private = false)
-      # rubocop:enable Style/OptionalBooleanParameter
-      true
-    end
-
-    def respond_to_missing?(_method, _include_private = false)
-      true
     end
   end
 

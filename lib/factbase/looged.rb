@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'decoor'
+require 'others'
 require 'time'
 require 'loog'
 require 'tago'
@@ -85,7 +85,7 @@ class Factbase::Looged
       @loog = loog
     end
 
-    def method_missing(*args)
+    others do |*args|
       r = @fact.method_missing(*args)
       k = args[0].to_s
       v = args[1]
@@ -94,16 +94,6 @@ class Factbase::Looged
       s = "#{s[0..MAX_LENGTH / 2]}...#{s[-MAX_LENGTH / 2..]}" if s.length > MAX_LENGTH
       @loog.debug("Set '#{k[0..-2]}' to #{s} (#{v.class})") if k.end_with?('=')
       r
-    end
-
-    # rubocop:disable Style/OptionalBooleanParameter
-    def respond_to?(_method, _include_private = false)
-      # rubocop:enable Style/OptionalBooleanParameter
-      true
-    end
-
-    def respond_to_missing?(_method, _include_private = false)
-      true
     end
   end
 

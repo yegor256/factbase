@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'decoor'
+require 'others'
 require_relative '../factbase'
 
 # Accumulator of props.
@@ -43,35 +43,25 @@ class Factbase::Accum
     "#{@fact} + #{@props}"
   end
 
-  def method_missing(*args)
+  others do |*args|
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
       @props[kk] = [] if @props[kk].nil?
       @props[kk] << args[1]
       @fact.method_missing(*args) if @pass
-      return
-    end
-    if k == '[]'
+    elsif k == '[]'
       kk = args[1].to_s
       vv = @props[kk].nil? ? [] : @props[kk]
       vvv = @fact.method_missing(*args)
       vvv = [vvv] unless vvv.nil? || vvv.is_a?(Array)
       vv += vvv unless vvv.nil?
       vv.uniq!
-      return vv.empty? ? nil : vv
+      vv.empty? ? nil : vv
+    elsif @props[k].nil?
+      @fact.method_missing(*args)
+    else
+      @props[k][0]
     end
-    return @props[k][0] unless @props[k].nil?
-    @fact.method_missing(*args)
-  end
-
-  # rubocop:disable Style/OptionalBooleanParameter
-  def respond_to?(_method, _include_private = false)
-    # rubocop:enable Style/OptionalBooleanParameter
-    true
-  end
-
-  def respond_to_missing?(_method, _include_private = false)
-    true
   end
 end
