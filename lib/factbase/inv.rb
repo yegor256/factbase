@@ -56,8 +56,6 @@ class Factbase::Inv
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Fact
-    decoor(:fact)
-
     def initialize(fact, block)
       @fact = fact
       @block = block
@@ -71,6 +69,16 @@ class Factbase::Inv
       k = args[0].to_s
       @block.call(k[0..-2], args[1]) if k.end_with?('=')
       @fact.method_missing(*args)
+    end
+
+    # rubocop:disable Style/OptionalBooleanParameter
+    def respond_to?(_method, _include_private = false)
+      # rubocop:enable Style/OptionalBooleanParameter
+      true
+    end
+
+    def respond_to_missing?(_method, _include_private = false)
+      true
     end
   end
 

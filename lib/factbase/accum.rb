@@ -29,8 +29,6 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class Factbase::Accum
-  decoor(:fact)
-
   # Ctor.
   # @param [Factbase::Fact] fact The fact to decorate
   # @param [Hash] props Hash of props that were set
@@ -65,5 +63,15 @@ class Factbase::Accum
     end
     return @props[k][0] unless @props[k].nil?
     @fact.method_missing(*args)
+  end
+
+  # rubocop:disable Style/OptionalBooleanParameter
+  def respond_to?(_method, _include_private = false)
+    # rubocop:enable Style/OptionalBooleanParameter
+    true
+  end
+
+  def respond_to_missing?(_method, _include_private = false)
+    true
   end
 end

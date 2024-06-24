@@ -33,7 +33,7 @@ require_relative '../factbase/syntax'
 #  fb = Factabase::Rules.new(fb, '(exists foo)')
 #  fb.txn do |fbt|
 #    f = fbt.insert
-#    f.bar = 3
+#    f.bar = 3 # No exception here
 #  end # Runtime exception here (transaction won't commit)
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -83,8 +83,6 @@ class Factbase::Rules
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Fact
-    decoor(:fact)
-
     def initialize(fact, check)
       @fact = fact
       @check = check
@@ -95,6 +93,16 @@ class Factbase::Rules
       k = args[0].to_s
       @check.it(@fact) if k.end_with?('=')
       r
+    end
+
+    # rubocop:disable Style/OptionalBooleanParameter
+    def respond_to?(_method, _include_private = false)
+      # rubocop:enable Style/OptionalBooleanParameter
+      true
+    end
+
+    def respond_to_missing?(_method, _include_private = false)
+      true
     end
   end
 
