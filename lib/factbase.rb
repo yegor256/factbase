@@ -214,6 +214,7 @@ class Factbase
   #
   # @param [Bytes] bytes Byte array to import
   def import(bytes)
+    raise 'Empty input, cannot load a factbase' if bytes.empty?
     @maps += Marshal.load(bytes)
   end
 end

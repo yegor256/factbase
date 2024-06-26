@@ -90,6 +90,18 @@ class TestFactbase < Minitest::Test
     assert_equal(1, f2.query('(eq foo 42)').each.to_a.count)
   end
 
+  def test_reads_from_empty_file
+    fb = Factbase.new
+    Tempfile.open do |f|
+      File.binwrite(f.path, '')
+      assert(
+        assert_raises do
+          fb.import(File.binread(f.path))
+        end.message.include?('cannot load a factbase')
+      )
+    end
+  end
+
   def test_empty_or_not
     fb = Factbase.new
     assert_equal(0, fb.size)
