@@ -38,7 +38,7 @@ class Factbase::Flatten
   # @return [Array<HashMap>] The hashmaps, but improved
   def it
     @maps
-      .sort_by { |m| m[@sorter] || nil }
+      .sort_by { |m| m[@sorter] || [] }
       .map { |m| m.sort.to_h }
       .map { |m| m.transform_values { |v| v.size == 1 ? v[0] : v } }
   end
