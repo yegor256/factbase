@@ -142,12 +142,16 @@ class Factbase::Rules
     end
 
     def it(fact)
-      @facts << fact.send(@uid) unless @uid.nil?
+      a = fact[@uid]
+      return if a.nil?
+      @facts << a[0] unless @uid.nil?
     end
 
     def include?(fact)
       return true if @uid.nil?
-      @facts.include?(fact.send(@uid))
+      a = fact[@uid]
+      return true if a.nil?
+      @facts.include?(a[0])
     end
   end
 end

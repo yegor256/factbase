@@ -44,6 +44,14 @@ class TestRules < Minitest::Test
     end
   end
 
+  def test_check_with_id
+    fb = Factbase::Rules.new(Factbase.new, '(exists foo)', uid: 'id')
+    fb.txn do |fbt|
+      f = fbt.insert
+      f.foo = 42
+    end
+  end
+
   def test_to_string
     fb = Factbase::Rules.new(
       Factbase.new,
