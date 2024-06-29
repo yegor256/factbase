@@ -86,6 +86,14 @@ class Factbase::Looged
       @loog = loog
     end
 
+    def to_s
+      @fact.to_s
+    end
+
+    def all_properties
+      @fact.all_properties
+    end
+
     others do |*args|
       r = @fact.method_missing(*args)
       k = args[0].to_s

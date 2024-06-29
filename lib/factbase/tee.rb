@@ -41,6 +41,10 @@ class Factbase::Tee
     @fact.to_s
   end
 
+  def all_properties
+    @fact.all_properties
+  end
+
   others do |*args|
     if args[0].to_s == '[]' && args[1].to_s.start_with?('$')
       n = args[1].to_s

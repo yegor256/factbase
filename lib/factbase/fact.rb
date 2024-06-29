@@ -57,13 +57,19 @@ class Factbase::Fact
     "[ #{@map.map { |k, v| "#{k}: #{v}" }.join(', ')} ]"
   end
 
+  # Get a list of all props.
+  # @return [Array<String>] List of all props in the fact
+  def all_properties
+    @map.keys
+  end
+
   # When a method is missing, this method is called.
   others do |*args|
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
       raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z_][_a-zA-Z0-9]*$/)
-      raise "Prohibited prop name '#{kk}'" if kk == 'to_s'
+      raise "Prohibited prop name '#{kk}'" if methods.include?(kk.to_sym)
       v = args[1]
       raise "Prop value can't be nil" if v.nil?
       raise "Prop value can't be empty" if v == ''

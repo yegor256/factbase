@@ -65,12 +65,10 @@ class TestToXML < Minitest::Test
     f = fb.insert
     f.type = 1
     f.f = 2
-    f.class = 3
     to = Factbase::ToXML.new(fb)
     xml = Nokogiri::XML.parse(to.xml)
     assert(!xml.xpath('/fb/f/type').empty?)
     assert(!xml.xpath('/fb/f/f').empty?)
-    assert(!xml.xpath('/fb/f/class').empty?)
   end
 
   def test_show_types_as_attributes

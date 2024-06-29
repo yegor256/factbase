@@ -43,6 +43,10 @@ class Factbase::Accum
     "#{@fact} + #{@props}"
   end
 
+  def all_properties
+    @fact.all_properties
+  end
+
   others do |*args|
     k = args[0].to_s
     if k.end_with?('=')

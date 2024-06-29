@@ -66,6 +66,10 @@ class Factbase::Inv
       @fact.to_s
     end
 
+    def all_properties
+      @fact.all_properties
+    end
+
     others do |*args|
       k = args[0].to_s
       @block.call(k[0..-2], args[1]) if k.end_with?('=')

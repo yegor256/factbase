@@ -173,4 +173,11 @@ class TestQuery < Minitest::Test
     maps << { 'foo' => [42] }
     assert(Factbase::Query.new(maps, Mutex.new, '(as bar (plus xxx 3))').each.to_a[0]['bar'].nil?)
   end
+
+  def test_get_all_properties
+    maps = []
+    maps << { 'foo' => [42] }
+    f = Factbase::Query.new(maps, Mutex.new, '(always)').each.to_a[0]
+    assert(f.all_properties.include?('foo'))
+  end
 end

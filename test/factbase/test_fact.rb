@@ -110,4 +110,16 @@ class TestFact < Minitest::Test
     assert_equal(t.utc, f.foo)
     assert_equal(t.utc.to_s, f.foo.to_s)
   end
+
+  def test_some_names_are_prohibited
+    f = Factbase::Fact.new(Mutex.new, {})
+    assert_raises { f.to_s = 42 }
+    assert_raises { f.class = 42 }
+  end
+
+  def test_get_all_properties
+    f = Factbase::Fact.new(Mutex.new, {})
+    f.foo = 42
+    assert(f.all_properties.include?('foo'))
+  end
 end
