@@ -31,14 +31,23 @@ require_relative '../../lib/factbase/fact'
 # License:: MIT
 class TestTee < Minitest::Test
   def test_two_facts
-    map = {}
-    prim = Factbase::Fact.new(Mutex.new, map)
+    prim = Factbase::Fact.new(Mutex.new, {})
     prim.foo = 42
-    upper = Factbase::Fact.new(Mutex.new, map)
+    upper = Factbase::Fact.new(Mutex.new, {})
     upper.bar = 13
     t = Factbase::Tee.new(prim, upper)
     assert_equal(42, t.foo)
     assert_equal([13], t['$bar'])
+  end
+
+  def test_all_properties
+    prim = Factbase::Fact.new(Mutex.new, {})
+    prim.foo = 42
+    upper = Factbase::Fact.new(Mutex.new, {})
+    upper.bar = 13
+    t = Factbase::Tee.new(prim, upper)
+    assert(t.all_properties.include?('foo'))
+    assert(t.all_properties.include?('bar'))
   end
 
   def test_recursively
