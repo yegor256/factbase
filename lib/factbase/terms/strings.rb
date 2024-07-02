@@ -32,6 +32,12 @@ module Factbase::Term::Strings
     (0..@operands.length - 1).map { |i| the_values(i, fact, maps)[0] }.join
   end
 
+  def sprintf(fact, maps)
+    fmt = the_values(0, fact, maps)[0]
+    ops = (1..@operands.length - 1).map { |i| the_values(i, fact, maps)[0] }
+    format(*([fmt] + ops))
+  end
+
   def matches(fact, maps)
     assert_args(2)
     str = the_values(0, fact, maps)

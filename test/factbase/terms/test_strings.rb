@@ -27,9 +27,20 @@ require_relative '../../../lib/factbase/term'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class TestMath < Minitest::Test
+class TestStrings < Minitest::Test
   def test_concat
     t = Factbase::Term.new(:concat, [42, 'hi', 3.14, Time.now])
     assert(t.evaluate(fact, []).start_with?('42hi3.14'))
+  end
+
+  def test_sprintf
+    t = Factbase::Term.new(:sprintf, ['hi, %s!', 'Jeff'])
+    assert_equal('hi, Jeff!', t.evaluate(fact, []))
+  end
+
+  private
+
+  def fact(map = {})
+    Factbase::Fact.new(Mutex.new, map)
   end
 end

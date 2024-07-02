@@ -72,6 +72,11 @@ or `b1` is `false`
 * `(gt v1 v2)` — if any `v1` is greater than any `v2`
 * `(many v)` — if `v` has many values
 * `(one v)` — if `v` has one value
+
+There are string manipulators:
+
+* `(concat v1 v2 v3 ...)` — concatenates all `v`
+* `(sprintf v v1 v2 ...)` — creates a string by `v` format with params
 * `(matches v s)` — if any `v` matches the `s` regular expression
 
 There are a few terms that return non-boolean values:
