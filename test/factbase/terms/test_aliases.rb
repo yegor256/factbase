@@ -32,13 +32,14 @@ require_relative '../../../lib/factbase/accum'
 class TestAliases < Minitest::Test
   def test_aliases
     maps = [
-      { 'x' => [1], 'y' => [0] },
-      { 'x' => [2], 'y' => [42] }
+      { 'x' => [1], 'y' => [0], 't1' => [Time.now], 't2' => [Time.now] },
+      { 'x' => [2], 'y' => [42], 't' => [Time.now] }
     ]
     {
       '(as foo (plus x 1))' => '(exists foo)',
       '(as foo (plus x y))' => '(gt foo 0)',
-      '(as foo (plus bar 1))' => '(absent foo)'
+      '(as foo (plus bar 1))' => '(absent foo)',
+      '(as foo (minus t1 t2))' => '(when (exists foo) (eq "Float" (type foo)))'
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term
       maps.each do |m|
