@@ -33,6 +33,11 @@ class TestStrings < Minitest::Test
     assert(t.evaluate(fact, []).start_with?('42hi3.14'))
   end
 
+  def test_concat_empty
+    t = Factbase::Term.new(:concat, [])
+    assert_equal('', t.evaluate(fact, []))
+  end
+
   def test_sprintf
     t = Factbase::Term.new(:sprintf, ['hi, %s!', 'Jeff'])
     assert_equal('hi, Jeff!', t.evaluate(fact, []))
