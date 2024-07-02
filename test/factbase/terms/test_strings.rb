@@ -40,7 +40,7 @@ class TestStrings < Minitest::Test
   end
 
   def test_sprintf
-    t = Factbase::Term.new(:sprintf, ['hi, %s!', 'Jeff'])
+    t = Factbase::Term.new(:sprintf, ['hi, %s!', 'Jeff', :hey])
     assert_equal('hi, Jeff!', t.evaluate(fact, []))
   end
 

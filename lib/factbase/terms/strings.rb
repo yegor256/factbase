@@ -34,7 +34,7 @@ module Factbase::Term::Strings
 
   def sprintf(fact, maps)
     fmt = the_values(0, fact, maps)[0]
-    ops = (1..@operands.length - 1).map { |i| the_values(i, fact, maps)[0] }
+    ops = (1..@operands.length - 1).map { |i| the_values(i, fact, maps)&.first }
     format(*([fmt] + ops))
   end
 
