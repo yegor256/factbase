@@ -29,7 +29,7 @@ require_relative '../../factbase'
 # License:: MIT
 module Factbase::Term::Strings
   def concat(fact, maps)
-    (0..@operands.length - 1).map { |i| the_values(i, fact, maps)[0] }.join
+    (0..@operands.length - 1).map { |i| the_values(i, fact, maps)&.first }.join
   end
 
   def sprintf(fact, maps)
