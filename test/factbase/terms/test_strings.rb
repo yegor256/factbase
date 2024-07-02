@@ -20,26 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../../factbase'
+require 'minitest/autorun'
+require_relative '../../../lib/factbase/term'
 
-# String terms.
-#
+# Strings test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-module Factbase::Term::Strings
-  def concat(fact, maps)
-    (0..@operands.length - 1).map { |i| the_values(i, fact, maps)[0] }.join
-  end
-
-  def matches(fact, maps)
-    assert_args(2)
-    str = the_values(0, fact, maps)
-    return false if str.nil?
-    raise 'Exactly one string expected' unless str.size == 1
-    re = the_values(1, fact, maps)
-    raise 'Regexp is nil' if re.nil?
-    raise 'Exactly one regexp expected' unless re.size == 1
-    str[0].to_s.match?(re[0])
+class TestMath < Minitest::Test
+  def test_concat
+    t = Factbase::Term.new(:concat, [42, 'hi', 3.14, Time.now])
+    assert(t.evaluate(fact, []).start_with?('42hi3.14'))
   end
 end
