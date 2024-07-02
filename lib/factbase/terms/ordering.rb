@@ -36,10 +36,10 @@ module Factbase::Term::Ordering
     before
   end
 
-  def unique(fact, _maps)
+  def unique(fact, maps)
     @uniques = [] if @uniques.nil?
     assert_args(1)
-    vv = by_symbol(0, fact)
+    vv = the_values(0, fact, maps)
     return false if vv.nil?
     vv = [vv] unless vv.is_a?(Array)
     vv.each do |v|
