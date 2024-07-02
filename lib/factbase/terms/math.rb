@@ -51,6 +51,27 @@ module Factbase::Term::Math
     vv.any? { |v| (v.is_a?(Integer) || v.is_a?(Float)) && v.zero? }
   end
 
+  def to_str(fact, maps)
+    assert_args(1)
+    vv = the_values(0, fact, maps)
+    return nil if vv.nil?
+    vv[0].to_s
+  end
+
+  def to_int(fact, maps)
+    assert_args(1)
+    vv = the_values(0, fact, maps)
+    return nil if vv.nil?
+    vv[0].to_i
+  end
+
+  def to_float(fact, maps)
+    assert_args(1)
+    vv = the_values(0, fact, maps)
+    return nil if vv.nil?
+    vv[0].to_f
+  end
+
   def eq(fact, maps)
     cmp(:==, fact, maps)
   end

@@ -97,6 +97,12 @@ Also, some simple arithmetic:
 * `(times v1 v2)` is a multiplication of `∏v1` and `∏v2`
 * `(div v1 v2)` is a division of `∏v1` by `∏v2`
 
+Types may be converted:
+
+* `(to_int v)` is an integer of `v`
+* `(to_str v)` is a string of `v`
+* `(to_float v)` is a float of `v`
+
 One term is for meta-programming:
 
 * `(defn f "self.to_s")` defines a new term using Ruby syntax and returns `true`

@@ -91,6 +91,21 @@ class TestMath < Minitest::Test
     assert(!t.evaluate(fact('bar' => [100]), []))
   end
 
+  def test_to_str
+    t = Factbase::Term.new(:to_str, [Time.now])
+    assert_equal('String', t.evaluate(fact, []).class.to_s)
+  end
+
+  def test_to_int
+    t = Factbase::Term.new(:to_int, [[42, 'hello']])
+    assert_equal('Integer', t.evaluate(fact, []).class.to_s)
+  end
+
+  def test_to_float
+    t = Factbase::Term.new(:to_float, [[3.14, 'hello']])
+    assert_equal('Float', t.evaluate(fact, []).class.to_s)
+  end
+
   private
 
   def fact(map = {})
