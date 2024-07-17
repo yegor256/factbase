@@ -106,6 +106,12 @@ class TestMath < Minitest::Test
     assert_equal('Float', t.evaluate(fact, []).class.to_s)
   end
 
+  def test_plus
+    t = Factbase::Term.new(:plus, [:foo, 42])
+    assert_equal(46, t.evaluate(fact('foo' => 4), []))
+    assert(t.evaluate(fact, []).nil?)
+  end
+
   private
 
   def fact(map = {})

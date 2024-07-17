@@ -63,41 +63,6 @@ class TestTerm < Minitest::Test
     assert_equal('nil', t.evaluate(fact, []))
   end
 
-  def test_defn_simple
-    t = Factbase::Term.new(:defn, [:foo, 'self.to_s'])
-    assert_equal(true, t.evaluate(fact('foo' => 4), []))
-    t1 = Factbase::Term.new(:foo, ['hello, world!'])
-    assert_equal('(foo \'hello, world!\')', t1.evaluate(fact, []))
-  end
-
-  def test_defn_again_by_mistake
-    t = Factbase::Term.new(:defn, [:and, 'self.to_s'])
-    assert_raises do
-      t.evaluate(fact, [])
-    end
-  end
-
-  def test_defn_bad_name_by_mistake
-    t = Factbase::Term.new(:defn, [:to_s, 'self.to_s'])
-    assert_raises do
-      t.evaluate(fact, [])
-    end
-  end
-
-  def test_defn_bad_name_spelling_by_mistake
-    t = Factbase::Term.new(:defn, [:'some-key', 'self.to_s'])
-    assert_raises do
-      t.evaluate(fact, [])
-    end
-  end
-
-  def test_undef_simple
-    t = Factbase::Term.new(:defn, [:hello, 'self.to_s'])
-    assert_equal(true, t.evaluate(fact, []))
-    t = Factbase::Term.new(:undef, [:hello])
-    assert_equal(true, t.evaluate(fact, []))
-  end
-
   def test_past
     t = Factbase::Term.new(:prev, [:foo])
     assert_nil(t.evaluate(fact('foo' => 4), []))
@@ -113,12 +78,6 @@ class TestTerm < Minitest::Test
   def test_either
     t = Factbase::Term.new(:either, [Factbase::Term.new(:at, [5, :foo]), 42])
     assert_equal([42], t.evaluate(fact('foo' => 4), []))
-  end
-
-  def test_plus
-    t = Factbase::Term.new(:plus, [:foo, 42])
-    assert_equal(46, t.evaluate(fact('foo' => 4), []))
-    assert(t.evaluate(fact, []).nil?)
   end
 
   def test_report_missing_term
