@@ -39,6 +39,11 @@ class TestLogical < Minitest::Test
     assert(!t.evaluate(fact('foo' => 100), []))
   end
 
+  def test_either
+    t = Factbase::Term.new(:either, [Factbase::Term.new(:at, [5, :foo]), 42])
+    assert_equal([42], t.evaluate(fact('foo' => 4), []))
+  end
+
   def test_or_matching
     t = Factbase::Term.new(
       :or,

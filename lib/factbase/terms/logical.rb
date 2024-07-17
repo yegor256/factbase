@@ -64,6 +64,13 @@ module Factbase::Term::Logical
     !a.evaluate(fact, maps) || (a.evaluate(fact, maps) && b.evaluate(fact, maps))
   end
 
+  def either(fact, maps)
+    assert_args(2)
+    v = the_values(0, fact, maps)
+    return v unless v.nil?
+    the_values(1, fact, maps)
+  end
+
   def and_or_simplify
     strs = []
     ops = []

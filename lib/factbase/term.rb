@@ -130,13 +130,6 @@ class Factbase::Term
 
   private
 
-  def either(fact, maps)
-    assert_args(2)
-    v = the_values(0, fact, maps)
-    return v unless v.nil?
-    the_values(1, fact, maps)
-  end
-
   def at(fact, maps)
     assert_args(2)
     i = the_values(0, fact, maps)

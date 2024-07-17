@@ -75,11 +75,6 @@ class TestTerm < Minitest::Test
     assert_equal(5, t.evaluate(fact('foo' => [4, 5]), []))
   end
 
-  def test_either
-    t = Factbase::Term.new(:either, [Factbase::Term.new(:at, [5, :foo]), 42])
-    assert_equal([42], t.evaluate(fact('foo' => 4), []))
-  end
-
   def test_report_missing_term
     t = Factbase::Term.new(:something, [])
     msg = assert_raises do
