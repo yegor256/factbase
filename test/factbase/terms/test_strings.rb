@@ -28,6 +28,13 @@ require_relative '../../../lib/factbase/term'
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
 class TestStrings < Minitest::Test
+  def test_regexp_matching
+    t = Factbase::Term.new(:matches, [:foo, '[a-z]+'])
+    assert(t.evaluate(fact('foo' => 'hello'), []))
+    assert(t.evaluate(fact('foo' => 'hello 42'), []))
+    assert(!t.evaluate(fact('foo' => 42), []))
+  end
+
   def test_concat
     t = Factbase::Term.new(:concat, [42, 'hi', 3.14, :hey, Time.now])
     s = t.evaluate(fact, [])
