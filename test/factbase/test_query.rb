@@ -120,8 +120,13 @@ class TestQuery < Minitest::Test
       '(agg (always) (count))' => 2,
       '(agg (eq bar $v) (count))' => 1,
       '(agg (eq z 40) (count))' => 0
-    }.each do |q, r|
-      assert_equal(r, Factbase::Query.new(maps, Mutex.new, q).one(v: 4), "#{q} -> #{r}")
+    }.each do |q, expected|
+      result = Factbase::Query.new(maps, Mutex.new, q).one(v: 4)
+      if expected.nil?
+        assert_nil(result, "#{q} -> nil")
+      else
+        assert_equal(expected, result, "#{q} -> #{expected}")
+      end
     end
   end
 
