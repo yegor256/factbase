@@ -57,6 +57,13 @@ module Factbase::Term::Logical
     true
   end
 
+  def when(fact, maps)
+    assert_args(2)
+    a = @operands[0]
+    b = @operands[1]
+    !a.evaluate(fact, maps) || (a.evaluate(fact, maps) && b.evaluate(fact, maps))
+  end
+
   def and_or_simplify
     strs = []
     ops = []
@@ -77,13 +84,6 @@ module Factbase::Term::Logical
 
   def or_simplify
     and_or_simplify
-  end
-
-  def when(fact, maps)
-    assert_args(2)
-    a = @operands[0]
-    b = @operands[1]
-    !a.evaluate(fact, maps) || (a.evaluate(fact, maps) && b.evaluate(fact, maps))
   end
 
   def _only_bool(val, pos)

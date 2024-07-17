@@ -33,17 +33,6 @@ class TestTerm < Minitest::Test
     assert(!t.evaluate(fact('foo' => [100]), []))
   end
 
-  def test_not_matching
-    t = Factbase::Term.new(:not, [Factbase::Term.new(:always, [])])
-    assert(!t.evaluate(fact('foo' => [100]), []))
-  end
-
-  def test_not_eq_matching
-    t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 100])])
-    assert(t.evaluate(fact('foo' => [42, 12, -90]), []))
-    assert(!t.evaluate(fact('foo' => 100), []))
-  end
-
   def test_size_matching
     t = Factbase::Term.new(:size, [:foo])
     assert_equal(3, t.evaluate(fact('foo' => [42, 12, -90]), []))
@@ -72,32 +61,6 @@ class TestTerm < Minitest::Test
     assert_equal('Time', t.evaluate(fact('foo' => Time.now), []))
     assert_equal('Integer', t.evaluate(fact('foo' => 1_000_000_000_000_000), []))
     assert_equal('nil', t.evaluate(fact, []))
-  end
-
-  def test_or_matching
-    t = Factbase::Term.new(
-      :or,
-      [
-        Factbase::Term.new(:eq, [:foo, 4]),
-        Factbase::Term.new(:eq, [:bar, 5])
-      ]
-    )
-    assert(t.evaluate(fact('foo' => [4]), []))
-    assert(t.evaluate(fact('bar' => [5]), []))
-    assert(!t.evaluate(fact('bar' => [42]), []))
-  end
-
-  def test_when_matching
-    t = Factbase::Term.new(
-      :when,
-      [
-        Factbase::Term.new(:eq, [:foo, 4]),
-        Factbase::Term.new(:eq, [:bar, 5])
-      ]
-    )
-    assert(t.evaluate(fact('foo' => 4, 'bar' => 5), []))
-    assert(!t.evaluate(fact('foo' => 4), []))
-    assert(t.evaluate(fact('foo' => 5, 'bar' => 5), []))
   end
 
   def test_defn_simple
