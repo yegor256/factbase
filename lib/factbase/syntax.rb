@@ -35,8 +35,10 @@ require_relative 'term'
 class Factbase::Syntax
   # Ctor.
   # @param [String] query The query, for example "(eq id 42)"
-  def initialize(query)
+  # @param [Class] term The class to instantiate to make every term
+  def initialize(query, term: Factbase::Term)
     @query = query
+    @term = term
   end
 
   # Convert it to a term.
@@ -60,7 +62,7 @@ class Factbase::Syntax
     raise 'Too many terms' if @ast[1] != @tokens.size
     term = @ast[0]
     raise 'No terms found' if term.nil?
-    raise 'Not a term' unless term.is_a?(Factbase::Term)
+    raise 'Not a term' unless term.is_a?(@term)
     term
   end
 
@@ -89,7 +91,7 @@ class Factbase::Syntax
       operands << operand
       break if tokens[at] == :close
     end
-    [Factbase::Term.new(op, operands), at + 1]
+    [@term.new(op, operands), at + 1]
   end
 
   # Turns a query into an array of tokens.
