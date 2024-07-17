@@ -35,7 +35,7 @@ class TestSyntax < Minitest::Test
       "(foo 'one two three   ')",
       "(foo 'one two three   ' 'tail tail')"
     ].each do |q|
-      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s)
+      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s, q)
     end
   end
 
@@ -50,7 +50,7 @@ class TestSyntax < Minitest::Test
       "(foo 'Hello,\n\nworld!\r\t\n')\n",
       "(or ( a 4) (b 5) (always) (and (always) (c 5) \t\t(r 7 w8s w8is 'Foo')))"
     ].each do |q|
-      Factbase::Syntax.new(q).to_term
+      assert(!Factbase::Syntax.new(q).to_term.nil?)
     end
   end
 
@@ -70,7 +70,7 @@ class TestSyntax < Minitest::Test
       '(eq t 3.0e+21)',
       "(foo (x (f (t (y 42 'Hey you'))) (never) (r 3)) y z)"
     ].each do |q|
-      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s)
+      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s, q)
     end
   end
 

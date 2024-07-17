@@ -44,7 +44,9 @@ class Factbase::Syntax
   # Convert it to a term.
   # @return [Term] The term detected
   def to_term
-    build.simplify
+    t = build
+    t = t.simplify if t.respond_to?(:simplify)
+    t
   rescue StandardError => e
     err = "#{e.message} in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
