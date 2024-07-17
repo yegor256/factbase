@@ -42,13 +42,13 @@ Gem::Specification.new do |s|
   s.files = `git ls-files`.split($RS)
   s.rdoc_options = ['--charset=UTF-8']
   s.extra_rdoc_files = ['README.md', 'LICENSE.txt']
-  s.add_dependency 'backtrace', '~>0.3'
-  s.add_dependency 'decoor', '~>0.0'
+  s.add_dependency 'backtrace', '>0'
+  s.add_dependency 'decoor', '>0'
   s.add_dependency 'json', '~>2.7'
-  s.add_dependency 'loog', '~>0.2'
+  s.add_dependency 'loog', '>0'
   s.add_dependency 'nokogiri', '~>1.10'
-  s.add_dependency 'others', '~>0.0'
-  s.add_dependency 'tago', '~>0.0'
+  s.add_dependency 'others', '>0'
+  s.add_dependency 'tago', '>0'
   s.add_dependency 'yaml', '~>0.3'
   s.metadata['rubygems_mfa_required'] = 'true'
 end
