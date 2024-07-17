@@ -29,6 +29,16 @@ require_relative 'term'
 #
 # This is an internal class, it is not supposed to be instantiated directly.
 #
+# However, you can use it directly, if you need a parser of our syntax. You can
+# create your own "Term" class and let this parser make instances of it for
+# every term it meets in the query:
+#
+#  require 'factbase/syntax'
+#  t = Factbase::Syntax.new('(hello world)', MyTerm).to_term
+#
+# The +MyTerm+ class should have a constructor with two arguments:
+# the operator and the list of operands (Array).
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
