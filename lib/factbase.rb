@@ -99,7 +99,7 @@ class Factbase
     Factbase.new(@maps.map { |m| m.transform_values(&:dup) })
   end
 
-  # Size.
+  # Size, the total number of facts in the factbase.
   # @return [Integer] How many facts are in there
   def size
     @maps.size
@@ -114,11 +114,11 @@ class Factbase
   #
   # @return [Factbase::Fact] The fact just inserted
   def insert
-    require_relative 'factbase/fact'
     map = {}
     @mutex.synchronize do
       @maps << map
     end
+    require_relative 'factbase/fact'
     Factbase::Fact.new(@mutex, map)
   end
 
