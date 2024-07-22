@@ -102,6 +102,9 @@ Also, some simple arithmetic:
 * `(times v1 v2)` is a multiplication of `∏v1` and `∏v2`
 * `(div v1 v2)` is a division of `∏v1` by `∏v2`
 
+It's possible to add and deduct string values to time values, like
+`(plus t '2 days')` or ``(minus t '14 hours')``.
+
 Types may be converted:
 
 * `(to_int v)` is an integer of `v`
