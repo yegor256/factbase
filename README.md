@@ -79,10 +79,6 @@ There are string manipulators:
 * `(sprintf v v1 v2 ...)` — creates a string by `v` format with params
 * `(matches v s)` — if any `v` matches the `s` regular expression
 
-There are time-related terms:
-
-* `(dob)` — returns the date of birth of the Factbase
-
 There are a few terms that return non-boolean values:
 
 * `(at i v)` is the `i`-th value of `v`
