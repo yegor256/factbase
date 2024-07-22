@@ -97,6 +97,12 @@ class TestMath < Minitest::Test
     assert(t.evaluate(fact, []).nil?)
   end
 
+  def test_minus
+    t = Factbase::Term.new(:minus, [:foo, 42])
+    assert_equal(58, t.evaluate(fact('foo' => 100), []))
+    assert(t.evaluate(fact, []).nil?)
+  end
+
   private
 
   def fact(map = {})
