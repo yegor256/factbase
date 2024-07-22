@@ -97,6 +97,12 @@ class TestMath < Minitest::Test
     assert(t.evaluate(fact, []).nil?)
   end
 
+  def test_plus_time
+    t = Factbase::Term.new(:plus, [:foo, '12 days'])
+    assert_equal(Time.parse('2024-01-13'), t.evaluate(fact('foo' => Time.parse('2024-01-01')), []))
+    assert(t.evaluate(fact, []).nil?)
+  end
+
   def test_minus
     t = Factbase::Term.new(:minus, [:foo, 42])
     assert_equal(58, t.evaluate(fact('foo' => 100), []))

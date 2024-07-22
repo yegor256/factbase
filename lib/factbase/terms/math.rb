@@ -86,6 +86,27 @@ module Factbase::Term::Math
     rights = the_values(1, fact, maps)
     return nil if rights.nil?
     raise 'Too many values at second position, one expected' unless rights.size == 1
-    lefts[0].send(op, rights[0])
+    v = lefts[0]
+    r = rights[0]
+    if v.is_a?(Time) && r.is_a?(String)
+      (num, units) = r.split
+      num = num.to_i
+      r =
+        case units
+        when 'seconds'
+          num
+        when 'minutes'
+          num * 60
+        when 'hours'
+          num * 60 * 60
+        when 'days'
+          num * 60 * 60 * 24
+        when 'weeks'
+          num * 60 * 60 * 24 * 7
+        else
+          raise "Unknown time unit '#{units}' in '#{r}"
+        end
+    end
+    v.send(op, r)
   end
 end
