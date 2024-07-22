@@ -147,6 +147,11 @@ It's also possible to use a sub-query in a shorter form than with the `agg`:
 
 * `(empty q)` is true if the subquery `q` is empty
 
+There are some system-level terms:
+
+* `(env v1 v2)` returns the value of environment variable `v1` or the string
+`v2` if it's not set
+
 ## How to contribute
 
 Read

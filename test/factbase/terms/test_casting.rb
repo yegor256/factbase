@@ -21,13 +21,14 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
 # Math test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class TestMath < Minitest::Test
+class TestCasting < Minitest::Test
   def test_to_str
     t = Factbase::Term.new(:to_string, [Time.now])
     assert_equal('String', t.evaluate(fact, []).class.to_s)
@@ -46,11 +47,5 @@ class TestMath < Minitest::Test
   def test_to_time
     t = Factbase::Term.new(:to_time, [%w[2023-01-01 hello]])
     assert_equal('Time', t.evaluate(fact, []).class.to_s)
-  end
-
-  private
-
-  def fact(map = {})
-    Factbase::Fact.new(Mutex.new, map)
   end
 end

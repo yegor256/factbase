@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
 # Math test.
@@ -113,11 +114,5 @@ class TestMath < Minitest::Test
     t = Factbase::Term.new(:minus, [:foo, '4 hours'])
     assert_equal(Time.parse('2024-01-01T06:04'), t.evaluate(fact('foo' => Time.parse('2024-01-01T10:04')), []))
     assert(t.evaluate(fact, []).nil?)
-  end
-
-  private
-
-  def fact(map = {})
-    Factbase::Fact.new(Mutex.new, map)
   end
 end

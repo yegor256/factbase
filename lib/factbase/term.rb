@@ -80,6 +80,9 @@ class Factbase::Term
   require_relative 'terms/defn'
   include Factbase::Term::Defn
 
+  require_relative 'terms/system'
+  include Factbase::Term::System
+
   require_relative 'terms/debug'
   include Factbase::Term::Debug
 
