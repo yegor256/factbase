@@ -109,6 +109,12 @@ class TestMath < Minitest::Test
     assert(t.evaluate(fact, []).nil?)
   end
 
+  def test_minus_time
+    t = Factbase::Term.new(:minus, [:foo, '4 hours'])
+    assert_equal(Time.parse('2024-01-01T06:04'), t.evaluate(fact('foo' => Time.parse('2024-01-01T10:04')), []))
+    assert(t.evaluate(fact, []).nil?)
+  end
+
   private
 
   def fact(map = {})
