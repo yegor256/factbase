@@ -30,7 +30,7 @@ require_relative '../../../lib/factbase/term'
 # License:: MIT
 class TestSystem < Minitest::Test
   def test_env
-    ENV['FOO'] = 'bar'
+    ENV.store('FOO', 'bar')
     t = Factbase::Term.new(:env, ['FOO', ''])
     assert_equal('bar', t.evaluate(fact, []))
   end
