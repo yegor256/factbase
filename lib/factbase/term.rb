@@ -65,6 +65,9 @@ class Factbase::Term
   require_relative 'terms/strings'
   include Factbase::Term::Strings
 
+  require_relative 'terms/casting'
+  include Factbase::Term::Casting
+
   require_relative 'terms/meta'
   include Factbase::Term::Meta
 
@@ -76,6 +79,9 @@ class Factbase::Term
 
   require_relative 'terms/defn'
   include Factbase::Term::Defn
+
+  require_relative 'terms/system'
+  include Factbase::Term::System
 
   require_relative 'terms/debug'
   include Factbase::Term::Debug

@@ -20,23 +20,39 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-$stdout.sync = true
+require_relative '../../factbase'
 
-require 'simplecov'
-SimpleCov.start
+# Casting terms.
+#
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# License:: MIT
+module Factbase::Term::Casting
+  def to_string(fact, maps)
+    assert_args(1)
+    vv = the_values(0, fact, maps)
+    return nil if vv.nil?
+    vv[0].to_s
+  end
 
-require 'simplecov-cobertura'
-SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
+  def to_integer(fact, maps)
+    assert_args(1)
+    vv = the_values(0, fact, maps)
+    return nil if vv.nil?
+    vv[0].to_i
+  end
 
-require 'minitest/autorun'
+  def to_float(fact, maps)
+    assert_args(1)
+    vv = the_values(0, fact, maps)
+    return nil if vv.nil?
+    vv[0].to_f
+  end
 
-require 'minitest/reporters'
-Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new]
-
-# Default methods for all tests.
-class Minitest::Test
-  def fact(map = {})
-    require 'factbase/fact'
-    Factbase::Fact.new(Mutex.new, map)
+  def to_time(fact, maps)
+    assert_args(1)
+    vv = the_values(0, fact, maps)
+    return nil if vv.nil?
+    Time.parse(vv[0].to_s)
   end
 end

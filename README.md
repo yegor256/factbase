@@ -102,6 +102,9 @@ Also, some simple arithmetic:
 * `(times v1 v2)` is a multiplication of `∏v1` and `∏v2`
 * `(div v1 v2)` is a division of `∏v1` by `∏v2`
 
+It's possible to add and deduct string values to time values, like
+`(plus t '2 days')` or ``(minus t '14 hours')``.
+
 Types may be converted:
 
 * `(to_int v)` is an integer of `v`
@@ -143,6 +146,11 @@ a positive integer)
 It's also possible to use a sub-query in a shorter form than with the `agg`:
 
 * `(empty q)` is true if the subquery `q` is empty
+
+There are some system-level terms:
+
+* `(env v1 v2)` returns the value of environment variable `v1` or the string
+`v2` if it's not set
 
 ## How to contribute
 

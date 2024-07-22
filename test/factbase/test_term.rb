@@ -90,10 +90,4 @@ class TestTerm < Minitest::Test
     end.message
     assert(msg.include?('at (at)'), msg)
   end
-
-  private
-
-  def fact(map = {})
-    Factbase::Fact.new(Mutex.new, map)
-  end
 end

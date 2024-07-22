@@ -20,23 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-$stdout.sync = true
+require_relative '../../factbase'
 
-require 'simplecov'
-SimpleCov.start
-
-require 'simplecov-cobertura'
-SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
-
-require 'minitest/autorun'
-
-require 'minitest/reporters'
-Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new]
-
-# Default methods for all tests.
-class Minitest::Test
-  def fact(map = {})
-    require 'factbase/fact'
-    Factbase::Fact.new(Mutex.new, map)
+# System-level terms.
+#
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# License:: MIT
+module Factbase::Term::System
+  def env(fact, maps)
+    assert_args(2)
+    n = the_values(0, fact, maps)[0]
+    ENV.fetch(n.upcase) { the_values(1, fact, maps)[1] }
   end
 end

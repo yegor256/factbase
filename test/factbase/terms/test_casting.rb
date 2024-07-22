@@ -21,52 +21,31 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
-# Logical test.
+# Math test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class TestLogical < Minitest::Test
-  def test_not_matching
-    t = Factbase::Term.new(:not, [Factbase::Term.new(:always, [])])
-    assert(!t.evaluate(fact('foo' => [100]), []))
+class TestCasting < Minitest::Test
+  def test_to_str
+    t = Factbase::Term.new(:to_string, [Time.now])
+    assert_equal('String', t.evaluate(fact, []).class.to_s)
   end
 
-  def test_not_eq_matching
-    t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 100])])
-    assert(t.evaluate(fact('foo' => [42, 12, -90]), []))
-    assert(!t.evaluate(fact('foo' => 100), []))
+  def test_to_integer
+    t = Factbase::Term.new(:to_integer, [[42, 'hello']])
+    assert_equal('Integer', t.evaluate(fact, []).class.to_s)
   end
 
-  def test_either
-    t = Factbase::Term.new(:either, [Factbase::Term.new(:at, [5, :foo]), 42])
-    assert_equal([42], t.evaluate(fact('foo' => 4), []))
+  def test_to_float
+    t = Factbase::Term.new(:to_float, [[3.14, 'hello']])
+    assert_equal('Float', t.evaluate(fact, []).class.to_s)
   end
 
-  def test_or_matching
-    t = Factbase::Term.new(
-      :or,
-      [
-        Factbase::Term.new(:eq, [:foo, 4]),
-        Factbase::Term.new(:eq, [:bar, 5])
-      ]
-    )
-    assert(t.evaluate(fact('foo' => [4]), []))
-    assert(t.evaluate(fact('bar' => [5]), []))
-    assert(!t.evaluate(fact('bar' => [42]), []))
-  end
-
-  def test_when_matching
-    t = Factbase::Term.new(
-      :when,
-      [
-        Factbase::Term.new(:eq, [:foo, 4]),
-        Factbase::Term.new(:eq, [:bar, 5])
-      ]
-    )
-    assert(t.evaluate(fact('foo' => 4, 'bar' => 5), []))
-    assert(!t.evaluate(fact('foo' => 4), []))
-    assert(t.evaluate(fact('foo' => 5, 'bar' => 5), []))
+  def test_to_time
+    t = Factbase::Term.new(:to_time, [%w[2023-01-01 hello]])
+    assert_equal('Time', t.evaluate(fact, []).class.to_s)
   end
 end

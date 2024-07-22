@@ -67,10 +67,4 @@ class TestAggregates < Minitest::Test
       assert_equal(r, t.evaluate(nil, maps), q)
     end
   end
-
-  private
-
-  def fact(map = {})
-    Factbase::Fact.new(Mutex.new, map)
-  end
 end

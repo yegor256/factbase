@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
 # Math test.
@@ -91,30 +92,27 @@ class TestMath < Minitest::Test
     assert(!t.evaluate(fact('bar' => [100]), []))
   end
 
-  def test_to_str
-    t = Factbase::Term.new(:to_str, [Time.now])
-    assert_equal('String', t.evaluate(fact, []).class.to_s)
-  end
-
-  def test_to_int
-    t = Factbase::Term.new(:to_int, [[42, 'hello']])
-    assert_equal('Integer', t.evaluate(fact, []).class.to_s)
-  end
-
-  def test_to_float
-    t = Factbase::Term.new(:to_float, [[3.14, 'hello']])
-    assert_equal('Float', t.evaluate(fact, []).class.to_s)
-  end
-
   def test_plus
     t = Factbase::Term.new(:plus, [:foo, 42])
     assert_equal(46, t.evaluate(fact('foo' => 4), []))
     assert(t.evaluate(fact, []).nil?)
   end
 
-  private
+  def test_plus_time
+    t = Factbase::Term.new(:plus, [:foo, '12 days'])
+    assert_equal(Time.parse('2024-01-13'), t.evaluate(fact('foo' => Time.parse('2024-01-01')), []))
+    assert(t.evaluate(fact, []).nil?)
+  end
 
-  def fact(map = {})
-    Factbase::Fact.new(Mutex.new, map)
+  def test_minus
+    t = Factbase::Term.new(:minus, [:foo, 42])
+    assert_equal(58, t.evaluate(fact('foo' => 100), []))
+    assert(t.evaluate(fact, []).nil?)
+  end
+
+  def test_minus_time
+    t = Factbase::Term.new(:minus, [:foo, '4 hours'])
+    assert_equal(Time.parse('2024-01-01T06:04'), t.evaluate(fact('foo' => Time.parse('2024-01-01T10:04')), []))
+    assert(t.evaluate(fact, []).nil?)
   end
 end

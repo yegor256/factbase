@@ -50,10 +50,4 @@ class TestStrings < Minitest::Test
     t = Factbase::Term.new(:sprintf, ['hi, %s!', 'Jeff'])
     assert_equal('hi, Jeff!', t.evaluate(fact, []))
   end
-
-  private
-
-  def fact(map = {})
-    Factbase::Fact.new(Mutex.new, map)
-  end
 end

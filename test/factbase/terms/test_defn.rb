@@ -62,10 +62,4 @@ class TestDefn < Minitest::Test
     t = Factbase::Term.new(:undef, [:hello])
     assert_equal(true, t.evaluate(fact, []))
   end
-
-  private
-
-  def fact(map = {})
-    Factbase::Fact.new(Mutex.new, map)
-  end
 end

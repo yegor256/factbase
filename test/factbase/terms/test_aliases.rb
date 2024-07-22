@@ -71,10 +71,4 @@ class TestAliases < Minitest::Test
       end
     end
   end
-
-  private
-
-  def fact(map = {})
-    Factbase::Fact.new(Mutex.new, map)
-  end
 end
