@@ -31,6 +31,6 @@ module Factbase::Term::System
   def env(fact, maps)
     assert_args(2)
     n = the_values(0, fact, maps)[0]
-    ENV.fetch(n.upcase) { the_values(1, fact, maps)[1] }
+    ENV.fetch(n.upcase) { the_values(1, fact, maps)[0] }
   end
 end

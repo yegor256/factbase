@@ -21,7 +21,11 @@
 name: xcop
 'on':
   push:
+    branches:
+      - master
   pull_request:
+    branches:
+      - master
 jobs:
   xcop:
     runs-on: ubuntu-22.04
