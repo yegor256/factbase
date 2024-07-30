@@ -93,15 +93,15 @@ module Factbase::Term::Math
       num = num.to_i
       r =
         case units
-        when 'seconds'
+        when 'seconds', 'second'
           num
-        when 'minutes'
+        when 'minutes', 'minute'
           num * 60
-        when 'hours'
+        when 'hours', 'hour'
           num * 60 * 60
-        when 'days'
+        when 'days', 'day'
           num * 60 * 60 * 24
-        when 'weeks'
+        when 'weeks', 'week'
           num * 60 * 60 * 24 * 7
         else
           raise "Unknown time unit '#{units}' in '#{r}"
