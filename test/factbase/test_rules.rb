@@ -96,9 +96,10 @@ class TestRules < Minitest::Test
 
   def test_in_combination_with_pre
     fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
-    fb = Factbase::Pre.new(fb) do |f|
-      f.hello = 42
-    end
+    fb =
+      Factbase::Pre.new(fb) do |f|
+        f.hello = 42
+      end
     ok = false
     assert_raises do
       fb.txn do |fbt|

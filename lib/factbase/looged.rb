@@ -59,13 +59,14 @@ class Factbase::Looged
     start = Time.now
     id = nil
     rollback = false
-    r = @fb.txn(this) do |fbt|
-      id = fbt.object_id
-      yield fbt
-    rescue Factbase::Rollback => e
-      rollback = true
-      raise e
-    end
+    r =
+      @fb.txn(this) do |fbt|
+        id = fbt.object_id
+        yield fbt
+      rescue Factbase::Rollback => e
+        rollback = true
+        raise e
+      end
     if rollback
       @loog.debug("Txn ##{id} rolled back in #{start.ago}")
     else
@@ -120,9 +121,10 @@ class Factbase::Looged
     def one(params = {})
       q = Factbase::Syntax.new(@expr).to_term.to_s
       r = nil
-      tail = Factbase::Looged.elapsed do
-        r = @fb.query(@expr).one(params)
-      end
+      tail =
+        Factbase::Looged.elapsed do
+          r = @fb.query(@expr).one(params)
+        end
       if r.nil?
         @loog.debug("Nothing found by '#{q}' #{tail}")
       else
@@ -135,9 +137,10 @@ class Factbase::Looged
       q = Factbase::Syntax.new(@expr).to_term.to_s
       if block_given?
         r = nil
-        tail = Factbase::Looged.elapsed do
-          r = @fb.query(@expr).each(params, &)
-        end
+        tail =
+          Factbase::Looged.elapsed do
+            r = @fb.query(@expr).each(params, &)
+          end
         raise ".each of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
           @loog.debug("Nothing found by '#{q}' #{tail}")
@@ -147,11 +150,12 @@ class Factbase::Looged
         r
       else
         array = []
-        tail = Factbase::Looged.elapsed do
-          @fb.query(@expr).each(params) do |f|
-            array << f
+        tail =
+          Factbase::Looged.elapsed do
+            @fb.query(@expr).each(params) do |f|
+              array << f
+            end
           end
-        end
         if array.empty?
           @loog.debug("Nothing found by '#{q}' #{tail}")
         else
@@ -164,9 +168,10 @@ class Factbase::Looged
     def delete!
       r = nil
       before = @fb.size
-      tail = Factbase::Looged.elapsed do
-        r = @fb.query(@expr).delete!
-      end
+      tail =
+        Factbase::Looged.elapsed do
+          r = @fb.query(@expr).delete!
+        end
       raise ".delete! of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
       if before.zero?
         @loog.debug("There were no facts, nothing deleted by '#{@expr}' #{tail}")

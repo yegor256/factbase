@@ -211,10 +211,11 @@ class TestFactbase < Minitest::Test
 
   def test_txn_with_rollback
     fb = Factbase.new
-    modified = fb.txn do |fbt|
-      fbt.insert.bar = 33
-      raise Factbase::Rollback
-    end
+    modified =
+      fb.txn do |fbt|
+        fbt.insert.bar = 33
+        raise Factbase::Rollback
+      end
     assert(!modified)
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end

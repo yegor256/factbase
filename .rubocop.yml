@@ -54,3 +54,5 @@ Layout/EndOfLine:
   EnforcedStyle: lf
 Security/MarshalLoad:
   Enabled: false
+Layout/MultilineAssignmentLayout:
+  Enabled: true

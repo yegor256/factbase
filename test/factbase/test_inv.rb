@@ -32,9 +32,10 @@ require_relative '../../lib/factbase/pre'
 # License:: MIT
 class TestInv < Minitest::Test
   def test_simple_checking
-    fb = Factbase::Inv.new(Factbase.new) do |p, v|
-      raise 'oops' if v.is_a?(String) && p == 'b'
-    end
+    fb =
+      Factbase::Inv.new(Factbase.new) do |p, v|
+        raise 'oops' if v.is_a?(String) && p == 'b'
+      end
     f = fb.insert
     f.a = 42
     assert_raises do
@@ -46,12 +47,14 @@ class TestInv < Minitest::Test
   end
 
   def test_pre_and_inv
-    fb = Factbase::Inv.new(Factbase.new) do |p, v|
-      raise 'oops' if v.is_a?(String) && p == 'b'
-    end
-    fb = Factbase::Pre.new(fb) do |f|
-      f.id = 42
-    end
+    fb =
+      Factbase::Inv.new(Factbase.new) do |p, v|
+        raise 'oops' if v.is_a?(String) && p == 'b'
+      end
+    fb =
+      Factbase::Pre.new(fb) do |f|
+        f.id = 42
+      end
     f = fb.insert
     assert_equal(42, f.id)
   end
