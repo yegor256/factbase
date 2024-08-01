@@ -71,9 +71,9 @@ class Factbase::Fact
       raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z_][_a-zA-Z0-9]*$/)
       raise "Prohibited prop name '#{kk}'" if methods.include?(kk.to_sym)
       v = args[1]
-      raise "Prop value can't be nil" if v.nil?
-      raise "Prop value can't be empty" if v == ''
-      raise "Prop type '#{v.class}' is not allowed" unless [String, Integer, Float, Time].include?(v.class)
+      raise "The value of '#{kk}' can't be nil" if v.nil?
+      raise "The value of '#{kk}' can't be empty" if v == ''
+      raise "The type '#{v.class}' of '#{kk}' is not allowed" unless [String, Integer, Float, Time].include?(v.class)
       v = v.utc if v.is_a?(Time)
       @mutex.synchronize do
         @map[kk] = [] if @map[kk].nil?
