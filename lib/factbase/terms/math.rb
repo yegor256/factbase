@@ -63,6 +63,14 @@ module Factbase::Term::Math
     cmp(:>, fact, maps)
   end
 
+  def lte(fact, maps)
+    cmp(:<=, fact, maps)
+  end
+
+  def gte(fact, maps)
+    cmp(:>=, fact, maps)
+  end
+
   def cmp(op, fact, maps)
     assert_args(2)
     lefts = the_values(0, fact, maps)

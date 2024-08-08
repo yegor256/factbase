@@ -69,6 +69,20 @@ class TestMath < Minitest::Test
     assert(!t.evaluate(fact('bar' => 100), []))
   end
 
+  def test_gte
+    t = Factbase::Term.new(:gte, [:foo, 42])
+    assert(t.evaluate(fact('foo' => 100), []))
+    assert(t.evaluate(fact('foo' => 42), []))
+    assert(!t.evaluate(fact('foo' => 41), []))
+  end
+
+  def test_lte
+    t = Factbase::Term.new(:lte, [:foo, 42])
+    assert(t.evaluate(fact('foo' => 41), []))
+    assert(t.evaluate(fact('foo' => 42), []))
+    assert(!t.evaluate(fact('foo' => 100), []))
+  end
+
   def test_gt
     t = Factbase::Term.new(:gt, [:foo, 42])
     assert(t.evaluate(fact('foo' => [100]), []))
