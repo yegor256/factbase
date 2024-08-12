@@ -35,4 +35,18 @@ class TestPre < Minitest::Test
     assert_equal(42, f.foo)
     assert_equal(1, fb.query('(always)').each.to_a.size)
   end
+
+  def test_in_transaction
+    fb =
+      Factbase::Pre.new(Factbase.new) do |f, fbt|
+        f.total = fbt.size
+      end
+    fb.txn do |fbt|
+      fbt.insert
+      fbt.insert
+    end
+    arr = fb.query('(always)').each.to_a
+    assert_equal(1, arr[0].total)
+    assert_equal(2, arr[1].total)
+  end
 end
