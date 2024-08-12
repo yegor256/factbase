@@ -67,4 +67,13 @@ class TestAccum < Minitest::Test
     a = Factbase::Accum.new(f, {}, false)
     assert(a['foo'].nil?)
   end
+
+  def test_prints_to_string
+    map = {}
+    f = Factbase::Fact.new(Mutex.new, map)
+    props = {}
+    a = Factbase::Accum.new(f, props, true)
+    a.foo = 42
+    assert_equal('[ foo: [42] ]', f.to_s)
+  end
 end

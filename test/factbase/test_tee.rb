@@ -59,4 +59,13 @@ class TestTee < Minitest::Test
     t = Factbase::Tee.new(prim, t)
     assert_equal(7, t['$bar'])
   end
+
+  def test_prints_to_string
+    prim = Factbase::Fact.new(Mutex.new, {})
+    prim.foo = 42
+    upper = Factbase::Fact.new(Mutex.new, {})
+    upper.bar = 13
+    t = Factbase::Tee.new(prim, upper)
+    assert_equal('[ foo: [42] ]', t.to_s)
+  end
 end

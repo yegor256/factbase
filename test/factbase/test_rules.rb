@@ -58,7 +58,10 @@ class TestRules < Minitest::Test
       '(when (exists a) (exists b))'
     )
     f = fb.insert
-    assert(f.to_s.length.positive?)
+    f.foo = 42
+    s = f.to_s
+    assert(s.length.positive?, s)
+    assert_equal('[ foo: [42] ]', s)
   end
 
   def test_query_one

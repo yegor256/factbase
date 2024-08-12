@@ -23,7 +23,7 @@
 require 'others'
 require_relative '../factbase'
 
-# Accumulator of props.
+# Accumulator of props, a decorator of +Factbase::Fact+.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
