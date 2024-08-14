@@ -66,7 +66,7 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
     loog (0.5.3)
-    minitest (5.24.1)
+    minitest (5.25.0)
     minitest-reporters (1.7.1)
       ansi
       builder
@@ -187,7 +187,7 @@ PLATFORMS
 
 DEPENDENCIES
   factbase!
-  minitest (= 5.24.1)
+  minitest (= 5.25.0)
   minitest-reporters (= 1.7.1)
   rake (= 13.2.1)
   rspec-rails (= 6.1.3)
