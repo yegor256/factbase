@@ -270,10 +270,12 @@ class TestFactbase < Minitest::Test
 
   def test_concurrent_transactions_inserts
     fb = Factbase.new
-    Threads.new(100).assert do |i|
+    i = 0
+    Threads.new(100).assert do
       fb.txn do |fbt|
         fact = fbt.insert
         fact.thread_id = i
+        i += 1
       end
     end
     assert_equal(100, fb.size)
@@ -295,11 +297,13 @@ class TestFactbase < Minitest::Test
 
   def test_concurrent_transactions_successful
     fb = Factbase.new
-    Threads.new(100).assert do |i|
+    i = 0
+    Threads.new(100).assert do
       fb.txn do |fbt|
         fact = fbt.insert
         fact.thread_id = i
         fact.value = i * 10
+        i += 1
       end
     end
     facts = fb.query('(exists thread_id)').each.to_a
@@ -311,10 +315,12 @@ class TestFactbase < Minitest::Test
 
   def test_concurrent_queries
     fb = Factbase.new
-    Threads.new(100).assert do |i|
+    i = 0
+    Threads.new(100).assert do
       fact = fb.insert
       fact.thread_id = i
       fact.value = i * 10
+      i += 1
     end
     Threads.new(100).assert do
       results = fb.query('(exists thread_id)').each.to_a
