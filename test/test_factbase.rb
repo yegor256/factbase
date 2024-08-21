@@ -243,11 +243,12 @@ class TestFactbase < Minitest::Test
       n += 1
     end
     assert_equal(100, fb.size)
-    100.times do |num|
-      i = num + 1
+    i = 0
+    Threads.new(100) do
       f = fb.query("(eq foo #{i})").each.to_a
       assert_equal(1, f.count)
       assert_equal(i, f.first.foo)
+      i += 1
     end
   end
 
@@ -268,6 +269,7 @@ class TestFactbase < Minitest::Test
     end
   end
 
+  # sometimes this test fails
   def test_concurrent_transactions_inserts
     fb = Factbase.new
     i = 0
@@ -294,6 +296,7 @@ class TestFactbase < Minitest::Test
     assert_equal(0, fb.size)
   end
 
+  # sometimes this test fails
   def test_concurrent_transactions_successful
     fb = Factbase.new
     i = 0
@@ -332,34 +335,45 @@ class TestFactbase < Minitest::Test
 
   def test_export_import_concurrent
     fb = Factbase.new
+    mutex = Mutex.new
     Threads.new(100).assert do
       fact = fb.insert
-      fact.foo = 42
+      fact.value = 42
     end
-    exported_data = nil
-    Threads.new(1).assert do
-      exported_data = fb.export
+    exported = []
+    Threads.new(5).assert do
+      mutex.synchronize do
+        exported << fb.export
+      end
     end
+    assert_equal(5, exported.size)
+    i = 0
     Threads.new(5).assert do
       new_fb = Factbase.new
-      new_fb.import(exported_data)
+      new_fb.import(exported[i])
       assert_equal(fb.size, new_fb.size)
-      fb.query('(exists thread_id)').each.to_a do |fact|
-        new_fact = new_fb.query("(eq thread_id #{fact.thread_id})").each.to_a.first
+      facts = fb.query('(eq value 42)').each.to_a
+      assert_equal(100, facts.size)
+      facts.each do |fact|
+        new_fact = new_fb.query("(eq value #{fact.value})").each.to_a.first
         assert_equal(fact.value, new_fact.value)
       end
+      i += 1
     end
   end
 
   def test_dup_concurrent
     fb = Factbase.new
+    mutex = Mutex.new
     Threads.new(100).assert do
       fact = fb.insert
       fact.foo = 42
     end
     fbs = []
     Threads.new(100).assert do
-      fbs << fb.dup
+      mutex.synchronize do
+        fbs << fb.dup
+      end
     end
     assert_equal(100, fbs.size)
     fbs.each do |factbase|
