@@ -332,6 +332,10 @@ class TestFactbase < Minitest::Test
 
   def test_export_import_concurrent
     fb = Factbase.new
+    Threads.new(100).assert do
+      fact = fb.insert
+      fact.foo = 42
+    end
     exported_data = nil
     Threads.new(1).assert do
       exported_data = fb.export
