@@ -230,8 +230,8 @@ class TestFactbase < Minitest::Test
       fact.value = fact.foo * fact.bar
     end
     assert_equal(100, fb.size)
-    assert_equal(100, fb.query("(eq foo 42)").each.to_a.size)
-    assert_equal(100, fb.query("(eq bar 49)").each.to_a.size)
+    assert_equal(100, fb.query('(eq foo 42)').each.to_a.size)
+    assert_equal(100, fb.query('(eq bar 49)').each.to_a.size)
     assert_equal(100, fb.query("(eq value #{42 * 49})").each.to_a.size)
   end
 
@@ -282,7 +282,6 @@ class TestFactbase < Minitest::Test
     assert_equal(100, fb.query('(exists thread_id)').each.to_a.size)
   end
 
-  # sometimes it fails
   def test_concurrent_transactions_with_rollbacks
     fb = Factbase.new
     Threads.new(100).assert do |i|
@@ -326,7 +325,7 @@ class TestFactbase < Minitest::Test
       results = fb.query('(exists thread_id)').each.to_a
       assert_equal(100, results.size)
 
-      thread_ids = results.map { |fact| fact.thread_id }
+      thread_ids = results.map(&:thread_id)
       assert_equal((0..99).to_a, thread_ids.sort)
     end
   end
