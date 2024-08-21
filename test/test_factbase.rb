@@ -22,6 +22,7 @@
 
 require 'minitest/autorun'
 require 'loog'
+require 'threads'
 require_relative '../lib/factbase'
 require_relative '../lib/factbase/rules'
 require_relative '../lib/factbase/inv'
@@ -218,5 +219,142 @@ class TestFactbase < Minitest::Test
       end
     assert(!modified)
     assert_equal(0, fb.query('(always)').each.to_a.size)
+  end
+
+  def test_concurrent_inserts
+    fb = Factbase.new
+    Threads.new(100).assert do
+      fact = fb.insert
+      fact.foo = 42
+      fact.bar = 49
+      fact.value = fact.foo * fact.bar
+    end
+    assert_equal(100, fb.size)
+    assert_equal(100, fb.query("(eq foo 42)").each.to_a.size)
+    assert_equal(100, fb.query("(eq bar 49)").each.to_a.size)
+    assert_equal(100, fb.query("(eq value #{42 * 49})").each.to_a.size)
+  end
+
+  def test_different_values_when_concurrent_inserts
+    fb = Factbase.new
+    n = 1
+    Threads.new(100).assert do
+      fb.insert.foo = n
+      n += 1
+    end
+    assert_equal(100, fb.size)
+    100.times do |num|
+      i = num + 1
+      f = fb.query("(eq foo #{i})").each.to_a
+      assert_equal(1, f.count)
+      assert_equal(i, f.first.foo)
+    end
+  end
+
+  def test_different_properties_when_concurrent_inserts
+    fb = Factbase.new
+    n = 1
+    Threads.new(100).assert do
+      fb.insert.send(:"prop_#{n}=", n)
+      n += 1
+    end
+    assert_equal(100, fb.size)
+    100.times do |num|
+      i = num + 1
+      prop = "prop_#{i}"
+      f = fb.query("(eq #{prop} #{i})").each.to_a
+      assert_equal(1, f.count)
+      assert_equal(i, f.first.send(prop.to_sym))
+    end
+  end
+
+  def test_concurrent_transactions_inserts
+    fb = Factbase.new
+    Threads.new(100).assert do |i|
+      fb.txn do |fbt|
+        fact = fbt.insert
+        fact.thread_id = i
+      end
+    end
+    assert_equal(100, fb.size)
+    assert_equal(100, fb.query('(exists thread_id)').each.to_a.size)
+  end
+
+  # sometimes it fails
+  def test_concurrent_transactions_with_rollbacks
+    fb = Factbase.new
+    Threads.new(100).assert do |i|
+      fb.txn do |fbt|
+        fact = fbt.insert
+        fact.thread_id = i
+        raise Factbase::Rollback
+      end
+    end
+    assert_equal(0, fb.size)
+  end
+
+  def test_concurrent_transactions_successful
+    fb = Factbase.new
+    Threads.new(100).assert do |i|
+      fb.txn do |fbt|
+        fact = fbt.insert
+        fact.thread_id = i
+        fact.value = i * 10
+      end
+    end
+    facts = fb.query('(exists thread_id)').each.to_a
+    assert_equal(100, facts.size)
+    facts.each do |fact|
+      assert_equal(fact.value, fact.thread_id * 10)
+    end
+  end
+
+  def test_concurrent_queries
+    fb = Factbase.new
+    Threads.new(100).assert do |i|
+      fact = fb.insert
+      fact.thread_id = i
+      fact.value = i * 10
+    end
+    Threads.new(100).assert do
+      results = fb.query('(exists thread_id)').each.to_a
+      assert_equal(100, results.size)
+
+      thread_ids = results.map { |fact| fact.thread_id }
+      assert_equal((0..99).to_a, thread_ids.sort)
+    end
+  end
+
+  def test_export_import_concurrent
+    fb = Factbase.new
+    exported_data = nil
+    Threads.new(1).assert do
+      exported_data = fb.export
+    end
+    Threads.new(5).assert do
+      new_fb = Factbase.new
+      new_fb.import(exported_data)
+      assert_equal(fb.size, new_fb.size)
+      fb.query('(exists thread_id)').each.to_a do |fact|
+        new_fact = new_fb.query("(eq thread_id #{fact.thread_id})").each.to_a.first
+        assert_equal(fact.value, new_fact.value)
+      end
+    end
+  end
+
+  def test_dup_concurrent
+    fb = Factbase.new
+    Threads.new(100).assert do
+      fact = fb.insert
+      fact.foo = 42
+    end
+    fbs = []
+    Threads.new(100).assert do
+      fbs << fb.dup
+    end
+    assert_equal(100, fbs.size)
+    fbs.each do |factbase|
+      assert(100, factbase.query('(eq foo 42)').each.to_a.size)
+    end
   end
 end
