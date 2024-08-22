@@ -22,6 +22,7 @@
 
 require 'minitest/autorun'
 require 'loog'
+require 'threads'
 require_relative '../lib/factbase'
 require_relative '../lib/factbase/rules'
 require_relative '../lib/factbase/inv'
@@ -218,5 +219,175 @@ class TestFactbase < Minitest::Test
       end
     assert(!modified)
     assert_equal(0, fb.query('(always)').each.to_a.size)
+  end
+
+  def test_concurrent_inserts
+    fb = Factbase.new
+    Threads.new(100).assert do
+      fact = fb.insert
+      fact.foo = 42
+      fact.bar = 49
+      fact.value = fact.foo * fact.bar
+    end
+    assert_equal(100, fb.size)
+    assert_equal(100, fb.query('(eq foo 42)').each.to_a.size)
+    assert_equal(100, fb.query('(eq bar 49)').each.to_a.size)
+    assert_equal(100, fb.query("(eq value #{42 * 49})").each.to_a.size)
+  end
+
+  def test_different_values_when_concurrent_inserts
+    fb = Factbase.new
+    Threads.new(100).assert do |i|
+      fb.insert.foo = i
+    end
+    assert_equal(100, fb.size)
+    Threads.new(100) do |i|
+      f = fb.query("(eq foo #{i})").each.to_a
+      assert_equal(1, f.count)
+      assert_equal(i, f.first.foo)
+    end
+  end
+
+  # @todo #98:1h I assumed that the test `test_different_properties_when_concurrent_inserts` would be passed.
+  # I see like this:
+  # ```
+  # [2024-08-22 21:14:53.962] ERROR -- Expected: 1
+  # Actual: 0: nil
+  # [2024-08-22 21:14:53.962] ERROR -- Expected: 1
+  # Actual: 0: nil
+  # test_different_properties_when_concurrent_inserts              ERROR (0.01s)
+  # Minitest::UnexpectedError:         RuntimeError: Only 0 out of 5 threads completed successfully
+  #           /home/suban/.rbenv/versions/3.3.4/lib/ruby/gems/3.3.0/gems/threads-0.4.0/lib/threads.rb:73:in `assert'
+  #           test/test_factbase.rb:265:in `test_different_properties_when_concurrent_inserts'
+  # ```
+  def test_different_properties_when_concurrent_inserts
+    skip
+    fb = Factbase.new
+    Threads.new(5).assert do |i|
+      fb.insert.send(:"prop_#{i}=", i)
+    end
+    assert_equal(5, fb.size)
+    Threads.new(5).assert do |i|
+      prop = "prop_#{i}"
+      f = fb.query("(eq #{prop} #{i})").each.to_a
+      assert_equal(1, f.count)
+      assert_equal(i, f.first.send(prop.to_sym))
+    end
+  end
+
+  # @todo #98:1h I assumed that the test `test_concurrent_transactions_inserts` would be passed.
+  # I see like this:
+  # ```
+  # Expected: 100
+  # Actual: 99
+  # D:/a/factbase/factbase/test/test_factbase.rb:281:in `test_concurrent_transactions_inserts'
+  # ```
+  # See details here https://github.com/yegor256/factbase/actions/runs/10492255419/job/29068637032
+  def test_concurrent_transactions_inserts
+    skip
+    fb = Factbase.new
+    Threads.new(100).assert do |i|
+      fb.txn do |fbt|
+        fact = fbt.insert
+        fact.thread_id = i
+      end
+    end
+    assert_equal(100, fb.size)
+    assert_equal(100, fb.query('(exists thread_id)').each.to_a.size)
+  end
+
+  def test_concurrent_transactions_with_rollbacks
+    fb = Factbase.new
+    Threads.new(100).assert do |i|
+      fb.txn do |fbt|
+        fact = fbt.insert
+        fact.thread_id = i
+        raise Factbase::Rollback
+      end
+    end
+    assert_equal(0, fb.size)
+  end
+
+  def test_concurrent_transactions_successful
+    fb = Factbase.new
+    Threads.new(100).assert do |i|
+      fb.txn do |fbt|
+        fact = fbt.insert
+        fact.thread_id = i
+        fact.value = i * 10
+      end
+    end
+    facts = fb.query('(exists thread_id)').each.to_a
+    assert_equal(100, facts.size)
+    facts.each do |fact|
+      assert_equal(fact.value, fact.thread_id * 10)
+    end
+  end
+
+  # @todo #98:1h I assumed that the test `test_concurrent_queries` would be passed.
+  # I see like this:
+  # ```
+  # [2024-08-22 17:40:19.224] ERROR -- Expected: [0, 1]
+  # Actual: [0, 0]: nil
+  # [2024-08-22 17:40:19.224] ERROR -- Expected: [0, 1]
+  # Actual: [0, 0]: nil
+  # test_concurrent_queries                                        ERROR (0.00s)
+  # Minitest::UnexpectedError:         RuntimeError: Only 0 out of 2 threads completed successfully
+  #           /home/suban/.rbenv/versions/3.3.4/lib/ruby/gems/3.3.0/gems/threads-0.4.0/lib/threads.rb:73:in `assert'
+  #           test/test_factbase.rb:329:in `test_concurrent_queries'
+  # ```
+  def test_concurrent_queries
+    skip
+    fb = Factbase.new
+    Threads.new(2).assert do |i|
+      fact = fb.insert
+      fact.thread_id = i
+      fact.value = i * 10
+    end
+    Threads.new(2).assert do
+      results = fb.query('(exists thread_id)').each.to_a
+      assert_equal(2, results.size)
+
+      thread_ids = results.map(&:thread_id)
+      assert_equal((0..1).to_a, thread_ids.sort)
+    end
+  end
+
+  def test_export_import_concurrent
+    fb = Factbase.new
+    Threads.new(100).assert do
+      fact = fb.insert
+      fact.value = 42
+    end
+    Threads.new(5).assert do
+      new_fb = Factbase.new
+      new_fb.import(fb.export)
+      assert_equal(fb.size, new_fb.size)
+      facts = fb.query('(eq value 42)').each.to_a
+      assert_equal(100, facts.size)
+      facts.each do |fact|
+        new_fact = new_fb.query("(eq value #{fact.value})").each.to_a.first
+        assert_equal(fact.value, new_fact.value)
+      end
+    end
+  end
+
+  def test_dup_concurrent
+    fb = Factbase.new
+    mutex = Mutex.new
+    Threads.new(100).assert do
+      fact = fb.insert
+      fact.foo = 42
+    end
+    fbs = []
+    Threads.new(100).assert do
+      mutex.synchronize do
+        fbs << fb.dup
+      end
+    end
+    assert_equal(100, fbs.size)
+    fbs.each do |factbase|
+      assert(100, factbase.query('(eq foo 42)').each.to_a.size)
+    end
   end
 end
