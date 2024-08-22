@@ -263,7 +263,7 @@ class TestFactbase < Minitest::Test
     end
   end
 
-  # @todo #98 I assumed that the test `test_concurrent_transactions_inserts` would be passed.
+  # @todo #98:1h I assumed that the test `test_concurrent_transactions_inserts` would be passed.
   # I see like this:
   # ```
   # Expected: 100
@@ -312,7 +312,7 @@ class TestFactbase < Minitest::Test
     end
   end
 
-  # @todo #98 I assumed that the test `test_concurrent_queries` would be passed.
+  # @todo #98:1h I assumed that the test `test_concurrent_queries` would be passed.
   # I see like this:
   # ```
   # [2024-08-22 17:40:19.224] ERROR -- Expected: [0, 1]
