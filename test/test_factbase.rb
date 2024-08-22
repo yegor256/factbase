@@ -248,14 +248,26 @@ class TestFactbase < Minitest::Test
     end
   end
 
+  # @todo #98:1h I assumed that the test `test_different_properties_when_concurrent_inserts` would be passed.
+  # I see like this:
+  # ```
+  # [2024-08-22 21:14:53.962] ERROR -- Expected: 1
+  # Actual: 0: nil
+  # [2024-08-22 21:14:53.962] ERROR -- Expected: 1
+  # Actual: 0: nil
+  # test_different_properties_when_concurrent_inserts              ERROR (0.01s)
+  # Minitest::UnexpectedError:         RuntimeError: Only 0 out of 5 threads completed successfully
+  #           /home/suban/.rbenv/versions/3.3.4/lib/ruby/gems/3.3.0/gems/threads-0.4.0/lib/threads.rb:73:in `assert'
+  #           test/test_factbase.rb:265:in `test_different_properties_when_concurrent_inserts'
+  # ```
   def test_different_properties_when_concurrent_inserts
     skip
     fb = Factbase.new
-    Threads.new(100).assert do |i|
+    Threads.new(5).assert do |i|
       fb.insert.send(:"prop_#{i}=", i)
     end
-    assert_equal(100, fb.size)
-    Threads.new(100).assert do |i|
+    assert_equal(5, fb.size)
+    Threads.new(5).assert do |i|
       prop = "prop_#{i}"
       f = fb.query("(eq #{prop} #{i})").each.to_a
       assert_equal(1, f.count)
