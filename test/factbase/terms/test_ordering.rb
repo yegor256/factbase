@@ -37,9 +37,9 @@ class TestOrdering < Minitest::Test
 
   def test_unique
     t = Factbase::Term.new(:unique, [:foo])
-    assert_equal(false, t.evaluate(fact, []))
-    assert_equal(true, t.evaluate(fact('foo' => 41), []))
-    assert_equal(false, t.evaluate(fact('foo' => 41), []))
-    assert_equal(true, t.evaluate(fact('foo' => 1), []))
+    refute(t.evaluate(fact, []))
+    assert(t.evaluate(fact('foo' => 41), []))
+    refute(t.evaluate(fact('foo' => 41), []))
+    assert(t.evaluate(fact('foo' => 1), []))
   end
 end
