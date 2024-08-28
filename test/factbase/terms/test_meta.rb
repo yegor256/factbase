@@ -49,10 +49,10 @@ class TestMeta < Minitest::Test
 
   def test_type
     t = Factbase::Term.new(:type, [:foo])
-    assert_equal("nil", t.evaluate(fact('foo' => nil), []))
-    assert_equal("Integer", t.evaluate(fact('foo' => [1]), []))
-    assert_equal("Array", t.evaluate(fact('foo' => [1, 2]), []))
-    assert_equal("String", t.evaluate(fact('foo' => 'bar'), []))
+    assert_equal('nil', t.evaluate(fact('foo' => nil), []))
+    assert_equal('Integer', t.evaluate(fact('foo' => [1]), []))
+    assert_equal('Array', t.evaluate(fact('foo' => [1, 2]), []))
+    assert_equal('String', t.evaluate(fact('foo' => 'bar'), []))
   end
 
   def test_nil
@@ -66,14 +66,14 @@ class TestMeta < Minitest::Test
     t = Factbase::Term.new(:many, [:foo])
     refute(t.evaluate(fact('foo' => nil), []))
     refute(t.evaluate(fact('foo' => 1), []))
-    refute(t.evaluate(fact('foo' => "1234"), []))
+    refute(t.evaluate(fact('foo' => '1234'), []))
     assert(t.evaluate(fact('foo' => [1, 3, 5]), []))
   end
 
   def test_one
     t = Factbase::Term.new(:one, [:foo])
     assert(t.evaluate(fact('foo' => 1), []))
-    assert(t.evaluate(fact('foo' => "1234"), []))
+    assert(t.evaluate(fact('foo' => '1234'), []))
     assert(t.evaluate(fact('foo' => [1]), []))
     refute(t.evaluate(fact('foo' => nil), []))
     refute(t.evaluate(fact('foo' => [1, 3, 5]), []))
