@@ -29,22 +29,22 @@ require_relative '../../../lib/factbase/term'
 # License:: MIT
 class TestDebug < Minitest::Test
   def test_traced
-    t = Factbase::Term.new(:debug, [Factbase::Term.new(:defn, [:test_debug, 'self.to_s'])])
-    assert_output("(debug (defn test_debug 'self.to_s')) -> true\n") do
-      assert(t.traced(fact, []))
+    t = Factbase::Term.new(:traced, [Factbase::Term.new(:defn, [:test_debug, 'self.to_s'])])
+    assert_output("(traced (defn test_debug 'self.to_s')) -> true\n") do
+      assert(t.evaluate(fact, []))
     end
   end
 
   def test_traced_raises
-    e = assert_raises { Factbase::Term.new(:debug, ['foo']).traced(fact, []) }
-    assert_equal("A term expected, but 'foo' provided", e.message)
+    e = assert_raises { Factbase::Term.new(:traced, ['foo']).evaluate(fact, []) }
+    assert_match("A term expected, but 'foo' provided", e.message)
   end
 
   def test_traced_raises_when_too_many_args
     e =
       assert_raises do
-        Factbase::Term.new(:debug, [Factbase::Term.new(:defn, [:debug, 'self.to_s']), 'something']).traced(fact, [])
+        Factbase::Term.new(:traced, [Factbase::Term.new(:defn, [:debug, 'self.to_s']), 'something']).evaluate(fact, [])
       end
-    assert_equal("Too many (2) operands for 'debug' (1 expected)", e.message)
+    assert_match("Too many (2) operands for 'traced' (1 expected)", e.message)
   end
 end
