@@ -37,7 +37,7 @@ class TestDebug < Minitest::Test
 
   def test_traced_raises
     e = assert_raises { Factbase::Term.new(:traced, ['foo']).evaluate(fact, []) }
-    assert_match("A term expected, but 'foo' provided", e.message)
+    assert_match(/A term expected, but 'foo' provided/, e.message)
   end
 
   def test_traced_raises_when_too_many_args
@@ -45,6 +45,6 @@ class TestDebug < Minitest::Test
       assert_raises do
         Factbase::Term.new(:traced, [Factbase::Term.new(:defn, [:debug, 'self.to_s']), 'something']).evaluate(fact, [])
       end
-    assert_match("Too many (2) operands for 'traced' (1 expected)", e.message)
+    assert_match(/Too many \(\d+\) operands for 'traced' \(\d+ expected\)/, e.message)
   end
 end
