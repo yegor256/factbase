@@ -23,7 +23,7 @@
 require 'minitest/autorun'
 require_relative '../../../lib/factbase/term'
 
-# Defn test.
+# Debug test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
