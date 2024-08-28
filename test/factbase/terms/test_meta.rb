@@ -45,6 +45,8 @@ class TestMeta < Minitest::Test
     assert_equal(1, t.evaluate(fact('foo' => 41), []))
     assert_equal(0, t.evaluate(fact('foo' => nil), []))
     assert_equal(4, t.evaluate(fact('foo' => [1, 2, 3, 4]), []))
+    assert_equal(0, t.evaluate(fact('foo' => []), []))
+    assert_equal(1, t.evaluate(fact('foo' => ''), []))
   end
 
   def test_type
@@ -53,6 +55,8 @@ class TestMeta < Minitest::Test
     assert_equal('Integer', t.evaluate(fact('foo' => [1]), []))
     assert_equal('Array', t.evaluate(fact('foo' => [1, 2]), []))
     assert_equal('String', t.evaluate(fact('foo' => 'bar'), []))
+    assert_equal('Float', t.evaluate(fact('foo' => 2.1), []))
+    assert_equal('Time', t.evaluate(fact('foo' => Time.now), []))
   end
 
   def test_nil
@@ -68,6 +72,7 @@ class TestMeta < Minitest::Test
     refute(t.evaluate(fact('foo' => 1), []))
     refute(t.evaluate(fact('foo' => '1234'), []))
     assert(t.evaluate(fact('foo' => [1, 3, 5]), []))
+    refute(t.evaluate(fact('foo' => []), []))
   end
 
   def test_one
@@ -77,5 +82,6 @@ class TestMeta < Minitest::Test
     assert(t.evaluate(fact('foo' => [1]), []))
     refute(t.evaluate(fact('foo' => nil), []))
     refute(t.evaluate(fact('foo' => [1, 3, 5]), []))
+    refute(t.evaluate(fact('foo' => []), []))
   end
 end
