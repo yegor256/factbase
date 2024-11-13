@@ -18,7 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ---
+extends: default
 rules:
-  line-length:
-    max: 100
-    allow-non-breakable-words: true
+  line-length: disable
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 2
+  truthy:
+    level: warning
+    allowed-values: [ 'on', 'true', 'false', 'yes', 'no' ]
