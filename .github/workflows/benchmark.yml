@@ -23,8 +23,6 @@
 name: benchmark
 on:
   push:
-    branches:
-      - master
     paths-ignore: [ 'README.md', '.github/**' ]
 concurrency:
   group: benchmark-${{ github.ref }}

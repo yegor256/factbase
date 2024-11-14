@@ -23,7 +23,7 @@
 require 'benchmark'
 require 'time'
 
-require_relative '../../lib/factbase'
+require_relative '../lib/factbase'
 
 QUERY_RUNS = 100
 TRANSACTION_RUNS = 1_000

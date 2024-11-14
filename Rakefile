@@ -38,7 +38,7 @@ require 'rake/testtask'
 desc 'Run all unit tests'
 Rake::TestTask.new(:test) do |test|
   Rake::Cleaner.cleanup_files(['coverage'])
-  test.libs << 'lib' << 'test' << 'benchmark'
+  test.libs << 'lib' << 'test'
   test.pattern = 'test/**/test_*.rb'
   test.warning = true
   test.verbose = false
@@ -59,7 +59,7 @@ end
 
 desc 'Run benchmark script'
 task :benchmark do
-  ruby 'test/benchmarks/benchmark_factbase.rb'
+  ruby 'benchmarks/benchmark_factbase.rb'
 end
 
 task :copyright do
