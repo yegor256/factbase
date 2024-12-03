@@ -32,7 +32,7 @@ def version
   Gem::Specification.load(Dir['*.gemspec'].first).version
 end
 
-task default: %i[clean test rubocop yard copyright]
+task default: %i[clean test rubocop yard copyright benchmark]
 
 require 'rake/testtask'
 desc 'Run all unit tests'
@@ -55,6 +55,11 @@ desc 'Run RuboCop on all directories'
 RuboCop::RakeTask.new(:rubocop) do |task|
   task.fail_on_error = true
   task.requires << 'rubocop-rspec'
+end
+
+desc 'Run benchmark script'
+task :benchmark do
+  ruby 'benchmarks/benchmark_factbase.rb'
 end
 
 task :copyright do

@@ -1,0 +1,77 @@
+# frozen_string_literal: true
+
+# Copyright (c) 2024 Yegor Bugayenko
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the 'Software'), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+---
+name: benchmark
+on:
+  push:
+    paths-ignore: [ 'README.md', '.github/**' ]
+concurrency:
+  group: benchmark-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+
+      - name: Install Dependencies
+        run: |
+          gem install bundler
+          bundle install
+
+      - name: Run Benchmark
+        run: |
+          ruby benchmark_factbase.rb > benchmark_output.txt
+
+      - name: Update README with Benchmark Results
+        run: |
+          set -x
+          sum=$(
+            printf "\`\`\`text\n"
+            cat benchmark_output.txt
+            printf "\n\n"
+            printf "\`\`\`\n\n"
+            echo "The results were calculated in [this GHA job][benchmark-gha]"
+            echo "on $(date +'%Y-%m-%d') at $(date +'%H:%M'),"
+            echo "on $(uname) with $(nproc --all) CPUs."
+          )
+          export sum
+          perl -i -0777 -pe 's/(?<=<!-- benchmark_begin -->).*(?=<!-- benchmark_end -->)/\n$ENV{sum}\n/gs;' README.md
+          url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          export url
+          perl -i -0777 -pe 's/(?<=\[benchmark-gha\]: )[^\n]+(?=\n)/$ENV{url}/gs;' README.md
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: benchmark-results-${{ github.run_id }}
+          commit-message: 'new benchmarking results'
+          delete-branch: true
+          title: 'New Benchmarking Results'
+          reviewers: yegor256
+          base: master

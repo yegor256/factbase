@@ -167,3 +167,9 @@ bundle exec rake
 ```
 
 If it's clean and you don't see any error messages, submit your pull request.
+
+<!-- benchmark_begin -->
+
+<!-- benchmark_end -->
+
+[benchmark-gha]:
