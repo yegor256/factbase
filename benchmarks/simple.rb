@@ -109,7 +109,6 @@ import_time =
   end
 sum['Factbase imported'] = import_time.real
 
-puts '+---+---+'
 puts '| What | Seconds |'
-puts '+---+---+'
+puts '| --- | --: |'
 sum.each { |k, v| puts "| #{k} | #{format('%0.3f', v)} |" }
