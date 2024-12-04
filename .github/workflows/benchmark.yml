@@ -58,7 +58,7 @@ jobs:
           rm stdout.txt
       - uses: peter-evans/create-pull-request@v7
         with:
-          branch: benchmark-results-${{ github.run_id }}
+          branch: benchmark-results
           commit-message: 'new benchmarking results'
           delete-branch: true
           title: 'New Benchmarking Results'
