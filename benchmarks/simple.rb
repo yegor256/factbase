@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 # Copyright (c) 2024 Yegor Bugayenko
@@ -29,92 +30,86 @@ QUERY_RUNS = 100
 TRANSACTION_RUNS = 1_000
 INSERTION_COUNT = 10_000
 
-def benchmark_factbase
-  factbase = Factbase.new
-  puts "Starting Factbase Benchmarking...\n\n"
+sum = {}
 
-  insertion_time =
+factbase = Factbase.new
+insertion_time =
+  Benchmark.measure do
+    INSERTION_COUNT.times do |i|
+      fact = factbase.insert
+      fact.id = i
+      fact.title = "Object Thinking #{i}"
+      fact.time = Time.now.iso8601
+      fact.cost = rand(1..100)
+      fact.foo = rand(0.0..100.0).round(3)
+      fact.bar = rand(100..300)
+      fact.seenBy = "User#{i}" if i.even?
+      fact.zzz = "Extra#{i}" if (i % 10).zero?
+    end
+  end
+
+sum["Inserted #{INSERTION_COUNT} facts"] = insertion_time.real
+
+queries = [
+  { description: '(eq title \'Object Thinking 5000\')',
+    query: '(eq title \'Object Thinking 5000\')' },
+  { description: '(gt time \'2024-03-23T03:21:43Z\')',
+    query: '(gt time \'2024-03-23T03:21:43Z\')' },
+  { description: '(gt cost 42)',
+    query: '(gt cost 42)' },
+  { description: '(exists seenBy)',
+    query: '(exists seenBy)' },
+  { description: '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))',
+    query: '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))' }
+]
+
+queries.each do |q|
+  time =
     Benchmark.measure do
-      INSERTION_COUNT.times do |i|
-        fact = factbase.insert
-        fact.id = i
-        fact.title = "Object Thinking #{i}"
+      QUERY_RUNS.times do
+        results = factbase.query(q[:query])
+        results.each(&:inspect)
+      end
+    end
+  average_time = (time.real / QUERY_RUNS).round(6)
+  sum["Queried: `#{q[:description]}`"] = average_time
+end
+
+transaction_time =
+  Benchmark.measure do
+    TRANSACTION_RUNS.times do |i|
+      factbase.txn do |fb_txn|
+        fact = fb_txn.insert
+        fact.id = INSERTION_COUNT + i
+        fact.title = "Transaction Fact #{i}"
         fact.time = Time.now.iso8601
         fact.cost = rand(1..100)
         fact.foo = rand(0.0..100.0).round(3)
         fact.bar = rand(100..300)
-        fact.seenBy = "User#{i}" if i.even?
-        fact.zzz = "Extra#{i}" if (i % 10).zero?
+        raise Factbase::Rollback, 'Cost below threshold' if fact.cost < 10
+      rescue Factbase::Rollback
+        # ignore
       end
     end
-
-  puts "Insertion of #{INSERTION_COUNT} facts completed in #{insertion_time.real.round(4)} seconds.\n\n"
-
-  queries = [
-    { description: '(eq title \'Object Thinking 5000\')',
-      query: '(eq title \'Object Thinking 5000\')' },
-    { description: '(gt time \'2024-03-23T03:21:43Z\')',
-      query: '(gt time \'2024-03-23T03:21:43Z\')' },
-    { description: '(gt cost 42)',
-      query: '(gt cost 42)' },
-    { description: '(exists seenBy)',
-      query: '(exists seenBy)' },
-    { description: '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))',
-      query: '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))' }
-  ]
-
-  queries.each do |q|
-    time =
-      Benchmark.measure do
-        QUERY_RUNS.times do
-          results = factbase.query(q[:query])
-          results.each(&:inspect)
-        end
-      end
-    average_time = (time.real / QUERY_RUNS).round(6)
-    puts "Query: #{q[:description]}"
-    puts "\tExecuted #{QUERY_RUNS} times."
-    puts "\tTotal Time: #{time.real.round(4)} seconds."
-    puts "\tAverage Time per Query: #{average_time} seconds.\n\n"
   end
 
-  transaction_time =
-    Benchmark.measure do
-      TRANSACTION_RUNS.times do |i|
-        factbase.txn do |fb_txn|
-          fact = fb_txn.insert
-          fact.id = INSERTION_COUNT + i
-          fact.title = "Transaction Fact #{i}"
-          fact.time = Time.now.iso8601
-          fact.cost = rand(1..100)
-          fact.foo = rand(0.0..100.0).round(3)
-          fact.bar = rand(100..300)
-          raise Factbase::Rollback, 'Cost below threshold' if fact.cost < 10
-        rescue Factbase::Rollback => e
-          puts "Transaction rolled back: #{e.message}"
-        end
-      end
-    end
+sum['Transaction committed'] = transaction_time.real / TRANSACTION_RUNS
 
-  puts "Executed #{TRANSACTION_RUNS} transactions in #{transaction_time.real.round(4)} seconds."
-  puts "\tAverage Time per Transaction: #{(transaction_time.real / TRANSACTION_RUNS).round(6)} seconds.\n\n"
+export_time =
+  Benchmark.measure do
+    factbase.export
+  end
+sum['Factbase exported'] = export_time.real
 
-  export_time =
-    Benchmark.measure do
-      factbase.export
-    end
+import_time =
+  Benchmark.measure do
+    new_factbase = Factbase.new
+    exported_data = factbase.export
+    new_factbase.import(exported_data)
+  end
+sum['Factbase imported'] = import_time.real
 
-  puts "Exported Factbase in #{export_time.real.round(4)} seconds.\n\n"
-
-  import_time =
-    Benchmark.measure do
-      new_factbase = Factbase.new
-      exported_data = factbase.export
-      new_factbase.import(exported_data)
-    end
-
-  puts "Imported Factbase in #{import_time.real.round(4)} seconds.\n\n"
-  puts "Final Factbase size: #{factbase.size}"
-end
-
-benchmark_factbase if __FILE__ == $PROGRAM_NAME
+puts '+---+---+'
+puts '| What | Seconds |'
+puts '+---+---+'
+sum.each { |k, v| puts "| #{k} | #{format('%0.3f', v)} |" }

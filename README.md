@@ -318,4 +318,4 @@ on 2024-12-04 at 06:52,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]:
+[benchmark-gha]: https://github.com
