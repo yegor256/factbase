@@ -1,0 +1,130 @@
+Starting Factbase Benchmarking...
+
+Insertion of 10000 facts completed in 0.7784 seconds.
+
+Query: (eq title 'Object Thinking 5000')
+	Executed 100 times.
+	Total Time: 4.8205 seconds.
+	Average Time per Query: 0.048205 seconds.
+
+Query: (gt time '2024-03-23T03:21:43Z')
+	Executed 100 times.
+	Total Time: 20.9457 seconds.
+	Average Time per Query: 0.209457 seconds.
+
+Query: (gt cost 42)
+	Executed 100 times.
+	Total Time: 14.1768 seconds.
+	Average Time per Query: 0.141768 seconds.
+
+Query: (exists seenBy)
+	Executed 100 times.
+	Total Time: 12.3522 seconds.
+	Average Time per Query: 0.123522 seconds.
+
+Query: (and (eq foo 42.998) (or (gt bar 200) (absent zzz)))
+	Executed 100 times.
+	Total Time: 5.7853 seconds.
+	Average Time per Query: 0.057853 seconds.
+
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Transaction rolled back: Cost below threshold
+Executed 1000 transactions in 109.7019 seconds.
+	Average Time per Transaction: 0.109702 seconds.
+
+Exported Factbase in 0.0399 seconds.
+
+Imported Factbase in 0.0764 seconds.
+
+Final Factbase size: 11000
