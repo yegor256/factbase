@@ -168,6 +168,10 @@ bundle exec rake
 
 If it's clean and you don't see any error messages, submit your pull request.
 
+# Benchmark
+
+This is the result of the benchmark:
+
 <!-- benchmark_begin -->
 ```text
 +---+---+

@@ -42,10 +42,8 @@ jobs:
       - run: |
           set -x
           sum=$(
-            printf "\`\`\`text\n"
             cat stdout.txt
-            printf "\n\n"
-            printf "\`\`\`\n\n"
+            echo
             echo "The results were calculated in [this GHA job][benchmark-gha]"
             echo "on $(date +'%Y-%m-%d') at $(date +'%H:%M'),"
             echo "on $(uname) with $(nproc --all) CPUs."
