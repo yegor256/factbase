@@ -59,7 +59,7 @@ end
 
 desc 'Run benchmark script'
 task :benchmark do
-  ruby 'benchmarks/benchmark_factbase.rb'
+  ruby 'benchmarks/simple.rb'
 end
 
 task :copyright do
