@@ -173,26 +173,22 @@ If it's clean and you don't see any error messages, submit your pull request.
 This is the result of the benchmark:
 
 <!-- benchmark_begin -->
-```text
 +---+---+
 | What | Seconds |
 +---+---+
-| Inserted 10000 facts | 0.747 |
-| Queried: `(eq title 'Object Thinking 5000')` | 0.047 |
-| Queried: `(gt time '2024-03-23T03:21:43Z')` | 0.206 |
-| Queried: `(gt cost 42)` | 0.139 |
-| Queried: `(exists seenBy)` | 0.121 |
-| Queried: `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.056 |
-| Transaction committed | 0.108 |
-| Factbase exported | 0.036 |
-| Factbase imported | 0.075 |
-
-
-```
+| Inserted 10000 facts | 0.763 |
+| Queried: `(eq title 'Object Thinking 5000')` | 0.048 |
+| Queried: `(gt time '2024-03-23T03:21:43Z')` | 0.210 |
+| Queried: `(gt cost 42)` | 0.146 |
+| Queried: `(exists seenBy)` | 0.123 |
+| Queried: `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.058 |
+| Transaction committed | 0.111 |
+| Factbase exported | 0.037 |
+| Factbase imported | 0.078 |
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2024-12-04 at 08:09,
+on 2024-12-04 at 08:38,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/12155493430
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/12155920989
