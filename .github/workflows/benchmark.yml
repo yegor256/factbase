@@ -31,29 +31,19 @@ jobs:
   benchmark:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
-
-      - name: Install Dependencies
-        run: |
+      - run: |
           gem install bundler
           bundle install
-
-      - name: Run Benchmark
-        run: |
-          ruby benchmarks/benchmark_factbase.rb > benchmark_output.txt
-
-      - name: Update README with Benchmark Results
-        run: |
+      - run: ruby benchmarks/simple.rb > stdout.txt
+      - run: |
           set -x
           sum=$(
             printf "\`\`\`text\n"
-            cat benchmark_output.txt
+            cat stdout.txt
             printf "\n\n"
             printf "\`\`\`\n\n"
             echo "The results were calculated in [this GHA job][benchmark-gha]"
@@ -65,9 +55,8 @@ jobs:
           url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           export url
           perl -i -0777 -pe 's/(?<=\[benchmark-gha\]: )[^\n]+(?=\n)/$ENV{url}/gs;' README.md
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+          rm stdout.txt
+      - uses: peter-evans/create-pull-request@v7
         with:
           branch: benchmark-results-${{ github.run_id }}
           commit-message: 'new benchmarking results'
