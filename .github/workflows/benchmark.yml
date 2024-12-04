@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Benchmark
         run: |
-          ruby benchmark_factbase.rb > benchmark_output.txt
+          ruby benchmarks/benchmark_factbase.rb > benchmark_output.txt
 
       - name: Update README with Benchmark Results
         run: |
