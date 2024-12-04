@@ -170,152 +170,25 @@ If it's clean and you don't see any error messages, submit your pull request.
 
 <!-- benchmark_begin -->
 ```text
-Starting Factbase Benchmarking...
-
-Insertion of 10000 facts completed in 0.7517 seconds.
-
-Query: (eq title 'Object Thinking 5000')
-	Executed 100 times.
-	Total Time: 4.8264 seconds.
-	Average Time per Query: 0.048264 seconds.
-
-Query: (gt time '2024-03-23T03:21:43Z')
-	Executed 100 times.
-	Total Time: 20.9746 seconds.
-	Average Time per Query: 0.209746 seconds.
-
-Query: (gt cost 42)
-	Executed 100 times.
-	Total Time: 14.4079 seconds.
-	Average Time per Query: 0.144079 seconds.
-
-Query: (exists seenBy)
-	Executed 100 times.
-	Total Time: 12.3482 seconds.
-	Average Time per Query: 0.123482 seconds.
-
-Query: (and (eq foo 42.998) (or (gt bar 200) (absent zzz)))
-	Executed 100 times.
-	Total Time: 5.7923 seconds.
-	Average Time per Query: 0.057923 seconds.
-
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Transaction rolled back: Cost below threshold
-Executed 1000 transactions in 110.7762 seconds.
-	Average Time per Transaction: 0.110776 seconds.
-
-Exported Factbase in 0.0387 seconds.
-
-Imported Factbase in 0.0769 seconds.
-
-Final Factbase size: 11000
++---+---+
+| What | Seconds |
++---+---+
+| Inserted 10000 facts | 0.747 |
+| Queried: `(eq title 'Object Thinking 5000')` | 0.047 |
+| Queried: `(gt time '2024-03-23T03:21:43Z')` | 0.206 |
+| Queried: `(gt cost 42)` | 0.139 |
+| Queried: `(exists seenBy)` | 0.121 |
+| Queried: `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.056 |
+| Transaction committed | 0.108 |
+| Factbase exported | 0.036 |
+| Factbase imported | 0.075 |
 
 
 ```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2024-12-04 at 06:52,
+on 2024-12-04 at 08:09,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/12155493430
