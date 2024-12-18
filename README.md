@@ -54,6 +54,16 @@ f2.import(File.read(file))
 assert(f2.query('(eq foo 42)').each.to_a.size == 1)
 ```
 
+You can check the presence of an attribute by name and then
+set it, also by name:
+
+```ruby
+n = 'foo'
+if f[n].nil?
+  f.send("#{n}=", 'Hello, world!')
+end
+```
+
 There are some boolean terms available in a query
 (they return either `true` or `false`):
 
