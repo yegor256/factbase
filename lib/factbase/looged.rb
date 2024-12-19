@@ -46,8 +46,9 @@ class Factbase::Looged
   end
 
   def insert
+    start = Time.now
     f = @fb.insert
-    @loog.debug("Inserted new fact ##{@fb.size}")
+    @loog.debug("Inserted new fact ##{@fb.size} in #{start.ago}")
     Fact.new(f, @loog)
   end
 

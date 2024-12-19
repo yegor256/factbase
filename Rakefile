@@ -32,7 +32,7 @@ def version
   Gem::Specification.load(Dir['*.gemspec'].first).version
 end
 
-task default: %i[clean test rubocop yard copyright benchmark]
+task default: %i[clean test rubocop yard copyright]
 
 require 'rake/testtask'
 desc 'Run all unit tests'
