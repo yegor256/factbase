@@ -185,19 +185,19 @@ This is the result of the benchmark:
 <!-- benchmark_begin -->
 | What | Seconds |
 | --- | --: |
-| Inserted 10000 facts | 0.789 |
-| Queried: `(eq title 'Object Thinking 5000')` | 0.051 |
-| Queried: `(gt time '2024-03-23T03:21:43Z')` | 0.227 |
-| Queried: `(gt cost 42)` | 0.156 |
-| Queried: `(exists seenBy)` | 0.135 |
-| Queried: `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.059 |
-| Transaction committed | 0.120 |
-| Factbase exported | 0.037 |
-| Factbase imported | 0.077 |
+| Inserted 10000 facts | 0.743 |
+| Queried: `(eq title 'Object Thinking 5000')` | 0.047 |
+| Queried: `(gt time '2024-03-23T03:21:43Z')` | 0.206 |
+| Queried: `(gt cost 42)` | 0.140 |
+| Queried: `(exists seenBy)` | 0.121 |
+| Queried: `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.056 |
+| Transaction committed | 0.111 |
+| Factbase exported | 0.039 |
+| Factbase imported | 0.075 |
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2024-12-04 at 08:44,
+on 2025-01-03 at 09:37,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/12156012242
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/12595644981
