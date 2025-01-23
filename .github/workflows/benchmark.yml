@@ -21,7 +21,7 @@
 # SOFTWARE.
 ---
 name: benchmark
-on:
+'on':
   push:
     paths-ignore: [ 'README.md', '.github/**' ]
 concurrency:
