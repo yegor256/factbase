@@ -28,7 +28,7 @@ require_relative '../lib/factbase'
 
 QUERY_RUNS = 10
 TRANSACTION_RUNS = 1_000
-INSERTION_COUNT = 1000
+INSERTION_COUNT = 100
 
 sum = {}
 
@@ -51,19 +51,19 @@ insertion_time =
 sum["Inserted #{INSERTION_COUNT} facts"] = insertion_time.real
 
 queries = [
-  '(eq title \'Object Thinking 5000\')',
   '(gt time \'2024-03-23T03:21:43Z\')',
-  '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))'
-  # '(eq id (agg (always) (max id)))',
-  # '(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))'
+  '(gt cost 50)',
+  '(eq title \'Object Thinking 5000\')',
+  '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))',
+  '(eq id (agg (always) (max id)))',
+  '(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))'
 ]
 
 queries.each do |q|
   time =
     Benchmark.measure do
       QUERY_RUNS.times do
-        results = factbase.query(q)
-        results.each(&:inspect)
+        factbase.query(q).each.to_a
       end
     end
   avg = (time.real / QUERY_RUNS).round(6)

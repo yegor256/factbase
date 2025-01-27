@@ -39,6 +39,10 @@ class TestSyntax < Minitest::Test
     end
   end
 
+  def test_makes_abstract_terms
+    assert_predicate(Factbase::Syntax.new(Factbase.new, '(foo $bar)').to_term, :abstract?)
+  end
+
   def test_simple_parsing
     [
       '(foo)',

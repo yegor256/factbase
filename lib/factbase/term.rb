@@ -122,7 +122,8 @@ class Factbase::Term
   # Does it have any variables inside?
   def abstract?
     @operands.each do |o|
-      return true if o.is_a?(Symbol) || o.abstract?
+      return true if o.is_a?(Factbase::Term) && o.abstract?
+      return true if o.is_a?(Symbol) && o.to_s.start_with?('$')
     end
     false
   end
