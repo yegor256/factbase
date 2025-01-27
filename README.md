@@ -183,21 +183,20 @@ If it's clean and you don't see any error messages, submit your pull request.
 This is the result of the benchmark:
 
 <!-- benchmark_begin -->
-| What | Seconds |
-| --- | --: |
-| Inserted 100 facts | 0.012 |
-| `(eq title 'Object Thinking 5000')` | 0.001 |
-| `(gt time '2024-03-23T03:21:43Z')` | 0.002 |
-| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.001 |
-| `(eq id (agg (always) (max id)))` | 0.040 |
-| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 3.996 |
-| Transaction committed | 0.005 |
-| Factbase exported | 0.003 |
-| Factbase imported | 0.006 |
+| Action | Seconds | Details |
+| --- | --: | --: |
+| `fb.insert()` | 7.800 | Inserted 100000 facts |
+| `(gt time '2024-03-23T03:21:43Z')` | 0.070 | Found 100000 fact(s) |
+| `(gt cost 50)` | 0.072 | Found 49779 fact(s) |
+| `(eq title 'Object Thinking 5000')` | 0.050 | Found 1 fact(s) |
+| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.060 | Found 0 fact(s) |
+| `(eq id (agg (always) (max id)))` | 0.131 | Found 1 fact(s) |
+| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 0.708 | Found 100000 fact(s) |
+| `.export()` + `.import()` | 2.110 | 11407716 bytes |
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-01-27 at 11:33,
+on 2025-01-27 at 16:25,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/12988028214
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/12993508174
