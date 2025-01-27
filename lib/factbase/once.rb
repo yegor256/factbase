@@ -31,9 +31,11 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::Once
   # Constructor.
+  # @param [Factbase] fb Factbase
   # @param [Factbase::Query] query Original query
   # @param [Hash] cache The cache
-  def initialize(query, cache)
+  def initialize(fb, query, cache)
+    @fb = fb
     @query = query
     @cache = cache
   end
@@ -57,7 +59,7 @@ class Factbase::Once
   # Delete all facts that match the query.
   # @return [Integer] Total number of facts deleted
   def delete!
-    @cache.clear
+    @fb.flush!
     @query.delete!
   end
 end

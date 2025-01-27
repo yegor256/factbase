@@ -146,7 +146,7 @@ class Factbase
   def query(query, maps = @maps)
     require_relative 'factbase/query'
     require_relative 'factbase/once'
-    Factbase::Once.new(Factbase::Query.new(self, maps, @mutex, query), @cache)
+    Factbase::Once.new(self, Factbase::Query.new(self, maps, @mutex, query), @cache)
   end
 
   # Run an ACID transaction, which will either modify the factbase
