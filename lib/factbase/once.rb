@@ -33,10 +33,12 @@ class Factbase::Once
   # Constructor.
   # @param [Factbase] fb Factbase
   # @param [Factbase::Query] query Original query
+  # @param [Array<Hash>] maps Where to search
   # @param [Hash] cache The cache
-  def initialize(fb, query, cache)
+  def initialize(fb, query, maps, cache)
     @fb = fb
     @query = query
+    @maps = maps
     @cache = cache
   end
 
@@ -45,7 +47,13 @@ class Factbase::Once
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
   def each(params = {}, &)
-    return to_enum(__method__, params) unless block_given?
+    unless block_given?
+      return to_enum(__method__, params) if Factbase::Syntax.new(@fb, @query).to_term.abstract?
+      key = [@query.to_s, @maps.object_id]
+      before = @cache[key]
+      @cache[key] = to_enum(__method__, params) if before.nil?
+      return @cache[key]
+    end
     @query.each(params, &)
   end
 

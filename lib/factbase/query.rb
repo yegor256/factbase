@@ -49,6 +49,12 @@ class Factbase::Query
     @query = query
   end
 
+  # Print it as a string.
+  # @return [String] The query as a string
+  def to_s
+    @query.to_s
+  end
+
   # Iterate facts one by one.
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one

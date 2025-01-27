@@ -119,6 +119,14 @@ class Factbase::Term
     end
   end
 
+  # Does it have any variables inside?
+  def abstract?
+    @operands.each do |o|
+      return true if o.is_a?(Symbol) || o.abstract?
+    end
+    false
+  end
+
   # Turns it into a string.
   # @return [String] The string of it
   def to_s

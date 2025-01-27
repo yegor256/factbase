@@ -49,6 +49,15 @@ class TestFactbase < Minitest::Test
     assert_equal([2, 3], maps[1]['bar'])
   end
 
+  def test_query_many_times
+    fb = Factbase.new
+    total = 5
+    total.times { fb.insert }
+    total.times do
+      assert_equal(5, fb.query('(always)').each.to_a.size)
+    end
+  end
+
   def test_simple_setting
     fb = Factbase.new
     fb.insert
