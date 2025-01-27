@@ -47,7 +47,7 @@ module Factbase::Term::Aliases
       .map { |j| j.size == 1 ? [j[0], j[0]] : j }
     term = @operands[1]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    subset = Factbase::Query.new(maps, Mutex.new, term.to_s).each(fact).to_a
+    subset = Factbase::Query.new(@fb, maps, Mutex.new, term.to_s).each(fact).to_a
     subset.each do |s|
       jumps.each do |to, from|
         s[from]&.each do |v|

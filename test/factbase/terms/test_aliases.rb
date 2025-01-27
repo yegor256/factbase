@@ -41,11 +41,11 @@ class TestAliases < Minitest::Test
       '(as foo (plus bar 1))' => '(absent foo)',
       '(as foo (minus t1 t2))' => '(when (exists foo) (eq "Float" (type foo)))'
     }.each do |q, r|
-      t = Factbase::Syntax.new(q).to_term
+      t = Factbase::Syntax.new(Factbase.new, q).to_term
       maps.each do |m|
         f = Factbase::Accum.new(fact(m), {}, false)
         next unless t.evaluate(f, maps)
-        assert(Factbase::Syntax.new(r).to_term.evaluate(f, []), "#{q} -> #{f}")
+        assert(Factbase::Syntax.new(Factbase.new, r).to_term.evaluate(f, []), "#{q} -> #{f}")
       end
     end
   end
@@ -61,13 +61,13 @@ class TestAliases < Minitest::Test
       '(join "uuu" (eq x 1))' => '(absent uuu)',
       '(join "uuu <= fff" (eq fff 1))' => '(absent uuu)'
     }.each do |q, r|
-      t = Factbase::Syntax.new(q).to_term
+      t = Factbase::Syntax.new(Factbase.new, q).to_term
       maps.each do |m|
         f = Factbase::Accum.new(fact(m), {}, false)
         require_relative '../../../lib/factbase/looged'
         f = Factbase::Looged::Fact.new(f, Loog::NULL)
         next unless t.evaluate(f, maps)
-        assert(Factbase::Syntax.new(r).to_term.evaluate(f, []), "#{q} -> #{f} doesn't match #{r}")
+        assert(Factbase::Syntax.new(Factbase.new, r).to_term.evaluate(f, []), "#{q} -> #{f} doesn't match #{r}")
       end
     end
   end

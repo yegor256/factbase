@@ -120,7 +120,7 @@ class Factbase::Looged
     end
 
     def one(params = {})
-      q = Factbase::Syntax.new(@expr).to_term.to_s
+      q = Factbase::Syntax.new(@fb, @expr).to_term.to_s
       r = nil
       tail =
         Factbase::Looged.elapsed do
@@ -135,7 +135,7 @@ class Factbase::Looged
     end
 
     def each(params = {}, &)
-      q = Factbase::Syntax.new(@expr).to_term.to_s
+      q = Factbase::Syntax.new(@fb, @expr).to_term.to_s
       if block_given?
         r = nil
         tail =

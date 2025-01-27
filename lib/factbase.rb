@@ -142,7 +142,7 @@ class Factbase
   # @param [String] query The query to use for selections
   def query(query)
     require_relative 'factbase/query'
-    Factbase::Query.new(@maps, @mutex, query)
+    Factbase::Query.new(self, @maps, @mutex, query)
   end
 
   # Run an ACID transaction, which will either modify the factbase

@@ -35,7 +35,7 @@ class TestSyntax < Minitest::Test
       "(foo 'one two three   ')",
       "(foo 'one two three   ' 'tail tail')"
     ].each do |q|
-      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s, q)
+      assert_equal(q, Factbase::Syntax.new(Factbase.new, q).to_term.to_s, q)
     end
   end
 
@@ -50,7 +50,7 @@ class TestSyntax < Minitest::Test
       "(foo 'Hello,\n\nworld!\r\t\n')\n",
       "(or ( a 4) (b 5) (always) (and (always) (c 5) \t\t(r 7 w8s w8is 'Foo')))"
     ].each do |q|
-      refute_nil(Factbase::Syntax.new(q).to_term)
+      refute_nil(Factbase::Syntax.new(Factbase.new, q).to_term)
     end
   end
 
@@ -70,7 +70,7 @@ class TestSyntax < Minitest::Test
       '(eq t 3.0e+21)',
       "(foo (x (f (t (y 42 'Hey you'))) (never) (r 3)) y z)"
     ].each do |q|
-      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s, q)
+      assert_equal(q, Factbase::Syntax.new(Factbase.new, q).to_term.to_s, q)
     end
   end
 
@@ -85,7 +85,7 @@ class TestSyntax < Minitest::Test
       '(or (eq bar 888) (eq z 1))' => true,
       "(or (gt bar 100) (eq foo 'Hello, world!'))" => true
     }.each do |k, v|
-      assert_equal(v, Factbase::Syntax.new(k).to_term.evaluate(m, []), k)
+      assert_equal(v, Factbase::Syntax.new(Factbase.new, k).to_term.evaluate(m, []), k)
     end
   end
 
@@ -109,7 +109,7 @@ class TestSyntax < Minitest::Test
       '"'
     ].each do |q|
       msg = assert_raises(q) do
-        Factbase::Syntax.new(q).to_term
+        Factbase::Syntax.new(Factbase.new, q).to_term
       end.message
       assert_includes(msg, q, msg)
     end
@@ -121,7 +121,7 @@ class TestSyntax < Minitest::Test
       '(and (foo) (foo))' => '(foo)',
       '(and (foo) (or (and (eq a 1))) (eq a 1) (foo))' => '(and (foo) (eq a 1))'
     }.each do |s, t|
-      assert_equal(t, Factbase::Syntax.new(s).to_term.to_s)
+      assert_equal(t, Factbase::Syntax.new(Factbase.new, s).to_term.to_s)
     end
   end
 end

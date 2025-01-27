@@ -29,30 +29,30 @@ require_relative '../../lib/factbase/term'
 # License:: MIT
 class TestTerm < Minitest::Test
   def test_false_matching
-    t = Factbase::Term.new(:never, [])
+    t = Factbase::Term.new(Factbase.new, :never, [])
     refute(t.evaluate(fact('foo' => [100]), []))
   end
 
   def test_size_matching
-    t = Factbase::Term.new(:size, [:foo])
+    t = Factbase::Term.new(Factbase.new, :size, [:foo])
     assert_equal(3, t.evaluate(fact('foo' => [42, 12, -90]), []))
     assert_equal(0, t.evaluate(fact('bar' => 100), []))
   end
 
   def test_exists_matching
-    t = Factbase::Term.new(:exists, [:foo])
+    t = Factbase::Term.new(Factbase.new, :exists, [:foo])
     assert(t.evaluate(fact('foo' => [42, 12, -90]), []))
     refute(t.evaluate(fact('bar' => 100), []))
   end
 
   def test_absent_matching
-    t = Factbase::Term.new(:absent, [:foo])
+    t = Factbase::Term.new(Factbase.new, :absent, [:foo])
     assert(t.evaluate(fact('z' => [42, 12, -90]), []))
     refute(t.evaluate(fact('foo' => 100), []))
   end
 
   def test_type_matching
-    t = Factbase::Term.new(:type, [:foo])
+    t = Factbase::Term.new(Factbase.new, :type, [:foo])
     assert_equal('Integer', t.evaluate(fact('foo' => 42), []))
     assert_equal('Integer', t.evaluate(fact('foo' => [42]), []))
     assert_equal('Array', t.evaluate(fact('foo' => [1, 2, 3]), []))
@@ -64,19 +64,19 @@ class TestTerm < Minitest::Test
   end
 
   def test_past
-    t = Factbase::Term.new(:prev, [:foo])
+    t = Factbase::Term.new(Factbase.new, :prev, [:foo])
     assert_nil(t.evaluate(fact('foo' => 4), []))
     assert_equal([4], t.evaluate(fact('foo' => 5), []))
   end
 
   def test_at
-    t = Factbase::Term.new(:at, [1, :foo])
+    t = Factbase::Term.new(Factbase.new, :at, [1, :foo])
     assert_nil(t.evaluate(fact('foo' => 4), []))
     assert_equal(5, t.evaluate(fact('foo' => [4, 5]), []))
   end
 
   def test_report_missing_term
-    t = Factbase::Term.new(:something, [])
+    t = Factbase::Term.new(Factbase.new, :something, [])
     msg = assert_raises(StandardError) do
       t.evaluate(fact, [])
     end.message
@@ -84,7 +84,7 @@ class TestTerm < Minitest::Test
   end
 
   def test_report_other_error
-    t = Factbase::Term.new(:at, [])
+    t = Factbase::Term.new(Factbase.new, :at, [])
     msg = assert_raises(StandardError) do
       t.evaluate(fact, [])
     end.message

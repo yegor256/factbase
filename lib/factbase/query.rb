@@ -38,10 +38,12 @@ require_relative 'tee'
 # License:: MIT
 class Factbase::Query
   # Constructor.
+  # @param [Factbase] fb Factbase
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [Mutex] mutex Mutex to sync all modifications to the +maps+
   # @param [String] query The query as a string
-  def initialize(maps, mutex, query)
+  def initialize(fb, maps, mutex, query)
+    @fb = fb
     @maps = maps
     @mutex = mutex
     @query = query
@@ -53,7 +55,7 @@ class Factbase::Query
   # @return [Integer] Total number of facts yielded
   def each(params = {})
     return to_enum(__method__, params) unless block_given?
-    term = Factbase::Syntax.new(@query).to_term
+    term = Factbase::Syntax.new(@fb, @query).to_term
     yielded = 0
     @maps.each do |m|
       extras = {}
@@ -76,7 +78,7 @@ class Factbase::Query
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return The value evaluated
   def one(params = {})
-    term = Factbase::Syntax.new(@query).to_term
+    term = Factbase::Syntax.new(@fb, @query).to_term
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     r = term.evaluate(Factbase::Tee.new(nil, params), @maps)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
@@ -88,7 +90,7 @@ class Factbase::Query
   # Delete all facts that match the query.
   # @return [Integer] Total number of facts deleted
   def delete!
-    term = Factbase::Syntax.new(@query).to_term
+    term = Factbase::Syntax.new(@fb, @query).to_term
     deleted = 0
     @mutex.synchronize do
       @maps.delete_if do |m|
