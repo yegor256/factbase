@@ -67,7 +67,6 @@ queries.each do |q|
     end
   avg = (time.real / QUERY_RUNS).round(6)
   sum["`#{q}`"] = avg
-  puts "#{q} --> #{avg}"
 end
 
 transaction_time =
