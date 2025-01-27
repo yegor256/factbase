@@ -92,5 +92,5 @@ rows = [
 ].map { |r| "| #{r[:title]} | #{format('%0.3f', r[:time])} | #{r[:details]} |" }
 
 puts '| Action | Seconds | Details |'
-puts '| --- | --: | --: |'
+puts '| --- | --: | --- |'
 rows.each { |row| puts row }
