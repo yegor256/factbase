@@ -30,7 +30,7 @@ require_relative '../../lib/factbase/term'
 class TestTerm < Minitest::Test
   def test_false_matching
     t = Factbase::Term.new(:never, [])
-    assert(!t.evaluate(fact('foo' => [100]), []))
+    refute(t.evaluate(fact('foo' => [100]), []))
   end
 
   def test_size_matching
@@ -42,13 +42,13 @@ class TestTerm < Minitest::Test
   def test_exists_matching
     t = Factbase::Term.new(:exists, [:foo])
     assert(t.evaluate(fact('foo' => [42, 12, -90]), []))
-    assert(!t.evaluate(fact('bar' => 100), []))
+    refute(t.evaluate(fact('bar' => 100), []))
   end
 
   def test_absent_matching
     t = Factbase::Term.new(:absent, [:foo])
     assert(t.evaluate(fact('z' => [42, 12, -90]), []))
-    assert(!t.evaluate(fact('foo' => 100), []))
+    refute(t.evaluate(fact('foo' => 100), []))
   end
 
   def test_type_matching
@@ -77,17 +77,17 @@ class TestTerm < Minitest::Test
 
   def test_report_missing_term
     t = Factbase::Term.new(:something, [])
-    msg = assert_raises do
+    msg = assert_raises(StandardError) do
       t.evaluate(fact, [])
     end.message
-    assert(msg.include?('not defined at (something)'), msg)
+    assert_includes(msg, 'not defined at (something)', msg)
   end
 
   def test_report_other_error
     t = Factbase::Term.new(:at, [])
-    msg = assert_raises do
+    msg = assert_raises(StandardError) do
       t.evaluate(fact, [])
     end.message
-    assert(msg.include?('at (at)'), msg)
+    assert_includes(msg, 'at (at)', msg)
   end
 end

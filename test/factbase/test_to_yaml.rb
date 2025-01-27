@@ -51,6 +51,6 @@ class TestToYAML < Minitest::Test
     f.a = 256
     f.c = 10
     yaml = Factbase::ToYAML.new(fb).yaml
-    assert(yaml.include?("a: 256\n  b: 42\n  c: 10"), yaml)
+    assert_includes(yaml, "a: 256\n  b: 42\n  c: 10", yaml)
   end
 end

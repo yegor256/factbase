@@ -35,11 +35,9 @@ class TestToXML < Minitest::Test
     fb.insert.t = Time.now
     to = Factbase::ToXML.new(fb)
     xml = Nokogiri::XML.parse(to.xml)
-    assert(!xml.xpath('/fb/f[t]').empty?)
-    assert(
-      xml.xpath('/fb/f/t/text()').text.match?(
-        /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/
-      )
+    refute_empty(xml.xpath('/fb/f[t]'))
+    assert_match(
+      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/, xml.xpath('/fb/f/t/text()').text
     )
   end
 
@@ -48,7 +46,7 @@ class TestToXML < Minitest::Test
     fb.insert.t = "\uffff < > & ' \""
     to = Factbase::ToXML.new(fb)
     xml = Nokogiri::XML.parse(to.xml)
-    assert(!xml.xpath('/fb/f[t]').empty?)
+    refute_empty(xml.xpath('/fb/f[t]'))
   end
 
   def test_meta_data_presence
@@ -56,8 +54,8 @@ class TestToXML < Minitest::Test
     fb.insert.x = 42
     to = Factbase::ToXML.new(fb)
     xml = Nokogiri::XML.parse(to.xml)
-    assert(!xml.xpath('/fb[@version]').empty?)
-    assert(!xml.xpath('/fb[@size]').empty?)
+    refute_empty(xml.xpath('/fb[@version]'))
+    refute_empty(xml.xpath('/fb[@size]'))
   end
 
   def test_to_xml_with_short_names
@@ -67,8 +65,8 @@ class TestToXML < Minitest::Test
     f.f = 2
     to = Factbase::ToXML.new(fb)
     xml = Nokogiri::XML.parse(to.xml)
-    assert(!xml.xpath('/fb/f/type').empty?)
-    assert(!xml.xpath('/fb/f/f').empty?)
+    refute_empty(xml.xpath('/fb/f/type'))
+    refute_empty(xml.xpath('/fb/f/f'))
   end
 
   def test_show_types_as_attributes
@@ -89,7 +87,7 @@ class TestToXML < Minitest::Test
       '/fb/f/d[@t="T"]',
       '/fb/f/e/v[@t="S"]',
       '/fb/f/e/v[@t="I"]'
-    ].each { |x| assert(!xml.xpath(x).empty?, out) }
+    ].each { |x| refute_empty(xml.xpath(x), out) }
   end
 
   def test_sorts_keys
@@ -102,7 +100,7 @@ class TestToXML < Minitest::Test
     to = Factbase::ToXML.new(fb)
     xml = Nokogiri::XML.parse(to.xml)
     %w[a c t x].each_with_index do |e, i|
-      assert(!xml.xpath("/fb/f/#{e}[count(preceding-sibling::*) = #{i}]").empty?, e)
+      refute_empty(xml.xpath("/fb/f/#{e}[count(preceding-sibling::*) = #{i}]"), e)
     end
   end
 end

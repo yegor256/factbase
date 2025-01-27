@@ -44,6 +44,6 @@ class TestSystem < Minitest::Test
   def test_when_default_is_absent
     ENV.delete('FOO')
     t = Factbase::Term.new(:env, ['FOO'])
-    assert_raises { t.evaluate(fact, []) }
+    assert_raises(StandardError) { t.evaluate(fact, []) }
   end
 end

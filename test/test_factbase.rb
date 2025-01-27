@@ -55,7 +55,7 @@ class TestFactbase < Minitest::Test
     fb.insert.bar = 88
     found = 0
     fb.query('(exists bar)').each do |f|
-      assert(42, f.bar.positive?)
+      assert_predicate(f.bar, :positive?)
       f.foo = 42
       assert_equal(42, f.foo)
       found += 1
@@ -88,17 +88,17 @@ class TestFactbase < Minitest::Test
       File.binwrite(f.path, f1.export)
       f2.import(File.binread(f.path))
     end
-    assert_equal(1, f2.query('(eq foo 42)').each.to_a.count)
+    assert_equal(1, f2.query('(eq foo 42)').each.to_a.size)
   end
 
   def test_reads_from_empty_file
     fb = Factbase.new
     Tempfile.open do |f|
       File.binwrite(f.path, '')
-      assert(
-        assert_raises do
+      assert_includes(
+        assert_raises(StandardError) do
           fb.import(File.binread(f.path))
-        end.message.include?('cannot load a factbase')
+        end.message, 'cannot load a factbase'
       )
     end
   end
@@ -122,10 +122,10 @@ class TestFactbase < Minitest::Test
 
   def test_txn_returns_boolean
     fb = Factbase.new
-    assert(fb.txn { true }.is_a?(FalseClass))
-    assert(fb.txn(&:insert).is_a?(TrueClass))
+    assert_kind_of(FalseClass, fb.txn { true })
+    assert_kind_of(TrueClass, fb.txn(&:insert))
     assert(fb.txn { |fbt| fbt.insert.bar = 42 })
-    assert(!fb.txn { |fbt| fbt.query('(always)').each.to_a })
+    refute(fb.txn { |fbt| fbt.query('(always)').each.to_a })
     assert(fb.txn { |fbt| fbt.query('(always)').each { |f| f.hello = 33 } })
     assert(fb.txn { |fbt| fbt.query('(always)').each.to_a[0].zzz = 33 })
   end
@@ -137,13 +137,13 @@ class TestFactbase < Minitest::Test
       fbt.insert.z = 42
     end
     assert_equal(2, fb.size)
-    assert(
-      assert_raises do
+    assert_includes(
+      assert_raises(StandardError) do
         fb.txn do |fbt|
           fbt.insert.foo = 42
           throw 'intentionally'
         end
-      end.message.include?('intentionally')
+      end.message, 'intentionally'
     )
     assert_equal(2, fb.size)
   end
@@ -164,12 +164,12 @@ class TestFactbase < Minitest::Test
     fb.insert.bar = 3
     fb.insert.foo = 5
     assert_equal(2, fb.size)
-    assert(
-      assert_raises do
+    assert_includes(
+      assert_raises(StandardError) do
         fb.txn do |fbt|
           fbt.insert.foo = 42
         end
-      end.message.include?('oops')
+      end.message, 'oops'
     )
     assert_equal(2, fb.size)
   end
@@ -186,7 +186,7 @@ class TestFactbase < Minitest::Test
       d.txn do |fbt|
         fbt.insert.bar = 455
       end
-      assert_raises do
+      assert_raises(StandardError) do
         d.txn do |fbt|
           fbt.insert
           throw 'oops'
@@ -217,7 +217,7 @@ class TestFactbase < Minitest::Test
         fbt.insert.bar = 33
         raise Factbase::Rollback
       end
-    assert(!modified)
+    refute(modified)
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end
 
@@ -261,7 +261,7 @@ class TestFactbase < Minitest::Test
   #           test/test_factbase.rb:265:in `test_different_properties_when_concurrent_inserts'
   # ```
   def test_different_properties_when_concurrent_inserts
-    skip
+    skip('Does not work')
     fb = Factbase.new
     Threads.new(5).assert do |i|
       fb.insert.send(:"prop_#{i}=", i)
@@ -284,7 +284,7 @@ class TestFactbase < Minitest::Test
   # ```
   # See details here https://github.com/yegor256/factbase/actions/runs/10492255419/job/29068637032
   def test_concurrent_transactions_inserts
-    skip
+    skip('Does not work')
     fb = Factbase.new
     Threads.new(100).assert do |i|
       fb.txn do |fbt|
@@ -337,7 +337,7 @@ class TestFactbase < Minitest::Test
   #           test/test_factbase.rb:329:in `test_concurrent_queries'
   # ```
   def test_concurrent_queries
-    skip
+    skip('Does not work')
     fb = Factbase.new
     Threads.new(2).assert do |i|
       fact = fb.insert
@@ -387,7 +387,7 @@ class TestFactbase < Minitest::Test
     end
     assert_equal(100, fbs.size)
     fbs.each do |factbase|
-      assert(100, factbase.query('(eq foo 42)').each.to_a.size)
+      assert_equal(100, factbase.query('(eq foo 42)').each.to_a.size)
     end
   end
 end

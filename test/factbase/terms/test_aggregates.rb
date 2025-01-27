@@ -49,7 +49,7 @@ class TestAggregates < Minitest::Test
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term
       f = maps.find { |m| t.evaluate(fact(m), maps) }
-      assert(!f.nil?, "nothing found by: #{q}")
+      refute_nil(f, "nothing found by: #{q}")
       assert(Factbase::Syntax.new(r).to_term.evaluate(fact(f), []))
     end
   end

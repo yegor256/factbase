@@ -36,7 +36,7 @@ class TestAccum < Minitest::Test
     props = {}
     a = Factbase::Accum.new(f, props, false)
     a.foo = 42
-    assert_raises { f.foo }
+    assert_raises(StandardError) { f.foo }
     assert_equal(42, a.foo)
     assert_equal([42], props['foo'])
   end
@@ -65,7 +65,7 @@ class TestAccum < Minitest::Test
   def test_empties
     f = Factbase::Fact.new(Mutex.new, {})
     a = Factbase::Accum.new(f, {}, false)
-    assert(a['foo'].nil?)
+    assert_nil(a['foo'])
   end
 
   def test_prints_to_string

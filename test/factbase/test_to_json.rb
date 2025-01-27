@@ -37,7 +37,7 @@ class TestToJSON < Minitest::Test
     f.foo = 256
     to = Factbase::ToJSON.new(fb)
     json = JSON.parse(to.json)
-    assert(42, json[0]['foo'][1])
+    assert_equal(256, json[0]['foo'][1])
   end
 
   def test_sort_keys
@@ -47,6 +47,6 @@ class TestToJSON < Minitest::Test
     f.b = 1
     f.a = 256
     json = Factbase::ToJSON.new(fb).json
-    assert(json.include?('{"a":256,"b":1,"c":42}'), json)
+    assert_includes(json, '{"a":256,"b":1,"c":42}', json)
   end
 end

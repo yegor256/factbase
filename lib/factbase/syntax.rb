@@ -113,13 +113,15 @@ class Factbase::Syntax
   def to_tokens
     list = []
     acc = ''
+    quotes = ['\'', '"']
+    spaces = [' ', ')']
     string = false
     comment = false
     @query.to_s.chars.each do |c|
       comment = true if !string && c == '#'
       comment = false if comment && c == "\n"
       next if comment
-      if ['\'', '"'].include?(c)
+      if quotes.include?(c)
         if string && acc[acc.length - 1] == '\\'
           acc = acc[0..-2]
         else
@@ -130,7 +132,7 @@ class Factbase::Syntax
         acc += c
         next
       end
-      if !acc.empty? && [' ', ')'].include?(c)
+      if !acc.empty? && spaces.include?(c)
         list << acc
         acc = ''
       end

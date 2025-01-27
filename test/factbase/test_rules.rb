@@ -38,8 +38,8 @@ class TestRules < Minitest::Test
     f1 = fb.insert
     f1.second = 2
     f1.first = 1
-    assert_raises do
-      f2 = fb.insert
+    f2 = fb.insert
+    assert_raises(StandardError) do
       f2.first = 1
     end
   end
@@ -60,7 +60,7 @@ class TestRules < Minitest::Test
     f = fb.insert
     f.foo = 42
     s = f.to_s
-    assert(s.length.positive?, s)
+    assert_predicate(s.length, :positive?, s)
     assert_equal('[ foo: [42] ]', s)
   end
 
@@ -74,7 +74,7 @@ class TestRules < Minitest::Test
   def test_check_only_when_txn_is_closed
     fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
     ok = false
-    assert_raises do
+    assert_raises(StandardError) do
       fb.txn do |fbt|
         f = fbt.insert
         f.a = 1
@@ -87,7 +87,7 @@ class TestRules < Minitest::Test
 
   def test_rollback_on_violation
     fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
-    assert_raises do
+    assert_raises(StandardError) do
       fb.txn do |fbt|
         f = fbt.insert
         f.a = 1
@@ -104,7 +104,7 @@ class TestRules < Minitest::Test
         f.hello = 42
       end
     ok = false
-    assert_raises do
+    assert_raises(StandardError) do
       fb.txn do |fbt|
         f = fbt.insert
         f.a = 1

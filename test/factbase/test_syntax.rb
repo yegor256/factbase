@@ -50,7 +50,7 @@ class TestSyntax < Minitest::Test
       "(foo 'Hello,\n\nworld!\r\t\n')\n",
       "(or ( a 4) (b 5) (always) (and (always) (c 5) \t\t(r 7 w8s w8is 'Foo')))"
     ].each do |q|
-      assert(!Factbase::Syntax.new(q).to_term.nil?)
+      refute_nil(Factbase::Syntax.new(q).to_term)
     end
   end
 
@@ -111,7 +111,7 @@ class TestSyntax < Minitest::Test
       msg = assert_raises(q) do
         Factbase::Syntax.new(q).to_term
       end.message
-      assert(msg.include?(q), msg)
+      assert_includes(msg, q, msg)
     end
   end
 

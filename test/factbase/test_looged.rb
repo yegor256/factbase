@@ -36,7 +36,7 @@ class TestLooged < Minitest::Test
     fb.insert.bar = 3
     found = 0
     fb.query('(exists bar)').each do |f|
-      assert(42, f.bar.positive?)
+      assert_predicate(f.bar, :positive?)
       f.foo = 42
       assert_equal(42, f.foo)
       found += 1
@@ -62,32 +62,32 @@ class TestLooged < Minitest::Test
       end
     )
     assert_equal(1, fb.size)
-    assert(log.to_s.include?('modified'), log)
+    assert_includes(log.to_s, 'modified', log)
   end
 
   def test_with_txn_rollback
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)
-    assert(!fb.txn { raise Factbase::Rollback })
+    refute(fb.txn { raise Factbase::Rollback })
     assert_equal(0, fb.size)
-    assert(log.to_s.include?('rolled back'), log)
-    assert(!log.to_s.include?('didn\'t touch'), log)
+    assert_includes(log.to_s, 'rolled back', log)
+    refute_includes(log.to_s, 'didn\'t touch', log)
   end
 
   def test_with_modifying_txn
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)
     fb.insert.foo = 1
-    assert(!fb.txn { |fbt| fbt.query('(always)').each.to_a }, log)
-    assert(fb.txn { |fbt| fbt.query('(always)').each.to_a[0].foo = 42 }, log)
-    assert(log.to_s.include?('modified'), log)
+    refute(fb.txn { |fbt| fbt.query('(always)').each.to_a }, log)
+    assert(fb.txn { |fbt| fbt.query('(always)').each.to_a[0].foo = 42 })
+    assert_includes(log.to_s, 'modified', log)
   end
 
   def test_with_empty_txn
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)
-    assert(!fb.txn { |fbt| fbt.query('(always)').each.to_a })
-    assert(log.to_s.include?('didn\'t touch'), log)
+    refute(fb.txn { |fbt| fbt.query('(always)').each.to_a })
+    assert_includes(log.to_s, 'didn\'t touch', log)
   end
 
   def test_returns_int
@@ -140,7 +140,7 @@ class TestLooged < Minitest::Test
       'Found 1 fact(s) by \'(exists bar)\'',
       'Deleted 3 fact(s) out of 4 by \'(not (exists bar))\''
     ].each do |s|
-      assert(log.to_s.include?(s), "#{log}\n")
+      assert_includes(log.to_s, s, "#{log}\n")
     end
   end
 end

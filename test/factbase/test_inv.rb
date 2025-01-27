@@ -38,7 +38,7 @@ class TestInv < Minitest::Test
       end
     f = fb.insert
     f.a = 42
-    assert_raises do
+    assert_raises(StandardError) do
       f.b = 'here we should crash'
     end
     f.c = 256

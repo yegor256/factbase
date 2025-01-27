@@ -27,7 +27,12 @@ AllCops:
   TargetRubyVersion: 3.2
   SuggestExtensions: false
   NewCops: enable
+require:
+  - rubocop-minitest
+  - rubocop-performance
 
+Minitest/EmptyLineBeforeAssertionMethods:
+  Enabled: false
 Gemspec/RequiredRubyVersion:
   Enabled: false
 Metrics/MethodLength:

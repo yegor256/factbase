@@ -46,8 +46,8 @@ class TestTee < Minitest::Test
     upper = Factbase::Fact.new(Mutex.new, {})
     upper.bar = 13
     t = Factbase::Tee.new(prim, upper)
-    assert(t.all_properties.include?('foo'))
-    assert(t.all_properties.include?('bar'))
+    assert_includes(t.all_properties, 'foo')
+    assert_includes(t.all_properties, 'bar')
   end
 
   def test_recursively

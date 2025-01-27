@@ -30,13 +30,13 @@ require_relative '../../../lib/factbase/term'
 class TestLogical < Minitest::Test
   def test_not_matching
     t = Factbase::Term.new(:not, [Factbase::Term.new(:always, [])])
-    assert(!t.evaluate(fact('foo' => [100]), []))
+    refute(t.evaluate(fact('foo' => [100]), []))
   end
 
   def test_not_eq_matching
     t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 100])])
     assert(t.evaluate(fact('foo' => [42, 12, -90]), []))
-    assert(!t.evaluate(fact('foo' => 100), []))
+    refute(t.evaluate(fact('foo' => 100), []))
   end
 
   def test_either
@@ -54,7 +54,7 @@ class TestLogical < Minitest::Test
     )
     assert(t.evaluate(fact('foo' => [4]), []))
     assert(t.evaluate(fact('bar' => [5]), []))
-    assert(!t.evaluate(fact('bar' => [42]), []))
+    refute(t.evaluate(fact('bar' => [42]), []))
   end
 
   def test_when_matching
@@ -66,7 +66,7 @@ class TestLogical < Minitest::Test
       ]
     )
     assert(t.evaluate(fact('foo' => 4, 'bar' => 5), []))
-    assert(!t.evaluate(fact('foo' => 4), []))
+    refute(t.evaluate(fact('foo' => 4), []))
     assert(t.evaluate(fact('foo' => 5, 'bar' => 5), []))
   end
 end

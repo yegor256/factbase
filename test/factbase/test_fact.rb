@@ -62,21 +62,21 @@ class TestFact < Minitest::Test
 
   def test_fails_when_empty
     f = Factbase::Fact.new(Mutex.new, {})
-    assert_raises do
+    assert_raises(StandardError) do
       f.something
     end
   end
 
   def test_fails_when_setting_nil
     f = Factbase::Fact.new(Mutex.new, {})
-    assert_raises do
+    assert_raises(StandardError) do
       f.foo = nil
     end
   end
 
   def test_fails_when_setting_empty
     f = Factbase::Fact.new(Mutex.new, {})
-    assert_raises do
+    assert_raises(StandardError) do
       f.foo = ''
     end
   end
@@ -84,14 +84,14 @@ class TestFact < Minitest::Test
   def test_fails_when_not_found
     f = Factbase::Fact.new(Mutex.new, {})
     f.first = 42
-    assert_raises do
+    assert_raises(StandardError) do
       f.second
     end
   end
 
   def test_set_by_name
     f = Factbase::Fact.new(Mutex.new, {})
-    f.send('_foo_bar=', 42)
+    f.send(:_foo_bar=, 42)
     assert_equal(42, f._foo_bar, f.to_s)
   end
 
@@ -113,13 +113,13 @@ class TestFact < Minitest::Test
 
   def test_some_names_are_prohibited
     f = Factbase::Fact.new(Mutex.new, {})
-    assert_raises { f.to_s = 42 }
-    assert_raises { f.class = 42 }
+    assert_raises(StandardError) { f.to_s = 42 }
+    assert_raises(StandardError) { f.class = 42 }
   end
 
   def test_get_all_properties
     f = Factbase::Fact.new(Mutex.new, {})
     f.foo = 42
-    assert(f.all_properties.include?('foo'))
+    assert_includes(f.all_properties, 'foo')
   end
 end

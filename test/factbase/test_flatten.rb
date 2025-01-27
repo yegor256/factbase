@@ -32,14 +32,14 @@ class TestFlatten < Minitest::Test
   def test_mapping
     maps = [{ 'b' => [42], 'i' => 1 }, { 'a' => 33, 'i' => 0 }, { 'c' => %w[hey you], 'i' => 2 }]
     to = Factbase::Flatten.new(maps, 'i').it
-    assert(33, to[0]['a'])
-    assert(42, to[1]['b'])
-    assert(2, to[2]['c'].size)
+    assert_equal(33, to[0]['a'])
+    assert_equal(42, to[1]['b'])
+    assert_equal(2, to[2]['c'].size)
   end
 
   def test_without_sorter
     maps = [{ 'b' => [42], 'i' => [44] }, { 'a' => 33 }]
     to = Factbase::Flatten.new(maps, 'i').it
-    assert(33, to[0]['a'])
+    assert_equal(33, to[0]['a'])
   end
 end

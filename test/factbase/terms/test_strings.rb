@@ -32,13 +32,13 @@ class TestStrings < Minitest::Test
     t = Factbase::Term.new(:matches, [:foo, '[a-z]+'])
     assert(t.evaluate(fact('foo' => 'hello'), []))
     assert(t.evaluate(fact('foo' => 'hello 42'), []))
-    assert(!t.evaluate(fact('foo' => 42), []))
+    refute(t.evaluate(fact('foo' => 42), []))
   end
 
   def test_concat
     t = Factbase::Term.new(:concat, [42, 'hi', 3.14, :hey, Time.now])
     s = t.evaluate(fact, [])
-    assert(s.start_with?('42hi3.14'), s)
+    assert(s.start_with?('42hi3.14'))
   end
 
   def test_concat_empty

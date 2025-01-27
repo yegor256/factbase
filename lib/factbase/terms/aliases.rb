@@ -33,7 +33,7 @@ module Factbase::Term::Aliases
     a = @operands[0]
     raise "A symbol expected as first argument of 'as'" unless a.is_a?(Symbol)
     vv = the_values(1, fact, maps)
-    vv&.each { |v| fact.send("#{a}=", v) }
+    vv&.each { |v| fact.send(:"#{a}=", v) }
     true
   end
 
@@ -51,7 +51,7 @@ module Factbase::Term::Aliases
     subset.each do |s|
       jumps.each do |to, from|
         s[from]&.each do |v|
-          fact.send("#{to}=", v)
+          fact.send(:"#{to}=", v)
         end
       end
     end
