@@ -119,7 +119,7 @@ class Factbase
     @mutex.synchronize do
       @maps << map
     end
-    @cache.clear
+    flush!
     require_relative 'factbase/fact'
     Factbase::Fact.new(self, @mutex, map)
   end
@@ -220,5 +220,10 @@ class Factbase
   def import(bytes)
     raise 'Empty input, cannot load a factbase' if bytes.empty?
     @maps += Marshal.load(bytes)
+  end
+
+  # Flush cache.
+  def flush!
+    @cache.clear
   end
 end
