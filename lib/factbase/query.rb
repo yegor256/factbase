@@ -59,7 +59,7 @@ class Factbase::Query
     yielded = 0
     @maps.each do |m|
       extras = {}
-      f = Factbase::Fact.new(@mutex, m)
+      f = Factbase::Fact.new(@fb, @mutex, m)
       params = params.transform_keys(&:to_s) if params.is_a?(Hash)
       f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
@@ -94,7 +94,7 @@ class Factbase::Query
     deleted = 0
     @mutex.synchronize do
       @maps.delete_if do |m|
-        f = Factbase::Fact.new(@mutex, m)
+        f = Factbase::Fact.new(@fb, @mutex, m)
         if term.evaluate(f, @maps)
           deleted += 1
           true

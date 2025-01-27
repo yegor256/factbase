@@ -121,7 +121,7 @@ class Factbase
     end
     @cache.clear
     require_relative 'factbase/fact'
-    Factbase::Fact.new(@mutex, map)
+    Factbase::Fact.new(self, @mutex, map)
   end
 
   # Create a query capable of iterating.

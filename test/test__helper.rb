@@ -37,6 +37,6 @@ Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new]
 class Minitest::Test
   def fact(map = {})
     require 'factbase/fact'
-    Factbase::Fact.new(Mutex.new, map)
+    Factbase::Fact.new(Factbase.new, Mutex.new, map)
   end
 end
