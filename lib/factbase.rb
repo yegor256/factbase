@@ -91,6 +91,7 @@ class Factbase
   def initialize(facts = [])
     @maps = facts
     @mutex = Mutex.new
+    @cache = {}
   end
 
   # Make a deep duplicate of this factbase.
@@ -118,6 +119,7 @@ class Factbase
     @mutex.synchronize do
       @maps << map
     end
+    @cache.clear
     require_relative 'factbase/fact'
     Factbase::Fact.new(@mutex, map)
   end
@@ -143,7 +145,8 @@ class Factbase
   # @param [Array<Hash>] maps Custom maps
   def query(query, maps = @maps)
     require_relative 'factbase/query'
-    Factbase::Query.new(self, maps, @mutex, query)
+    require_relative 'factbase/once'
+    Factbase::Once.new(Factbase::Query.new(self, maps, @mutex, query), @cache)
   end
 
   # Run an ACID transaction, which will either modify the factbase
