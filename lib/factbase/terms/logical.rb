@@ -82,7 +82,7 @@ module Factbase::Term::Logical
       ops << o
     end
     return ops[0] if ops.size == 1
-    Factbase::Term.new(@op, ops)
+    Factbase::Term.new(@fb, @op, ops)
   end
 
   def and_simplify

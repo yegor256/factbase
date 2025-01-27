@@ -29,27 +29,28 @@ require_relative '../../../lib/factbase/term'
 # License:: MIT
 class TestLogical < Minitest::Test
   def test_not_matching
-    t = Factbase::Term.new(:not, [Factbase::Term.new(:always, [])])
+    t = Factbase::Term.new(Factbase.new, :not, [Factbase::Term.new(Factbase.new, :always, [])])
     refute(t.evaluate(fact('foo' => [100]), []))
   end
 
   def test_not_eq_matching
-    t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 100])])
+    t = Factbase::Term.new(Factbase.new, :not, [Factbase::Term.new(Factbase.new, :eq, [:foo, 100])])
     assert(t.evaluate(fact('foo' => [42, 12, -90]), []))
     refute(t.evaluate(fact('foo' => 100), []))
   end
 
   def test_either
-    t = Factbase::Term.new(:either, [Factbase::Term.new(:at, [5, :foo]), 42])
+    t = Factbase::Term.new(Factbase.new, :either, [Factbase::Term.new(Factbase.new, :at, [5, :foo]), 42])
     assert_equal([42], t.evaluate(fact('foo' => 4), []))
   end
 
   def test_or_matching
     t = Factbase::Term.new(
+      Factbase.new,
       :or,
       [
-        Factbase::Term.new(:eq, [:foo, 4]),
-        Factbase::Term.new(:eq, [:bar, 5])
+        Factbase::Term.new(Factbase.new, :eq, [:foo, 4]),
+        Factbase::Term.new(Factbase.new, :eq, [:bar, 5])
       ]
     )
     assert(t.evaluate(fact('foo' => [4]), []))
@@ -59,10 +60,11 @@ class TestLogical < Minitest::Test
 
   def test_when_matching
     t = Factbase::Term.new(
+      Factbase.new,
       :when,
       [
-        Factbase::Term.new(:eq, [:foo, 4]),
-        Factbase::Term.new(:eq, [:bar, 5])
+        Factbase::Term.new(Factbase.new, :eq, [:foo, 4]),
+        Factbase::Term.new(Factbase.new, :eq, [:bar, 5])
       ]
     )
     assert(t.evaluate(fact('foo' => 4, 'bar' => 5), []))

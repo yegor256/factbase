@@ -24,6 +24,7 @@ require 'time'
 require_relative '../factbase'
 require_relative 'fact'
 require_relative 'term'
+require_relative 'term_once'
 
 # Syntax.
 #
@@ -34,7 +35,7 @@ require_relative 'term'
 # every term it meets in the query:
 #
 #  require 'factbase/syntax'
-#  t = Factbase::Syntax.new('(hello world)', MyTerm).to_term
+#  t = Factbase::Syntax.new(Factbase.new, '(hello world)', MyTerm).to_term
 #
 # The +MyTerm+ class should have a constructor with two arguments:
 # the operator and the list of operands (Array).
@@ -44,9 +45,11 @@ require_relative 'term'
 # License:: MIT
 class Factbase::Syntax
   # Ctor.
+  # @param [Factbase] fb Factbase
   # @param [String] query The query, for example "(eq id 42)"
   # @param [Class] term The class to instantiate to make every term
-  def initialize(query, term: Factbase::Term)
+  def initialize(fb, query, term: Factbase::Term)
+    @fb = fb
     @query = query
     @term = term
   end
@@ -61,7 +64,7 @@ class Factbase::Syntax
         t
       end
   rescue StandardError => e
-    err = "#{e.message} in \"#{@query}\""
+    err = "#{e.message} (#{e.backtrace[1]}) in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
     raise err
   end
@@ -106,7 +109,7 @@ class Factbase::Syntax
       operands << operand
       break if tokens[at] == :close
     end
-    [@term.new(op, operands), at + 1]
+    [Factbase::TermOnce.new(@term.new(@fb, op, operands), @fb.cache), at + 1]
   end
 
   # Turns a query into an array of tokens.

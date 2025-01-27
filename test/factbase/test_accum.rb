@@ -32,7 +32,7 @@ require_relative '../../lib/factbase/fact'
 class TestAccum < Minitest::Test
   def test_holds_props
     map = {}
-    f = Factbase::Fact.new(Mutex.new, map)
+    f = Factbase::Fact.new(Factbase.new, Mutex.new, map)
     props = {}
     a = Factbase::Accum.new(f, props, false)
     a.foo = 42
@@ -43,7 +43,7 @@ class TestAccum < Minitest::Test
 
   def test_passes_props
     map = {}
-    f = Factbase::Fact.new(Mutex.new, map)
+    f = Factbase::Fact.new(Factbase.new, Mutex.new, map)
     props = {}
     a = Factbase::Accum.new(f, props, true)
     a.foo = 42
@@ -54,7 +54,7 @@ class TestAccum < Minitest::Test
 
   def test_appends_props
     map = {}
-    f = Factbase::Fact.new(Mutex.new, map)
+    f = Factbase::Fact.new(Factbase.new, Mutex.new, map)
     f.foo = 42
     props = {}
     a = Factbase::Accum.new(f, props, false)
@@ -63,14 +63,14 @@ class TestAccum < Minitest::Test
   end
 
   def test_empties
-    f = Factbase::Fact.new(Mutex.new, {})
+    f = Factbase::Fact.new(Factbase.new, Mutex.new, {})
     a = Factbase::Accum.new(f, {}, false)
     assert_nil(a['foo'])
   end
 
   def test_prints_to_string
     map = {}
-    f = Factbase::Fact.new(Mutex.new, map)
+    f = Factbase::Fact.new(Factbase.new, Mutex.new, map)
     props = {}
     a = Factbase::Accum.new(f, props, true)
     a.foo = 42

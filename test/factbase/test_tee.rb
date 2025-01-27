@@ -31,9 +31,9 @@ require_relative '../../lib/factbase/fact'
 # License:: MIT
 class TestTee < Minitest::Test
   def test_two_facts
-    prim = Factbase::Fact.new(Mutex.new, {})
+    prim = Factbase::Fact.new(Factbase.new, Mutex.new, {})
     prim.foo = 42
-    upper = Factbase::Fact.new(Mutex.new, {})
+    upper = Factbase::Fact.new(Factbase.new, Mutex.new, {})
     upper.bar = 13
     t = Factbase::Tee.new(prim, upper)
     assert_equal(42, t.foo)
@@ -41,9 +41,9 @@ class TestTee < Minitest::Test
   end
 
   def test_all_properties
-    prim = Factbase::Fact.new(Mutex.new, {})
+    prim = Factbase::Fact.new(Factbase.new, Mutex.new, {})
     prim.foo = 42
-    upper = Factbase::Fact.new(Mutex.new, {})
+    upper = Factbase::Fact.new(Factbase.new, Mutex.new, {})
     upper.bar = 13
     t = Factbase::Tee.new(prim, upper)
     assert_includes(t.all_properties, 'foo')
@@ -52,7 +52,7 @@ class TestTee < Minitest::Test
 
   def test_recursively
     map = {}
-    prim = Factbase::Fact.new(Mutex.new, map)
+    prim = Factbase::Fact.new(Factbase.new, Mutex.new, map)
     prim.foo = 42
     t = Factbase::Tee.new(nil, { 'bar' => 7 })
     assert_equal(7, t['$bar'])
@@ -61,9 +61,9 @@ class TestTee < Minitest::Test
   end
 
   def test_prints_to_string
-    prim = Factbase::Fact.new(Mutex.new, {})
+    prim = Factbase::Fact.new(Factbase.new, Mutex.new, {})
     prim.foo = 42
-    upper = Factbase::Fact.new(Mutex.new, {})
+    upper = Factbase::Fact.new(Factbase.new, Mutex.new, {})
     upper.bar = 13
     t = Factbase::Tee.new(prim, upper)
     assert_equal('[ foo: [42] ]', t.to_s)

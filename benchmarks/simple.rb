@@ -23,87 +23,74 @@
 
 require 'benchmark'
 require 'time'
-
 require_relative '../lib/factbase'
 
-QUERY_RUNS = 10
-TRANSACTION_RUNS = 1_000
-INSERTION_COUNT = 100
-
-sum = {}
-
-factbase = Factbase.new
-insertion_time =
-  Benchmark.measure do
-    INSERTION_COUNT.times do |i|
-      fact = factbase.insert
-      fact.id = i
-      fact.title = "Object Thinking #{i}"
-      fact.time = Time.now.iso8601
-      fact.cost = rand(1..100)
-      fact.foo = rand(0.0..100.0).round(3)
-      fact.bar = rand(100..300)
-      fact.seenBy = "User#{i}" if i.even?
-      fact.zzz = "Extra#{i}" if (i % 10).zero?
-    end
-  end
-
-sum["Inserted #{INSERTION_COUNT} facts"] = insertion_time.real
-
-queries = [
-  '(eq title \'Object Thinking 5000\')',
-  '(gt time \'2024-03-23T03:21:43Z\')',
-  '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))',
-  '(eq id (agg (always) (max id)))',
-  '(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))'
-]
-
-queries.each do |q|
+def insert(fb, total)
   time =
     Benchmark.measure do
-      QUERY_RUNS.times do
-        results = factbase.query(q)
-        results.each(&:inspect)
-      end
-    end
-  avg = (time.real / QUERY_RUNS).round(6)
-  sum["`#{q}`"] = avg
-end
-
-transaction_time =
-  Benchmark.measure do
-    TRANSACTION_RUNS.times do |i|
-      factbase.txn do |fb_txn|
-        fact = fb_txn.insert
-        fact.id = INSERTION_COUNT + i
-        fact.title = "Transaction Fact #{i}"
+      total.times do |i|
+        fact = fb.insert
+        fact.id = i
+        fact.title = "Object Thinking #{i}"
         fact.time = Time.now.iso8601
         fact.cost = rand(1..100)
         fact.foo = rand(0.0..100.0).round(3)
         fact.bar = rand(100..300)
-        raise Factbase::Rollback, 'Cost below threshold' if fact.cost < 10
-      rescue Factbase::Rollback
-        # ignore
+        fact.seenBy = "User#{i}" if i.even?
+        fact.zzz = "Extra#{i}" if (i % 10).zero?
       end
     end
-  end
+  {
+    title: '`fb.insert()`',
+    time: time.real,
+    details: "Inserted #{total} facts"
+  }
+end
 
-sum['Transaction committed'] = transaction_time.real / TRANSACTION_RUNS
+def query(fb, query)
+  total = 0
+  runs = 10
+  time =
+    Benchmark.measure do
+      runs.times do
+        total = fb.query(query).each.to_a.size
+      end
+    end
+  {
+    title: "`#{query}`",
+    time: (time.real / runs).round(6),
+    details: "Found #{total} fact(s)"
+  }
+end
 
-export_time =
-  Benchmark.measure do
-    factbase.export
-  end
-sum['Factbase exported'] = export_time.real
+def impex(fb)
+  size = 0
+  time =
+    Benchmark.measure do
+      bin = fb.export
+      size = bin.size
+      fb2 = Factbase.new
+      fb2.import(bin)
+    end
+  {
+    title: '`.export()` + `.import()`',
+    time: time.real,
+    details: "#{size} bytes"
+  }
+end
 
-import_time =
-  Benchmark.measure do
-    new_factbase = Factbase.new
-    exported_data = factbase.export
-    new_factbase.import(exported_data)
-  end
-sum['Factbase imported'] = import_time.real
+fb = Factbase.new
+rows = [
+  insert(fb, 100_000),
+  query(fb, '(gt time \'2024-03-23T03:21:43Z\')'),
+  query(fb, '(gt cost 50)'),
+  query(fb, '(eq title \'Object Thinking 5000\')'),
+  query(fb, '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))'),
+  query(fb, '(eq id (agg (always) (max id)))'),
+  query(fb, '(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))'),
+  impex(fb)
+].map { |r| "| #{r[:title]} | #{format('%0.3f', r[:time])} | #{r[:details]} |" }
 
-puts '| What | Seconds |'
-puts '| --- | --: |'
-sum.each { |k, v| puts "| #{k} | #{format('%0.3f', v)} |" }
+puts '| Action | Seconds | Details |'
+puts '| --- | --: | --: |'
+rows.each { |row| puts row }

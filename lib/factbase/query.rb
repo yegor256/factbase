@@ -38,13 +38,21 @@ require_relative 'tee'
 # License:: MIT
 class Factbase::Query
   # Constructor.
+  # @param [Factbase] fb Factbase
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [Mutex] mutex Mutex to sync all modifications to the +maps+
   # @param [String] query The query as a string
-  def initialize(maps, mutex, query)
+  def initialize(fb, maps, mutex, query)
+    @fb = fb
     @maps = maps
     @mutex = mutex
     @query = query
+  end
+
+  # Print it as a string.
+  # @return [String] The query as a string
+  def to_s
+    @query.to_s
   end
 
   # Iterate facts one by one.
@@ -53,11 +61,11 @@ class Factbase::Query
   # @return [Integer] Total number of facts yielded
   def each(params = {})
     return to_enum(__method__, params) unless block_given?
-    term = Factbase::Syntax.new(@query).to_term
+    term = Factbase::Syntax.new(@fb, @query).to_term
     yielded = 0
     @maps.each do |m|
       extras = {}
-      f = Factbase::Fact.new(@mutex, m)
+      f = Factbase::Fact.new(@fb, @mutex, m)
       params = params.transform_keys(&:to_s) if params.is_a?(Hash)
       f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
@@ -76,7 +84,7 @@ class Factbase::Query
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return The value evaluated
   def one(params = {})
-    term = Factbase::Syntax.new(@query).to_term
+    term = Factbase::Syntax.new(@fb, @query).to_term
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     r = term.evaluate(Factbase::Tee.new(nil, params), @maps)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
@@ -88,11 +96,11 @@ class Factbase::Query
   # Delete all facts that match the query.
   # @return [Integer] Total number of facts deleted
   def delete!
-    term = Factbase::Syntax.new(@query).to_term
+    term = Factbase::Syntax.new(@fb, @query).to_term
     deleted = 0
     @mutex.synchronize do
       @maps.delete_if do |m|
-        f = Factbase::Fact.new(@mutex, m)
+        f = Factbase::Fact.new(@fb, @mutex, m)
         if term.evaluate(f, @maps)
           deleted += 1
           true

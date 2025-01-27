@@ -33,7 +33,7 @@ require_relative '../factbase'
 # fact with a single key/value pair inside:
 #
 #  require 'factbase/fact'
-#  f = Factbase::Fact.new(Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
+#  f = Factbase::Fact.new(Factbase.new, Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
 #  assert_equal(42, f.foo)
 #
 # A fact is basically a key/value hash map, where values are non-empty
@@ -46,7 +46,8 @@ class Factbase::Fact
   # Ctor.
   # @param [Mutex] mutex A mutex to use for maps synchronization
   # @param [Hash] map A map of key/value pairs
-  def initialize(mutex, map)
+  def initialize(fb, mutex, map)
+    @fb = fb
     @mutex = mutex
     @map = map
   end
@@ -80,6 +81,7 @@ class Factbase::Fact
         @map[kk] << v
         @map[kk].uniq!
       end
+      @fb.cache.clear
       nil
     elsif k == '[]'
       @map[args[1].to_s]

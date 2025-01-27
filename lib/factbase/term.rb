@@ -34,8 +34,8 @@ require_relative 'tee'
 #
 #  require 'factbase/fact'
 #  require 'factbase/term'
-#  f = Factbase::Fact.new(Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
-#  t = Factbase::Term.new(:lt, [:foo, 50])
+#  f = Factbase::Fact.new(Factbase.new, Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
+#  t = Factbase::Term.new(Factbase.new, :lt, [:foo, 50])
 #  assert(t.evaluate(f))
 #
 # The design of this class may look ugly, since it has a large number of
@@ -87,9 +87,11 @@ class Factbase::Term
   include Factbase::Term::Debug
 
   # Ctor.
+  # @param [Factbase] fb Factbase
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
-  def initialize(operator, operands)
+  def initialize(fb, operator, operands)
+    @fb = fb
     @op = operator
     @operands = operands
   end
@@ -115,6 +117,32 @@ class Factbase::Term
     else
       self
     end
+  end
+
+  # Does it have any dependencies on a fact?
+  #
+  # If a term is static, it will return the same value for +evaluate+,
+  # no matter what is the fact given.
+  #
+  # @return [Boolean] TRUE if static
+  def static?
+    return true if @op == :agg
+    @operands.each do |o|
+      return false if o.is_a?(Factbase::Term) && !o.static?
+      return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
+    end
+    true
+  end
+
+  # Does it have any variables (+$foo+, for example) inside?
+  #
+  # @return [Boolean] TRUE if abstract
+  def abstract?
+    @operands.each do |o|
+      return true if o.is_a?(Factbase::Term) && o.abstract?
+      return true if o.is_a?(Symbol) && o.to_s.start_with?('$')
+    end
+    false
   end
 
   # Turns it into a string.
