@@ -40,7 +40,23 @@ class TestSyntax < Minitest::Test
   end
 
   def test_makes_abstract_terms
-    assert_predicate(Factbase::Syntax.new(Factbase.new, '(foo $bar)').to_term, :abstract?)
+    {
+      '(foo $bar)' => true,
+      '(foo (bar (a (b c (f $bar)))))' => true,
+      '(foo (bar (a (b c (f bar)))))' => false
+    }.each do |q, a|
+      assert_equal(a, Factbase::Syntax.new(Factbase.new, q).to_term.abstract?)
+    end
+  end
+
+  def test_makes_static_terms
+    {
+      '(foo bar)' => false,
+      '(foo "bar")' => true,
+      '(agg (always) (max id))' => true
+    }.each do |q, a|
+      assert_equal(a, Factbase::Syntax.new(Factbase.new, q).to_term.static?)
+    end
   end
 
   def test_simple_parsing

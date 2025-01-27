@@ -29,17 +29,15 @@ require_relative '../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class Factbase::Once
+class Factbase::QueryOnce
   # Constructor.
   # @param [Factbase] fb Factbase
   # @param [Factbase::Query] query Original query
   # @param [Array<Hash>] maps Where to search
-  # @param [Hash] cache The cache
-  def initialize(fb, query, maps, cache)
+  def initialize(fb, query, maps)
     @fb = fb
     @query = query
     @maps = maps
-    @cache = cache
   end
 
   # Iterate facts one by one.
@@ -50,9 +48,9 @@ class Factbase::Once
     unless block_given?
       return to_enum(__method__, params) if Factbase::Syntax.new(@fb, @query).to_term.abstract?
       key = [@query.to_s, @maps.object_id]
-      before = @cache[key]
-      @cache[key] = to_enum(__method__, params) if before.nil?
-      return @cache[key]
+      before = @fb.cache[key]
+      @fb.cache[key] = to_enum(__method__, params).to_a if before.nil?
+      return @fb.cache[key]
     end
     @query.each(params, &)
   end
@@ -67,7 +65,7 @@ class Factbase::Once
   # Delete all facts that match the query.
   # @return [Integer] Total number of facts deleted
   def delete!
-    @fb.flush!
+    @fb.cache.clear
     @query.delete!
   end
 end

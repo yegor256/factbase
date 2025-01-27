@@ -86,6 +86,8 @@ class Factbase
   # An exception that may be thrown in a transaction, to roll it back.
   class Rollback < StandardError; end
 
+  attr_reader :cache
+
   # Constructor.
   # @param [Array<Hash>] facts Array of facts to start with
   def initialize(facts = [])
@@ -119,7 +121,7 @@ class Factbase
     @mutex.synchronize do
       @maps << map
     end
-    flush!
+    @cache.clear
     require_relative 'factbase/fact'
     Factbase::Fact.new(self, @mutex, map)
   end
@@ -145,11 +147,11 @@ class Factbase
   # @param [Array<Hash>] maps Custom maps
   def query(query, maps = @maps)
     require_relative 'factbase/query'
-    require_relative 'factbase/once'
-    Factbase::Once.new(
+    require_relative 'factbase/query_once'
+    Factbase::QueryOnce.new(
       self,
       Factbase::Query.new(self, maps, @mutex, query),
-      maps, @cache
+      maps
     )
   end
 
@@ -224,10 +226,5 @@ class Factbase
   def import(bytes)
     raise 'Empty input, cannot load a factbase' if bytes.empty?
     @maps += Marshal.load(bytes)
-  end
-
-  # Flush cache.
-  def flush!
-    @cache.clear
   end
 end

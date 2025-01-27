@@ -119,7 +119,24 @@ class Factbase::Term
     end
   end
 
-  # Does it have any variables inside?
+  # Does it have any dependencies on a fact?
+  #
+  # If a term is static, it will return the same value for +evaluate+,
+  # no matter what is the fact given.
+  #
+  # @return [Boolean] TRUE if static
+  def static?
+    return true if @op == :agg
+    @operands.each do |o|
+      return false if o.is_a?(Factbase::Term) && !o.static?
+      return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
+    end
+    true
+  end
+
+  # Does it have any variables (+$foo+, for example) inside?
+  #
+  # @return [Boolean] TRUE if abstract
   def abstract?
     @operands.each do |o|
       return true if o.is_a?(Factbase::Term) && o.abstract?

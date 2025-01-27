@@ -24,6 +24,7 @@ require 'time'
 require_relative '../factbase'
 require_relative 'fact'
 require_relative 'term'
+require_relative 'term_once'
 
 # Syntax.
 #
@@ -108,7 +109,7 @@ class Factbase::Syntax
       operands << operand
       break if tokens[at] == :close
     end
-    [@term.new(@fb, op, operands), at + 1]
+    [Factbase::TermOnce.new(@term.new(@fb, op, operands), @fb.cache), at + 1]
   end
 
   # Turns a query into an array of tokens.

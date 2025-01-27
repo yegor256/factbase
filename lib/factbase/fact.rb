@@ -81,7 +81,7 @@ class Factbase::Fact
         @map[kk] << v
         @map[kk].uniq!
       end
-      @fb.flush!
+      @fb.cache.clear
       nil
     elsif k == '[]'
       @map[args[1].to_s]
