@@ -26,9 +26,9 @@ require 'time'
 
 require_relative '../lib/factbase'
 
-QUERY_RUNS = 100
+QUERY_RUNS = 10
 TRANSACTION_RUNS = 1_000
-INSERTION_COUNT = 10_000
+INSERTION_COUNT = 1000
 
 sum = {}
 
@@ -51,28 +51,23 @@ insertion_time =
 sum["Inserted #{INSERTION_COUNT} facts"] = insertion_time.real
 
 queries = [
-  { description: '(eq title \'Object Thinking 5000\')',
-    query: '(eq title \'Object Thinking 5000\')' },
-  { description: '(gt time \'2024-03-23T03:21:43Z\')',
-    query: '(gt time \'2024-03-23T03:21:43Z\')' },
-  { description: '(gt cost 42)',
-    query: '(gt cost 42)' },
-  { description: '(exists seenBy)',
-    query: '(exists seenBy)' },
-  { description: '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))',
-    query: '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))' }
+  '(eq title \'Object Thinking 5000\')',
+  '(gt time \'2024-03-23T03:21:43Z\')',
+  '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))',
+  '(eq id (agg (always) (max id)))'
 ]
 
 queries.each do |q|
   time =
     Benchmark.measure do
       QUERY_RUNS.times do
-        results = factbase.query(q[:query])
+        results = factbase.query(q)
         results.each(&:inspect)
       end
     end
-  average_time = (time.real / QUERY_RUNS).round(6)
-  sum["Queried: `#{q[:description]}`"] = average_time
+  avg = (time.real / QUERY_RUNS).round(6)
+  sum["`#{q}`"] = avg
+  puts "#{q} --> #{avg}"
 end
 
 transaction_time =
