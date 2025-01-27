@@ -183,24 +183,21 @@ If it's clean and you don't see any error messages, submit your pull request.
 This is the result of the benchmark:
 
 <!-- benchmark_begin -->
-(eq title 'Object Thinking 5000') --> 0.005436
-(gt time '2024-03-23T03:21:43Z') --> 0.021017
-(and (eq foo 42.998) (or (gt bar 200) (absent zzz))) --> 0.006183
-(eq id (agg (always) (max id))) --> 3.755101
 | What | Seconds |
 | --- | --: |
-| Inserted 1000 facts | 0.079 |
-| `(eq title 'Object Thinking 5000')` | 0.005 |
-| `(gt time '2024-03-23T03:21:43Z')` | 0.021 |
-| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.006 |
-| `(eq id (agg (always) (max id)))` | 3.755 |
-| Transaction committed | 0.014 |
-| Factbase exported | 0.007 |
-| Factbase imported | 0.012 |
+| Inserted 100 facts | 0.012 |
+| `(eq title 'Object Thinking 5000')` | 0.001 |
+| `(gt time '2024-03-23T03:21:43Z')` | 0.002 |
+| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.001 |
+| `(eq id (agg (always) (max id)))` | 0.040 |
+| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 3.996 |
+| Transaction committed | 0.005 |
+| Factbase exported | 0.003 |
+| Factbase imported | 0.006 |
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-01-27 at 11:21,
+on 2025-01-27 at 11:33,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/12987845484
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/12988028214
