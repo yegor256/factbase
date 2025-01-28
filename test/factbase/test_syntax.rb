@@ -147,6 +147,10 @@ class TestSyntax < Minitest::Test
   end
 
   def test_fails_when_term_is_not_a_class
-    assert_raises(StandardError) { Factbase::Syntax.new(Factbase.new, s, 'hello') }
+    assert_raises(StandardError) { Factbase::Syntax.new(Factbase.new, '(foo 1)', term: 'hello') }
+  end
+
+  def test_fails_when_term_is_wrong_class
+    assert_raises(StandardError) { Factbase::Syntax.new(Factbase.new, '(bar 1)', term: String).to_term }
   end
 end
