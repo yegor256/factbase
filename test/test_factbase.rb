@@ -294,20 +294,21 @@ class TestFactbase < Minitest::Test
   # See details here https://github.com/yegor256/factbase/actions/runs/10492255419/job/29068637032
   def test_concurrent_transactions_inserts
     skip('Does not work')
+    total = 100
     fb = Factbase.new
-    Threads.new(100).assert do |i|
+    Threads.new(total).assert do |i|
       fb.txn do |fbt|
         fact = fbt.insert
         fact.thread_id = i
       end
     end
-    assert_equal(100, fb.size)
-    assert_equal(100, fb.query('(exists thread_id)').each.to_a.size)
+    assert_equal(total, fb.size)
+    assert_equal(total, fb.query('(exists thread_id)').each.to_a.size)
   end
 
   def test_concurrent_transactions_with_rollbacks
     fb = Factbase.new
-    Threads.new(100).assert do |i|
+    Threads.new.assert do |i|
       fb.txn do |fbt|
         fact = fbt.insert
         fact.thread_id = i
@@ -319,7 +320,8 @@ class TestFactbase < Minitest::Test
 
   def test_concurrent_transactions_successful
     fb = Factbase.new
-    Threads.new(100).assert do |i|
+    total = 100
+    Threads.new(total).assert do |i|
       fb.txn do |fbt|
         fact = fbt.insert
         fact.thread_id = i
@@ -327,7 +329,7 @@ class TestFactbase < Minitest::Test
       end
     end
     facts = fb.query('(exists thread_id)').each.to_a
-    assert_equal(100, facts.size)
+    assert_equal(total, facts.size)
     facts.each do |fact|
       assert_equal(fact.value, fact.thread_id * 10)
     end

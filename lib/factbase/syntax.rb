@@ -64,7 +64,7 @@ class Factbase::Syntax
         t
       end
   rescue StandardError => e
-    err = "#{e.message} (#{e.backtrace[1]}) in \"#{@query}\""
+    err = "#{e.message} (#{e.backtrace.take(5).join('; ')}) in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
     raise err
   end
@@ -77,10 +77,10 @@ class Factbase::Syntax
     @tokens ||= to_tokens
     raise 'No tokens' if @tokens.empty?
     @ast ||= to_ast(@tokens, 0)
-    raise 'Too many terms' if @ast[1] != @tokens.size
+    raise "Too many terms (#{@ast[1]} != #{@tokens.size})" if @ast[1] != @tokens.size
     term = @ast[0]
     raise 'No terms found' if term.nil?
-    raise 'Not a term' unless term.is_a?(@term)
+    raise "Not a term: #{@term.class.to_s.inspect}" unless term.is_a?(@term)
     term
   end
 
