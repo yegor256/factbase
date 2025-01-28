@@ -57,6 +57,7 @@ class Factbase::Syntax
     @fb = fb
     @query = query
     raise "Term must be a Class, while #{term.class.name} provided" unless term.is_a?(Class)
+    raise "The 'term' must be a child of Factbase::Term, while #{term.name} provided" unless term <= Factbase::Term
     @term = term
   end
 
@@ -70,7 +71,7 @@ class Factbase::Syntax
         t
       end
   rescue StandardError => e
-    err = "#{e.message} (#{e.backtrace.take(5).join('; ')}) in \"#{@query}\""
+    err = "#{e.message} (#{Backtrace.new(e)}) in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
     raise err
   end
@@ -84,10 +85,10 @@ class Factbase::Syntax
     raise 'No tokens' if @tokens.empty?
     @ast ||= to_ast(@tokens, 0)
     raise "Too many terms (#{@ast[1]} != #{@tokens.size})" if @ast[1] != @tokens.size
-    term = @ast[0]
-    raise 'No terms found' if term.nil?
-    raise "Not a term: #{@term.name}" unless term.is_a?(@term)
-    term
+    t = @ast[0]
+    raise 'No terms found in the AST' if t.nil?
+    raise "#{t.class.name} is not an instance of #{@term}, thus not a proper term" unless t.is_a?(@term)
+    t
   end
 
   # Reads the stream of tokens, starting at the +at+ position. If the
@@ -115,7 +116,9 @@ class Factbase::Syntax
       operands << operand
       break if tokens[at] == :close
     end
-    [Factbase::TermOnce.new(@term.new(@fb, op, operands), @fb.cache), at + 1]
+    t = @term.new(@fb, op, operands)
+    t = Factbase::TermOnce.new(t, @fb.cache) if t.instance_of?(Factbase::Term)
+    [t, at + 1]
   end
 
   # Turns a query into an array of tokens.

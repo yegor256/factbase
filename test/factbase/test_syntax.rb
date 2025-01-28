@@ -153,4 +153,18 @@ class TestSyntax < Minitest::Test
   def test_fails_when_term_is_wrong_class
     assert_raises(StandardError) { Factbase::Syntax.new(Factbase.new, '(bar 1)', term: String).to_term }
   end
+
+  def test_fails_when_term_is_incorrectly_defined_class
+    assert_includes(
+      assert_raises(StandardError) { Factbase::Syntax.new(Factbase.new, '(bar 1)', term: FakeTerm).to_term }.message,
+      'wrong number of arguments'
+    )
+  end
+
+  class FakeTerm < Factbase::Term
+    def initialize(invalid)
+      super
+      @x = invalid
+    end
+  end
 end
