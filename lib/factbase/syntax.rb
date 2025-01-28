@@ -45,6 +45,11 @@ require_relative 'term_once'
 # License:: MIT
 class Factbase::Syntax
   # Ctor.
+  #
+  # The class provided as the +term+ argument must have a three-argument
+  # constructor, similar to the class +Factbase::Term+. Also, it must be
+  # a child of +Factbase::Term+.
+  #
   # @param [Factbase] fb Factbase
   # @param [String] query The query, for example "(eq id 42)"
   # @param [Class] term The class to instantiate to make every term
