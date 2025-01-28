@@ -56,6 +56,7 @@ class Factbase::Syntax
   def initialize(fb, query, term: Factbase::Term)
     @fb = fb
     @query = query
+    raise "Term must be a Class, while #{term.class.name} provided" unless term.is_a?(Class)
     @term = term
   end
 
@@ -85,7 +86,7 @@ class Factbase::Syntax
     raise "Too many terms (#{@ast[1]} != #{@tokens.size})" if @ast[1] != @tokens.size
     term = @ast[0]
     raise 'No terms found' if term.nil?
-    raise "Not a term: #{@term.class.name.inspect}" unless term.is_a?(@term)
+    raise "Not a term: #{@term.name}" unless term.is_a?(@term)
     term
   end
 
