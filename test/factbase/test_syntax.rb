@@ -114,6 +114,7 @@ class TestSyntax < Minitest::Test
       '',
       '()',
       '(foo',
+      '(foo $)',
       '(foo 1) (bar 2)',
       'some text',
       '"hello, world!',
