@@ -80,7 +80,7 @@ class Factbase::Syntax
     raise "Too many terms (#{@ast[1]} != #{@tokens.size})" if @ast[1] != @tokens.size
     term = @ast[0]
     raise 'No terms found' if term.nil?
-    raise "Not a term: #{@term.class.to_s.inspect}" unless term.is_a?(@term)
+    raise "Not a term: #{@term.class.name.inspect}" unless term.is_a?(@term)
     term
   end
 
