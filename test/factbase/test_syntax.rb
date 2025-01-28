@@ -145,4 +145,8 @@ class TestSyntax < Minitest::Test
       assert_equal(t, Factbase::Syntax.new(Factbase.new, s).to_term.to_s)
     end
   end
+
+  def test_fails_when_term_is_not_a_class
+    assert_raises(StandardError) { Factbase::Syntax.new(Factbase.new, s, 'hello') }
+  end
 end
