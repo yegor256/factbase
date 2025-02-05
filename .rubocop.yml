@@ -30,7 +30,6 @@ AllCops:
 require:
   - rubocop-minitest
   - rubocop-performance
-
 Minitest/EmptyLineBeforeAssertionMethods:
   Enabled: false
 Gemspec/RequiredRubyVersion:
@@ -61,3 +60,5 @@ Security/MarshalLoad:
   Enabled: false
 Layout/MultilineAssignmentLayout:
   Enabled: true
+required:
+  - rubocop-rake
