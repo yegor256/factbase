@@ -197,7 +197,7 @@ GEM
     useragent (0.16.11)
     yaml (0.4.0)
     yard (0.9.37)
-    zeitwerk (2.7.1)
+    zeitwerk (2.7.2)
 
 PLATFORMS
   arm64-darwin-22
