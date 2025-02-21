@@ -24,6 +24,13 @@ class TestTallied < Minitest::Test
     assert_equal(2, fb.churn.added)
   end
 
+  def test_counts_in_one
+    fb = Factbase::Tallied.new(Factbase.new)
+    fb.insert.bar = 3
+    assert_equal(1, fb.query('(agg (eq bar 3) (count))').one)
+    assert_equal(1, fb.churn.added)
+  end
+
   def test_returns_all_props
     fb = Factbase::Tallied.new(Factbase.new)
     f = fb.insert
