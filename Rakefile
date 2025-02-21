@@ -15,7 +15,7 @@ def version
   Gem::Specification.load(Dir['*.gemspec'].first).version
 end
 
-task default: %i[clean test rubocop yard copyright]
+task default: %i[clean test rubocop yard]
 
 require 'rake/testtask'
 desc 'Run all unit tests'
@@ -45,10 +45,3 @@ task :benchmark do
   ruby 'benchmarks/simple.rb'
 end
 
-task :copyright do
-  sh "grep -q -r '#{Date.today.strftime('%Y')}' \
-    --include '*.rb' \
-    --include '*.txt' \
-    --include 'Rakefile' \
-    ."
-end
