@@ -23,4 +23,9 @@ class TestChurn < Minitest::Test
     c = Factbase::Churn.new
     assert_predicate(c, :zero?)
   end
+
+  def test_makes_a_duplicate
+    c = Factbase::Churn.new
+    assert_predicate(c.dup, :zero?)
+  end
 end
