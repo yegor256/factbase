@@ -44,4 +44,3 @@ desc 'Run benchmark script'
 task :benchmark do
   ruby 'benchmarks/simple.rb'
 end
-
