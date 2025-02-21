@@ -1,8 +1,0 @@
-coverage/
-.idea/
-*.gem
-.bundle/
-.DS_Store
-rdoc/
-doc/
-.yardoc/
