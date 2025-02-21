@@ -24,6 +24,13 @@ class TestTallied < Minitest::Test
     assert_equal(2, fb.churn.added)
   end
 
+  def test_returns_all_props
+    fb = Factbase::Tallied.new(Factbase.new)
+    f = fb.insert
+    f.bar = 3
+    assert_includes(f.all_properties, 'bar')
+  end
+
   def test_counts_in_txn
     fb = Factbase::Tallied.new(Factbase.new)
     fb.txn do |fbt|
