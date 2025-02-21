@@ -54,13 +54,7 @@ class Factbase::Tallied
       @churn = churn
     end
 
-    def to_s
-      @fact.to_s
-    end
-
-    def all_properties
-      @fact.all_properties
-    end
+    decoor(:fact)
 
     others do |*args|
       r = @fact.method_missing(*args)
