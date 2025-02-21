@@ -23,11 +23,11 @@ class Factbase::Churn
   end
 
   def to_s
-    "#{@inserted}/#{@deleted}/#{@added}"
+    "#{@inserted}i/#{@deleted}d/#{@added}a"
   end
 
   def zero?
-    @inserted.empty? && @deleted.zero? && @added.zero?
+    @inserted.zero? && @deleted.zero? && @added.zero?
   end
 
   def append(ins, del, add)
