@@ -57,7 +57,7 @@ require 'yaml'
 # It's important to use +binwrite+ and +binread+, because the content is
 # a chain of bytes, not a text.
 #
-# It is NOT thread-safe!
+# Objects of this class are thread-safe.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko

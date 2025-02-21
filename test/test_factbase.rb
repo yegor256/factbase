@@ -213,27 +213,49 @@ class TestFactbase < Minitest::Test
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end
 
+  def test_simple_concurrent_inserts
+    fb = Factbase.new
+    t = 25
+    Threads.new(t).assert do
+      fb.insert
+    end
+    assert_equal(t, fb.size)
+  end
+
+  def test_simple_concurrent_inserts_in_txns
+    fb = Factbase.new
+    t = 30
+    Threads.new(t).assert do
+      fb.txn do |fbt|
+        fbt.insert.foo = 1
+      end
+    end
+    assert_equal(t, fb.size)
+  end
+
   def test_concurrent_inserts
     fb = Factbase.new
-    Threads.new(100).assert do
+    t = 66
+    Threads.new(t).assert do
       fact = fb.insert
       fact.foo = 42
       fact.bar = 49
       fact.value = fact.foo * fact.bar
     end
-    assert_equal(100, fb.size)
-    assert_equal(100, fb.query('(eq foo 42)').each.to_a.size)
-    assert_equal(100, fb.query('(eq bar 49)').each.to_a.size)
-    assert_equal(100, fb.query("(eq value #{42 * 49})").each.to_a.size)
+    assert_equal(t, fb.size)
+    assert_equal(t, fb.query('(eq foo 42)').each.to_a.size)
+    assert_equal(t, fb.query('(eq bar 49)').each.to_a.size)
+    assert_equal(t, fb.query("(eq value #{42 * 49})").each.to_a.size)
   end
 
   def test_different_values_when_concurrent_inserts
     fb = Factbase.new
-    Threads.new(100).assert do |i|
+    t = 55
+    Threads.new(t).assert do |i|
       fb.insert.foo = i
     end
-    assert_equal(100, fb.size)
-    Threads.new(100) do |i|
+    assert_equal(t, fb.size)
+    Threads.new(t) do |i|
       f = fb.query("(eq foo #{i})").each.to_a
       assert_equal(1, f.count)
       assert_equal(i, f.first.foo)
