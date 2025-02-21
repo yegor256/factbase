@@ -21,9 +21,8 @@ jobs:
         with:
           ruby-version: 3.3
           bundler-cache: true
-      - run: |
-          gem install bundler
-          bundle install
+      - run: bundle config set --global path "$(pwd)/vendor/bundle"
+      - run: bundle install --no-color
       - run: ruby benchmarks/simple.rb > stdout.txt
       - run: |
           set -x
