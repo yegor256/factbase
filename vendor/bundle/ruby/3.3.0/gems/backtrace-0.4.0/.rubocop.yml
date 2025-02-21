@@ -1,0 +1,8 @@
+AllCops:
+  DisplayCopNames: true
+  TargetRubyVersion: 2.3.3
+  SuggestExtensions: false
+  NewCops: enable
+
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
