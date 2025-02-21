@@ -36,10 +36,6 @@ class Factbase::Rules
     @uid = uid
   end
 
-  def dup
-    Factbase::Rules.new(@fb.dup, @rules, @check, uid: @uid)
-  end
-
   def insert
     Fact.new(@fb.insert, @check)
   end
@@ -48,12 +44,12 @@ class Factbase::Rules
     Query.new(@fb.query(query), @check)
   end
 
-  def txn(this = self, &)
+  def txn
     before = @check
     later = Later.new(@uid)
     @check = later
-    @fb.txn(this) do |fbt|
-      yield fbt
+    @fb.txn do |fbt|
+      yield Factbase::Rules.new(fbt, @rules, @check, uid: @uid)
       @check = before
       fbt.query('(always)').each do |f|
         next unless later.include?(f)

@@ -31,17 +31,15 @@ class Factbase::Pre
     @block = block
   end
 
-  def dup
-    Factbase::Pre.new(@fb.dup, &@block)
-  end
-
   def insert
     f = @fb.insert
     @block.call(f, self)
     f
   end
 
-  def txn(this = self, &)
-    @fb.txn(this, &)
+  def txn
+    @fb.txn do |fbt|
+      yield Factbase::Pre.new(fbt, &@block)
+    end
   end
 end

@@ -18,10 +18,6 @@ class Factbase::Churn
     @added = add
   end
 
-  def dup
-    Factbase::Churn.new(@inserted, @deleted, @added)
-  end
-
   def to_s
     "#{@inserted}i/#{@deleted}d/#{@added}a"
   end

@@ -25,10 +25,6 @@ class Factbase::Tallied
 
   decoor(:fb)
 
-  def dup
-    Factbase::Tallied.new(@fb.dup, @churn.dup)
-  end
-
   def insert
     f = Fact.new(@fb.insert, @churn)
     @churn.append(1, 0, 0)
@@ -39,8 +35,8 @@ class Factbase::Tallied
     Query.new(@fb.query(query), @churn)
   end
 
-  def txn(this = self, &)
-    @fb.txn(this) do |fbt|
+  def txn
+    @fb.txn do |fbt|
       yield Factbase::Tallied.new(fbt, @churn)
     end
   end

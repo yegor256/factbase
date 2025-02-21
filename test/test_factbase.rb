@@ -102,16 +102,6 @@ class TestFactbase < Minitest::Test
     assert_equal(1, fb.size)
   end
 
-  def test_makes_duplicate
-    fb1 = Factbase.new
-    fb1.insert
-    assert_equal(1, fb1.size)
-    fb2 = fb1.dup
-    fb2.insert
-    assert_equal(1, fb1.size)
-    assert_equal(2, fb2.size)
-  end
-
   def test_txn_returns_boolean
     fb = Factbase.new
     assert_kind_of(FalseClass, fb.txn { true })
@@ -120,6 +110,12 @@ class TestFactbase < Minitest::Test
     refute(fb.txn { |fbt| fbt.query('(always)').each.to_a })
     assert(fb.txn { |fbt| fbt.query('(always)').each { |f| f.hello = 33 } })
     assert(fb.txn { |fbt| fbt.query('(always)').each.to_a[0].zzz = 33 })
+  end
+
+  def test_appends_in_txn
+    fb = Factbase.new
+    fb.insert.foo = 443
+    assert(fb.txn { |fbt| fbt.query('(always)').each { |f| f.hello = 33 } })
   end
 
   def test_run_txn
@@ -215,7 +211,7 @@ class TestFactbase < Minitest::Test
 
   def test_simple_concurrent_inserts
     fb = Factbase.new
-    t = 25
+    t = Concurrent.processor_count * 20
     Threads.new(t).assert do
       fb.insert
     end
@@ -224,18 +220,40 @@ class TestFactbase < Minitest::Test
 
   def test_simple_concurrent_inserts_in_txns
     fb = Factbase.new
-    t = 30
+    t = Concurrent.processor_count * 7
+    mul = 23
     Threads.new(t).assert do
-      fb.txn do |fbt|
-        fbt.insert.foo = 1
-      end
+      assert(
+        fb.txn do |fbt|
+          mul.times do |m|
+            fbt.insert.foo = m
+          end
+        end
+      )
     end
-    assert_equal(t, fb.size)
+    assert_equal(t * mul, fb.size)
+  end
+
+  def test_simple_concurrent_inserts_in_txns_with_sleep
+    fb = Factbase.new
+    t = Concurrent.processor_count * 13
+    mul = 53
+    Threads.new(t).assert do
+      assert(
+        fb.txn do |fbt|
+          sleep(0.01)
+          mul.times do |m|
+            fbt.insert.foo = m
+          end
+        end
+      )
+    end
+    assert_equal(t * mul, fb.size)
   end
 
   def test_concurrent_inserts
     fb = Factbase.new
-    t = 66
+    t = Concurrent.processor_count * 20
     Threads.new(t).assert do
       fact = fb.insert
       fact.foo = 42
@@ -250,7 +268,7 @@ class TestFactbase < Minitest::Test
 
   def test_different_values_when_concurrent_inserts
     fb = Factbase.new
-    t = 55
+    t = Concurrent.processor_count * 16
     Threads.new(t).assert do |i|
       fb.insert.foo = i
     end
@@ -299,16 +317,16 @@ class TestFactbase < Minitest::Test
   # See details here https://github.com/yegor256/factbase/actions/runs/10492255419/job/29068637032
   def test_concurrent_transactions_inserts
     skip('Does not work')
-    total = 100
+    t = Concurrent.processor_count * 19
     fb = Factbase.new
-    Threads.new(total).assert do |i|
+    Threads.new(t).assert do |i|
       fb.txn do |fbt|
         fact = fbt.insert
         fact.thread_id = i
       end
     end
-    assert_equal(total, fb.size)
-    assert_equal(total, fb.query('(exists thread_id)').each.to_a.size)
+    assert_equal(t, fb.size)
+    assert_equal(t, fb.query('(exists thread_id)').each.to_a.size)
   end
 
   def test_concurrent_transactions_with_rollbacks
@@ -325,8 +343,8 @@ class TestFactbase < Minitest::Test
 
   def test_concurrent_transactions_successful
     fb = Factbase.new
-    total = 100
-    Threads.new(total).assert do |i|
+    t = Concurrent.processor_count * 17
+    Threads.new(t).assert do |i|
       fb.txn do |fbt|
         fact = fbt.insert
         fact.thread_id = i
@@ -334,7 +352,7 @@ class TestFactbase < Minitest::Test
       end
     end
     facts = fb.query('(exists thread_id)').each.to_a
-    assert_equal(total, facts.size)
+    assert_equal(t, facts.size)
     facts.each do |fact|
       assert_equal(fact.value, fact.thread_id * 10)
     end
@@ -363,7 +381,6 @@ class TestFactbase < Minitest::Test
     Threads.new(2).assert do
       results = fb.query('(exists thread_id)').each.to_a
       assert_equal(2, results.size)
-
       thread_ids = results.map(&:thread_id)
       assert_equal((0..1).to_a, thread_ids.sort)
     end

@@ -66,6 +66,6 @@ class TestTallied < Minitest::Test
     assert_equal(0, fb.size)
     assert_equal(t, fb.churn.inserted)
     assert_equal(t, fb.churn.deleted)
-    assert_equal(t * 2, fb.churn.added)
+    assert_equal(t, fb.churn.added)
   end
 end

@@ -54,7 +54,7 @@ class Factbase::Query
       a = Factbase::Accum.new(f, extras, false)
       r = term.evaluate(a, @maps)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
-        raise "Unexpected evaluation result (#{r.class}), must be Boolean at #{@query}"
+        raise "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@query.inspect}"
       end
       next unless r
       yield Factbase::Accum.new(f, extras, true)
@@ -71,7 +71,7 @@ class Factbase::Query
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     r = term.evaluate(Factbase::Tee.new(nil, params), @maps)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
-      raise "Incorrect type #{r.class} returned by #{@query}"
+      raise "Incorrect type #{r.class} returned by #{@query.inspect}"
     end
     r
   end

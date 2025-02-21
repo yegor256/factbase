@@ -24,10 +24,6 @@ class Factbase::Looged
 
   decoor(:fb)
 
-  def dup
-    Factbase::Looged.new(@fb.dup, @loog)
-  end
-
   def insert
     start = Time.now
     f = @fb.insert
@@ -39,14 +35,14 @@ class Factbase::Looged
     Query.new(@fb, query, @loog)
   end
 
-  def txn(this = self, &)
+  def txn
     start = Time.now
     id = nil
     rollback = false
     r =
-      @fb.txn(this) do |fbt|
+      @fb.txn do |fbt|
         id = fbt.object_id
-        yield fbt
+        yield Factbase::Looged.new(fbt, @loog)
       rescue Factbase::Rollback => e
         rollback = true
         raise e

@@ -72,17 +72,11 @@ class Factbase
   attr_reader :cache
 
   # Constructor.
-  # @param [Array<Hash>] facts Array of facts to start with
-  def initialize(facts = [])
-    @maps = facts
+  # @param [Array<Hash>] maps Array of facts to start with
+  def initialize(maps = [], cache: {})
+    @maps = maps
     @mutex = Mutex.new
-    @cache = {}
-  end
-
-  # Make a deep duplicate of this factbase.
-  # @return [Factbase] A new factbase
-  def dup
-    Factbase.new(@maps.map { |m| m.transform_values(&:dup) })
+    @cache = cache
   end
 
   # Size, the total number of facts in the factbase.
@@ -153,31 +147,44 @@ class Factbase
   # A the end of this script, the factbase will be empty. No facts will
   # inserted and all changes that happened in the block will be rolled back.
   #
-  # @param [Factbase] this The factbase to use (don't provide this param)
   # @return [Boolean] TRUE if some changes have been made, FALSE otherwise
-  def txn(this = self)
-    copy = this.dup
+  def txn
+    pairs = {}
+    before =
+      @mutex.synchronize do
+        @maps.map do |m|
+          n = m.transform_values(&:dup)
+          # rubocop:disable Lint/HashCompareByIdentity
+          pairs[n.object_id] = m.object_id
+          # rubocop:enable Lint/HashCompareByIdentity
+          n
+        end
+      end
+    require_relative 'factbase/taped'
+    taped = Factbase::Taped.new(before)
     begin
-      yield copy
+      require_relative 'factbase/light'
+      yield Factbase::Light.new(Factbase.new(taped, cache: @cache), @cache)
     rescue Factbase::Rollback
       return false
     end
-    modified = false
     @mutex.synchronize do
-      after = Marshal.load(copy.export)
-      after.each_with_index do |m, i|
-        if i >= @maps.size
-          @maps << {}
-          modified = true
-        end
-        m.each do |k, vv|
-          next if @maps[i][k] == vv
-          @maps[i][k] = vv
-          modified = true
-        end
+      taped.inserted.each do |oid|
+        b = before.find { |m| m.object_id == oid }
+        next if b.nil?
+        @maps << b
       end
+      taped.added.each do |oid|
+        b = before.find { |m| m.object_id == oid }
+        next if b.nil?
+        @maps.delete_if { |m| m.object_id == pairs[oid] }
+        @maps << b
+      end
+      taped.deleted.each do |oid|
+        @maps.delete_if { |m| m.object_id == pairs[oid] }
+      end
+      taped.modified?
     end
-    modified
   end
 
   # Export it into a chain of bytes.

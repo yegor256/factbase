@@ -19,10 +19,6 @@ class Factbase::Inv
     @block = block
   end
 
-  def dup
-    Factbase::Inv.new(@fb.dup, &@block)
-  end
-
   def insert
     Fact.new(@fb.insert, @block)
   end
@@ -31,8 +27,10 @@ class Factbase::Inv
     Query.new(@fb.query(query), @block)
   end
 
-  def txn(this = self, &)
-    @fb.txn(this, &)
+  def txn
+    @fb.txn do |fbt|
+      yield Factbase::Inv.new(fbt, &@block)
+    end
   end
 
   # Fact decorator.
