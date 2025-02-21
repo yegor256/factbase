@@ -64,6 +64,30 @@ if f[n].nil?
 end
 ```
 
+You can make a factbase log all operations:
+
+```ruby
+require 'loog'
+require 'factbase/looged'
+log = Loog::VERBOSE
+fb = Factbase::Looged.new(Factbase.new, log)
+f = fb.insert
+```
+
+You can also count the amount of changes made to a factbase:
+
+```ruby
+require 'loog'
+require 'factbase/tailled'
+log = Loog::VERBOSE
+fb = Factbase::Tailled.new(Factbase.new, log)
+f = fb.insert
+churn = fb.churn
+assert churn.inserted == 1
+```
+
+## Terms
+
 There are some boolean terms available in a query
 (they return either `true` or `false`):
 
