@@ -209,18 +209,18 @@ This is the result of the benchmark:
 <!-- benchmark_begin -->
 | Action | Seconds | Details |
 | --- | --: | --- |
-| `fb.insert()` | 8.044 | Inserted 100000 facts |
-| `(gt time '2024-03-23T03:21:43Z')` | 0.084 | Found 100000 fact(s) |
-| `(gt cost 50)` | 0.058 | Found 49874 fact(s) |
-| `(eq title 'Object Thinking 5000')` | 0.071 | Found 1 fact(s) |
-| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.061 | Found 2 fact(s) |
-| `(eq id (agg (always) (max id)))` | 0.126 | Found 1 fact(s) |
-| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 0.756 | Found 100000 fact(s) |
-| `.export()` + `.import()` | 1.729 | 11407917 bytes |
+| `fb.insert()` | 7.867 | Inserted 100000 facts |
+| `(gt time '2024-03-23T03:21:43Z')` | 0.081 | Found 100000 fact(s) |
+| `(gt cost 50)` | 0.057 | Found 50085 fact(s) |
+| `(eq title 'Object Thinking 5000')` | 0.069 | Found 1 fact(s) |
+| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.059 | Found 1 fact(s) |
+| `(eq id (agg (always) (max id)))` | 0.125 | Found 1 fact(s) |
+| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 0.748 | Found 100000 fact(s) |
+| `.export()` + `.import()` | 1.902 | 11408057 bytes |
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-02-21 at 17:02,
+on 2025-02-23 at 09:06,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13461563326
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13481547577
