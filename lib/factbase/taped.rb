@@ -16,9 +16,9 @@ class Factbase::Taped
 
   def initialize(origin, lookup: {})
     @origin = origin
-    @inserted = []
-    @deleted = []
-    @added = []
+    @inserted = Set.new
+    @deleted = Set.new
+    @added = Set.new
     @lookup = lookup
   end
 
@@ -37,7 +37,7 @@ class Factbase::Taped
     # rubocop:disable Lint/HashCompareByIdentity
     @lookup[map.object_id] = map
     # rubocop:enable Lint/HashCompareByIdentity
-    @inserted.append(map.object_id)
+    @inserted.add(map.object_id)
   end
 
   def each
@@ -54,7 +54,7 @@ class Factbase::Taped
       r = yield m
       if r
         @lookup.delete(m.object_id)
-        @deleted.append(m.object_id)
+        @deleted.add(m.object_id)
       end
       r
     end
@@ -75,7 +75,7 @@ class Factbase::Taped
 
     def []=(key, value)
       @origin[key] = value
-      @added.append(@origin.object_id)
+      @added.add(@origin.object_id)
     end
   end
 
@@ -100,17 +100,16 @@ class Factbase::Taped
     end
 
     def any?(&)
-      p 1
       @origin.any?(&)
     end
 
     def <<(item)
-      @added.append(@oid)
+      @added.add(@oid)
       @origin << (item)
     end
 
     def uniq!
-      @added.append(@oid)
+      @added.add(@oid)
       @origin.uniq!
     end
   end

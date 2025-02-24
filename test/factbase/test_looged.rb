@@ -62,7 +62,7 @@ class TestLooged < Minitest::Test
     fb = Factbase::Looged.new(Factbase.new, log)
     fb.insert.foo = 1
     assert_equal(0, fb.txn { |fbt| fbt.query('(always)').each.to_a }.to_i, log)
-    assert_equal(2, fb.txn { |fbt| fbt.query('(always)').each.to_a[0].foo = 42 }.to_i)
+    assert_equal(1, fb.txn { |fbt| fbt.query('(always)').each.to_a[0].foo = 42 }.to_i)
     assert_includes(log.to_s, 'touched', log)
   end
 

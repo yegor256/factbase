@@ -170,6 +170,7 @@ class Factbase
     rescue Factbase::Rollback
       return 0
     end
+    require_relative 'factbase/churn'
     churn = Factbase::Churn.new
     @mutex.synchronize do
       taped.inserted.each do |oid|

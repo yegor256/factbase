@@ -107,8 +107,8 @@ class TestFactbase < Minitest::Test
     assert_equal(1, fb.txn(&:insert).to_i)
     assert_equal(1, fb.txn { |fbt| fbt.insert.bar = 42 }.to_i)
     assert_equal(0, fb.txn { |fbt| fbt.query('(always)').each.to_a }.to_i)
-    assert_equal(6, fb.txn { |fbt| fbt.query('(always)').each { |f| f.hello = 33 } }.to_i)
-    assert_equal(3, fb.txn { |fbt| fbt.query('(always)').each.to_a[0].zzz = 33 }.to_i)
+    assert_equal(2, fb.txn { |fbt| fbt.query('(always)').each { |f| f.hello = 33 } }.to_i)
+    assert_equal(1, fb.txn { |fbt| fbt.query('(always)').each.to_a[0].zzz = 33 }.to_i)
   end
 
   def test_appends_in_txn
@@ -225,6 +225,17 @@ class TestFactbase < Minitest::Test
     assert_equal(0, modified.to_i)
     assert_equal(1, fb.query('(always)').each.to_a.size)
     assert_equal(0, fb.query('(exists boom)').each.to_a.size)
+  end
+
+  def test_modifies_existing_fact_in_txn
+    fb = Factbase.new
+    n = fb.insert
+    n.foo = 1
+    fb.txn do |fbt|
+      f = fbt.query('(always)').each.to_a.first
+      f.bar = 2
+    end
+    assert_equal(1, fb.query('(eq foo 1)').each.to_a.size)
   end
 
   def test_simple_concurrent_inserts

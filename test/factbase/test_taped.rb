@@ -33,4 +33,14 @@ class TestTaped < Minitest::Test
     assert_equal(1, t.added.size)
     assert_equal(h.object_id, t.added.first)
   end
+
+  def test_tracks_addition_uniquely
+    h = { f: 5 }
+    t = Factbase::Taped.new([h])
+    t.each do |m|
+      m[:bar] = 66
+      m[:foo] = 77
+    end
+    assert_equal(1, t.added.size)
+  end
 end
