@@ -32,7 +32,7 @@ end
 
 def query(fb, query)
   total = 0
-  runs = 10
+  runs = 100
   time =
     Benchmark.measure do
       runs.times do
@@ -41,8 +41,8 @@ def query(fb, query)
     end
   {
     title: "`#{query}`",
-    time: (time.real / runs).round(6),
-    details: "Found #{total} fact(s)"
+    time: time.real.round(6),
+    details: "Found #{total} fact(s) x#{runs} times"
   }
 end
 
