@@ -26,10 +26,11 @@ class TestQuery < Minitest::Test
   end
 
   def test_complex_parsing
-    maps = []
-    maps << { 'num' => [42], 'name' => ['Jeff'] }
-    maps << { 'pi' => [3.14], 'num' => [42, 66, 0], 'name' => ['peter'] }
-    maps << { 'time' => [Time.now - 100], 'num' => [0], 'hi' => [4], 'nome' => ['Walter'] }
+    maps = [
+      { 'num' => [42], 'name' => ['Jeff'] },
+      { 'pi' => [3.14], 'num' => [42, 66, 0], 'name' => ['peter'] },
+      { 'time' => [Time.now - 100], 'num' => [0], 'hi' => [4], 'nome' => ['Walter'] }
+    ]
     {
       '(eq num 444)' => 0,
       '(eq hi 4)' => 1,
@@ -71,7 +72,11 @@ class TestQuery < Minitest::Test
       "(or (eq num +66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1,
       '(eq 3 (agg (eq num $num) (count)))' => 1
     }.each do |q, r|
-      assert_equal(r, Factbase::Query.new(Factbase.new, maps, Mutex.new, q).each.to_a.size, q)
+      fb = Factbase.new(maps)
+      assert_equal(r, fb.query(q).each.to_a.size, q)
+      fb.txn do |fbt|
+        assert_equal(r, fbt.query(q).each.to_a.size, q)
+      end
     end
   end
 
@@ -84,19 +89,21 @@ class TestQuery < Minitest::Test
   end
 
   def test_simple_deleting
-    maps = []
-    maps << { 'foo' => [42] }
-    maps << { 'bar' => [4, 5] }
-    maps << { 'bar' => [5] }
+    maps = [
+      { 'foo' => [42] },
+      { 'bar' => [4, 5] },
+      { 'bar' => [5] }
+    ]
     q = Factbase::Query.new(Factbase.new, maps, Mutex.new, '(eq bar 5)')
     assert_equal(2, q.delete!)
     assert_equal(1, maps.size)
   end
 
   def test_reading_one
-    maps = []
-    maps << { 'foo' => [42] }
-    maps << { 'bar' => [4, 5] }
+    maps = [
+      { 'foo' => [42] },
+      { 'bar' => [4, 5] }
+    ]
     {
       '(agg (exists foo) (first foo))' => [42],
       '(agg (exists z) (first z))' => nil,
@@ -114,10 +121,11 @@ class TestQuery < Minitest::Test
   end
 
   def test_deleting_nothing
-    maps = []
-    maps << { 'foo' => [42] }
-    maps << { 'bar' => [4, 5] }
-    maps << { 'bar' => [5] }
+    maps = [
+      { 'foo' => [42] },
+      { 'bar' => [4, 5] },
+      { 'bar' => [5] }
+    ]
     q = Factbase::Query.new(Factbase.new, maps, Mutex.new, '(never)')
     assert_equal(0, q.delete!)
     assert_equal(3, maps.size)
@@ -144,9 +152,10 @@ class TestQuery < Minitest::Test
   end
 
   def test_with_params
-    maps = []
-    maps << { 'foo' => [42] }
-    maps << { 'foo' => [17] }
+    maps = [
+      { 'foo' => [42] },
+      { 'foo' => [17] }
+    ]
     found = 0
     Factbase::Query.new(Factbase.new, maps, Mutex.new, '(eq foo $bar)').each(bar: [42]) do
       found += 1
@@ -157,14 +166,12 @@ class TestQuery < Minitest::Test
   end
 
   def test_with_nil_alias
-    maps = []
-    maps << { 'foo' => [42] }
+    maps = [{ 'foo' => [42] }]
     assert_nil(Factbase::Query.new(Factbase.new, maps, Mutex.new, '(as bar (plus xxx 3))').each.to_a[0]['bar'])
   end
 
   def test_get_all_properties
-    maps = []
-    maps << { 'foo' => [42] }
+    maps = [{ 'foo' => [42] }]
     f = Factbase::Query.new(Factbase.new, maps, Mutex.new, '(always)').each.to_a[0]
     assert_includes(f.all_properties, 'foo')
   end

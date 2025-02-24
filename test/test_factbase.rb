@@ -197,9 +197,13 @@ class TestFactbase < Minitest::Test
 
   def test_txn_inside_query
     fb = Factbase.new
-    fb.insert.foo = 42
+    fact = fb.insert
+    fact.foo = 42
+    fact.foo = 555
     fb.query('(exists foo)').each do |f|
       fb.txn do |fbt|
+        assert_equal(42, fb.query('(always)').each.to_a.first.foo)
+        assert_equal(42, fb.query('(always)').each.to_a.first['foo'].first)
         fbt.insert.bar = 33
       end
       f.xyz = 1
