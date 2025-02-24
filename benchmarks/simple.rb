@@ -42,7 +42,7 @@ def query(fb, query)
   {
     title: "`#{query}`",
     time: time.real.round(6),
-    details: "Found #{total} fact(s) x#{runs} times"
+    details: "#{total} facts x#{runs}"
   }
 end
 
