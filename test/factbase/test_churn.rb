@@ -17,6 +17,7 @@ class TestChurn < Minitest::Test
     c = Factbase::Churn.new
     c.append(1, 2, 3)
     assert_equal('1i/2d/3a', c.to_s)
+    assert_equal(6, c.to_i)
   end
 
   def test_checks_for_zero

@@ -26,6 +26,10 @@ class Factbase::Churn
     @inserted.zero? && @deleted.zero? && @added.zero?
   end
 
+  def to_i
+    @inserted + @deleted + @added
+  end
+
   def append(ins, del, add)
     @mutex.synchronize do
       @inserted += ins

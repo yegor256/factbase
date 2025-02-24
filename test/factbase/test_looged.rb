@@ -45,7 +45,7 @@ class TestLooged < Minitest::Test
       end
     )
     assert_equal(1, fb.size)
-    assert_includes(log.to_s, 'modified', log)
+    assert_includes(log.to_s, 'touched', log)
   end
 
   def test_with_txn_rollback
@@ -61,16 +61,16 @@ class TestLooged < Minitest::Test
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)
     fb.insert.foo = 1
-    assert_equal(0, fb.txn { |fbt| fbt.query('(always)').each.to_a }, log)
-    assert_equal(1, fb.txn { |fbt| fbt.query('(always)').each.to_a[0].foo = 42 })
-    assert_includes(log.to_s, 'modified', log)
+    assert_equal(0, fb.txn { |fbt| fbt.query('(always)').each.to_a }.to_i, log)
+    assert_equal(2, fb.txn { |fbt| fbt.query('(always)').each.to_a[0].foo = 42 }.to_i)
+    assert_includes(log.to_s, 'touched', log)
   end
 
   def test_with_empty_txn
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)
-    assert_equal(0, fb.txn { |fbt| fbt.query('(always)').each.to_a })
-    assert_includes(log.to_s, 'didn\'t touch', log)
+    assert_equal(0, fb.txn { |fbt| fbt.query('(always)').each.to_a }.to_i)
+    assert_includes(log.to_s, 'touched', log)
   end
 
   def test_returns_int
