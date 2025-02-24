@@ -209,24 +209,24 @@ This is the result of the benchmark:
 <!-- benchmark_begin -->
 | Action | Seconds | Details |
 | --- | --: | --- |
-| `fb.insert()` | 1.865 | Inserted 25000 facts |
-| `(gt time '2024-03-23T03:21:43Z')` | 0.198 | Found 25000 fact(s) x100 times |
-| `(gt cost 50)` | 0.178 | Found 12434 fact(s) x100 times |
-| `(eq title 'Object Thinking 5000')` | 0.133 | Found 1 fact(s) x100 times |
-| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.156 | Found 0 fact(s) x100 times |
-| `(eq id (agg (always) (max id)))` | 0.269 | Found 1 fact(s) x100 times |
-| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 1.843 | Found 25000 fact(s) x100 times |
-| txn: `query()` | 19.209 | modified 0 facts |
-| txn: `insert()` | 0.124 | modified 100 facts |
-| txn: `add()` | 16.459 | modified 7 facts |
-| txn: `delete!()` | 3.584 | modified 12493 facts |
-| `.export()` + `.import()` | 0.346 | 1438332 bytes |
-| `(gt cost 3)` | 0.029 | Deleted 12311 fact(s) |
-| `(gt bar 1)` | 0.001 | Deleted 389 fact(s) |
+| `fb.insert()` | 1.883 | Inserted 25000 facts |
+| `(gt time '2024-03-23T03:21:43Z')` | 0.201 | 25000 facts x100 |
+| `(gt cost 50)` | 0.175 | 12430 facts x100 |
+| `(eq title 'Object Thinking 5000')` | 0.129 | 1 facts x100 |
+| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.157 | 0 facts x100 |
+| `(eq id (agg (always) (max id)))` | 0.268 | 1 facts x100 |
+| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 1.844 | 25000 facts x100 |
+| txn: `query()` | 19.358 | modified 0 facts |
+| txn: `insert()` | 0.059 | modified 100 facts |
+| txn: `add()` | 16.223 | modified 3 facts |
+| txn: `delete!()` | 3.573 | modified 12439 facts |
+| `.export()` + `.import()` | 0.369 | 1451040 bytes |
+| `(gt cost 3)` | 0.030 | Deleted 12395 fact(s) |
+| `(gt bar 1)` | 0.001 | Deleted 363 fact(s) |
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-02-24 at 13:30,
+on 2025-02-24 at 13:32,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13499201550
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13499241189
