@@ -91,6 +91,10 @@ class Factbase::Taped
       @origin.each(&)
     end
 
+    def [](key)
+      @origin[key]
+    end
+
     def to_a
       @origin.to_a
     end
