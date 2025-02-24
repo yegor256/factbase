@@ -136,6 +136,16 @@ class TestFactbase < Minitest::Test
     assert_equal(2, fb.size)
   end
 
+  def test_deals_with_arrays_in_txn
+    fb = Factbase.new
+    f = fb.insert
+    f.foo = 1
+    f.foo = 2
+    fb.txn do |fbt|
+      assert_equal(1, fbt.query('(gt foo 0)').each.to_a.size)
+    end
+  end
+
   def test_run_txn_via_query
     fb = Factbase.new
     fb.insert.foo = 1

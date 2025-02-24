@@ -97,8 +97,13 @@ rows = [
   query(fb, '(eq id (agg (always) (max id)))'),
   query(fb, '(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))'),
   txn(fb, 'insert()') do |fbt|
+    100.times do
+      fbt.insert
+    end
+  end,
+  txn(fb, 'add()') do |fbt|
     100.times do |i|
-      fbt.insert.foo = i
+      fbt.query("(gt foo #{i})").each.to_a.first.bar = 55
     end
   end,
   txn(fb, 'delete!()') do |fbt|

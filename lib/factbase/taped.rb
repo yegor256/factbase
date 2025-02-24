@@ -75,6 +75,19 @@ class Factbase::Taped
       @added = added
     end
 
+    def each(&)
+      @origin.each(&)
+    end
+
+    def to_a
+      @origin.to_a
+    end
+
+    def any?(&)
+      p 1
+      @origin.any?(&)
+    end
+
     def <<(item)
       @added.append(@oid)
       @origin << (item)

@@ -25,7 +25,7 @@ module Factbase::Term::Meta
     assert_args(1)
     v = by_symbol(0, fact)
     return 0 if v.nil?
-    return 1 unless v.is_a?(Array)
+    return 1 unless v.respond_to?(:each)
     v.size
   end
 
@@ -33,7 +33,7 @@ module Factbase::Term::Meta
     assert_args(1)
     v = by_symbol(0, fact)
     return 'nil' if v.nil?
-    v = v[0] if v.is_a?(Array) && v.size == 1
+    v = v[0] if v.respond_to?(:each) && v.size == 1
     v.class.to_s
   end
 

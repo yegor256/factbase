@@ -177,7 +177,7 @@ class Factbase::Term
     v = v.evaluate(fact, maps) if v.is_a?(Factbase::Term)
     v = fact[v.to_s] if v.is_a?(Symbol)
     return v if v.nil?
-    v = [v] unless v.is_a?(Array)
+    v = [v] unless v.respond_to?(:each)
     v
   end
 end

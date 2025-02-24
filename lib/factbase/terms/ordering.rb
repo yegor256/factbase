@@ -24,7 +24,7 @@ module Factbase::Term::Ordering
     assert_args(1)
     vv = the_values(0, fact, maps)
     return false if vv.nil?
-    vv = [vv] unless vv.is_a?(Array)
+    vv = [vv] unless vv.respond_to?(:each)
     vv.each do |v|
       return false if @uniques.include?(v)
       @uniques << v

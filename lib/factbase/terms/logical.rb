@@ -77,7 +77,7 @@ module Factbase::Term::Logical
   end
 
   def _only_bool(val, pos)
-    val = val[0] if val.is_a?(Array)
+    val = val[0] if val.respond_to?(:each)
     return false if val.nil?
     return val if val.is_a?(TrueClass) || val.is_a?(FalseClass)
     raise "Boolean expected, while #{val.class} received from #{@operands[pos]}"
