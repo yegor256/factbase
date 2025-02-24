@@ -212,6 +212,24 @@ class TestFactbase < Minitest::Test
     assert_equal(1, fb.query('(exists xyz)').each.to_a.size)
   end
 
+  def test_evals_complex_txn
+    fb = Factbase.new
+    n = fb.insert
+    n.foo = 42
+    n.bar = 555
+    fb.txn do |fbt|
+      fbt.insert.foo = 333
+      fbt.insert.bar = 333
+      fbt.query('(eq bar 555)').delete!
+      fbt.insert.bar = 555
+      fbt.query('(eq bar 777)').delete! # nothing to be deleted
+      n1 = fbt.insert
+      n1.bar = 9
+      n1.bar = 99
+    end
+    assert_equal(4, fb.query('(always)').each.to_a.size)
+  end
+
   def test_txn_with_rollback
     fb = Factbase.new
     n = fb.insert
