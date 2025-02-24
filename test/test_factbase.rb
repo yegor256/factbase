@@ -214,13 +214,17 @@ class TestFactbase < Minitest::Test
 
   def test_txn_with_rollback
     fb = Factbase.new
+    n = fb.insert
+    n.bar = 55
     modified =
       fb.txn do |fbt|
         fbt.insert.bar = 33
+        fbt.query('(eq bar 55)').each.to_a.first.boom = 44
         raise Factbase::Rollback
       end
-    assert_equal(0, modified)
-    assert_equal(0, fb.query('(always)').each.to_a.size)
+    assert_equal(0, modified.to_i)
+    assert_equal(1, fb.query('(always)').each.to_a.size)
+    assert_equal(0, fb.query('(exists boom)').each.to_a.size)
   end
 
   def test_simple_concurrent_inserts
