@@ -104,12 +104,11 @@ class TestFactbase < Minitest::Test
 
   def test_txn_returns_boolean
     fb = Factbase.new
-    assert_kind_of(FalseClass, fb.txn { true })
-    assert_kind_of(TrueClass, fb.txn(&:insert))
-    assert(fb.txn { |fbt| fbt.insert.bar = 42 })
-    refute(fb.txn { |fbt| fbt.query('(always)').each.to_a })
-    assert(fb.txn { |fbt| fbt.query('(always)').each { |f| f.hello = 33 } })
-    assert(fb.txn { |fbt| fbt.query('(always)').each.to_a[0].zzz = 33 })
+    assert_equal(1, fb.txn(&:insert))
+    assert_equal(1, fb.txn { |fbt| fbt.insert.bar = 42 })
+    assert_equal(0, fb.txn { |fbt| fbt.query('(always)').each.to_a })
+    assert_equal(2, fb.txn { |fbt| fbt.query('(always)').each { |f| f.hello = 33 } })
+    assert_equal(1, fb.txn { |fbt| fbt.query('(always)').each.to_a[0].zzz = 33 })
   end
 
   def test_appends_in_txn

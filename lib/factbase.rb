@@ -147,7 +147,7 @@ class Factbase
   # A the end of this script, the factbase will be empty. No facts will
   # inserted and all changes that happened in the block will be rolled back.
   #
-  # @return [Boolean] TRUE if some changes have been made, FALSE otherwise
+  # @return [Integer] How many facts have been changed
   def txn
     pairs = {}
     before =
@@ -168,11 +168,13 @@ class Factbase
     rescue Factbase::Rollback
       return false
     end
+    modified = []
     @mutex.synchronize do
       taped.inserted.each do |oid|
         b = before.find { |m| m.object_id == oid }
         next if b.nil?
         @maps << b
+        modified << oid
       end
       garbage = []
       taped.added.each do |oid|
@@ -180,13 +182,15 @@ class Factbase
         next if b.nil?
         garbage << pairs[oid]
         @maps << b
+        modified << oid
       end
       taped.deleted.each do |oid|
         garbage << pairs[oid]
+        modified << oid
       end
       @maps.delete_if { |m| garbage.include?(m.object_id) }
-      taped.modified?
     end
+    modified.uniq.count
   end
 
   # Export it into a chain of bytes.

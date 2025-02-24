@@ -50,7 +50,7 @@ class Factbase::Looged
     if rollback
       @loog.debug("Txn ##{id} rolled back in #{start.ago}")
     else
-      @loog.debug("Txn ##{id} #{r ? 'modified' : 'didn\'t touch'} the factbase in #{start.ago}")
+      @loog.debug("Txn ##{id} #{r.positive? ? 'modified' : 'didn\'t touch'} the factbase in #{start.ago}")
     end
     r
   end

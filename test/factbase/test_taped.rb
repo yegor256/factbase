@@ -16,7 +16,6 @@ class TestTaped < Minitest::Test
     t = Factbase::Taped.new([])
     t << {}
     assert_equal(1, t.inserted.size)
-    assert_predicate(t, :modified?)
   end
 
   def test_tracks_deletion

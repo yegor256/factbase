@@ -61,15 +61,15 @@ class TestLooged < Minitest::Test
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)
     fb.insert.foo = 1
-    refute(fb.txn { |fbt| fbt.query('(always)').each.to_a }, log)
-    assert(fb.txn { |fbt| fbt.query('(always)').each.to_a[0].foo = 42 })
+    assert_equal(0, fb.txn { |fbt| fbt.query('(always)').each.to_a }, log)
+    assert_equal(1, fb.txn { |fbt| fbt.query('(always)').each.to_a[0].foo = 42 })
     assert_includes(log.to_s, 'modified', log)
   end
 
   def test_with_empty_txn
     log = Loog::Buffer.new
     fb = Factbase::Looged.new(Factbase.new, log)
-    refute(fb.txn { |fbt| fbt.query('(always)').each.to_a })
+    assert_equal(0, fb.txn { |fbt| fbt.query('(always)').each.to_a })
     assert_includes(log.to_s, 'didn\'t touch', log)
   end
 

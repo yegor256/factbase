@@ -21,10 +21,6 @@ class Factbase::Taped
     @added = []
   end
 
-  def modified?
-    !@inserted.empty? || !@deleted.empty? || !@added.empty?
-  end
-
   def size
     @origin.size
   end
