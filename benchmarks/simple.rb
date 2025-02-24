@@ -97,6 +97,11 @@ rows = [
   query(fb, '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))'),
   query(fb, '(eq id (agg (always) (max id)))'),
   query(fb, '(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))'),
+  txn(fb, 'query()') do |fbt|
+    100.times do |i|
+      fbt.query("(gt foo #{i})").each.to_a
+    end
+  end,
   txn(fb, 'insert()') do |fbt|
     100.times do
       fbt.insert

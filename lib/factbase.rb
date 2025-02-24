@@ -147,38 +147,40 @@ class Factbase
   # A the end of this script, the factbase will be empty. No facts will
   # inserted and all changes that happened in the block will be rolled back.
   #
-  # @return [Integer] How many facts have been changed
+  # @return [Integer] How many facts have been changed (zero if rolled back)
   def txn
     pairs = {}
+    lookup = {}
     before =
       @mutex.synchronize do
         @maps.map do |m|
           n = m.transform_values(&:dup)
           # rubocop:disable Lint/HashCompareByIdentity
           pairs[n.object_id] = m.object_id
+          lookup[n.object_id] = n
           # rubocop:enable Lint/HashCompareByIdentity
           n
         end
       end
     require_relative 'factbase/taped'
-    taped = Factbase::Taped.new(before)
+    taped = Factbase::Taped.new(before, lookup:)
     begin
       require_relative 'factbase/light'
       yield Factbase::Light.new(Factbase.new(taped, cache: @cache), @cache)
     rescue Factbase::Rollback
-      return false
+      return 0
     end
     modified = []
     @mutex.synchronize do
       taped.inserted.each do |oid|
-        b = before.find { |m| m.object_id == oid }
+        b = taped.find_by_object_id(oid)
         next if b.nil?
         @maps << b
         modified << oid
       end
       garbage = []
       taped.added.each do |oid|
-        b = before.find { |m| m.object_id == oid }
+        b = taped.find_by_object_id(oid)
         next if b.nil?
         garbage << pairs[oid]
         @maps << b

@@ -214,7 +214,7 @@ class TestFactbase < Minitest::Test
         fbt.insert.bar = 33
         raise Factbase::Rollback
       end
-    refute(modified)
+    assert_equal(0, modified)
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end
 
