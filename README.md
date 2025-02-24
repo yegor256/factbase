@@ -209,24 +209,24 @@ This is the result of the benchmark:
 <!-- benchmark_begin -->
 | Action | Seconds | Details |
 | --- | --: | --- |
-| `fb.insert()` | 1.883 | Inserted 25000 facts |
-| `(gt time '2024-03-23T03:21:43Z')` | 0.201 | 25000 facts x100 |
-| `(gt cost 50)` | 0.175 | 12430 facts x100 |
-| `(eq title 'Object Thinking 5000')` | 0.129 | 1 facts x100 |
-| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.157 | 0 facts x100 |
-| `(eq id (agg (always) (max id)))` | 0.268 | 1 facts x100 |
-| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 1.844 | 25000 facts x100 |
-| txn: `query()` | 19.358 | modified 0 facts |
-| txn: `insert()` | 0.059 | modified 100 facts |
-| txn: `add()` | 16.223 | modified 3 facts |
-| txn: `delete!()` | 3.573 | modified 12439 facts |
-| `.export()` + `.import()` | 0.369 | 1451040 bytes |
-| `(gt cost 3)` | 0.030 | Deleted 12395 fact(s) |
-| `(gt bar 1)` | 0.001 | Deleted 363 fact(s) |
+| `fb.insert()` | 2.010 | Inserted 25000 facts |
+| `(gt time '2024-03-23T03:21:43Z')` | 0.224 | 25000 facts x100 |
+| `(gt cost 50)` | 0.191 | 12484 facts x100 |
+| `(eq title 'Object Thinking 5000')` | 0.140 | 1 facts x100 |
+| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.163 | 3 facts x100 |
+| `(eq id (agg (always) (max id)))` | 0.301 | 1 facts x100 |
+| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 1.885 | 25000 facts x100 |
+| txn: `query()` | 19.363 | 0i/0d/0a |
+| txn: `insert()` | 0.065 | 100i/0d/0a |
+| txn: `add()` | 16.323 | 0i/0d/7a |
+| txn: `delete!()` | 3.555 | 0i/12277d/0a |
+| `.export()` + `.import()` | 0.341 | 1446750 bytes |
+| `(gt cost 3)` | 0.030 | Deleted 12344 fact(s) |
+| `(gt bar 1)` | 0.001 | Deleted 379 fact(s) |
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-02-24 at 13:32,
+on 2025-02-24 at 16:14,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13499241189
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13502564159
