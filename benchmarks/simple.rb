@@ -76,14 +76,15 @@ def impex(fb)
 end
 
 def txn(fb, scenario, &block)
+  modified = 0
   time =
     Benchmark.measure do
-      fb.txn(&block)
+      modified = fb.txn(&block)
     end
   {
     title: "txn: #{scenario}",
     time: time.real,
-    details: ''
+    details: "modified #{modified} facts"
   }
 end
 
