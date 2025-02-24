@@ -69,7 +69,7 @@ class Factbase::Taped
 
     def [](key)
       v = @origin[key]
-      v = TapedArray.new(v, @origin.object_id, @added) if v.is_a?(Array)
+      v = TapedArray.new(v, @origin.object_id, @added) if v.respond_to?(:each)
       v
     end
 
