@@ -13,6 +13,16 @@ require_relative '../../lib/factbase/tallied'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class TestTallied < Minitest::Test
+  def test_counts_size
+    fb = Factbase::Tallied.new(Factbase.new)
+    assert_equal(0, fb.size)
+  end
+
+  def test_queries_empty_factbase
+    fb = Factbase::Tallied.new(Factbase.new)
+    assert_equal(0, fb.query('(gt foo 1)').each.to_a.size)
+  end
+
   def test_counts_simple_changes
     fb = Factbase::Tallied.new(Factbase.new)
     fb.insert.bar = 3

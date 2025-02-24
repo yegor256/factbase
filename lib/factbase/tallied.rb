@@ -79,6 +79,7 @@ class Factbase::Tallied
     end
 
     def each(params = {}, &)
+      return to_enum(__method__, params) unless block_given?
       @query.each(params) do |f|
         yield Fact.new(f, @churn)
       end
