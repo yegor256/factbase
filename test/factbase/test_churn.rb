@@ -28,4 +28,13 @@ class TestChurn < Minitest::Test
     c = Factbase::Churn.new
     assert_predicate(c.dup, :zero?)
   end
+
+  def test_concatenates_with_other
+    c1 = Factbase::Churn.new
+    c1.append(1, 6, 3)
+    c2 = Factbase::Churn.new
+    c2.append(3, 2, 46)
+    c3 = c1 + c2
+    assert_equal('4i/8d/49a', c3.to_s)
+  end
 end

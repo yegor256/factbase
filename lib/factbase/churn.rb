@@ -33,4 +33,12 @@ class Factbase::Churn
       @added += add
     end
   end
+
+  def +(other)
+    Factbase::Churn.new(
+      @inserted + other.inserted,
+      @deleted + other.deleted,
+      @added + other.added
+    )
+  end
 end
