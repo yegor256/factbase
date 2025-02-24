@@ -174,15 +174,17 @@ class Factbase
         next if b.nil?
         @maps << b
       end
+      garbage = []
       taped.added.each do |oid|
         b = before.find { |m| m.object_id == oid }
         next if b.nil?
-        @maps.delete_if { |m| m.object_id == pairs[oid] }
+        garbage << pairs[oid]
         @maps << b
       end
       taped.deleted.each do |oid|
-        @maps.delete_if { |m| m.object_id == pairs[oid] }
+        garbage << pairs[oid]
       end
+      @maps.delete_if { |m| garbage.include?(m.object_id) }
       taped.modified?
     end
   end
