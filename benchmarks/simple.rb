@@ -84,7 +84,7 @@ def txn(fb, scenario, &block)
   {
     title: "txn: `#{scenario}`",
     time: time.real,
-    details: "modified #{modified} facts"
+    details: modified.to_s
   }
 end
 
