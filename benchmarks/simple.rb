@@ -107,13 +107,13 @@ rows = [
     end
   end,
   txn(fb, 'delete!()') do |fbt|
-    100.times do |i|
-      fbt.query("(gt foo #{i})").delete!
+    50.times do |i|
+      fbt.query("(gt foo #{100 - i})").delete!
     end
   end,
   impex(fb),
-  delete(fb, '(gt cost 50)'),
-  delete(fb, '(gt foo 1)')
+  delete(fb, '(gt cost 3)'),
+  delete(fb, '(gt bar 1)')
 ].map { |r| "| #{r[:title]} | #{format('%0.3f', r[:time])} | #{r[:details]} |" }
 
 puts '| Action | Seconds | Details |'
