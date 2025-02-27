@@ -3,20 +3,20 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
 require 'loog'
 require 'threads'
 require_relative '../lib/factbase'
-require_relative '../lib/factbase/rules'
 require_relative '../lib/factbase/inv'
-require_relative '../lib/factbase/pre'
 require_relative '../lib/factbase/logged'
+require_relative '../lib/factbase/pre'
+require_relative '../lib/factbase/rules'
+require_relative 'test__helper'
 
 # Factbase main module test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestFactbase < Minitest::Test
+class TestFactbase < Factbase::Test
   def test_injects_data_correctly
     maps = []
     fb = Factbase.new(maps)

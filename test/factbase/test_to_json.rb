@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require 'loog'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/to_json'
@@ -12,7 +12,7 @@ require_relative '../../lib/factbase/to_json'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestToJSON < Minitest::Test
+class TestToJSON < Factbase::Test
   def test_simple_rendering
     fb = Factbase.new
     f = fb.insert

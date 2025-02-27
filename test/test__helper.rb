@@ -17,8 +17,10 @@ require 'minitest/autorun'
 require 'minitest/reporters'
 Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new]
 
+require_relative '../lib/factbase'
+
 # Default methods for all tests.
-class Minitest::Test
+class Factbase::Test < Minitest::Test
   def fact(map = {})
     require 'factbase/fact'
     Factbase::Fact.new(Factbase.new, Mutex.new, map)

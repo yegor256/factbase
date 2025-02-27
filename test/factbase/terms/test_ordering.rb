@@ -3,14 +3,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
 # Ordering test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestOrdering < Minitest::Test
+class TestOrdering < Factbase::Test
   def test_prev
     t = Factbase::Term.new(Factbase.new, :prev, [:foo])
     assert_nil(t.evaluate(fact('foo' => 41), []))

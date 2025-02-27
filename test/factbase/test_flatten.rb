@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/flatten'
 
@@ -11,7 +11,7 @@ require_relative '../../lib/factbase/flatten'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestFlatten < Minitest::Test
+class TestFlatten < Factbase::Test
   def test_mapping
     maps = [{ 'b' => [42], 'i' => 1 }, { 'a' => 33, 'i' => 0 }, { 'c' => %w[hey you], 'i' => 2 }]
     to = Factbase::Flatten.new(maps, 'i').it

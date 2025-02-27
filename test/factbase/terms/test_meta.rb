@@ -3,14 +3,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
 # Meta test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestMeta < Minitest::Test
+class TestMeta < Factbase::Test
   def test_exists
     t = Factbase::Term.new(Factbase.new, :exists, [:foo])
     assert(t.evaluate(fact('foo' => 41), []))

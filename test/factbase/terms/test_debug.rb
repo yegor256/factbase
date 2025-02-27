@@ -3,14 +3,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
 # Debug test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestDebug < Minitest::Test
+class TestDebug < Factbase::Test
   def test_traced
     t = Factbase::Term.new(Factbase.new, :traced, [Factbase::Term.new(Factbase.new, :defn, [:test_debug, 'self.to_s'])])
     assert_output("(traced (defn test_debug 'self.to_s')) -> true\n") do

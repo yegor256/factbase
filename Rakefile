@@ -15,7 +15,7 @@ def version
   Gem::Specification.load(Dir['*.gemspec'].first).version
 end
 
-task default: %i[clean test rubocop yard]
+task default: %i[clean test rubocop yard benchmark]
 
 require 'rake/testtask'
 desc 'Run all unit tests'
@@ -40,7 +40,14 @@ RuboCop::RakeTask.new(:rubocop) do |task|
   task.requires << 'rubocop-rspec'
 end
 
-desc 'Run benchmark script'
+desc 'Benchmark them all'
 task :benchmark do
-  ruby 'benchmarks/simple.rb'
+  fb = Factbase.new
+  require 'benchmark'
+  Benchmark.bm(60) do |b|
+    Dir['benchmark/bench_*.rb'].each do |f|
+      require_relative f
+      Kernel.send(File.basename(f).gsub(/\.rb$/, '').to_sym, b, fb)
+    end
+  end
 end

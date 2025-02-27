@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/fact'
 
@@ -11,7 +11,7 @@ require_relative '../../lib/factbase/fact'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestFact < Minitest::Test
+class TestFact < Factbase::Test
   def test_injects_data_correctly
     map = {}
     f = Factbase::Fact.new(Factbase.new, Mutex.new, map)

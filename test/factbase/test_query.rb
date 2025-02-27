@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require 'time'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/query'
@@ -12,7 +12,7 @@ require_relative '../../lib/factbase/query'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestQuery < Minitest::Test
+class TestQuery < Factbase::Test
   def test_simple_parsing
     maps = []
     maps << { 'foo' => [42] }

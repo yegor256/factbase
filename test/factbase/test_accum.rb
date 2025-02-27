@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/accum'
 require_relative '../../lib/factbase/fact'
@@ -12,7 +12,7 @@ require_relative '../../lib/factbase/fact'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestAccum < Minitest::Test
+class TestAccum < Factbase::Test
   def test_holds_props
     map = {}
     f = Factbase::Fact.new(Factbase.new, Mutex.new, map)

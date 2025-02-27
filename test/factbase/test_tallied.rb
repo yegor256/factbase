@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require 'threads'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/tallied'
@@ -12,7 +12,7 @@ require_relative '../../lib/factbase/tallied'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestTallied < Minitest::Test
+class TestTallied < Factbase::Test
   def test_counts_size
     fb = Factbase::Tallied.new(Factbase.new)
     assert_equal(0, fb.size)

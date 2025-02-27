@@ -3,7 +3,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
@@ -11,7 +10,7 @@ require_relative '../../../lib/factbase/term'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestMath < Minitest::Test
+class TestMath < Factbase::Test
   def test_simple
     t = Factbase::Term.new(Factbase.new, :eq, [:foo, 42])
     assert(t.evaluate(fact('foo' => [42]), []))

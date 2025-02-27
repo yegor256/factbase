@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require 'loog'
 require_relative '../../lib/factbase/pre'
 
@@ -11,7 +11,7 @@ require_relative '../../lib/factbase/pre'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestPre < Minitest::Test
+class TestPre < Factbase::Test
   def test_simple_setting
     fb = Factbase::Pre.new(Factbase.new) { |f| f.foo = 42 }
     f = fb.insert

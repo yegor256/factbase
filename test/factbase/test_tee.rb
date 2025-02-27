@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/tee'
 require_relative '../../lib/factbase/fact'
@@ -12,7 +12,7 @@ require_relative '../../lib/factbase/fact'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestTee < Minitest::Test
+class TestTee < Factbase::Test
   def test_two_facts
     prim = Factbase::Fact.new(Factbase.new, Mutex.new, {})
     prim.foo = 42

@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/rules'
 require_relative '../../lib/factbase/pre'
@@ -12,7 +12,7 @@ require_relative '../../lib/factbase/pre'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestRules < Minitest::Test
+class TestRules < Factbase::Test
   def test_simple_checking
     fb = Factbase::Rules.new(
       Factbase.new,

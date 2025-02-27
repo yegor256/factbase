@@ -3,7 +3,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
@@ -11,7 +10,7 @@ require_relative '../../../lib/factbase/term'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestCasting < Minitest::Test
+class TestCasting < Factbase::Test
   def test_to_str
     t = Factbase::Term.new(Factbase.new, :to_string, [Time.now])
     assert_equal('String', t.evaluate(fact, []).class.to_s)

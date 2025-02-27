@@ -3,14 +3,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 
 # Logical test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestLogical < Minitest::Test
+class TestLogical < Factbase::Test
   def test_not_matching
     t = Factbase::Term.new(Factbase.new, :not, [Factbase::Term.new(Factbase.new, :always, [])])
     refute(t.evaluate(fact('foo' => [100]), []))

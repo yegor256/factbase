@@ -3,14 +3,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require_relative '../../lib/factbase/syntax'
 
 # Syntax test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestSyntax < Minitest::Test
+class TestSyntax < Factbase::Test
   def test_parses_string_right
     [
       "(foo 'abc')",

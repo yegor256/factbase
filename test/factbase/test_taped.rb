@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/taped'
 
@@ -11,7 +11,7 @@ require_relative '../../lib/factbase/taped'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestTaped < Minitest::Test
+class TestTaped < Factbase::Test
   def test_tracks_insertion
     t = Factbase::Taped.new([])
     t << {}

@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require 'loog'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/looged'
@@ -12,7 +12,7 @@ require_relative '../../lib/factbase/looged'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestLooged < Minitest::Test
+class TestLooged < Factbase::Test
   def test_simple_setting
     fb = Factbase::Looged.new(Factbase.new, Loog::NULL)
     fb.insert
