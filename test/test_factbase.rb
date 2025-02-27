@@ -10,7 +10,7 @@ require_relative '../lib/factbase'
 require_relative '../lib/factbase/rules'
 require_relative '../lib/factbase/inv'
 require_relative '../lib/factbase/pre'
-require_relative '../lib/factbase/looged'
+require_relative '../lib/factbase/logged'
 
 # Factbase main module test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -177,7 +177,7 @@ class TestFactbase < Minitest::Test
       Factbase::Rules.new(Factbase.new, '(always)'),
       Factbase::Inv.new(Factbase.new) { |_, _| true },
       Factbase::Pre.new(Factbase.new) { |_| true },
-      Factbase::Looged.new(Factbase.new, Loog::NULL)
+      Factbase::Logged.new(Factbase.new, Loog::NULL)
     ].each do |d|
       f = d.insert
       f.foo = 42

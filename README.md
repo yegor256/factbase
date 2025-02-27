@@ -17,7 +17,7 @@ The values are either atomic literals or non-empty sets of literals.
 It is possible to delete a fact, but impossible to delete a property
 from a fact.
 
-**ATTENTION**: The current implemention is naive and,
+**ATTENTION**: The current implementation is naive and,
 because of that, **very slow**. I will be very happy
 if you suggest a better implementation without the change of the interface.
 The `Factbase::query()` method is what mostly needs performance optimization:
@@ -68,9 +68,9 @@ You can make a factbase log all operations:
 
 ```ruby
 require 'loog'
-require 'factbase/looged'
+require 'factbase/logged'
 log = Loog::VERBOSE
-fb = Factbase::Looged.new(Factbase.new, log)
+fb = Factbase::Logged.new(Factbase.new, log)
 f = fb.insert
 ```
 
@@ -78,9 +78,9 @@ You can also count the amount of changes made to a factbase:
 
 ```ruby
 require 'loog'
-require 'factbase/tailled'
+require 'factbase/tallied'
 log = Loog::VERBOSE
-fb = Factbase::Tailled.new(Factbase.new, log)
+fb = Factbase::Tallied.new(Factbase.new, log)
 f = fb.insert
 churn = fb.churn
 assert churn.inserted == 1
@@ -137,7 +137,7 @@ Also, some simple arithmetic:
 * `(div v1 v2)` is a division of `∏v1` by `∏v2`
 
 It's possible to add and deduct string values to time values, like
-`(plus t '2 days')` or ``(minus t '14 hours')``.
+`(plus t '2 days')` or `(minus t '14 hours')`.
 
 Types may be converted:
 

@@ -47,8 +47,8 @@ class TestAliases < Minitest::Test
       t = Factbase::Syntax.new(Factbase.new, q).to_term
       maps.each do |m|
         f = Factbase::Accum.new(fact(m), {}, false)
-        require_relative '../../../lib/factbase/looged'
-        f = Factbase::Looged::Fact.new(f, Loog::NULL)
+        require_relative '../../../lib/factbase/logged'
+        f = Factbase::Logged::Fact.new(f, Loog::NULL)
         next unless t.evaluate(f, maps)
         assert(Factbase::Syntax.new(Factbase.new, r).to_term.evaluate(f, []), "#{q} -> #{f} doesn't match #{r}")
       end

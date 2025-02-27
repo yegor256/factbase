@@ -14,7 +14,7 @@ require_relative 'syntax'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class Factbase::Looged
+class Factbase::Logged
   def initialize(fb, loog)
     raise 'The "fb" is nil' if fb.nil?
     @fb = fb
@@ -42,7 +42,7 @@ class Factbase::Looged
     r =
       @fb.txn do |fbt|
         id = fbt.object_id
-        yield Factbase::Looged.new(fbt, @loog)
+        yield Factbase::Logged.new(fbt, @loog)
       rescue Factbase::Rollback => e
         rollback = true
         raise e
@@ -102,7 +102,7 @@ class Factbase::Looged
       q = Factbase::Syntax.new(@fb, @expr).to_term.to_s
       r = nil
       tail =
-        Factbase::Looged.elapsed do
+        Factbase::Logged.elapsed do
           r = @fb.query(@expr).one(params)
         end
       if r.nil?
@@ -118,7 +118,7 @@ class Factbase::Looged
       if block_given?
         r = nil
         tail =
-          Factbase::Looged.elapsed do
+          Factbase::Logged.elapsed do
             r = @fb.query(@expr).each(params, &)
           end
         raise ".each of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
@@ -131,7 +131,7 @@ class Factbase::Looged
       else
         array = []
         tail =
-          Factbase::Looged.elapsed do
+          Factbase::Logged.elapsed do
             @fb.query(@expr).each(params) do |f|
               array << f
             end
@@ -149,10 +149,10 @@ class Factbase::Looged
       r = nil
       before = @fb.size
       tail =
-        Factbase::Looged.elapsed do
+        Factbase::Logged.elapsed do
           r = @fb.query(@expr).delete!
         end
-      raise ".delete! of #{@query.class} returned #{r.class}" unless r.is_a?(Integer)
+      raise ".delete! of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
       if before.zero?
         @loog.debug("There were no facts, nothing deleted by '#{@expr}' #{tail}")
       elsif r.zero?

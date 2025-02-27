@@ -37,7 +37,7 @@ require 'yaml'
 #  {
 #    'name': ['Jeff', 'Walter'],
 #    'age': [42, 'unknown'],
-#    'place: 'LA'
+#    'place': 'LA'
 #  }
 #
 # Value sets, as you can see, allow data of different types. However, there
