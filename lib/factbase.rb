@@ -150,20 +150,18 @@ class Factbase
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
     pairs = {}
-    lookup = {}
     before =
       @mutex.synchronize do
         @maps.map do |m|
           n = m.transform_values(&:dup)
           # rubocop:disable Lint/HashCompareByIdentity
           pairs[n.object_id] = m.object_id
-          lookup[n.object_id] = n
           # rubocop:enable Lint/HashCompareByIdentity
           n
         end
       end
     require_relative 'factbase/taped'
-    taped = Factbase::Taped.new(before, lookup:)
+    taped = Factbase::Taped.new(before)
     begin
       require_relative 'factbase/light'
       yield Factbase::Light.new(Factbase.new(taped, cache: @cache), @cache)

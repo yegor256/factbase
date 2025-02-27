@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko

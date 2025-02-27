@@ -14,18 +14,15 @@ require_relative '../factbase'
 class Factbase::Taped
   attr_reader :inserted, :deleted, :added
 
-  def initialize(origin, lookup: {})
+  def initialize(origin)
     @origin = origin
     @inserted = Set.new
     @deleted = Set.new
     @added = Set.new
-    @lookup = lookup
   end
 
   def find_by_object_id(oid)
-    o = @lookup[oid]
-    o = @origin.find { |m| m.object_id == oid } if o.nil?
-    o
+    @origin.find { |m| m.object_id == oid }
   end
 
   def size
@@ -34,17 +31,12 @@ class Factbase::Taped
 
   def <<(map)
     @origin << (map)
-    # rubocop:disable Lint/HashCompareByIdentity
-    @lookup[map.object_id] = map
-    # rubocop:enable Lint/HashCompareByIdentity
     @inserted.add(map.object_id)
   end
 
   def each
+    return to_enum(__method__) unless block_given?
     @origin.each do |m|
-      # rubocop:disable Lint/HashCompareByIdentity
-      @lookup[m.object_id] = m
-      # rubocop:enable Lint/HashCompareByIdentity
       yield TapedHash.new(m, @added)
     end
   end
@@ -53,7 +45,6 @@ class Factbase::Taped
     @origin.delete_if do |m|
       r = yield m
       if r
-        @lookup.delete(m.object_id)
         @deleted.add(m.object_id)
       end
       r

@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
@@ -7,7 +6,7 @@
 require_relative '../lib/factbase'
 
 def bench_factbase(bmk, fb)
-  total = 50_000
+  total = 5_000
   bmk.report("insert #{total} facts") do
     total.times do
       fact = fb.insert
