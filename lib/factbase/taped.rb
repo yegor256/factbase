@@ -16,9 +16,9 @@ class Factbase::Taped
 
   def initialize(origin)
     @origin = origin
-    @inserted = Set.new
-    @deleted = Set.new
-    @added = Set.new
+    @inserted = []
+    @deleted = []
+    @added = []
   end
 
   def find_by_object_id(oid)
@@ -31,7 +31,7 @@ class Factbase::Taped
 
   def <<(map)
     @origin << (map)
-    @inserted.add(map.object_id)
+    @inserted.append(map.object_id)
   end
 
   def each
@@ -45,7 +45,7 @@ class Factbase::Taped
     @origin.delete_if do |m|
       r = yield m
       if r
-        @deleted.add(m.object_id)
+        @deleted.append(m.object_id)
       end
       r
     end
@@ -66,7 +66,7 @@ class Factbase::Taped
 
     def []=(key, value)
       @origin[key] = value
-      @added.add(@origin.object_id)
+      @added.append(@origin.object_id)
     end
   end
 
@@ -95,12 +95,12 @@ class Factbase::Taped
     end
 
     def <<(item)
-      @added.add(@oid)
+      @added.append(@oid)
       @origin << (item)
     end
 
     def uniq!
-      @added.add(@oid)
+      @added.append(@oid)
       @origin.uniq!
     end
   end
