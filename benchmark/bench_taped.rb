@@ -6,7 +6,7 @@
 require_relative '../lib/factbase'
 require_relative '../lib/factbase/taped'
 
-def bench_taped(bmk, fb)
+def bench_taped(bmk, _fb)
   maps = []
   taped = Factbase::Taped.new(maps)
 
@@ -17,7 +17,7 @@ def bench_taped(bmk, fb)
     end
   end
 
-  cycles = cycles / 50
+  cycles /= 50
   bmk.report("Taped.each() x#{cycles}") do
     cycles.times do
       taped.each.to_a

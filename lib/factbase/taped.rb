@@ -12,13 +12,23 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Taped
-  attr_reader :inserted, :deleted, :added
-
   def initialize(origin)
     @origin = origin
     @inserted = []
     @deleted = []
     @added = []
+  end
+
+  def inserted
+    @inserted.uniq
+  end
+
+  def deleted
+    @deleted.uniq
+  end
+
+  def added
+    @added.uniq
   end
 
   def find_by_object_id(oid)

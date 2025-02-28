@@ -171,21 +171,21 @@ class Factbase
     require_relative 'factbase/churn'
     churn = Factbase::Churn.new
     @mutex.synchronize do
-      taped.inserted.uniq.each do |oid|
+      taped.inserted.each do |oid|
         b = taped.find_by_object_id(oid)
         next if b.nil?
         @maps << b
         churn.append(1, 0, 0)
       end
       garbage = []
-      taped.added.uniq.each do |oid|
+      taped.added.each do |oid|
         b = taped.find_by_object_id(oid)
         next if b.nil?
         garbage << pairs[oid]
         @maps << b
         churn.append(0, 0, 1)
       end
-      taped.deleted.uniq.each do |oid|
+      taped.deleted.each do |oid|
         garbage << pairs[oid]
         churn.append(0, 1, 0)
       end
