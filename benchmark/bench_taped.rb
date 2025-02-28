@@ -10,21 +10,22 @@ def bench_taped(bmk, _fb)
   maps = []
   taped = Factbase::Taped.new(maps)
 
-  cycles = 10_000
+  cycles = 50_000
   bmk.report("Taped.append() x#{cycles}") do
     cycles.times do
       taped << { foo: rand(0..100) }
     end
   end
 
-  cycles /= 50
+  cycles /= 400
   bmk.report("Taped.each() x#{cycles}") do
     cycles.times do
       taped.each.to_a
     end
   end
 
-  bmk.report('Taped.delete_if()') do
+  cycles *= 3
+  bmk.report("Taped.delete_if() x#{cycles}") do
     cycles.times do
       taped.delete_if { |m| m[:foo] < 50 }
     end
