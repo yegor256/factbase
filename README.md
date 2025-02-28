@@ -207,28 +207,30 @@ If it's clean and you don't see any error messages, submit your pull request.
 This is the result of the benchmark:
 
 <!-- benchmark_begin -->
+```
                                                                    user     system      total        real
-insert 50000 facts                                             1.260420   0.016353   1.276773 (  1.282022)
-export 50000 facts                                             0.068404   0.001958   0.070362 (  0.070373)
-import 1009665 bytes (50000 facts)                             0.082487   0.009059   0.091546 (  0.091572)
-insert 10 facts                                                0.109468   0.015029   0.124497 (  0.124525)
-query 10 times                                                 4.021931   0.106738   4.128669 (  4.129001)
-modify 10 attrs                                                3.534844   0.047895   3.582739 (  3.583004)
-delete 10 facts                                                2.170305   0.003953   2.174258 (  2.174448)
-(gt time '2024-03-23T03:21:43Z')                               0.194027   0.005001   0.199028 (  0.199319)
-(gt cost 50)                                                   0.200799   0.003970   0.204769 (  0.205048)
-(eq title 'Object Thinking 5000')                              0.201568   0.003013   0.204581 (  0.204746)
-(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))           0.297912   0.003996   0.301908 (  0.301923)
-(eq id (agg (always) (max id)))                                0.397810   0.002991   0.400801 (  0.400948)
-(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))        4.585193   0.016241   4.601434 (  4.602741)
-delete!                                                        0.115284   0.000002   0.115286 (  0.115325)
-Taped.append() x50000                                          0.026238   0.000994   0.027232 (  0.027232)
-Taped.each() x125                                              1.337599   0.001969   1.339568 (  1.339810)
-Taped.delete_if() x375                                         0.825386   0.000000   0.825386 (  0.825462)
+insert 50000 facts                                             1.216926   0.009687   1.226613 (  1.233335)
+export 50000 facts                                             0.055611   0.002976   0.058587 (  0.058594)
+import 1008464 bytes (50000 facts)                             0.068731   0.008049   0.076780 (  0.076828)
+insert 10 facts                                                0.096866   0.019001   0.115867 (  0.115919)
+query 10 times                                                 3.940857   0.141913   4.082770 (  4.089283)
+modify 10 attrs                                                3.430524   0.064981   3.495505 (  3.499871)
+delete 10 facts                                                2.130973   0.001001   2.131974 (  2.132124)
+(gt time '2024-03-23T03:21:43Z')                               0.192254   0.005977   0.198231 (  0.198500)
+(gt cost 50)                                                   0.201262   0.004008   0.205270 (  0.205516)
+(eq title 'Object Thinking 5000')                              0.201111   0.003973   0.205084 (  0.205312)
+(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))           0.304289   0.002010   0.306299 (  0.306505)
+(eq id (agg (always) (max id)))                                0.399487   0.002987   0.402474 (  0.402837)
+(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))        4.501088   0.016998   4.518086 (  4.519644)
+delete!                                                        0.117293   0.000007   0.117300 (  0.117330)
+Taped.append() x50000                                          0.028056   0.001978   0.030034 (  0.030038)
+Taped.each() x125                                              1.332449   0.002015   1.334464 (  1.334506)
+Taped.delete_if() x375                                         0.820585   0.000000   0.820585 (  0.820626)
+```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-02-28 at 09:10,
+on 2025-02-28 at 09:13,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13584912849
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13584960859
