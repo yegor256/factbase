@@ -44,9 +44,7 @@ class Factbase::Taped
   def delete_if
     @origin.delete_if do |m|
       r = yield m
-      if r
-        @deleted.append(m.object_id)
-      end
+      @deleted.append(m.object_id) if r
       r
     end
   end

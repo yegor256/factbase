@@ -11,13 +11,14 @@ def bench_taped(bmk, fb)
   taped = Factbase::Taped.new(maps)
 
   cycles = 10_000
-  bmk.report('Taped.append()') do
+  bmk.report("Taped.append() x#{cycles}") do
     cycles.times do
       taped << { foo: rand(0..100) }
     end
   end
 
-  bmk.report('Taped.each()') do
+  cycles = cycles / 50
+  bmk.report("Taped.each() x#{cycles}") do
     cycles.times do
       taped.each.to_a
     end
