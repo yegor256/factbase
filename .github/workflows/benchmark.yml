@@ -23,7 +23,7 @@ jobs:
           bundler-cache: true
       - run: bundle config set --global path "$(pwd)/vendor/bundle"
       - run: bundle install --no-color
-      - run: bundle exec ruby benchmarks/simple.rb > stdout.txt
+      - run: bundle exec rake benchmark > stdout.txt
       - run: |
           set -x
           sum=$(
