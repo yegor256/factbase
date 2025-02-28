@@ -207,26 +207,28 @@ If it's clean and you don't see any error messages, submit your pull request.
 This is the result of the benchmark:
 
 <!-- benchmark_begin -->
-| Action | Seconds | Details |
-| --- | --: | --- |
-| `fb.insert()` | 2.010 | Inserted 25000 facts |
-| `(gt time '2024-03-23T03:21:43Z')` | 0.224 | 25000 facts x100 |
-| `(gt cost 50)` | 0.191 | 12484 facts x100 |
-| `(eq title 'Object Thinking 5000')` | 0.140 | 1 facts x100 |
-| `(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))` | 0.163 | 3 facts x100 |
-| `(eq id (agg (always) (max id)))` | 0.301 | 1 facts x100 |
-| `(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))` | 1.885 | 25000 facts x100 |
-| txn: `query()` | 19.363 | 0i/0d/0a |
-| txn: `insert()` | 0.065 | 100i/0d/0a |
-| txn: `add()` | 16.323 | 0i/0d/7a |
-| txn: `delete!()` | 3.555 | 0i/12277d/0a |
-| `.export()` + `.import()` | 0.341 | 1446750 bytes |
-| `(gt cost 3)` | 0.030 | Deleted 12344 fact(s) |
-| `(gt bar 1)` | 0.001 | Deleted 379 fact(s) |
+                                                                   user     system      total        real
+insert 50000 facts                                             1.260420   0.016353   1.276773 (  1.282022)
+export 50000 facts                                             0.068404   0.001958   0.070362 (  0.070373)
+import 1009665 bytes (50000 facts)                             0.082487   0.009059   0.091546 (  0.091572)
+insert 10 facts                                                0.109468   0.015029   0.124497 (  0.124525)
+query 10 times                                                 4.021931   0.106738   4.128669 (  4.129001)
+modify 10 attrs                                                3.534844   0.047895   3.582739 (  3.583004)
+delete 10 facts                                                2.170305   0.003953   2.174258 (  2.174448)
+(gt time '2024-03-23T03:21:43Z')                               0.194027   0.005001   0.199028 (  0.199319)
+(gt cost 50)                                                   0.200799   0.003970   0.204769 (  0.205048)
+(eq title 'Object Thinking 5000')                              0.201568   0.003013   0.204581 (  0.204746)
+(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))           0.297912   0.003996   0.301908 (  0.301923)
+(eq id (agg (always) (max id)))                                0.397810   0.002991   0.400801 (  0.400948)
+(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))        4.585193   0.016241   4.601434 (  4.602741)
+delete!                                                        0.115284   0.000002   0.115286 (  0.115325)
+Taped.append() x50000                                          0.026238   0.000994   0.027232 (  0.027232)
+Taped.each() x125                                              1.337599   0.001969   1.339568 (  1.339810)
+Taped.delete_if() x375                                         0.825386   0.000000   0.825386 (  0.825462)
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-02-24 at 16:14,
+on 2025-02-28 at 09:10,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13502564159
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13584912849
