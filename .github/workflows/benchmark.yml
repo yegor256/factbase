@@ -27,7 +27,9 @@ jobs:
       - run: |
           set -x
           sum=$(
+            echo '```'
             cat stdout.txt
+            echo '```'
             echo
             echo "The results were calculated in [this GHA job][benchmark-gha]"
             echo "on $(date +'%Y-%m-%d') at $(date +'%H:%M'),"
