@@ -209,28 +209,28 @@ This is the result of the benchmark:
 <!-- benchmark_begin -->
 ```
                                                                    user     system      total        real
-insert 50000 facts                                             1.216926   0.009687   1.226613 (  1.233335)
-export 50000 facts                                             0.055611   0.002976   0.058587 (  0.058594)
-import 1008464 bytes (50000 facts)                             0.068731   0.008049   0.076780 (  0.076828)
-insert 10 facts                                                0.096866   0.019001   0.115867 (  0.115919)
-query 10 times                                                 3.940857   0.141913   4.082770 (  4.089283)
-modify 10 attrs                                                3.430524   0.064981   3.495505 (  3.499871)
-delete 10 facts                                                2.130973   0.001001   2.131974 (  2.132124)
-(gt time '2024-03-23T03:21:43Z')                               0.192254   0.005977   0.198231 (  0.198500)
-(gt cost 50)                                                   0.201262   0.004008   0.205270 (  0.205516)
-(eq title 'Object Thinking 5000')                              0.201111   0.003973   0.205084 (  0.205312)
-(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))           0.304289   0.002010   0.306299 (  0.306505)
-(eq id (agg (always) (max id)))                                0.399487   0.002987   0.402474 (  0.402837)
-(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))        4.501088   0.016998   4.518086 (  4.519644)
-delete!                                                        0.117293   0.000007   0.117300 (  0.117330)
-Taped.append() x50000                                          0.028056   0.001978   0.030034 (  0.030038)
-Taped.each() x125                                              1.332449   0.002015   1.334464 (  1.334506)
-Taped.delete_if() x375                                         0.820585   0.000000   0.820585 (  0.820626)
+insert 50000 facts                                             1.254054   0.005913   1.259967 (  1.265006)
+export 50000 facts                                             0.058130   0.003007   0.061137 (  0.061143)
+import 1008548 bytes (50000 facts)                             0.069492   0.011984   0.081476 (  0.081481)
+insert 10 facts                                                0.100646   0.017048   0.117694 (  0.117699)
+query 10 times                                                 4.009878   0.126996   4.136874 (  4.137060)
+modify 10 attrs                                                3.482129   0.056947   3.539076 (  3.539267)
+delete 10 facts                                                2.143382   0.001010   2.144392 (  2.144499)
+(gt time '2024-03-23T03:21:43Z')                               0.189533   0.005015   0.194548 (  0.194772)
+(gt cost 50)                                                   0.199938   0.003972   0.203910 (  0.204126)
+(eq title 'Object Thinking 5000')                              0.202175   0.004005   0.206180 (  0.206375)
+(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))           0.304928   0.005998   0.310926 (  0.311205)
+(eq id (agg (always) (max id)))                                0.390569   0.003989   0.394558 (  0.394813)
+(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))        4.538154   0.005001   4.543155 (  4.543682)
+delete!                                                        0.113966   0.000000   0.113966 (  0.113969)
+Taped.append() x50000                                          0.023085   0.004994   0.028079 (  0.028080)
+Taped.each() x125                                              1.347818   0.004998   1.352816 (  1.352855)
+Taped.delete_if() x375                                         0.841235   0.000005   0.841240 (  0.841274)
 ```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-02-28 at 09:13,
+on 2025-02-28 at 14:23,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13584960859
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13590077886
