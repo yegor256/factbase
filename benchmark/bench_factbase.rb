@@ -32,21 +32,26 @@ def bench_factbase(bmk, fb)
       end
     end
   end
-  bmk.report("query #{actions} times") do
+  bmk.report("query #{actions} times w/txn") do
     fb.txn do |fbt|
       actions.times do |i|
-        fbt.query("(gt foo #{i})").each.to_a
+        fbt.query("(gt foo #{i})").each.to_a.each
       end
     end
   end
-  bmk.report("modify #{actions} attrs") do
+  bmk.report("query #{actions} times w/o txn") do
+    actions.times do |i|
+      fb.query("(gt foo #{i})").each.to_a.each
+    end
+  end
+  bmk.report("modify #{actions} attrs w/txn") do
     fb.txn do |fbt|
       actions.times do |i|
         fbt.query("(gt foo #{i})").each.to_a.first.bar = 55
       end
     end
   end
-  bmk.report("delete #{actions} facts") do
+  bmk.report("delete #{actions} facts w/txn") do
     fb.txn do |fbt|
       actions.times do |i|
         fbt.query("(gt foo #{100 - i})").delete!
