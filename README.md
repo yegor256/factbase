@@ -208,37 +208,34 @@ This is the result of the benchmark:
 
 <!-- benchmark_begin -->
 ```text
-
-
-Benchmarking, please wait a few seconds...
                                                                    user     system      total        real
-insert 500 facts                                               0.017487   0.000000   0.017487 (  0.017560)
-export 500 facts                                               0.000517   0.000024   0.000541 (  0.000542)
-import 10456 bytes (500 facts)                                 0.000404   0.000000   0.000404 (  0.000404)
-insert 10 facts                                                0.001825   0.000000   0.001825 (  0.001826)
-query 10 times w/txn                                           0.049619   0.003999   0.053618 (  0.053621)
-query 10 times w/o txn                                         0.043671   0.000000   0.043671 (  0.043673)
-modify 10 attrs w/txn                                          0.030897   0.000975   0.031872 (  0.031875)
-delete 10 facts w/txn                                          0.012024   0.000013   0.012037 (  0.012038)
-(and (eq what 'issue-was-closed') (exists... -> 200            7.836740   0.018246   7.854986 (  7.855478)
-(and (eq what 'issue-was-closed') (exists... -> 200/txn        8.817858   0.014003   8.831861 (  8.832345)
-(and (eq what 'issue-was-closed') (exists... -> zero          10.051354   0.017001  10.068355 ( 10.069083)
-(and (eq what 'issue-was-closed') (exists... -> zero/txn      10.667497   0.016002  10.683499 ( 10.684435)
-(gt time '2024-03-23T03:21:43Z')                               0.008827   0.000000   0.008827 (  0.008827)
-(gt cost 50)                                                   0.009784   0.000002   0.009786 (  0.009789)
-(eq title 'Object Thinking 5000')                              0.008519   0.000000   0.008519 (  0.008523)
-(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))           0.013591   0.000000   0.013591 (  0.013595)
-(eq id (agg (always) (max id)))                                0.021419   0.000000   0.021419 (  0.021423)
-(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))        0.141201   0.000000   0.141201 (  0.141216)
-delete!                                                        0.004025   0.000000   0.004025 (  0.004027)
-Taped.append() x50000                                          0.038128   0.001997   0.040125 (  0.040130)
-Taped.each() x125                                              1.510154   0.001001   1.511155 (  1.511313)
-Taped.delete_if() x375                                         0.883123   0.000000   0.883123 (  0.883229)
+insert 500 facts                                               0.014864   0.001975   0.016839 (  0.022081)
+export 500 facts                                               0.000442   0.000104   0.000546 (  0.000545)
+import 10471 bytes (500 facts)                                 0.000400   0.000000   0.000400 (  0.000401)
+insert 10 facts                                                0.001682   0.000022   0.001704 (  0.001706)
+query 10 times w/txn                                           0.044960   0.000017   0.044977 (  0.044979)
+query 10 times w/o txn                                         0.036477   0.000000   0.036477 (  0.036479)
+modify 10 attrs w/txn                                          0.030350   0.000001   0.030351 (  0.030351)
+delete 10 facts w/txn                                          0.012024   0.000009   0.012033 (  0.012034)
+(and (eq what 'issue-was-closed') (exists... -> 200            7.441920   0.016109   7.458029 (  7.458467)
+(and (eq what 'issue-was-closed') (exists... -> 200/txn        8.225194   0.012010   8.237204 (  8.237618)
+(and (eq what 'issue-was-closed') (exists... -> zero           9.219058   0.014000   9.233058 (  9.233282)
+(and (eq what 'issue-was-closed') (exists... -> zero/txn      10.053033   0.016002  10.069035 ( 10.069337)
+(gt time '2024-03-23T03:21:43Z')                               0.008293   0.000000   0.008293 (  0.008293)
+(gt cost 50)                                                   0.008924   0.000000   0.008924 (  0.008933)
+(eq title 'Object Thinking 5000')                              0.008048   0.000000   0.008048 (  0.008049)
+(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))           0.011836   0.000001   0.011837 (  0.011838)
+(eq id (agg (always) (max id)))                                0.019566   0.000000   0.019566 (  0.019567)
+(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))        0.130626   0.000997   0.131623 (  0.131636)
+delete!                                                        0.003929   0.000000   0.003929 (  0.003931)
+Taped.append() x50000                                          0.036295   0.004001   0.040296 (  0.040324)
+Taped.each() x125                                              1.416123   0.002000   1.418123 (  1.418151)
+Taped.delete_if() x375                                         0.813407   0.000000   0.813407 (  0.813443)
 ```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-03-03 at 15:04,
+on 2025-03-03 at 15:36,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13633891920
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13634551256
