@@ -172,6 +172,7 @@ class Factbase::Term
     fact[k]
   end
 
+  # @return [Array|nil] Either array of values or NIL
   def the_values(pos, fact, maps)
     v = @operands[pos]
     v = v.evaluate(fact, maps) if v.is_a?(Factbase::Term)
