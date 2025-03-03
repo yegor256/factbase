@@ -42,6 +42,7 @@ end
 
 desc 'Benchmark them all'
 task :benchmark do
+  puts "\n\nBenchmarking, please wait a few seconds..."
   fb = Factbase.new
   require 'benchmark'
   Benchmark.bm(60) do |b|

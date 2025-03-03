@@ -80,15 +80,49 @@ def bench_large_query(bmk, fb)
     (as closer who)
     (as who assigner)
     (empty (and
-      (eq what 'issue-was-closed')
+      (eq what 'bug-was-resolved')
       (eq where $where)
       (eq issue $issue)
       (eq repository $repository))))".gsub(/\s+/, ' ')
 
   cycles = 1
-  bmk.report("#{q[0..40]}...") do
+  bmk.report("#{q[0..40]}... -> #{total}") do
     cycles.times do
-      Factbase::Logged.new(fb, Loog::VERBOSE).query(q).each.to_a
+      t = fb.query(q).each.to_a.size
+      raise "Found #{t} facts, expected to find #{total}" unless t == total
+    end
+  end
+  bmk.report("#{q[0..40]}... -> #{total}/txn") do
+    cycles.times do
+      fb.txn do |fbt|
+        t = fbt.query(q).each.to_a.size
+        raise "Found #{t} facts, expected to find #{total}" unless t == total
+      end
+    end
+  end
+
+  total.times do |i|
+    f = fb.insert
+    f.id = i
+    f.where = 'github'
+    f.what = 'bug-was-resolved'
+    f.who = 444
+    f.when = Time.now - (i * rand(1_000..100_000))
+    f.issue = i
+    f.repository = repo
+  end
+  bmk.report("#{q[0..40]}... -> zero") do
+    cycles.times do
+      t = fb.query(q).each.to_a.size
+      raise "Found #{t} facts, expected to find nothing" unless t.zero?
+    end
+  end
+  bmk.report("#{q[0..40]}... -> zero/txn") do
+    cycles.times do
+      fb.txn do |fbt|
+        t = fbt.query(q).each.to_a.size
+        raise "Found #{t} facts, expected to find nothing" unless t.zero?
+      end
     end
   end
 end

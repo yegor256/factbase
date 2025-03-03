@@ -68,7 +68,7 @@ class Factbase::Taped
 
     def [](key)
       v = @origin[key]
-      v = TapedArray.new(v, @origin.object_id, @added) if v.respond_to?(:each)
+      v = TapedArray.new(v, @origin.object_id, @added) if v.is_a?(Array)
       v
     end
 
@@ -87,6 +87,7 @@ class Factbase::Taped
     end
 
     def each(&)
+      return to_enum(__method__) unless block_given?
       @origin.each(&)
     end
 

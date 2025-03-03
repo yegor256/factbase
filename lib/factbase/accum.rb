@@ -41,7 +41,7 @@ class Factbase::Accum
       kk = args[1].to_s
       vv = @props[kk].nil? ? [] : @props[kk]
       vvv = @fact.method_missing(*args)
-      vvv = [vvv] unless vvv.nil? || vvv.respond_to?(:each)
+      vvv = [vvv] unless vvv.nil? || vvv.respond_to?(:to_a)
       vv += vvv.to_a unless vvv.nil?
       vv.uniq!
       vv.empty? ? nil : vv
