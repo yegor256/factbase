@@ -80,7 +80,7 @@ def bench_large_query(bmk, fb)
     (as closer who)
     (as who assigner)
     (empty (and
-      (eq what 'issue-was-closed')
+      (eq what 'bug-was-resolved')
       (eq where $where)
       (eq issue $issue)
       (eq repository $repository))))".gsub(/\s+/, ' ')
@@ -88,7 +88,8 @@ def bench_large_query(bmk, fb)
   cycles = 1
   bmk.report("#{q[0..40]}...") do
     cycles.times do
-      Factbase::Logged.new(fb, Loog::VERBOSE).query(q).each.to_a
+      t = fb.query(q).each.to_a.size
+      raise "Found #{t} facts, expected to find #{total}" unless t == total
     end
   end
 end

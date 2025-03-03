@@ -87,6 +87,7 @@ class Factbase::Taped
     end
 
     def each(&)
+      return to_enum(__method__) unless block_given?
       @origin.each(&)
     end
 
