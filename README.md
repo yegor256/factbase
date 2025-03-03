@@ -207,30 +207,38 @@ If it's clean and you don't see any error messages, submit your pull request.
 This is the result of the benchmark:
 
 <!-- benchmark_begin -->
-```
+```text
+
+
+Benchmarking, please wait a few seconds...
                                                                    user     system      total        real
-insert 50000 facts                                             1.254054   0.005913   1.259967 (  1.265006)
-export 50000 facts                                             0.058130   0.003007   0.061137 (  0.061143)
-import 1008548 bytes (50000 facts)                             0.069492   0.011984   0.081476 (  0.081481)
-insert 10 facts                                                0.100646   0.017048   0.117694 (  0.117699)
-query 10 times                                                 4.009878   0.126996   4.136874 (  4.137060)
-modify 10 attrs                                                3.482129   0.056947   3.539076 (  3.539267)
-delete 10 facts                                                2.143382   0.001010   2.144392 (  2.144499)
-(gt time '2024-03-23T03:21:43Z')                               0.189533   0.005015   0.194548 (  0.194772)
-(gt cost 50)                                                   0.199938   0.003972   0.203910 (  0.204126)
-(eq title 'Object Thinking 5000')                              0.202175   0.004005   0.206180 (  0.206375)
-(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))           0.304928   0.005998   0.310926 (  0.311205)
-(eq id (agg (always) (max id)))                                0.390569   0.003989   0.394558 (  0.394813)
-(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))        4.538154   0.005001   4.543155 (  4.543682)
-delete!                                                        0.113966   0.000000   0.113966 (  0.113969)
-Taped.append() x50000                                          0.023085   0.004994   0.028079 (  0.028080)
-Taped.each() x125                                              1.347818   0.004998   1.352816 (  1.352855)
-Taped.delete_if() x375                                         0.841235   0.000005   0.841240 (  0.841274)
+insert 500 facts                                               0.017487   0.000000   0.017487 (  0.017560)
+export 500 facts                                               0.000517   0.000024   0.000541 (  0.000542)
+import 10456 bytes (500 facts)                                 0.000404   0.000000   0.000404 (  0.000404)
+insert 10 facts                                                0.001825   0.000000   0.001825 (  0.001826)
+query 10 times w/txn                                           0.049619   0.003999   0.053618 (  0.053621)
+query 10 times w/o txn                                         0.043671   0.000000   0.043671 (  0.043673)
+modify 10 attrs w/txn                                          0.030897   0.000975   0.031872 (  0.031875)
+delete 10 facts w/txn                                          0.012024   0.000013   0.012037 (  0.012038)
+(and (eq what 'issue-was-closed') (exists... -> 200            7.836740   0.018246   7.854986 (  7.855478)
+(and (eq what 'issue-was-closed') (exists... -> 200/txn        8.817858   0.014003   8.831861 (  8.832345)
+(and (eq what 'issue-was-closed') (exists... -> zero          10.051354   0.017001  10.068355 ( 10.069083)
+(and (eq what 'issue-was-closed') (exists... -> zero/txn      10.667497   0.016002  10.683499 ( 10.684435)
+(gt time '2024-03-23T03:21:43Z')                               0.008827   0.000000   0.008827 (  0.008827)
+(gt cost 50)                                                   0.009784   0.000002   0.009786 (  0.009789)
+(eq title 'Object Thinking 5000')                              0.008519   0.000000   0.008519 (  0.008523)
+(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))           0.013591   0.000000   0.013591 (  0.013595)
+(eq id (agg (always) (max id)))                                0.021419   0.000000   0.021419 (  0.021423)
+(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))        0.141201   0.000000   0.141201 (  0.141216)
+delete!                                                        0.004025   0.000000   0.004025 (  0.004027)
+Taped.append() x50000                                          0.038128   0.001997   0.040125 (  0.040130)
+Taped.each() x125                                              1.510154   0.001001   1.511155 (  1.511313)
+Taped.delete_if() x375                                         0.883123   0.000000   0.883123 (  0.883229)
 ```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-02-28 at 14:23,
+on 2025-03-03 at 15:04,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13590077886
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/13633891920
