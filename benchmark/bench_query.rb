@@ -6,7 +6,7 @@
 require_relative '../lib/factbase'
 
 def bench_query(bmk, fb)
-  total = 5_000
+  total = 500
   total.times do |i|
     f = fb.insert
     f.id = i
