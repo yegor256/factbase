@@ -119,6 +119,15 @@ class TestSyntax < Factbase::Test
     end
   end
 
+  def test_raises_on_broken_syntax
+    100.times do
+      q = ['(', ')', '#test', '$foo', '%what', '"hello"', '42', '+', '?', '!', '\"', '\''].shuffle.join(' ')
+      assert_raises(Factbase::Syntax::Broken) do
+        Factbase::Syntax.new(Factbase.new, q).to_term
+      end
+    end
+  end
+
   def test_simplification
     {
       '(foo)' => '(foo)',

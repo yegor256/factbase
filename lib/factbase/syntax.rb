@@ -28,6 +28,9 @@ require_relative 'term_once'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Syntax
+  # If the syntax is broken.
+  class Broken < StandardError; end
+
   # Ctor.
   #
   # The class provided as the +term+ argument must have a three-argument
@@ -57,7 +60,7 @@ class Factbase::Syntax
   rescue StandardError => e
     err = "#{e.message} (#{Backtrace.new(e)}) in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
-    raise err
+    raise Broken, err
   end
 
   private
