@@ -92,6 +92,14 @@ def bench_large_query(bmk, fb)
       raise "Found #{t} facts, expected to find #{total}" unless t == total
     end
   end
+  bmk.report("#{q[0..40]}... -> #{total}/txn") do
+    cycles.times do
+      fb.txn do |fbt|
+        t = fbt.query(q).each.to_a.size
+        raise "Found #{t} facts, expected to find #{total}" unless t == total
+      end
+    end
+  end
 
   total.times do |i|
     f = fb.insert
@@ -107,6 +115,14 @@ def bench_large_query(bmk, fb)
     cycles.times do
       t = fb.query(q).each.to_a.size
       raise "Found #{t} facts, expected to find nothing" unless t.zero?
+    end
+  end
+  bmk.report("#{q[0..40]}... -> zero/txn") do
+    cycles.times do
+      fb.txn do |fbt|
+        t = fbt.query(q).each.to_a.size
+        raise "Found #{t} facts, expected to find nothing" unless t.zero?
+      end
     end
   end
 end
