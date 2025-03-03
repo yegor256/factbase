@@ -179,11 +179,12 @@ class Factbase::Term
     v = fact[v.to_s] if v.is_a?(Symbol)
     return v if v.nil?
     unless v.is_a?(Array)
-      if v.respond_to?(:each)
-        v = v.to_a
-      else
-        v = [v]
-      end
+      v =
+        if v.respond_to?(:each)
+          v.to_a
+        else
+          [v]
+        end
     end
     v
   end
