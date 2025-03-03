@@ -25,7 +25,7 @@ module Factbase::Term::Meta
     assert_args(1)
     v = by_symbol(0, fact)
     return 0 if v.nil?
-    return 1 unless v.respond_to?(:each)
+    return 1 unless v.respond_to?(:to_a)
     v.size
   end
 
