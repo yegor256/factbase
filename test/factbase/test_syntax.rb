@@ -122,7 +122,7 @@ class TestSyntax < Factbase::Test
   def test_raises_on_broken_syntax
     100.times do
       q = ['(', ')', '#test', '$foo', '%what', '"hello"', '42', '+', '?', '!', '\"', '\''].shuffle.join(' ')
-      assert_raises(Factbase::Syntax::Broken) do
+      assert_raises(Factbase::Syntax::Broken, q) do
         Factbase::Syntax.new(Factbase.new, q).to_term
       end
     end
