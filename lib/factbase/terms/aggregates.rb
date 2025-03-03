@@ -50,7 +50,7 @@ module Factbase::Term::Aggregates
     maps.each do |m|
       vv = m[k.to_s]
       next if vv.nil?
-      vv = [vv] unless vv.respond_to?(:to_a)
+      vv = [vv] unless vv.respond_to?(:each)
       vv.each do |v|
         sum += v
       end
@@ -82,7 +82,7 @@ module Factbase::Term::Aggregates
     maps.each do |m|
       vv = m[k.to_s]
       next if vv.nil?
-      vv = [vv] unless vv.respond_to?(:to_a)
+      vv = [vv] unless vv.respond_to?(:each)
       vv.each do |v|
         best = v if best.nil? || yield(v, best)
       end
