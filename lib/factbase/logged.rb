@@ -6,20 +6,29 @@
 require 'decoor'
 require 'others'
 require 'time'
-require 'loog'
 require 'tago'
 require_relative 'syntax'
 
 # A decorator of a Factbase, that logs all operations.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Logged
-  def initialize(fb, loog)
+  # Ctor.
+  # @param [Factbase] fb The factbase to decorate
+  # @param [Object] log The logging facility
+  # @param [Integer] time_tolerate How many seconds are OK per request
+  # @param [Print] tube The tube to use, if log is NIL
+  def initialize(fb, log = nil, time_tolerate: 1, tube: nil)
     raise 'The "fb" is nil' if fb.nil?
     @fb = fb
-    raise 'The "loog" is nil' if loog.nil?
-    @loog = loog
+    if log.nil?
+      raise 'Either "log" or "tube" must be non-NIL' if tube.nil?
+      @tube = tube
+    else
+      @tube = Tube.new(log, time_tolerate:)
+    end
   end
 
   decoor(:fb)
@@ -27,12 +36,12 @@ class Factbase::Logged
   def insert
     start = Time.now
     f = @fb.insert
-    @loog.debug("Inserted new fact ##{@fb.size} in #{start.ago}")
-    Fact.new(f, @loog)
+    @tube.say(start, "Inserted new fact ##{@fb.size} in #{start.ago}")
+    Fact.new(f, tube: @tube)
   end
 
   def query(query)
-    Query.new(@fb, query, @loog)
+    Query.new(@fb, query, @tube)
   end
 
   def txn
@@ -42,17 +51,34 @@ class Factbase::Logged
     r =
       @fb.txn do |fbt|
         id = fbt.object_id
-        yield Factbase::Logged.new(fbt, @loog)
+        yield Factbase::Logged.new(fbt, tube: @tube)
       rescue Factbase::Rollback => e
         rollback = true
         raise e
       end
     if rollback
-      Factbase::Logged.log_it(@loog, start, "Txn ##{id} rolled back in #{start.ago}")
+      @tube.say(start, "Txn ##{id} rolled back in #{start.ago}")
     else
-      Factbase::Logged.log_it(@loog, start, "Txn ##{id} touched #{r} in #{start.ago}")
+      @tube.say(start, "Txn ##{id} touched #{r} in #{start.ago}")
     end
     r
+  end
+
+  # Printer of log messages.
+  class Tube
+    def initialize(log, time_tolerate: 1)
+      @log = log
+      @time_tolerate = time_tolerate
+    end
+
+    def say(start, msg)
+      m = :debug
+      if Time.now - start > @time_tolerate
+        msg = "#{msg} (slow!)"
+        m = :warn
+      end
+      @log.send(m, msg)
+    end
   end
 
   # Fact decorator.
@@ -62,9 +88,14 @@ class Factbase::Logged
   class Fact
     MAX_LENGTH = 64
 
-    def initialize(fact, loog)
+    def initialize(fact, tube: nil, log: nil)
       @fact = fact
-      @loog = loog
+      @tube =
+        if log.nil?
+          tube
+        else
+          Tube.new(log)
+        end
     end
 
     def to_s
@@ -76,13 +107,14 @@ class Factbase::Logged
     end
 
     others do |*args|
+      start = Time.now
       r = @fact.method_missing(*args)
       k = args[0].to_s
       v = args[1]
       s = v.is_a?(Time) ? v.utc.iso8601 : v.to_s
       s = v.to_s.inspect if v.is_a?(String)
       s = "#{s[0..MAX_LENGTH / 2]}...#{s[-MAX_LENGTH / 2..]}" if s.length > MAX_LENGTH
-      @loog.debug("Set '#{k[0..-2]}' to #{s} (#{v.class})") if k.end_with?('=')
+      @tube.say(start, "Set '#{k[0..-2]}' to #{s} (#{v.class})") if k.end_with?('=')
       r
     end
   end
@@ -92,10 +124,10 @@ class Factbase::Logged
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Query
-    def initialize(fb, expr, loog)
+    def initialize(fb, expr, tube)
       @fb = fb
       @expr = expr
-      @loog = loog
+      @tube = tube
     end
 
     def one(params = {})
@@ -107,9 +139,9 @@ class Factbase::Logged
           r = @fb.query(@expr).one(params)
         end
       if r.nil?
-        Factbase::Logged.log_it(@loog, start, "Nothing found by '#{q}' #{tail}")
+        @tube.say(start, "Nothing found by '#{q}' #{tail}")
       else
-        Factbase::Logged.log_it(@loog, start, "Found #{r} (#{r.class}) by '#{q}' #{tail}")
+        @tube.say(start, "Found #{r} (#{r.class}) by '#{q}' #{tail}")
       end
       r
     end
@@ -125,9 +157,9 @@ class Factbase::Logged
           end
         raise ".each of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
-          Factbase::Logged.log_it(@loog, start, "Nothing found by '#{q}' #{tail}")
+          @tube.say(start, "Nothing found by '#{q}' #{tail}")
         else
-          Factbase::Logged.log_it(@loog, start, "Found #{r} fact(s) by '#{q}' #{tail}")
+          @tube.say(start, "Found #{r} fact(s) by '#{q}' #{tail}")
         end
         r
       else
@@ -139,9 +171,9 @@ class Factbase::Logged
             end
           end
         if array.empty?
-          Factbase::Logged.log_it(@loog, start, "Nothing found by '#{q}' #{tail}")
+          @tube.say(start, "Nothing found by '#{q}' #{tail}")
         else
-          Factbase::Logged.log_it(@loog, start, "Found #{array.size} fact(s) by '#{q}' #{tail}")
+          @tube.say(start, "Found #{array.size} fact(s) by '#{q}' #{tail}")
         end
         array
       end
@@ -157,11 +189,11 @@ class Factbase::Logged
         end
       raise ".delete! of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
       if before.zero?
-        Factbase::Logged.log_it(@loog, start, "There were no facts, nothing deleted by '#{@expr}' #{tail}")
+        @tube.say(start, "There were no facts, nothing deleted by '#{@expr}' #{tail}")
       elsif r.zero?
-        Factbase::Logged.log_it(@loog, start, "No facts out of #{before} deleted by '#{@expr}' #{tail}")
+        @tube.say(start, "No facts out of #{before} deleted by '#{@expr}' #{tail}")
       else
-        Factbase::Logged.log_it(@loog, start, "Deleted #{r} fact(s) out of #{before} by '#{@expr}' #{tail}")
+        @tube.say(start, "Deleted #{r} fact(s) out of #{before} by '#{@expr}' #{tail}")
       end
       r
     end
@@ -171,14 +203,5 @@ class Factbase::Logged
     start = Time.now
     yield
     "in #{start.ago}"
-  end
-
-  def self.log_it(loog, start, msg)
-    m = :debug
-    if Time.now - start > 1
-      msg = "#{msg} (slow!)"
-      m = :warn
-    end
-    loog.send(m, msg)
   end
 end

@@ -48,6 +48,13 @@ class TestLogged < Factbase::Test
     assert_includes(log.to_s, 'touched', log)
   end
 
+  def test_with_slow_txn
+    log = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, log, time_tolerate: 0.1)
+    fb.txn { sleep 0.4 }
+    assert_includes(log.to_s, '(slow!)', log)
+  end
+
   def test_with_txn_rollback
     log = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, log)
