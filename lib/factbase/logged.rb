@@ -48,9 +48,9 @@ class Factbase::Logged
         raise e
       end
     if rollback
-      @loog.debug("Txn ##{id} rolled back in #{start.ago}")
+      Factbase::Logged.log_it(@loog, start, "Txn ##{id} rolled back in #{start.ago}")
     else
-      @loog.debug("Txn ##{id} touched #{r} in #{start.ago}")
+      Factbase::Logged.log_it(@loog, start, "Txn ##{id} touched #{r} in #{start.ago}")
     end
     r
   end
@@ -99,6 +99,7 @@ class Factbase::Logged
     end
 
     def one(params = {})
+      start = Time.now
       q = Factbase::Syntax.new(@fb, @expr).to_term.to_s
       r = nil
       tail =
@@ -106,14 +107,15 @@ class Factbase::Logged
           r = @fb.query(@expr).one(params)
         end
       if r.nil?
-        @loog.debug("Nothing found by '#{q}' #{tail}")
+        Factbase::Logged.log_it(@loog, start, "Nothing found by '#{q}' #{tail}")
       else
-        @loog.debug("Found #{r} (#{r.class}) by '#{q}' #{tail}")
+        Factbase::Logged.log_it(@loog, start, "Found #{r} (#{r.class}) by '#{q}' #{tail}")
       end
       r
     end
 
     def each(params = {}, &)
+      start = Time.now
       q = Factbase::Syntax.new(@fb, @expr).to_term.to_s
       if block_given?
         r = nil
@@ -123,9 +125,9 @@ class Factbase::Logged
           end
         raise ".each of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
-          @loog.debug("Nothing found by '#{q}' #{tail}")
+          Factbase::Logged.log_it(@loog, start, "Nothing found by '#{q}' #{tail}")
         else
-          @loog.debug("Found #{r} fact(s) by '#{q}' #{tail}")
+          Factbase::Logged.log_it(@loog, start, "Found #{r} fact(s) by '#{q}' #{tail}")
         end
         r
       else
@@ -137,9 +139,9 @@ class Factbase::Logged
             end
           end
         if array.empty?
-          @loog.debug("Nothing found by '#{q}' #{tail}")
+          Factbase::Logged.log_it(@loog, start, "Nothing found by '#{q}' #{tail}")
         else
-          @loog.debug("Found #{array.size} fact(s) by '#{q}' #{tail}")
+          Factbase::Logged.log_it(@loog, start, "Found #{array.size} fact(s) by '#{q}' #{tail}")
         end
         array
       end
@@ -147,6 +149,7 @@ class Factbase::Logged
 
     def delete!
       r = nil
+      start = Time.now
       before = @fb.size
       tail =
         Factbase::Logged.elapsed do
@@ -154,11 +157,11 @@ class Factbase::Logged
         end
       raise ".delete! of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
       if before.zero?
-        @loog.debug("There were no facts, nothing deleted by '#{@expr}' #{tail}")
+        Factbase::Logged.log_it(@loog, start, "There were no facts, nothing deleted by '#{@expr}' #{tail}")
       elsif r.zero?
-        @loog.debug("No facts out of #{before} deleted by '#{@expr}' #{tail}")
+        Factbase::Logged.log_it(@loog, start, "No facts out of #{before} deleted by '#{@expr}' #{tail}")
       else
-        @loog.debug("Deleted #{r} fact(s) out of #{before} by '#{@expr}' #{tail}")
+        Factbase::Logged.log_it(@loog, start, "Deleted #{r} fact(s) out of #{before} by '#{@expr}' #{tail}")
       end
       r
     end
@@ -168,5 +171,14 @@ class Factbase::Logged
     start = Time.now
     yield
     "in #{start.ago}"
+  end
+
+  def self.log_it(loog, start, msg)
+    m = :debug
+    if Time.now - start > 1
+      msg = "#{msg} (slow!)"
+      m = :warn
+    end
+    loog.send(m, msg)
   end
 end
