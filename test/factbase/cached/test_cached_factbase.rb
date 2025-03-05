@@ -17,6 +17,7 @@ class TestCachedQuery < Factbase::Test
     fb = Factbase::CachedFactbase.new(Factbase.new)
     f = fb.insert
     f.foo = 1
-    assert_equal(1, fb.query('(eq foo 1)').each.to_a.size)
+    f.bar = 'test'
+    assert_equal(1, fb.query('(and (eq foo 1) (eq bar "test"))').each.to_a.size)
   end
 end
