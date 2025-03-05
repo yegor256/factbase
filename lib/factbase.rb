@@ -69,14 +69,12 @@ class Factbase
   # An exception that may be thrown in a transaction, to roll it back.
   class Rollback < StandardError; end
 
-  attr_reader :cache
-
   # Constructor.
   # @param [Array<Hash>] maps Array of facts to start with
-  def initialize(maps = [], cache: {})
+  def initialize(maps = [])
     @maps = maps
     @mutex = Mutex.new
-    @cache = cache
+    @cache = {}
   end
 
   # Size, the total number of facts in the factbase.
@@ -98,9 +96,8 @@ class Factbase
     @mutex.synchronize do
       @maps << map
     end
-    @cache.clear
     require_relative 'factbase/fact'
-    Factbase::Fact.new(self, @mutex, map)
+    Factbase::Fact.new(@mutex, map)
   end
 
   # Create a query capable of iterating.
@@ -121,15 +118,9 @@ class Factbase
   # +README.md+ file of the repository.
   #
   # @param [String] query The query to use for selections
-  # @param [Array<Hash>] maps Custom maps
-  def query(query, maps = @maps)
+  def query(query)
     require_relative 'factbase/query'
-    require_relative 'factbase/query_once'
-    Factbase::QueryOnce.new(
-      self,
-      Factbase::Query.new(self, maps, @mutex, query),
-      maps
-    )
+    Factbase::Query.new(@maps, @mutex, query)
   end
 
   # Run an ACID transaction, which will either modify the factbase

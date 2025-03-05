@@ -8,7 +8,6 @@ require 'time'
 require_relative '../factbase'
 require_relative 'fact'
 require_relative 'term'
-require_relative 'term_once'
 
 # Syntax.
 #
@@ -37,11 +36,9 @@ class Factbase::Syntax
   # constructor, similar to the class +Factbase::Term+. Also, it must be
   # a child of +Factbase::Term+.
   #
-  # @param [Factbase] fb Factbase
   # @param [String] query The query, for example "(eq id 42)"
   # @param [Class] term The class to instantiate to make every term
-  def initialize(fb, query, term: Factbase::Term)
-    @fb = fb
+  def initialize(query, term: Factbase::Term)
     @query = query
     raise "Term must be a Class, while #{term.class.name} provided" unless term.is_a?(Class)
     raise "The 'term' must be a child of Factbase::Term, while #{term.name} provided" unless term <= Factbase::Term
@@ -103,8 +100,7 @@ class Factbase::Syntax
       operands << operand
       break if tokens[at] == :close
     end
-    t = @term.new(@fb, op, operands)
-    t = Factbase::TermOnce.new(t, @fb.cache) if t.instance_of?(Factbase::Term)
+    t = @term.new(op, operands)
     [t, at + 1]
   end
 

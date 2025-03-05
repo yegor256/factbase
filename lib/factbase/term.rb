@@ -17,7 +17,7 @@ require_relative 'tee'
 #
 #  require 'factbase/fact'
 #  require 'factbase/term'
-#  f = Factbase::Fact.new(Factbase.new, Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
+#  f = Factbase::Fact.new(Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
 #  t = Factbase::Term.new(Factbase.new, :lt, [:foo, 50])
 #  assert(t.evaluate(f))
 #
@@ -70,11 +70,9 @@ class Factbase::Term
   include Factbase::Term::Debug
 
   # Ctor.
-  # @param [Factbase] fb Factbase
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
-  def initialize(fb, operator, operands)
-    @fb = fb
+  def initialize(operator, operands)
     @op = operator
     @operands = operands
   end

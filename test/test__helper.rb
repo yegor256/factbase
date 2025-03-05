@@ -23,6 +23,6 @@ require_relative '../lib/factbase'
 class Factbase::Test < Minitest::Test
   def fact(map = {})
     require 'factbase/fact'
-    Factbase::Fact.new(Factbase.new, Mutex.new, map)
+    Factbase::Fact.new(Mutex.new, map)
   end
 end
