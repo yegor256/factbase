@@ -22,6 +22,8 @@ require_relative '../factbase'
 # A fact is basically a key/value hash map, where values are non-empty
 # sets of values.
 #
+# It is NOT thread-safe!
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT

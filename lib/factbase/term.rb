@@ -30,6 +30,8 @@ require_relative 'tee'
 # Moreover, it looks like the number of possible term types is rather limited
 # and currently we implement most of them.
 #
+# It is NOT thread-safe!
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
