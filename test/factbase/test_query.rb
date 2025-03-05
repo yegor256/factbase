@@ -7,6 +7,7 @@ require_relative '../test__helper'
 require 'time'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/query'
+require_relative '../../lib/factbase/cached/cached_factbase'
 
 # Query test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -72,7 +73,7 @@ class TestQuery < Factbase::Test
       "(or (eq num +66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1,
       '(eq 3 (agg (eq num $num) (count)))' => 1
     }.each do |q, r|
-      fb = Factbase.new(maps)
+      fb = Factbase::CachedFactbase.new(Factbase.new(maps))
       assert_equal(r, fb.query(q).each.to_a.size, q)
       fb.txn do |fbt|
         assert_equal(r, fbt.query(q).each.to_a.size, q)
