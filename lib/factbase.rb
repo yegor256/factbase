@@ -73,7 +73,6 @@ class Factbase
   # @param [Array<Hash>] maps Array of facts to start with
   def initialize(maps = [])
     @maps = maps
-    @cache = {}
   end
 
   # Size, the total number of facts in the factbase.
