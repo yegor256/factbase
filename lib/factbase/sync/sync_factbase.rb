@@ -30,11 +30,13 @@ class Factbase::SyncFactbase
   end
 
   # Create a query capable of iterating.
-  # @param [String] query The query to use for selections
-  def query(query)
+  # @param [String] term The query to use for selections
+  # @param [Array<Hash>> maps Possible maps to use
+  def query(term, maps = nil)
+    term = Factbase::Syntax.new(term).to_term(@origin) if term.is_a?(String)
     @mutex.synchronize do
       require_relative 'sync_query'
-      Factbase::SyncQuery.new(@origin.query(query), @mutex)
+      Factbase::SyncQuery.new(@origin.query(term, maps), @mutex)
     end
   end
 

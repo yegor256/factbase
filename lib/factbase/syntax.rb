@@ -46,11 +46,12 @@ class Factbase::Syntax
   end
 
   # Convert it to a term.
+  # @param [Factbase] fb Optional factbase
   # @return [Term] The term detected
-  def to_term
+  def to_term(fb = Factbase.new)
     @to_term ||=
       begin
-        t = build
+        t = build(fb)
         t = t.simplify if t.respond_to?(:simplify)
         t
       end
@@ -63,11 +64,12 @@ class Factbase::Syntax
   private
 
   # Convert it to a term.
+  # @param [Factbase] fb Factbase
   # @return [Term] The term detected
-  def build
+  def build(fb)
     @tokens ||= to_tokens
     raise 'No tokens' if @tokens.empty?
-    @ast ||= to_ast(@tokens, 0)
+    @ast ||= to_ast(@tokens, 0, fb)
     raise "Too many terms (#{@ast[1]} != #{@tokens.size})" if @ast[1] != @tokens.size
     t = @ast[0]
     raise 'No terms found in the AST' if t.nil?
@@ -82,7 +84,10 @@ class Factbase::Syntax
   # The function returns an two-elements array, where the first element
   # is the term/literal and the second one is the position where the
   # scanning should continue.
-  def to_ast(tokens, at)
+  #
+  # @param [Factbase] fb Factbase
+  # @return [Array<Factbase::Term,Integer>] The term detected
+  def to_ast(tokens, at, fb)
     raise "Closing too soon at ##{at}" if tokens[at] == :close
     return [tokens[at], at + 1] unless tokens[at] == :open
     at += 1
@@ -93,14 +98,14 @@ class Factbase::Syntax
     loop do
       raise "End of token stream at ##{at}" if tokens[at].nil?
       break if tokens[at] == :close
-      (operand, at1) = to_ast(tokens, at)
+      (operand, at1) = to_ast(tokens, at, fb)
       raise "Stuck at position ##{at}" if at == at1
       raise "Jump back at position ##{at}" if at1 < at
       at = at1
       operands << operand
       break if tokens[at] == :close
     end
-    t = @term.new(op, operands)
+    t = @term.new(op, operands, fb:)
     [t, at + 1]
   end
 

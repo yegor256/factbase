@@ -76,9 +76,10 @@ class Factbase::Term
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
-  def initialize(operator, operands)
+  def initialize(operator, operands, fb: Factbase.new)
     @op = operator
     @operands = operands
+    @fb = fb
   end
 
   # Does it match the fact?

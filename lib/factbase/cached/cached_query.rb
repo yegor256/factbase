@@ -19,12 +19,17 @@ class Factbase::CachedQuery
     @cache = cache
   end
 
+  # Print it as a string.
+  # @return [String] The query as a string
+  def to_s
+    @origin.to_s
+  end
+
   # Iterate facts one by one.
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
-  def each(params = {}, &)
-    raise 'Cannot cache non-abstract query' unless params.empty?
+  def each(params = nil, &)
     return to_enum(__method__, params) unless block_given?
     key = "each #{@origin}"
     before = @cache[key]
@@ -35,8 +40,7 @@ class Factbase::CachedQuery
   # Read a single value.
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return The value evaluated
-  def one(params = {})
-    raise 'Cannot cache non-abstract query' unless params.empty?
+  def one(_params = nil)
     key = "one: #{@origin}"
     before = @cache[key]
     @cache[key] = @origin.one if before.nil?

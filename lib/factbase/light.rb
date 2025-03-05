@@ -23,7 +23,7 @@ class Factbase::Light
     @fb.insert
   end
 
-  def query(query)
-    @fb.query(query)
+  def query(query, maps = nil)
+    @fb.query(query, maps)
   end
 end

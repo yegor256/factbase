@@ -23,15 +23,16 @@ class Factbase::Query
   # Constructor.
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [String] query The query as a string
-  def initialize(maps, query)
+  def initialize(maps, term)
     @maps = maps
-    @query = query
+    term = Factbase::Syntax.new(term).to_term if term.is_a?(String)
+    @term = term
   end
 
   # Print it as a string.
   # @return [String] The query as a string
   def to_s
-    @query.to_s
+    @term.to_s
   end
 
   # Iterate facts one by one.
@@ -40,7 +41,6 @@ class Factbase::Query
   # @return [Integer] Total number of facts yielded
   def each(params = {})
     return to_enum(__method__, params) unless block_given?
-    term = Factbase::Syntax.new(@query).to_term
     yielded = 0
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     @maps.each do |m|
@@ -48,7 +48,7 @@ class Factbase::Query
       f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
-      r = term.evaluate(a, @maps)
+      r = @term.evaluate(a, @maps)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
         raise "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@query.inspect}"
       end
@@ -63,9 +63,8 @@ class Factbase::Query
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return The value evaluated
   def one(params = {})
-    term = Factbase::Syntax.new(@query).to_term
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    r = term.evaluate(Factbase::Tee.new(nil, params), @maps)
+    r = @term.evaluate(Factbase::Tee.new(nil, params), @maps)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
       raise "Incorrect type #{r.class} returned by #{@query.inspect}"
     end
@@ -75,11 +74,10 @@ class Factbase::Query
   # Delete all facts that match the query.
   # @return [Integer] Total number of facts deleted
   def delete!
-    term = Factbase::Syntax.new(@query).to_term
     deleted = 0
     @maps.delete_if do |m|
       f = Factbase::Fact.new(m)
-      if term.evaluate(f, @maps)
+      if @term.evaluate(f, @maps)
         deleted += 1
         true
       else

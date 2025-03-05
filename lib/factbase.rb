@@ -114,10 +114,13 @@ class Factbase
   # The full list of terms available in the query you can find in the
   # +README.md+ file of the repository.
   #
-  # @param [String] query The query to use for selections
-  def query(query)
+  # @param [String|Factbase::Term] query The query to use for selections
+  # @param [Array<Hash>|nil] maps The subset of maps (if provided)
+  def query(term, maps = nil)
+    maps ||= @maps
     require_relative 'factbase/query'
-    Factbase::Query.new(@maps, query)
+    term = Factbase::Syntax.new(term).to_term(self) if term.is_a?(String)
+    Factbase::Query.new(maps, term)
   end
 
   # Run an ACID transaction, which will either modify the factbase

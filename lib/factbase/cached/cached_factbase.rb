@@ -5,6 +5,7 @@
 
 require 'decoor'
 require_relative '../../factbase'
+require_relative '../../factbase/syntax'
 
 # A factbase with a cache.
 #
@@ -31,10 +32,12 @@ class Factbase::CachedFactbase
   end
 
   # Create a query capable of iterating.
-  # @param [String] query The query to use for selections
-  def query(query)
-    q = @origin.query(query)
-    unless Factbase::Syntax.new(query).to_term.abstract?
+  # @param [String] term The term to use
+  # @param [Array<Hash>> maps Possible maps to use
+  def query(term, maps = nil)
+    term = Factbase::Syntax.new(term).to_term(self) if term.is_a?(String)
+    q = @origin.query(term, maps)
+    unless term.abstract?
       require_relative 'cached_query'
       q = Factbase::CachedQuery.new(q, @cache)
     end

@@ -21,6 +21,14 @@ class TestCachedQuery < Factbase::Test
     end
   end
 
+  def test_aggregates_too
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    f = fb.insert
+    f.foo = 42
+    f.hello = 1
+    assert_equal(0, fb.query('(nil (agg (exists hello) (min foo)))').each.to_a.size)
+  end
+
   def test_deletes_too
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.foo = 1
