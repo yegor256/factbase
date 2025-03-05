@@ -113,7 +113,7 @@ class Factbase
   # The full list of terms available in the query you can find in the
   # +README.md+ file of the repository.
   #
-  # @param [String|Factbase::Term] query The query to use for selections
+  # @param [String|Factbase::Term] term The query to use for selections
   # @param [Array<Hash>|nil] maps The subset of maps (if provided)
   def query(term, maps = nil)
     maps ||= @maps
@@ -125,7 +125,7 @@ class Factbase
   # Run an ACID transaction, which will either modify the factbase
   # or rollback in case of an error.
   #
-  # If necessary to terminate a transaction and roolback all changes,
+  # If necessary to terminate a transaction and rollback all changes,
   # you should raise the +Factbase::Rollback+ exception:
   #
   #  fb = Factbase.new
@@ -134,7 +134,7 @@ class Factbase
   #    raise Factbase::Rollback
   #  end
   #
-  # A the end of this script, the factbase will be empty. No facts will
+  # At the end of this script, the factbase will be empty. No facts will be
   # inserted and all changes that happened in the block will be rolled back.
   #
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
@@ -190,7 +190,7 @@ class Factbase
   #
   # The data is binary, it's not a text!
   #
-  # @return [Bytes] The chain of bytes
+  # @return [String] Binary string containing serialized data
   def export
     Marshal.dump(@maps)
   end
@@ -203,9 +203,9 @@ class Factbase
   #  fb.import(File.binread("foo.fb"))
   #
   # The facts that existed in the factbase before importing will remain there.
-  # The facts from the incoming byte stream will added to them.
+  # The facts from the incoming byte stream will be added to them.
   #
-  # @param [Bytes] bytes Byte array to import
+  # @param [String] bytes Binary string to import
   def import(bytes)
     raise 'Empty input, cannot load a factbase' if bytes.empty?
     @maps += Marshal.load(bytes)

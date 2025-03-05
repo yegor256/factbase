@@ -32,8 +32,8 @@ class Factbase::Syntax
 
   # Ctor.
   #
-  # The class provided as the +term+ argument must have a three-argument
-  # constructor, similar to the class +Factbase::Term+. Also, it must be
+  # The class provided as the +term+ argument must have a constructor that accepts
+  # an operator, operands array, and a keyword argument fb. Also, it must be
   # a child of +Factbase::Term+.
   #
   # @param [String] query The query, for example "(eq id 42)"
@@ -81,12 +81,14 @@ class Factbase::Syntax
   # token at the position is not a literal (like 42 or "Hello") but a term,
   # the function recursively calls itself.
   #
-  # The function returns an two-elements array, where the first element
+  # The function returns a two-element array, where the first element
   # is the term/literal and the second one is the position where the
   # scanning should continue.
   #
+  # @param [Array] tokens Array of tokens
+  # @param [Integer] at Position to start parsing from
   # @param [Factbase] fb Factbase
-  # @return [Array<Factbase::Term,Integer>] The term detected
+  # @return [Array<Factbase::Term,Integer>] The term detected and ending position
   def to_ast(tokens, at, fb)
     raise "Closing too soon at ##{at}" if tokens[at] == :close
     return [tokens[at], at + 1] unless tokens[at] == :open
@@ -110,6 +112,7 @@ class Factbase::Syntax
   end
 
   # Turns a query into an array of tokens.
+  # @return [Array] Array of tokens
   def to_tokens
     list = []
     acc = ''

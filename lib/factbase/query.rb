@@ -22,7 +22,7 @@ require_relative 'tee'
 class Factbase::Query
   # Constructor.
   # @param [Array<Fact>] maps Array of facts to start with
-  # @param [String] query The query as a string
+  # @param [String|Factbase::Term] term The query term
   def initialize(maps, term)
     @maps = maps
     term = Factbase::Syntax.new(term).to_term if term.is_a?(String)
@@ -50,7 +50,7 @@ class Factbase::Query
       a = Factbase::Accum.new(f, extras, false)
       r = @term.evaluate(a, @maps)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
-        raise "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@query.inspect}"
+        raise "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term.inspect}"
       end
       next unless r
       yield Factbase::Accum.new(f, extras, true)
@@ -61,12 +61,12 @@ class Factbase::Query
 
   # Read a single value.
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
-  # @return The value evaluated
+  # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
   def one(params = {})
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     r = @term.evaluate(Factbase::Tee.new(nil, params), @maps)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
-      raise "Incorrect type #{r.class} returned by #{@query.inspect}"
+      raise "Incorrect type #{r.class} returned by #{@term.inspect}"
     end
     r
   end

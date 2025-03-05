@@ -16,7 +16,8 @@ class Factbase::CachedFactbase
   decoor(:origin)
 
   # Constructor.
-  # @param [Array<Hash>] maps Array of facts to start with
+  # @param [Factbase] origin Original factbase to decorate
+  # @param [Hash] cache Cache to use
   def initialize(origin, cache = {})
     @origin = origin
     @cache = cache
@@ -33,7 +34,7 @@ class Factbase::CachedFactbase
 
   # Create a query capable of iterating.
   # @param [String] term The term to use
-  # @param [Array<Hash>> maps Possible maps to use
+  # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
     term = Factbase::Syntax.new(term).to_term(self) if term.is_a?(String)
     q = @origin.query(term, maps)

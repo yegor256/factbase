@@ -36,9 +36,13 @@ require_relative 'tee'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Term
-  attr_reader :op, :operands
+  # The operator of this term
+  # @return [Symbol] The operator
+  attr_reader :op
 
-  attr_writer :fb
+  # The operands of this term
+  # @return [Array] The operands
+  attr_reader :operands
 
   require_relative 'terms/math'
   include Factbase::Term::Math
@@ -76,6 +80,7 @@ class Factbase::Term
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
+  # @param [Factbase] fb Optional factbase reference
   def initialize(operator, operands, fb: Factbase.new)
     @op = operator
     @operands = operands
@@ -85,7 +90,7 @@ class Factbase::Term
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
-  # @return [bool] TRUE if matches
+  # @return [Boolean] TRUE if matches
   def evaluate(fact, maps)
     send(@op, fact, maps)
   rescue NoMethodError => e

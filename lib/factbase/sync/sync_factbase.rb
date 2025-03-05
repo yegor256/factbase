@@ -15,7 +15,8 @@ class Factbase::SyncFactbase
   decoor(:origin)
 
   # Constructor.
-  # @param [Array<Hash>] maps Array of facts to start with
+  # @param [Factbase] origin Original factbase to decorate
+  # @param [Mutex] mutex Mutex to use for synchronization
   def initialize(origin, mutex = Mutex.new)
     @origin = origin
     @mutex = mutex
@@ -31,7 +32,7 @@ class Factbase::SyncFactbase
 
   # Create a query capable of iterating.
   # @param [String] term The query to use for selections
-  # @param [Array<Hash>> maps Possible maps to use
+  # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
     term = Factbase::Syntax.new(term).to_term(@origin) if term.is_a?(String)
     @mutex.synchronize do
@@ -42,6 +43,7 @@ class Factbase::SyncFactbase
 
   # Run an ACID transaction.
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
+  # @yield [Factbase] Block to execute in transaction
   def txn(&)
     @mutex.synchronize do
       @origin.txn(&)

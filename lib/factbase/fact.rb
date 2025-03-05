@@ -10,8 +10,8 @@ require_relative '../factbase'
 
 # A single fact in a factbase.
 #
-# This is an internal class, it is not supposed to be instantiated directly,
-# by the +Factbase+ class.
+# This is an internal class, it is supposed to be instantiated only by the
+# +Factbase+ class.
 # However, it is possible to use it for testing directly, for example to make a
 # fact with a single key/value pair inside:
 #
@@ -47,6 +47,10 @@ class Factbase::Fact
   end
 
   # When a method is missing, this method is called.
+  # Method missing handler for dynamic property access and setting
+  # @param [Symbol] method The method name being called
+  # @param [Array] args Method arguments
+  # @return [Object] The value retrieved or nil if setting a value
   others do |*args|
     k = args[0].to_s
     if k.end_with?('=')
