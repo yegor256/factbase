@@ -22,7 +22,7 @@ require_relative '../lib/factbase'
 # Default methods for all tests.
 class Factbase::Test < Minitest::Test
   def fact(map = {})
-    require 'factbase/fact'
+    require_relative '../lib/factbase/fact'
     Factbase::Fact.new(Mutex.new, map)
   end
 end

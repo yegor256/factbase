@@ -3,7 +3,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'time'
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/cached/cached_factbase'

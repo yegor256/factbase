@@ -16,9 +16,9 @@ class Factbase::CachedFactbase
 
   # Constructor.
   # @param [Array<Hash>] maps Array of facts to start with
-  def initialize(origin)
+  def initialize(origin, cache = {})
     @origin = origin
-    @cache = {}
+    @cache = cache
   end
 
   # Insert a new fact and return it.

@@ -18,7 +18,7 @@ require_relative 'term'
 # every term it meets in the query:
 #
 #  require 'factbase/syntax'
-#  t = Factbase::Syntax.new(Factbase.new, '(hello world)', MyTerm).to_term
+#  t = Factbase::Syntax.new('(hello world)', MyTerm).to_term
 #
 # The +MyTerm+ class should have a constructor with two arguments:
 # the operator and the list of operands (Array).

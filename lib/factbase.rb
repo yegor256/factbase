@@ -155,7 +155,7 @@ class Factbase
     taped = Factbase::Taped.new(before)
     begin
       require_relative 'factbase/light'
-      yield Factbase::Light.new(Factbase.new(taped, cache: @cache), @cache)
+      yield Factbase::Light.new(Factbase.new(taped))
     rescue Factbase::Rollback
       return 0
     end

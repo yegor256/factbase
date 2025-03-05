@@ -12,14 +12,14 @@ require_relative '../../../lib/factbase/term'
 # License:: MIT
 class TestOrdering < Factbase::Test
   def test_prev
-    t = Factbase::Term.new(Factbase.new, :prev, [:foo])
+    t = Factbase::Term.new(:prev, [:foo])
     assert_nil(t.evaluate(fact('foo' => 41), []))
     assert_equal([41], t.evaluate(fact('foo' => 5), []))
     assert_equal([5], t.evaluate(fact('foo' => 6), []))
   end
 
   def test_unique
-    t = Factbase::Term.new(Factbase.new, :unique, [:foo])
+    t = Factbase::Term.new(:unique, [:foo])
     refute(t.evaluate(fact, []))
     assert(t.evaluate(fact('foo' => 41), []))
     refute(t.evaluate(fact('foo' => 41), []))

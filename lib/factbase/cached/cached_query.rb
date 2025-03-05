@@ -25,8 +25,8 @@ class Factbase::CachedQuery
   # @return [Integer] Total number of facts yielded
   def each(params = {}, &)
     raise 'Cannot cache non-abstract query' unless params.empty?
-    return to_enum(__method__) unless block_given?
-    key = "each #{@origin.to_s}"
+    return to_enum(__method__, params) unless block_given?
+    key = "each #{@origin}"
     before = @cache[key]
     @cache[key] = @origin.each.to_a if before.nil?
     @cache[key].each(&)
@@ -37,7 +37,7 @@ class Factbase::CachedQuery
   # @return The value evaluated
   def one(params = {})
     raise 'Cannot cache non-abstract query' unless params.empty?
-    key = "one: #{@origin.to_s}"
+    key = "one: #{@origin}"
     before = @cache[key]
     @cache[key] = @origin.one if before.nil?
     @cache[key]
@@ -47,6 +47,6 @@ class Factbase::CachedQuery
   # @return [Integer] Total number of facts deleted
   def delete!
     @cache.clear
-    @query.delete!
+    @origin.delete!
   end
 end

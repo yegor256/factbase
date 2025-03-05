@@ -18,7 +18,7 @@ require_relative 'tee'
 #  require 'factbase/fact'
 #  require 'factbase/term'
 #  f = Factbase::Fact.new(Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
-#  t = Factbase::Term.new(Factbase.new, :lt, [:foo, 50])
+#  t = Factbase::Term.new(:lt, [:foo, 50])
 #  assert(t.evaluate(f))
 #
 # The design of this class may look ugly, since it has a large number of
@@ -35,6 +35,8 @@ require_relative 'tee'
 # License:: MIT
 class Factbase::Term
   attr_reader :op, :operands
+
+  attr_writer :fb
 
   require_relative 'terms/math'
   include Factbase::Term::Math
