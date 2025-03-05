@@ -46,10 +46,10 @@ class Factbase::Query
     return to_enum(__method__, params) unless block_given?
     term = Factbase::Syntax.new(@fb, @query).to_term
     yielded = 0
+    params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     @maps.each do |m|
       extras = {}
       f = Factbase::Fact.new(@fb, @mutex, m)
-      params = params.transform_keys(&:to_s) if params.is_a?(Hash)
       f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
       r = term.evaluate(a, @maps)
