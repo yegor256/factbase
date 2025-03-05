@@ -22,11 +22,9 @@ require_relative 'tee'
 class Factbase::Query
   # Constructor.
   # @param [Array<Fact>] maps Array of facts to start with
-  # @param [Mutex] mutex Mutex to sync all modifications to the +maps+
   # @param [String] query The query as a string
-  def initialize(maps, mutex, query)
+  def initialize(maps, query)
     @maps = maps
-    @mutex = mutex
     @query = query
   end
 
@@ -47,7 +45,7 @@ class Factbase::Query
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     @maps.each do |m|
       extras = {}
-      f = Factbase::Fact.new(@mutex, m)
+      f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
       r = term.evaluate(a, @maps)
@@ -79,15 +77,13 @@ class Factbase::Query
   def delete!
     term = Factbase::Syntax.new(@query).to_term
     deleted = 0
-    @mutex.synchronize do
-      @maps.delete_if do |m|
-        f = Factbase::Fact.new(@mutex, m)
-        if term.evaluate(f, @maps)
-          deleted += 1
-          true
-        else
-          false
-        end
+    @maps.delete_if do |m|
+      f = Factbase::Fact.new(m)
+      if term.evaluate(f, @maps)
+        deleted += 1
+        true
+      else
+        false
       end
     end
     deleted

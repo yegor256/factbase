@@ -16,7 +16,7 @@ require_relative '../factbase'
 # fact with a single key/value pair inside:
 #
 #  require 'factbase/fact'
-#  f = Factbase::Fact.new(Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
+#  f = Factbase::Fact.new({ 'foo' => [42, 256, 'Hello, world!'] })
 #  assert_equal(42, f.foo)
 #
 # A fact is basically a key/value hash map, where values are non-empty
@@ -27,10 +27,8 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::Fact
   # Ctor.
-  # @param [Mutex] mutex A mutex to use for maps synchronization
   # @param [Hash] map A map of key/value pairs
-  def initialize(mutex, map)
-    @mutex = mutex
+  def initialize(map)
     @map = map
   end
 
@@ -58,11 +56,9 @@ class Factbase::Fact
       raise "The value of '#{kk}' can't be empty" if v == ''
       raise "The type '#{v.class}' of '#{kk}' is not allowed" unless [String, Integer, Float, Time].include?(v.class)
       v = v.utc if v.is_a?(Time)
-      @mutex.synchronize do
-        @map[kk] = [] if @map[kk].nil?
-        @map[kk] << v
-        @map[kk].uniq!
-      end
+      @map[kk] = [] if @map[kk].nil?
+      @map[kk] << v
+      @map[kk].uniq!
       nil
     elsif k == '[]'
       @map[args[1].to_s]

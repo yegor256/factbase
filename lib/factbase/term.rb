@@ -17,7 +17,7 @@ require_relative 'tee'
 #
 #  require 'factbase/fact'
 #  require 'factbase/term'
-#  f = Factbase::Fact.new(Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
+#  f = Factbase::Fact.new({ 'foo' => [42, 256, 'Hello, world!'] })
 #  t = Factbase::Term.new(:lt, [:foo, 50])
 #  assert(t.evaluate(f))
 #

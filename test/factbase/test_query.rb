@@ -17,7 +17,7 @@ class TestQuery < Factbase::Test
   def test_simple_parsing
     maps = []
     maps << { 'foo' => [42] }
-    q = Factbase::Query.new(maps, Mutex.new, '(eq foo 42)')
+    q = Factbase::Query.new(maps, '(eq foo 42)')
     assert_equal(
       1,
       q.each do |f|
@@ -85,7 +85,7 @@ class TestQuery < Factbase::Test
     maps = []
     now = Time.now.utc
     maps << { 'foo' => [now] }
-    q = Factbase::Query.new(maps, Mutex.new, "(eq foo #{now.iso8601})")
+    q = Factbase::Query.new(maps, "(eq foo #{now.iso8601})")
     assert_equal(1, q.each.to_a.size)
   end
 
@@ -95,7 +95,7 @@ class TestQuery < Factbase::Test
       { 'bar' => [4, 5] },
       { 'bar' => [5] }
     ]
-    q = Factbase::Query.new(maps, Mutex.new, '(eq bar 5)')
+    q = Factbase::Query.new(maps, '(eq bar 5)')
     assert_equal(2, q.delete!)
     assert_equal(1, maps.size)
   end
@@ -112,7 +112,7 @@ class TestQuery < Factbase::Test
       '(agg (eq bar $v) (count))' => 1,
       '(agg (eq z 40) (count))' => 0
     }.each do |q, expected|
-      result = Factbase::Query.new(maps, Mutex.new, q).one(v: 4)
+      result = Factbase::Query.new(maps, q).one(v: 4)
       if expected.nil?
         assert_nil(result, "#{q} -> nil")
       else
@@ -127,7 +127,7 @@ class TestQuery < Factbase::Test
       { 'bar' => [4, 5] },
       { 'bar' => [5] }
     ]
-    q = Factbase::Query.new(maps, Mutex.new, '(never)')
+    q = Factbase::Query.new(maps, '(never)')
     assert_equal(0, q.delete!)
     assert_equal(3, maps.size)
   end
@@ -135,20 +135,20 @@ class TestQuery < Factbase::Test
   def test_to_array
     maps = []
     maps << { 'foo' => [42] }
-    assert_equal(1, Factbase::Query.new(maps, Mutex.new, '(eq foo 42)').each.to_a.size)
+    assert_equal(1, Factbase::Query.new(maps, '(eq foo 42)').each.to_a.size)
   end
 
   def test_returns_int
     maps = []
     maps << { 'foo' => [1] }
-    q = Factbase::Query.new(maps, Mutex.new, '(eq foo 1)')
+    q = Factbase::Query.new(maps, '(eq foo 1)')
     assert_equal(1, q.each(&:to_s))
   end
 
   def test_with_aliases
     maps = []
     maps << { 'foo' => [42] }
-    assert_equal(45, Factbase::Query.new(maps, Mutex.new, '(as bar (plus foo 3))').each.to_a[0].bar)
+    assert_equal(45, Factbase::Query.new(maps, '(as bar (plus foo 3))').each.to_a[0].bar)
     assert_equal(1, maps[0].size)
   end
 
@@ -158,22 +158,22 @@ class TestQuery < Factbase::Test
       { 'foo' => [17] }
     ]
     found = 0
-    Factbase::Query.new(maps, Mutex.new, '(eq foo $bar)').each(bar: [42]) do
+    Factbase::Query.new(maps, '(eq foo $bar)').each(bar: [42]) do
       found += 1
     end
     assert_equal(1, found)
-    assert_equal(1, Factbase::Query.new(maps, Mutex.new, '(eq foo $bar)').each(bar: 42).to_a.size)
-    assert_equal(0, Factbase::Query.new(maps, Mutex.new, '(eq foo $bar)').each(bar: 555).to_a.size)
+    assert_equal(1, Factbase::Query.new(maps, '(eq foo $bar)').each(bar: 42).to_a.size)
+    assert_equal(0, Factbase::Query.new(maps, '(eq foo $bar)').each(bar: 555).to_a.size)
   end
 
   def test_with_nil_alias
     maps = [{ 'foo' => [42] }]
-    assert_nil(Factbase::Query.new(maps, Mutex.new, '(as bar (plus xxx 3))').each.to_a[0]['bar'])
+    assert_nil(Factbase::Query.new(maps, '(as bar (plus xxx 3))').each.to_a[0]['bar'])
   end
 
   def test_get_all_properties
     maps = [{ 'foo' => [42] }]
-    f = Factbase::Query.new(maps, Mutex.new, '(always)').each.to_a[0]
+    f = Factbase::Query.new(maps, '(always)').each.to_a[0]
     assert_includes(f.all_properties, 'foo')
   end
 end

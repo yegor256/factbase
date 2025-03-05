@@ -73,7 +73,6 @@ class Factbase
   # @param [Array<Hash>] maps Array of facts to start with
   def initialize(maps = [])
     @maps = maps
-    @mutex = Mutex.new
     @cache = {}
   end
 
@@ -93,11 +92,9 @@ class Factbase
   # @return [Factbase::Fact] The fact just inserted
   def insert
     map = {}
-    @mutex.synchronize do
-      @maps << map
-    end
+    @maps << map
     require_relative 'factbase/fact'
-    Factbase::Fact.new(@mutex, map)
+    Factbase::Fact.new(map)
   end
 
   # Create a query capable of iterating.
@@ -120,7 +117,7 @@ class Factbase
   # @param [String] query The query to use for selections
   def query(query)
     require_relative 'factbase/query'
-    Factbase::Query.new(@maps, @mutex, query)
+    Factbase::Query.new(@maps, query)
   end
 
   # Run an ACID transaction, which will either modify the factbase
@@ -142,14 +139,12 @@ class Factbase
   def txn
     pairs = {}
     before =
-      @mutex.synchronize do
-        @maps.map do |m|
-          n = m.transform_values(&:dup)
-          # rubocop:disable Lint/HashCompareByIdentity
-          pairs[n.object_id] = m.object_id
-          # rubocop:enable Lint/HashCompareByIdentity
-          n
-        end
+      @maps.map do |m|
+        n = m.transform_values(&:dup)
+        # rubocop:disable Lint/HashCompareByIdentity
+        pairs[n.object_id] = m.object_id
+        # rubocop:enable Lint/HashCompareByIdentity
+        n
       end
     require_relative 'factbase/taped'
     taped = Factbase::Taped.new(before)
@@ -161,27 +156,25 @@ class Factbase
     end
     require_relative 'factbase/churn'
     churn = Factbase::Churn.new
-    @mutex.synchronize do
-      taped.inserted.each do |oid|
-        b = taped.find_by_object_id(oid)
-        next if b.nil?
-        @maps << b
-        churn.append(1, 0, 0)
-      end
-      garbage = []
-      taped.added.each do |oid|
-        b = taped.find_by_object_id(oid)
-        next if b.nil?
-        garbage << pairs[oid]
-        @maps << b
-        churn.append(0, 0, 1)
-      end
-      taped.deleted.each do |oid|
-        garbage << pairs[oid]
-        churn.append(0, 1, 0)
-      end
-      @maps.delete_if { |m| garbage.include?(m.object_id) }
+    taped.inserted.each do |oid|
+      b = taped.find_by_object_id(oid)
+      next if b.nil?
+      @maps << b
+      churn.append(1, 0, 0)
     end
+    garbage = []
+    taped.added.each do |oid|
+      b = taped.find_by_object_id(oid)
+      next if b.nil?
+      garbage << pairs[oid]
+      @maps << b
+      churn.append(0, 0, 1)
+    end
+    taped.deleted.each do |oid|
+      garbage << pairs[oid]
+      churn.append(0, 1, 0)
+    end
+    @maps.delete_if { |m| garbage.include?(m.object_id) }
     churn
   end
 
