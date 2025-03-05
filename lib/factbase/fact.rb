@@ -10,28 +10,27 @@ require_relative '../factbase'
 
 # A single fact in a factbase.
 #
-# This is an internal class, it is not supposed to be instantiated directly,
-# by the +Factbase+ class.
+# This is an internal class, it is supposed to be instantiated only by the
+# +Factbase+ class.
 # However, it is possible to use it for testing directly, for example to make a
 # fact with a single key/value pair inside:
 #
 #  require 'factbase/fact'
-#  f = Factbase::Fact.new(Factbase.new, Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
+#  f = Factbase::Fact.new({ 'foo' => [42, 256, 'Hello, world!'] })
 #  assert_equal(42, f.foo)
 #
 # A fact is basically a key/value hash map, where values are non-empty
 # sets of values.
+#
+# It is NOT thread-safe!
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Fact
   # Ctor.
-  # @param [Mutex] mutex A mutex to use for maps synchronization
   # @param [Hash] map A map of key/value pairs
-  def initialize(fb, mutex, map)
-    @fb = fb
-    @mutex = mutex
+  def initialize(map)
     @map = map
   end
 
@@ -48,6 +47,10 @@ class Factbase::Fact
   end
 
   # When a method is missing, this method is called.
+  # Method missing handler for dynamic property access and setting
+  # @param [Symbol] method The method name being called
+  # @param [Array] args Method arguments
+  # @return [Object] The value retrieved or nil if setting a value
   others do |*args|
     k = args[0].to_s
     if k.end_with?('=')
@@ -59,12 +62,9 @@ class Factbase::Fact
       raise "The value of '#{kk}' can't be empty" if v == ''
       raise "The type '#{v.class}' of '#{kk}' is not allowed" unless [String, Integer, Float, Time].include?(v.class)
       v = v.utc if v.is_a?(Time)
-      @mutex.synchronize do
-        @map[kk] = [] if @map[kk].nil?
-        @map[kk] << v
-        @map[kk].uniq!
-      end
-      @fb.cache.clear
+      @map[kk] = [] if @map[kk].nil?
+      @map[kk] << v
+      @map[kk].uniq!
       nil
     elsif k == '[]'
       @map[args[1].to_s]

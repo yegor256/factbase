@@ -11,11 +11,8 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Light
-  attr_reader :cache
-
-  def initialize(fb, cache)
+  def initialize(fb)
     @fb = fb
-    @cache = cache
   end
 
   def size
@@ -26,7 +23,7 @@ class Factbase::Light
     @fb.insert
   end
 
-  def query(query)
-    @fb.query(query)
+  def query(query, maps = nil)
+    @fb.query(query, maps)
   end
 end

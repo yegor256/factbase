@@ -8,7 +8,6 @@ require 'time'
 require_relative '../factbase'
 require_relative 'fact'
 require_relative 'term'
-require_relative 'term_once'
 
 # Syntax.
 #
@@ -19,7 +18,7 @@ require_relative 'term_once'
 # every term it meets in the query:
 #
 #  require 'factbase/syntax'
-#  t = Factbase::Syntax.new(Factbase.new, '(hello world)', MyTerm).to_term
+#  t = Factbase::Syntax.new('(hello world)', MyTerm).to_term
 #
 # The +MyTerm+ class should have a constructor with two arguments:
 # the operator and the list of operands (Array).
@@ -33,15 +32,13 @@ class Factbase::Syntax
 
   # Ctor.
   #
-  # The class provided as the +term+ argument must have a three-argument
-  # constructor, similar to the class +Factbase::Term+. Also, it must be
+  # The class provided as the +term+ argument must have a constructor that accepts
+  # an operator, operands array, and a keyword argument fb. Also, it must be
   # a child of +Factbase::Term+.
   #
-  # @param [Factbase] fb Factbase
   # @param [String] query The query, for example "(eq id 42)"
   # @param [Class] term The class to instantiate to make every term
-  def initialize(fb, query, term: Factbase::Term)
-    @fb = fb
+  def initialize(query, term: Factbase::Term)
     @query = query
     raise "Term must be a Class, while #{term.class.name} provided" unless term.is_a?(Class)
     raise "The 'term' must be a child of Factbase::Term, while #{term.name} provided" unless term <= Factbase::Term
@@ -49,11 +46,12 @@ class Factbase::Syntax
   end
 
   # Convert it to a term.
+  # @param [Factbase] fb Optional factbase
   # @return [Term] The term detected
-  def to_term
+  def to_term(fb = Factbase.new)
     @to_term ||=
       begin
-        t = build
+        t = build(fb)
         t = t.simplify if t.respond_to?(:simplify)
         t
       end
@@ -66,11 +64,12 @@ class Factbase::Syntax
   private
 
   # Convert it to a term.
+  # @param [Factbase] fb Factbase
   # @return [Term] The term detected
-  def build
+  def build(fb)
     @tokens ||= to_tokens
     raise 'No tokens' if @tokens.empty?
-    @ast ||= to_ast(@tokens, 0)
+    @ast ||= to_ast(@tokens, 0, fb)
     raise "Too many terms (#{@ast[1]} != #{@tokens.size})" if @ast[1] != @tokens.size
     t = @ast[0]
     raise 'No terms found in the AST' if t.nil?
@@ -82,10 +81,15 @@ class Factbase::Syntax
   # token at the position is not a literal (like 42 or "Hello") but a term,
   # the function recursively calls itself.
   #
-  # The function returns an two-elements array, where the first element
+  # The function returns a two-element array, where the first element
   # is the term/literal and the second one is the position where the
   # scanning should continue.
-  def to_ast(tokens, at)
+  #
+  # @param [Array] tokens Array of tokens
+  # @param [Integer] at Position to start parsing from
+  # @param [Factbase] fb Factbase
+  # @return [Array<Factbase::Term,Integer>] The term detected and ending position
+  def to_ast(tokens, at, fb)
     raise "Closing too soon at ##{at}" if tokens[at] == :close
     return [tokens[at], at + 1] unless tokens[at] == :open
     at += 1
@@ -96,19 +100,19 @@ class Factbase::Syntax
     loop do
       raise "End of token stream at ##{at}" if tokens[at].nil?
       break if tokens[at] == :close
-      (operand, at1) = to_ast(tokens, at)
+      (operand, at1) = to_ast(tokens, at, fb)
       raise "Stuck at position ##{at}" if at == at1
       raise "Jump back at position ##{at}" if at1 < at
       at = at1
       operands << operand
       break if tokens[at] == :close
     end
-    t = @term.new(@fb, op, operands)
-    t = Factbase::TermOnce.new(t, @fb.cache) if t.instance_of?(Factbase::Term)
+    t = @term.new(op, operands, fb:)
     [t, at + 1]
   end
 
   # Turns a query into an array of tokens.
+  # @return [Array] Array of tokens
   def to_tokens
     list = []
     acc = ''

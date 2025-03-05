@@ -17,8 +17,8 @@ require_relative 'tee'
 #
 #  require 'factbase/fact'
 #  require 'factbase/term'
-#  f = Factbase::Fact.new(Factbase.new, Mutex.new, { 'foo' => [42, 256, 'Hello, world!'] })
-#  t = Factbase::Term.new(Factbase.new, :lt, [:foo, 50])
+#  f = Factbase::Fact.new({ 'foo' => [42, 256, 'Hello, world!'] })
+#  t = Factbase::Term.new(:lt, [:foo, 50])
 #  assert(t.evaluate(f))
 #
 # The design of this class may look ugly, since it has a large number of
@@ -30,11 +30,19 @@ require_relative 'tee'
 # Moreover, it looks like the number of possible term types is rather limited
 # and currently we implement most of them.
 #
+# It is NOT thread-safe!
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Term
-  attr_reader :op, :operands
+  # The operator of this term
+  # @return [Symbol] The operator
+  attr_reader :op
+
+  # The operands of this term
+  # @return [Array] The operands
+  attr_reader :operands
 
   require_relative 'terms/math'
   include Factbase::Term::Math
@@ -70,19 +78,19 @@ class Factbase::Term
   include Factbase::Term::Debug
 
   # Ctor.
-  # @param [Factbase] fb Factbase
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
-  def initialize(fb, operator, operands)
-    @fb = fb
+  # @param [Factbase] fb Optional factbase reference
+  def initialize(operator, operands, fb: Factbase.new)
     @op = operator
     @operands = operands
+    @fb = fb
   end
 
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
-  # @return [bool] TRUE if matches
+  # @return [Boolean] TRUE if matches
   def evaluate(fact, maps)
     send(@op, fact, maps)
   rescue NoMethodError => e

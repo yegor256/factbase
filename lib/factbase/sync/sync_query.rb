@@ -3,24 +3,20 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require_relative '../factbase'
+require_relative '../../factbase'
 
-# Query with a cache, a decorator of another query.
-#
-# It is NOT thread-safe!
+# Synchronized thread-safe query.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class Factbase::QueryOnce
+class Factbase::SyncQuery
   # Constructor.
-  # @param [Factbase] fb Factbase
-  # @param [Factbase::Query] query Original query
-  # @param [Array<Hash>] maps Where to search
-  def initialize(fb, query, maps)
-    @fb = fb
-    @query = query
-    @maps = maps
+  # @param [Factbase::Query] origin Original query
+  # @param [Mutex] mutex The mutex
+  def initialize(origin, mutex)
+    @origin = origin
+    @mutex = mutex
   end
 
   # Iterate facts one by one.
@@ -28,27 +24,26 @@ class Factbase::QueryOnce
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
   def each(params = {}, &)
-    unless block_given?
-      return to_enum(__method__, params) if Factbase::Syntax.new(@fb, @query).to_term.abstract?
-      key = [@query.to_s, @maps.object_id]
-      before = @fb.cache[key]
-      @fb.cache[key] = to_enum(__method__, params).to_a if before.nil?
-      return @fb.cache[key]
+    return to_enum(__method__, params) unless block_given?
+    @mutex.synchronize do
+      @origin.each(&)
     end
-    @query.each(params, &)
   end
 
   # Read a single value.
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return The value evaluated
   def one(params = {})
-    @query.one(params)
+    @mutex.synchronize do
+      @origin.one(params)
+    end
   end
 
   # Delete all facts that match the query.
   # @return [Integer] Total number of facts deleted
   def delete!
-    @fb.cache.clear
-    @query.delete!
+    @mutex.synchronize do
+      @origin.delete!
+    end
   end
 end

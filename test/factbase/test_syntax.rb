@@ -18,7 +18,7 @@ class TestSyntax < Factbase::Test
       "(foo 'one two three   ')",
       "(foo 'one two three   ' 'tail tail')"
     ].each do |q|
-      assert_equal(q, Factbase::Syntax.new(Factbase.new, q).to_term.to_s, q)
+      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s, q)
     end
   end
 
@@ -28,7 +28,7 @@ class TestSyntax < Factbase::Test
       '(foo (bar (a (b c (f $bar)))))' => true,
       '(foo (bar (a (b c (f bar)))))' => false
     }.each do |q, a|
-      assert_equal(a, Factbase::Syntax.new(Factbase.new, q).to_term.abstract?)
+      assert_equal(a, Factbase::Syntax.new(q).to_term.abstract?)
     end
   end
 
@@ -38,7 +38,7 @@ class TestSyntax < Factbase::Test
       '(foo "bar")' => true,
       '(agg (always) (max id))' => true
     }.each do |q, a|
-      assert_equal(a, Factbase::Syntax.new(Factbase.new, q).to_term.static?)
+      assert_equal(a, Factbase::Syntax.new(q).to_term.static?)
     end
   end
 
@@ -53,7 +53,7 @@ class TestSyntax < Factbase::Test
       "(foo 'Hello,\n\nworld!\r\t\n')\n",
       "(or ( a 4) (b 5) (always) (and (always) (c 5) \t\t(r 7 w8s w8is 'Foo')))"
     ].each do |q|
-      refute_nil(Factbase::Syntax.new(Factbase.new, q).to_term)
+      refute_nil(Factbase::Syntax.new(q).to_term)
     end
   end
 
@@ -73,7 +73,7 @@ class TestSyntax < Factbase::Test
       '(eq t 3.0e+21)',
       "(foo (x (f (t (y 42 'Hey you'))) (never) (r 3)) y z)"
     ].each do |q|
-      assert_equal(q, Factbase::Syntax.new(Factbase.new, q).to_term.to_s, q)
+      assert_equal(q, Factbase::Syntax.new(q).to_term.to_s, q)
     end
   end
 
@@ -88,7 +88,7 @@ class TestSyntax < Factbase::Test
       '(or (eq bar 888) (eq z 1))' => true,
       "(or (gt bar 100) (eq foo 'Hello, world!'))" => true
     }.each do |k, v|
-      assert_equal(v, Factbase::Syntax.new(Factbase.new, k).to_term.evaluate(m, []), k)
+      assert_equal(v, Factbase::Syntax.new(k).to_term.evaluate(m, []), k)
     end
   end
 
@@ -113,7 +113,7 @@ class TestSyntax < Factbase::Test
       '"'
     ].each do |q|
       msg = assert_raises(q) do
-        Factbase::Syntax.new(Factbase.new, q).to_term
+        Factbase::Syntax.new(q).to_term
       end.message
       assert_includes(msg, q, msg)
     end
@@ -127,7 +127,7 @@ class TestSyntax < Factbase::Test
         '\'', 'привет'
       ].shuffle.join(' . ')
       assert_raises(Factbase::Syntax::Broken, q) do
-        Factbase::Syntax.new(Factbase.new, q).to_term
+        Factbase::Syntax.new(q).to_term
       end
     end
   end
@@ -138,21 +138,21 @@ class TestSyntax < Factbase::Test
       '(and (foo) (foo))' => '(foo)',
       '(and (foo) (or (and (eq a 1))) (eq a 1) (foo))' => '(and (foo) (eq a 1))'
     }.each do |s, t|
-      assert_equal(t, Factbase::Syntax.new(Factbase.new, s).to_term.to_s)
+      assert_equal(t, Factbase::Syntax.new(s).to_term.to_s)
     end
   end
 
   def test_fails_when_term_is_not_a_class
-    assert_raises(StandardError) { Factbase::Syntax.new(Factbase.new, '(foo 1)', term: 'hello') }
+    assert_raises(StandardError) { Factbase::Syntax.new('(foo 1)', term: 'hello') }
   end
 
   def test_fails_when_term_is_wrong_class
-    assert_raises(StandardError) { Factbase::Syntax.new(Factbase.new, '(bar 1)', term: String).to_term }
+    assert_raises(StandardError) { Factbase::Syntax.new('(bar 1)', term: String).to_term }
   end
 
   def test_fails_when_term_is_incorrectly_defined_class
     assert_includes(
-      assert_raises(StandardError) { Factbase::Syntax.new(Factbase.new, '(bar 1)', term: FakeTerm).to_term }.message,
+      assert_raises(StandardError) { Factbase::Syntax.new('(bar 1)', term: FakeTerm).to_term }.message,
       'wrong number of arguments'
     )
   end

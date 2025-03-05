@@ -42,7 +42,12 @@ end
 
 desc 'Benchmark them all'
 task :benchmark do
+  require_relative 'lib/factbase'
   fb = Factbase.new
+  require_relative 'lib/factbase/cached/cached_factbase'
+  fb = Factbase::CachedFactbase.new(fb)
+  require_relative 'lib/factbase/sync/sync_factbase'
+  fb = Factbase::SyncFactbase.new(fb)
   require 'benchmark'
   Benchmark.bm(60) do |b|
     Dir['benchmark/bench_*.rb'].each do |f|

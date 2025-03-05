@@ -57,7 +57,7 @@ require 'yaml'
 # It's important to use +binwrite+ and +binread+, because the content is
 # a chain of bytes, not a text.
 #
-# Objects of this class are thread-safe.
+# It is NOT thread-safe!
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
@@ -69,14 +69,10 @@ class Factbase
   # An exception that may be thrown in a transaction, to roll it back.
   class Rollback < StandardError; end
 
-  attr_reader :cache
-
   # Constructor.
   # @param [Array<Hash>] maps Array of facts to start with
-  def initialize(maps = [], cache: {})
+  def initialize(maps = [])
     @maps = maps
-    @mutex = Mutex.new
-    @cache = cache
   end
 
   # Size, the total number of facts in the factbase.
@@ -95,12 +91,9 @@ class Factbase
   # @return [Factbase::Fact] The fact just inserted
   def insert
     map = {}
-    @mutex.synchronize do
-      @maps << map
-    end
-    @cache.clear
+    @maps << map
     require_relative 'factbase/fact'
-    Factbase::Fact.new(self, @mutex, map)
+    Factbase::Fact.new(map)
   end
 
   # Create a query capable of iterating.
@@ -120,22 +113,19 @@ class Factbase
   # The full list of terms available in the query you can find in the
   # +README.md+ file of the repository.
   #
-  # @param [String] query The query to use for selections
-  # @param [Array<Hash>] maps Custom maps
-  def query(query, maps = @maps)
+  # @param [String|Factbase::Term] term The query to use for selections
+  # @param [Array<Hash>|nil] maps The subset of maps (if provided)
+  def query(term, maps = nil)
+    maps ||= @maps
     require_relative 'factbase/query'
-    require_relative 'factbase/query_once'
-    Factbase::QueryOnce.new(
-      self,
-      Factbase::Query.new(self, maps, @mutex, query),
-      maps
-    )
+    term = Factbase::Syntax.new(term).to_term(self) if term.is_a?(String)
+    Factbase::Query.new(maps, term)
   end
 
   # Run an ACID transaction, which will either modify the factbase
   # or rollback in case of an error.
   #
-  # If necessary to terminate a transaction and roolback all changes,
+  # If necessary to terminate a transaction and rollback all changes,
   # you should raise the +Factbase::Rollback+ exception:
   #
   #  fb = Factbase.new
@@ -144,53 +134,49 @@ class Factbase
   #    raise Factbase::Rollback
   #  end
   #
-  # A the end of this script, the factbase will be empty. No facts will
+  # At the end of this script, the factbase will be empty. No facts will be
   # inserted and all changes that happened in the block will be rolled back.
   #
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
     pairs = {}
     before =
-      @mutex.synchronize do
-        @maps.map do |m|
-          n = m.transform_values(&:dup)
-          # rubocop:disable Lint/HashCompareByIdentity
-          pairs[n.object_id] = m.object_id
-          # rubocop:enable Lint/HashCompareByIdentity
-          n
-        end
+      @maps.map do |m|
+        n = m.transform_values(&:dup)
+        # rubocop:disable Lint/HashCompareByIdentity
+        pairs[n.object_id] = m.object_id
+        # rubocop:enable Lint/HashCompareByIdentity
+        n
       end
     require_relative 'factbase/taped'
     taped = Factbase::Taped.new(before)
     begin
       require_relative 'factbase/light'
-      yield Factbase::Light.new(Factbase.new(taped, cache: @cache), @cache)
+      yield Factbase::Light.new(Factbase.new(taped))
     rescue Factbase::Rollback
       return 0
     end
     require_relative 'factbase/churn'
     churn = Factbase::Churn.new
-    @mutex.synchronize do
-      taped.inserted.each do |oid|
-        b = taped.find_by_object_id(oid)
-        next if b.nil?
-        @maps << b
-        churn.append(1, 0, 0)
-      end
-      garbage = []
-      taped.added.each do |oid|
-        b = taped.find_by_object_id(oid)
-        next if b.nil?
-        garbage << pairs[oid]
-        @maps << b
-        churn.append(0, 0, 1)
-      end
-      taped.deleted.each do |oid|
-        garbage << pairs[oid]
-        churn.append(0, 1, 0)
-      end
-      @maps.delete_if { |m| garbage.include?(m.object_id) }
+    taped.inserted.each do |oid|
+      b = taped.find_by_object_id(oid)
+      next if b.nil?
+      @maps << b
+      churn.append(1, 0, 0)
     end
+    garbage = []
+    taped.added.each do |oid|
+      b = taped.find_by_object_id(oid)
+      next if b.nil?
+      garbage << pairs[oid]
+      @maps << b
+      churn.append(0, 0, 1)
+    end
+    taped.deleted.each do |oid|
+      garbage << pairs[oid]
+      churn.append(0, 1, 0)
+    end
+    @maps.delete_if { |m| garbage.include?(m.object_id) }
     churn
   end
 
@@ -204,7 +190,7 @@ class Factbase
   #
   # The data is binary, it's not a text!
   #
-  # @return [Bytes] The chain of bytes
+  # @return [String] Binary string containing serialized data
   def export
     Marshal.dump(@maps)
   end
@@ -217,9 +203,9 @@ class Factbase
   #  fb.import(File.binread("foo.fb"))
   #
   # The facts that existed in the factbase before importing will remain there.
-  # The facts from the incoming byte stream will added to them.
+  # The facts from the incoming byte stream will be added to them.
   #
-  # @param [Bytes] bytes Byte array to import
+  # @param [String] bytes Binary string to import
   def import(bytes)
     raise 'Empty input, cannot load a factbase' if bytes.empty?
     @maps += Marshal.load(bytes)

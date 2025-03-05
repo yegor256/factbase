@@ -12,19 +12,19 @@ require_relative '../../../lib/factbase/term'
 # License:: MIT
 class TestMeta < Factbase::Test
   def test_exists
-    t = Factbase::Term.new(Factbase.new, :exists, [:foo])
+    t = Factbase::Term.new(:exists, [:foo])
     assert(t.evaluate(fact('foo' => 41), []))
     refute(t.evaluate(fact('bar' => 41), []))
   end
 
   def test_absent
-    t = Factbase::Term.new(Factbase.new, :absent, [:foo])
+    t = Factbase::Term.new(:absent, [:foo])
     refute(t.evaluate(fact('foo' => 41), []))
     assert(t.evaluate(fact('bar' => 41), []))
   end
 
   def test_size
-    t = Factbase::Term.new(Factbase.new, :size, [:foo])
+    t = Factbase::Term.new(:size, [:foo])
     assert_equal(1, t.evaluate(fact('foo' => 41), []))
     assert_equal(0, t.evaluate(fact('foo' => nil), []))
     assert_equal(4, t.evaluate(fact('foo' => [1, 2, 3, 4]), []))
@@ -33,7 +33,7 @@ class TestMeta < Factbase::Test
   end
 
   def test_type
-    t = Factbase::Term.new(Factbase.new, :type, [:foo])
+    t = Factbase::Term.new(:type, [:foo])
     assert_equal('nil', t.evaluate(fact('foo' => nil), []))
     assert_equal('Integer', t.evaluate(fact('foo' => [1]), []))
     assert_equal('Array', t.evaluate(fact('foo' => [1, 2]), []))
@@ -43,14 +43,14 @@ class TestMeta < Factbase::Test
   end
 
   def test_nil
-    t = Factbase::Term.new(Factbase.new, :nil, [:foo])
+    t = Factbase::Term.new(:nil, [:foo])
     assert(t.evaluate(fact('foo' => nil), []))
     refute(t.evaluate(fact('foo' => true), []))
     refute(t.evaluate(fact('foo' => 'bar'), []))
   end
 
   def test_many
-    t = Factbase::Term.new(Factbase.new, :many, [:foo])
+    t = Factbase::Term.new(:many, [:foo])
     refute(t.evaluate(fact('foo' => nil), []))
     refute(t.evaluate(fact('foo' => 1), []))
     refute(t.evaluate(fact('foo' => '1234'), []))
@@ -59,7 +59,7 @@ class TestMeta < Factbase::Test
   end
 
   def test_one
-    t = Factbase::Term.new(Factbase.new, :one, [:foo])
+    t = Factbase::Term.new(:one, [:foo])
     assert(t.evaluate(fact('foo' => 1), []))
     assert(t.evaluate(fact('foo' => '1234'), []))
     assert(t.evaluate(fact('foo' => [1]), []))

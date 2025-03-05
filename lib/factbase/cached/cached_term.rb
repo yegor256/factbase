@@ -3,16 +3,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require_relative '../factbase'
+require_relative '../../factbase'
 
 # Term with a cache, a decorator of another term.
-#
-# It is NOT thread-safe!
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class Factbase::TermOnce < Factbase::Term
+class Factbase::CachedTerm < Factbase::Term
   # Constructor.
   # @param [Factbase::Term] term Original term
   # @param [Hash] cache The cache

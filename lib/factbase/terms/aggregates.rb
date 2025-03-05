@@ -64,7 +64,7 @@ module Factbase::Term::Aggregates
     raise "A term expected, but '#{selector}' provided" unless selector.is_a?(Factbase::Term)
     term = @operands[1]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    subset = @fb.query(selector.to_s, maps).each(fact).to_a
+    subset = @fb.query(selector, maps).each(fact).to_a
     term.evaluate(nil, subset)
   end
 
@@ -72,7 +72,7 @@ module Factbase::Term::Aggregates
     assert_args(1)
     term = @operands[0]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    @fb.query(term.to_s, maps).each(fact).to_a.empty?
+    @fb.query(term, maps).each(fact).to_a.empty?
   end
 
   def best(maps)
