@@ -35,7 +35,11 @@ class Factbase::CachedFactbase
   # @param [String] term The term to use
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
-    term = Factbase::Syntax.new(term).to_term(self) if term.is_a?(String)
+    require_relative 'cached_term'
+    if term.is_a?(String)
+      term = Factbase::Syntax.new(term, term: Factbase::CachedTerm).to_term(self)
+      term.inject_cache(@cache)
+    end
     q = @origin.query(term, maps)
     unless term.abstract?
       require_relative 'cached_query'

@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../factbase'
-require_relative 'syntax'
-require_relative 'fact'
 require_relative 'accum'
+require_relative 'fact'
+require_relative 'syntax'
 require_relative 'tee'
 
 # Query.
