@@ -46,8 +46,8 @@ task :benchmark do
   fb = Factbase.new
   require_relative 'lib/factbase/cached/cached_factbase'
   fb = Factbase::CachedFactbase.new(fb)
-  # require_relative 'lib/factbase/indexed/indexed_factbase'
-  # fb = Factbase::IndexedFactbase.new(fb)
+  require_relative 'lib/factbase/indexed/indexed_factbase'
+  fb = Factbase::IndexedFactbase.new(fb)
   require_relative 'lib/factbase/sync/sync_factbase'
   fb = Factbase::SyncFactbase.new(fb)
   require 'benchmark'

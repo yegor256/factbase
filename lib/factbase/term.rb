@@ -88,6 +88,8 @@ class Factbase::Term
   end
 
   def redress(type, **args)
+    a = args
+    a[:fb] = @fb if a[:fb].nil?
     type.new(
       @op,
       @operands.map do |op|
@@ -97,8 +99,7 @@ class Factbase::Term
           op
         end
       end,
-      fb: @fb,
-      **args
+      **a
     )
   end
 

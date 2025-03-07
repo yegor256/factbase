@@ -36,7 +36,7 @@ class Factbase::CachedFactbase
   # @return [Factbase::Term] The term
   def to_term(query)
     require_relative 'cached_term'
-    @origin.to_term(query).redress(Factbase::CachedTerm, cache: @cache)
+    @origin.to_term(query).redress(Factbase::CachedTerm, cache: @cache, fb: self)
   end
 
   # Create a query capable of iterating.
@@ -47,7 +47,7 @@ class Factbase::CachedFactbase
       if term.is_a?(String)
         to_term(term)
       else
-        term.redress(Factbase::CachedTerm)
+        term.redress(Factbase::CachedTerm, cache: @cache, fb: self)
       end
     q = @origin.query(term, maps)
     unless term.abstract?

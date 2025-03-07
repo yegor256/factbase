@@ -31,6 +31,17 @@ class TestCachedQuery < Factbase::Test
     assert_equal(1, fb.query('(eq foo (agg (exists hello) (min foo)))').each.to_a.size)
   end
 
+  def test_joins_too
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    total = 10_000
+    total.times do |i|
+      f = fb.insert
+      f.foo = i
+      f.hello = 1
+    end
+    assert_equal(total, fb.query('(join "bar<=foo" (eq foo (agg (exists hello) (min foo))))').each.to_a.size)
+  end
+
   def test_caches_while_being_decorated
     fb = Factbase::SyncFactbase.new(Factbase::CachedFactbase.new(Factbase.new))
     10_000.times do |i|
