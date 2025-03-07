@@ -43,11 +43,12 @@ class Factbase::CachedFactbase
   # @param [String] term The term to use
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
-    if term.is_a?(String)
-      term = to_term(term)
-    else
-      term = term.redress(Factbase::CachedTerm)
-    end
+    term =
+      if term.is_a?(String)
+        to_term(term)
+      else
+        term.redress(Factbase::CachedTerm)
+      end
     q = @origin.query(term, maps)
     unless term.abstract?
       require_relative 'cached_query'

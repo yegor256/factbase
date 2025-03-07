@@ -89,15 +89,15 @@ class Factbase::Term
 
   def redress(type, **args)
     type.new(
-      @op, 
-      @operands.map do |op| 
+      @op,
+      @operands.map do |op|
         if op.is_a?(Factbase::Term)
-          op.redress(type, **args) 
+          op.redress(type, **args)
         else
           op
         end
-      end, 
-      fb: @fb, 
+      end,
+      fb: @fb,
       **args
     )
   end
