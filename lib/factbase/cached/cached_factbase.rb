@@ -6,6 +6,9 @@
 require 'decoor'
 require_relative '../../factbase'
 require_relative '../../factbase/syntax'
+require_relative 'cached_fact'
+require_relative 'cached_query'
+require_relative 'cached_term'
 
 # A factbase with a cache.
 #
@@ -27,7 +30,6 @@ class Factbase::CachedFactbase
   # @return [Factbase::Fact] The fact just inserted
   def insert
     @cache.clear
-    require_relative 'cached_fact'
     Factbase::CachedFact.new(@origin.insert, @cache)
   end
 
@@ -35,7 +37,6 @@ class Factbase::CachedFactbase
   # @param [String] query The query to convert
   # @return [Factbase::Term] The term
   def to_term(query)
-    require_relative 'cached_term'
     @origin.to_term(query).redress(Factbase::CachedTerm, cache: @cache, fb: self)
   end
 
@@ -47,12 +48,10 @@ class Factbase::CachedFactbase
       if term.is_a?(String)
         to_term(term)
       else
-        require_relative 'cached_term'
         term.redress(Factbase::CachedTerm, cache: @cache, fb: self)
       end
     q = @origin.query(term, maps)
     unless term.abstract?
-      require_relative 'cached_query'
       q = Factbase::CachedQuery.new(q, @cache)
     end
     q

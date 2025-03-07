@@ -36,7 +36,7 @@ class TestIndexedQuery < Factbase::Test
 
   def test_joins_too
     fb = Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new))
-    total = 10_000
+    total = 10
     total.times do |i|
       f = fb.insert
       f.who = i

@@ -6,6 +6,9 @@
 require 'decoor'
 require_relative '../../factbase'
 require_relative '../../factbase/syntax'
+require_relative 'indexed_fact'
+require_relative 'indexed_query'
+require_relative 'indexed_term'
 
 # A factbase with an index.
 #
@@ -27,7 +30,6 @@ class Factbase::IndexedFactbase
   # @return [Factbase::Fact] The fact just inserted
   def insert
     @idx.clear
-    require_relative 'indexed_fact'
     Factbase::IndexedFact.new(@origin.insert, @idx)
   end
 
@@ -35,7 +37,6 @@ class Factbase::IndexedFactbase
   # @param [String] query The query to convert
   # @return [Factbase::Term] The term
   def to_term(query)
-    require_relative 'indexed_term'
     @origin.to_term(query).redress(Factbase::IndexedTerm, idx: @idx, fb: self)
   end
 
@@ -47,12 +48,10 @@ class Factbase::IndexedFactbase
       if term.is_a?(String)
         to_term(term)
       else
-        require_relative 'indexed_term'
         term.redress(Factbase::IndexedTerm, idx: @idx, fb: self)
       end
     q = @origin.query(term, maps)
     if term.abstract?
-      require_relative 'indexed_query'
       q = Factbase::IndexedQuery.new(q, @idx)
     end
     q

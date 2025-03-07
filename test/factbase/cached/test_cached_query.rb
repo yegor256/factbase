@@ -6,6 +6,7 @@
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/cached/cached_factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 
 # Query test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -32,7 +33,7 @@ class TestCachedQuery < Factbase::Test
   end
 
   def test_joins_too
-    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb = Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new))
     total = 10_000
     total.times do |i|
       f = fb.insert
