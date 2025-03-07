@@ -50,6 +50,24 @@ require 'yaml'
 #  fb2 = Factbase.new # it's empty
 #  fb2.import(File.binread(file))
 #
+# Here's how to use transactions to ensure data consistency:
+#
+#  fb = Factbase.new
+#  # Successful transaction
+#  fb.txn do |fbt|
+#    f = fbt.insert
+#    f.name = 'John'
+#    f.age = 30
+#    # If any error occurs here, all changes will be rolled back
+#  end
+#  # Transaction with rollback
+#  fb.txn do |fbt|
+#    f = fbt.insert
+#    f.name = 'Jane'
+#    f.age = 25
+#    raise Factbase::Rollback # This will undo all changes in this transaction
+#  end
+#
 # It's impossible to delete properties of a fact. It is however possible to
 # delete the entire fact, with the help of the +query()+ and then +delete!()+
 # methods.
