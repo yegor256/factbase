@@ -23,6 +23,10 @@ class Factbase::Light
     @fb.insert
   end
 
+  def to_term(query)
+    @fb.to_term(query)
+  end
+
   def query(query, maps = nil)
     @fb.query(query, maps)
   end

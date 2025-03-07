@@ -15,19 +15,10 @@ class Factbase::CachedTerm < Factbase::Term
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
   # @param [Factbase] fb Optional factbase reference
-  def initialize(operator, operands, fb: nil)
-    super
-    @cacheable = static? && !abstract?
-  end
-
-  # Inject cache into this term and all others inside.
-  # @param [Hash] cache The cache
-  def inject_cache(cache)
+  def initialize(operator, operands, fb: nil, cache: {})
+    super(operator, operands, fb: fb)
     @cache = cache
-    @operands.each do |o|
-      next unless o.is_a?(Factbase::CachedTerm)
-      o.inject_cache(cache)
-    end
+    @cacheable = static? && !abstract?
   end
 
   # Does it match the fact?

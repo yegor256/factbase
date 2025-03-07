@@ -31,14 +31,22 @@ class Factbase::CachedFactbase
     Factbase::CachedFact.new(@origin.insert, @cache)
   end
 
+  # Convert a query to a term.
+  # @param [String] query The query to convert
+  # @return [Factbase::Term] The term
+  def to_term(query)
+    require_relative 'cached_term'
+    @origin.to_term(query).redress(Factbase::CachedTerm, cache: @cache)
+  end
+
   # Create a query capable of iterating.
   # @param [String] term The term to use
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
-    require_relative 'cached_term'
     if term.is_a?(String)
-      term = Factbase::Syntax.new(term, term: Factbase::CachedTerm).to_term(self)
-      term.inject_cache(@cache)
+      term = to_term(term)
+    else
+      term = term.redress(Factbase::CachedTerm)
     end
     q = @origin.query(term, maps)
     unless term.abstract?

@@ -31,11 +31,18 @@ class Factbase::IndexedFactbase
     Factbase::IndexedFact.new(@origin.insert, @idx)
   end
 
+  # Convert a query to a term.
+  # @param [String] query The query to convert
+  # @return [Factbase::Term] The term
+  def to_term(query)
+    @origin.to_term(query)
+  end
+
   # Create a query capable of iterating.
   # @param [String] term The term to use
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
-    term = Factbase::Syntax.new(term).to_term(self) if term.is_a?(String)
+    term = to_term(term) if term.is_a?(String)
     require_relative 'indexed_query'
     Factbase::IndexedQuery.new(@origin.query(term, maps), @idx)
   end

@@ -41,6 +41,12 @@ class TestFactbase < Factbase::Test
     end
   end
 
+  def test_converts_query_to_term
+    fb = Factbase.new
+    term = fb.to_term('(eq foo 42)')
+    assert_equal('(eq foo 42)', term.to_s)
+  end
+
   def test_simple_setting
     fb = Factbase.new
     fb.insert

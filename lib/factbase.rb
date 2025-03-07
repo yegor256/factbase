@@ -135,9 +135,17 @@ class Factbase
   # @param [Array<Hash>|nil] maps The subset of maps (if provided)
   def query(term, maps = nil)
     maps ||= @maps
+    term = to_term(term) if term.is_a?(String)
     require_relative 'factbase/query'
-    term = Factbase::Syntax.new(term).to_term(self) if term.is_a?(String)
     Factbase::Query.new(maps, term)
+  end
+
+  # Convert a query to a term.
+  # @param [String] query The query to convert
+  # @return [Factbase::Term] The term
+  def to_term(query)
+    require_relative 'factbase/syntax'
+    Factbase::Syntax.new(query).to_term(self)
   end
 
   # Run an ACID transaction, which will either modify the factbase

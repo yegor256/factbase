@@ -87,6 +87,21 @@ class Factbase::Term
     @fb = fb
   end
 
+  def redress(type, **args)
+    type.new(
+      @op, 
+      @operands.map do |op| 
+        if op.is_a?(Factbase::Term)
+          op.redress(type, **args) 
+        else
+          op
+        end
+      end, 
+      fb: @fb, 
+      **args
+    )
+  end
+
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
