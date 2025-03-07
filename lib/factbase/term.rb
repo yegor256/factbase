@@ -103,6 +103,15 @@ class Factbase::Term
     )
   end
 
+  # Try to predict which facts from the provided list
+  # should be evaluated. If no prediction can be made,
+  # the same list is returned.
+  # @param [Array<Hash>] maps Records to iterate, maybe
+  # @return [Array<Hash>] Records to iterate
+  def predict(maps)
+    maps
+  end
+
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
