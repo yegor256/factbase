@@ -5,6 +5,7 @@
 
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/cached/cached_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
 
 # Query test.
@@ -22,7 +23,7 @@ class TestIndexedQuery < Factbase::Test
   end
 
   def test_attaches_alias
-    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb = Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
     total = 10_000
     total.times do |i|
       f = fb.insert
@@ -31,6 +32,20 @@ class TestIndexedQuery < Factbase::Test
       f.xyz = i
     end
     assert_equal(total, fb.query('(as boom (agg (eq foo $bar) (min xyz)))').each.to_a.size)
+  end
+
+  def test_joins_too
+    fb = Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new))
+    total = 10_000
+    total.times do |i|
+      f = fb.insert
+      f.who = i
+    end
+    total.times do |i|
+      f = fb.insert
+      f.friend = i
+    end
+    assert_equal(total, fb.query('(and (exists who) (join "f<=friend" (eq friend $who)))').each.to_a.size)
   end
 
   def test_deletes_too
