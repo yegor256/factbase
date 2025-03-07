@@ -11,7 +11,7 @@ require_relative '../../../lib/factbase/cached/cached_factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestCachedQuery < Factbase::Test
+class TestCachedFactbase < Factbase::Test
   def test_inserts_and_queries
     fb = Factbase::CachedFactbase.new(Factbase.new)
     f = fb.insert

@@ -95,7 +95,7 @@ module Factbase::Term::Logical
       ops << o
     end
     return ops[0] if ops.size == 1
-    Factbase::Term.new(@op, ops)
+    self.class.new(@op, ops)
   end
 
   # Simplifies AND expressions by removing duplicates

@@ -87,6 +87,31 @@ class Factbase::Term
     @fb = fb
   end
 
+  def redress(type, **args)
+    a = args
+    a[:fb] = @fb if a[:fb].nil?
+    type.new(
+      @op,
+      @operands.map do |op|
+        if op.is_a?(Factbase::Term)
+          op.redress(type, **args)
+        else
+          op
+        end
+      end,
+      **a
+    )
+  end
+
+  # Try to predict which facts from the provided list
+  # should be evaluated. If no prediction can be made,
+  # the same list is returned.
+  # @param [Array<Hash>] maps Records to iterate, maybe
+  # @return [Array<Hash>] Records to iterate
+  def predict(maps)
+    maps
+  end
+
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available

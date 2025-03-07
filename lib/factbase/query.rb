@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../factbase'
-require_relative 'syntax'
-require_relative 'fact'
 require_relative 'accum'
+require_relative 'fact'
+require_relative 'syntax'
 require_relative 'tee'
 
 # Query.
@@ -43,7 +43,7 @@ class Factbase::Query
     return to_enum(__method__, params) unless block_given?
     yielded = 0
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    @maps.each do |m|
+    @term.predict(@maps).each do |m|
       extras = {}
       f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
