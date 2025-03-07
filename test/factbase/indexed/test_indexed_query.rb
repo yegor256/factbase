@@ -23,13 +23,14 @@ class TestIndexedQuery < Factbase::Test
 
   def test_attaches_alias
     fb = Factbase::IndexedFactbase.new(Factbase.new)
-    total = 10
+    total = 10_000
     total.times do |i|
       f = fb.insert
-      f.foo = rand(0..100)
-      f.bar = i
+      f.foo = rand(0..10)
+      f.bar = rand(0..10)
+      f.xyz = i
     end
-    assert_equal(total, fb.query('(as boom (agg (gt foo $foo) (min bar)))').each.to_a.size)
+    assert_equal(total, fb.query('(as boom (agg (eq foo $bar) (min xyz)))').each.to_a.size)
   end
 
   def test_deletes_too

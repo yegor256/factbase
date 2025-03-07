@@ -51,7 +51,7 @@ class Factbase::IndexedFactbase
         term.redress(Factbase::IndexedTerm, idx: @idx, fb: self)
       end
     q = @origin.query(term, maps)
-    unless term.abstract?
+    if term.abstract?
       require_relative 'indexed_query'
       q = Factbase::IndexedQuery.new(q, @idx)
     end

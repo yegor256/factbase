@@ -22,18 +22,24 @@ class Factbase::IndexedTerm < Factbase::Term
     @cacheable = !static? && abstract?
   end
 
-  def cmp(op, fact, maps)
-    assert_args(2)
-    lefts = the_values(0, fact, maps)
-    return false if lefts.nil?
-    rights = the_values(1, fact, maps)
-    return false if rights.nil?
-    lefts.any? do |l|
-      l = l.floor if l.is_a?(Time) && op == :==
-      rights.any? do |r|
-        r = r.floor if r.is_a?(Time) && op == :==
-        l.send(op, r)
+  def predict(maps)
+    case @op
+    when :eq
+      if @operands[0].is_a?(Symbol) && !@operands[1].is_a?(Array)
+        key = [maps.object_id, @operands[0], @operator]
+        if @idx[key].nil?
+          @idx[key] = maps.group_by { |m| m[@operands[0]] }
+        end
+        @idx[key][@operands[1]] || []
+      else
+        maps
       end
+    when :and
+      @operands.map { |o| o.predict(maps) }.reduce(&:&)
+    when :or
+      @operands.map { |o| o.predict(maps) }.reduce(&:|)
+    else
+      maps
     end
   end
 end
