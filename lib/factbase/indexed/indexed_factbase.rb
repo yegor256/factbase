@@ -35,16 +35,27 @@ class Factbase::IndexedFactbase
   # @param [String] query The query to convert
   # @return [Factbase::Term] The term
   def to_term(query)
-    @origin.to_term(query)
+    require_relative 'indexed_term'
+    @origin.to_term(query).redress(Factbase::IndexedTerm, idx: @idx, fb: self)
   end
 
   # Create a query capable of iterating.
   # @param [String] term The term to use
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
-    term = to_term(term) if term.is_a?(String)
-    require_relative 'indexed_query'
-    Factbase::IndexedQuery.new(@origin.query(term, maps), @idx)
+    term =
+      if term.is_a?(String)
+        to_term(term)
+      else
+        require_relative 'indexed_term'
+        term.redress(Factbase::IndexedTerm, idx: @idx, fb: self)
+      end
+    q = @origin.query(term, maps)
+    unless term.abstract?
+      require_relative 'indexed_query'
+      q = Factbase::IndexedQuery.new(q, @idx)
+    end
+    q
   end
 
   # Run an ACID transaction.

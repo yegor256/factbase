@@ -47,6 +47,7 @@ class Factbase::CachedFactbase
       if term.is_a?(String)
         to_term(term)
       else
+        require_relative 'cached_term'
         term.redress(Factbase::CachedTerm, cache: @cache, fb: self)
       end
     q = @origin.query(term, maps)
