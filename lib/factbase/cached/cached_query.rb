@@ -35,6 +35,7 @@ class Factbase::CachedQuery
     before = @cache[key]
     @cache[key] = @origin.each.to_a if before.nil?
     @cache[key].each do |f|
+      require_relative 'cached_fact'
       yield Factbase::CachedFact.new(f, @cache)
     end
   end

@@ -32,6 +32,7 @@ class Factbase::IndexedQuery
   def each(params = {})
     return to_enum(__method__, params) unless block_given?
     @origin.each(params) do |f|
+      require_relative 'indexed_fact'
       yield Factbase::IndexedFact.new(f, @idx)
     end
   end
