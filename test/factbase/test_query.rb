@@ -18,7 +18,7 @@ class TestQuery < Factbase::Test
   def test_simple_parsing
     maps = []
     maps << { 'foo' => [42] }
-    q = Factbase::Query.new(maps, '(eq foo 42)')
+    q = Factbase::Query.new(Factbase.new, maps, '(eq foo 42)')
     assert_equal(
       1,
       q.each do |f|
@@ -136,20 +136,20 @@ class TestQuery < Factbase::Test
   def test_to_array
     maps = []
     maps << { 'foo' => [42] }
-    assert_equal(1, Factbase::Query.new(maps, '(eq foo 42)').each.to_a.size)
+    assert_equal(1, Factbase::Query.new(Factbase.new, maps, '(eq foo 42)').each.to_a.size)
   end
 
   def test_returns_int
     maps = []
     maps << { 'foo' => [1] }
-    q = Factbase::Query.new(maps, '(eq foo 1)')
+    q = Factbase::Query.new(Factbase.new, maps, '(eq foo 1)')
     assert_equal(1, q.each(&:to_s))
   end
 
   def test_with_aliases
     maps = []
     maps << { 'foo' => [42] }
-    assert_equal(45, Factbase::Query.new(maps, '(as bar (plus foo 3))').each.to_a[0].bar)
+    assert_equal(45, Factbase::Query.new(Factbase.new, maps, '(as bar (plus foo 3))').each.to_a[0].bar)
     assert_equal(1, maps[0].size)
   end
 
@@ -159,22 +159,22 @@ class TestQuery < Factbase::Test
       { 'foo' => [17] }
     ]
     found = 0
-    Factbase::Query.new(maps, '(eq foo $bar)').each(bar: [42]) do
+    Factbase::Query.new(Factbase.new, maps, '(eq foo $bar)').each(bar: [42]) do
       found += 1
     end
     assert_equal(1, found)
-    assert_equal(1, Factbase::Query.new(maps, '(eq foo $bar)').each(bar: 42).to_a.size)
-    assert_equal(0, Factbase::Query.new(maps, '(eq foo $bar)').each(bar: 555).to_a.size)
+    assert_equal(1, Factbase::Query.new(Factbase.new, maps, '(eq foo $bar)').each(bar: 42).to_a.size)
+    assert_equal(0, Factbase::Query.new(Factbase.new, maps, '(eq foo $bar)').each(bar: 555).to_a.size)
   end
 
   def test_with_nil_alias
     maps = [{ 'foo' => [42] }]
-    assert_nil(Factbase::Query.new(maps, '(as bar (plus xxx 3))').each.to_a[0]['bar'])
+    assert_nil(Factbase::Query.new(Factbase.new, maps, '(as bar (plus xxx 3))').each.to_a[0]['bar'])
   end
 
   def test_get_all_properties
     maps = [{ 'foo' => [42] }]
-    f = Factbase::Query.new(maps, '(always)').each.to_a[0]
+    f = Factbase::Query.new(Factbase.new, maps, '(always)').each.to_a[0]
     assert_includes(f.all_properties, 'foo')
   end
 end

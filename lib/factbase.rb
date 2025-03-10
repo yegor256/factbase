@@ -137,7 +137,7 @@ class Factbase
     maps ||= @maps
     term = to_term(term) if term.is_a?(String)
     require_relative 'factbase/query'
-    Factbase::Query.new(maps, term, self)
+    Factbase::Query.new(maps, term)
   end
 
   # Convert a query to a term.

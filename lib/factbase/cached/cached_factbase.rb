@@ -37,7 +37,7 @@ class Factbase::CachedFactbase
   # @param [String] query The query to convert
   # @return [Factbase::Term] The term
   def to_term(query)
-    @origin.to_term(query).redress(Factbase::CachedTerm, cache: @cache, fb: self)
+    @origin.to_term(query).redress(Factbase::CachedTerm, cache: @cache)
   end
 
   # Create a query capable of iterating.

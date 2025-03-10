@@ -11,7 +11,7 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Term::Defn
-  def defn(_fact, _maps)
+  def defn(_fact, _maps, _fb)
     assert_args(2)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'defn'" unless fn.is_a?(Symbol)
@@ -25,7 +25,7 @@ module Factbase::Term::Defn
     true
   end
 
-  def undef(_fact, _maps)
+  def undef(_fact, _maps, _fb)
     assert_args(1)
     fn = @operands[0]
     raise "A symbol expected as first argument of 'undef'" unless fn.is_a?(Symbol)

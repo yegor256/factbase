@@ -11,7 +11,7 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Term::System
-  def env(fact, maps)
+  def env(fact, maps, _fb)
     assert_args(2)
     n = _values(0, fact, maps)[0]
     ENV.fetch(n.upcase) { _values(1, fact, maps)[0] }

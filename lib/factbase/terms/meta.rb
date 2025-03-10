@@ -11,17 +11,17 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Term::Meta
-  def exists(fact, _maps)
+  def exists(fact, _maps, _fb)
     assert_args(1)
     !by_symbol(0, fact).nil?
   end
 
-  def absent(fact, _maps)
+  def absent(fact, _maps, _fb)
     assert_args(1)
     by_symbol(0, fact).nil?
   end
 
-  def size(fact, _maps)
+  def size(fact, _maps, _fb)
     assert_args(1)
     v = by_symbol(0, fact)
     return 0 if v.nil?
@@ -29,7 +29,7 @@ module Factbase::Term::Meta
     v.size
   end
 
-  def type(fact, _maps)
+  def type(fact, _maps, _fb)
     assert_args(1)
     v = by_symbol(0, fact)
     return 'nil' if v.nil?
@@ -37,18 +37,18 @@ module Factbase::Term::Meta
     v.class.to_s
   end
 
-  def nil(fact, maps)
+  def nil(fact, maps, _fb)
     assert_args(1)
     _values(0, fact, maps).nil?
   end
 
-  def many(fact, maps)
+  def many(fact, maps, _fb)
     assert_args(1)
     v = _values(0, fact, maps)
     !v.nil? && v.size > 1
   end
 
-  def one(fact, maps)
+  def one(fact, maps, _fb)
     assert_args(1)
     v = _values(0, fact, maps)
     !v.nil? && v.size == 1

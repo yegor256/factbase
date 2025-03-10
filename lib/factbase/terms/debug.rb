@@ -11,7 +11,7 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Term::Debug
-  def traced(fact, maps)
+  def traced(fact, maps, _fb)
     assert_args(1)
     t = @operands[0]
     raise "A term expected, but '#{t}' provided" unless t.is_a?(Factbase::Term)

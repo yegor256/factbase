@@ -37,7 +37,7 @@ class Factbase::IndexedFactbase
   # @param [String] query The query to convert
   # @return [Factbase::Term] The term
   def to_term(query)
-    @origin.to_term(query).redress(Factbase::IndexedTerm, idx: @idx, fb: self)
+    @origin.to_term(query).redress(Factbase::IndexedTerm, idx: @idx)
   end
 
   # Create a query capable of iterating.

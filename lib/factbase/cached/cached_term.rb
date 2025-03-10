@@ -15,8 +15,8 @@ class Factbase::CachedTerm < Factbase::Term
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
   # @param [Factbase] fb Optional factbase reference
-  def initialize(operator, operands, fb: nil, cache: {})
-    super(operator, operands, fb: fb)
+  def initialize(operator, operands, cache: {})
+    super(operator, operands)
     @cache = cache
     @cacheable = static? && !abstract?
   end
@@ -25,7 +25,7 @@ class Factbase::CachedTerm < Factbase::Term
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @return [bool] TRUE if matches
-  def evaluate(fact, maps)
+  def evaluate(fact, maps, fb)
     return super unless @cacheable
     key = [@text, maps.object_id]
     before = @cache[key]

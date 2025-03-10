@@ -16,8 +16,8 @@ class Factbase::IndexedTerm < Factbase::Term
   # @param [Array] operands Operands
   # @param [Factbase] fb Optional factbase reference
   # @param [Hash] idx Index
-  def initialize(operator, operands, fb: nil, idx: {})
-    super(operator, operands, fb: fb)
+  def initialize(operator, operands, idx: {})
+    super(operator, operands)
     @idx = idx
     @cacheable = !static? && abstract?
   end

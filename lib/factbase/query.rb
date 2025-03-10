@@ -21,28 +21,27 @@ require_relative 'tee'
 # License:: MIT
 class Factbase::Query
   # Constructor.
-  # @param [Factbase] fb The factbase
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [String|Factbase::Term] term The query term
-  def initialize(fb, maps, term)
-    @fb = fb
-    @maps = maps
+  def initialize(maps, term)
     term = Factbase::Syntax.new(term).to_term if term.is_a?(String)
-    @term = term
+    @iterator = Factbase::Iterator.new(maps, term)
   end
 
   # Print it as a string.
   # @return [String] The query as a string
   def to_s
-    @term.to_s
+    @iterator.to_s
   end
 
   # Iterate facts one by one.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
-  def each(params = {})
+  def each(params = {}, fb: self)
     return to_enum(__method__, params) unless block_given?
+    @iterator.each(fb) do ||
     yielded = 0
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     @term.predict(@maps).each do |m|
@@ -50,7 +49,7 @@ class Factbase::Query
       f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
-      r = @term.evaluate(a, @maps, @fb)
+      r = @term.evaluate(a, @maps, fb)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
         raise "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term.inspect}"
       end
@@ -62,11 +61,12 @@ class Factbase::Query
   end
 
   # Read a single value.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
-  def one(params = {})
+  def one(fb, params = {})
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    r = @term.evaluate(Factbase::Tee.new(nil, params), @maps, @fb)
+    r = @term.evaluate(Factbase::Tee.new(nil, params), @maps, fb)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
       raise "Incorrect type #{r.class} returned by #{@term.inspect}"
     end
