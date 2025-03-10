@@ -39,18 +39,18 @@ module Factbase::Term::Meta
 
   def nil(fact, maps)
     assert_args(1)
-    the_values(0, fact, maps).nil?
+    _values(0, fact, maps).nil?
   end
 
   def many(fact, maps)
     assert_args(1)
-    v = the_values(0, fact, maps)
+    v = _values(0, fact, maps)
     !v.nil? && v.size > 1
   end
 
   def one(fact, maps)
     assert_args(1)
-    v = the_values(0, fact, maps)
+    v = _values(0, fact, maps)
     !v.nil? && v.size == 1
   end
 end

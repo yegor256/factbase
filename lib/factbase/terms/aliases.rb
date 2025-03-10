@@ -11,16 +11,16 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Term::Aliases
-  def as(fact, maps)
+  def as(fact, maps, fb)
     assert_args(2)
     a = @operands[0]
     raise "A symbol expected as first argument of 'as'" unless a.is_a?(Symbol)
-    vv = the_values(1, fact, maps)
+    vv = _values(1, fact, maps)
     vv&.each { |v| fact.send(:"#{a}=", v) }
     true
   end
 
-  def join(fact, maps)
+  def join(fact, maps, fb)
     assert_args(2)
     jumps = @operands[0]
     raise "A string expected as first argument of 'join'" unless jumps.is_a?(String)
@@ -30,7 +30,7 @@ module Factbase::Term::Aliases
       .map { |j| j.size == 1 ? [j[0], j[0]] : j }
     term = @operands[1]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    subset = @fb.query(term, maps).each(fact).to_a
+    subset = fb.query(term, maps).each(fact).to_a
     subset.each do |s|
       jumps.each do |to, from|
         s[from]&.each do |v|

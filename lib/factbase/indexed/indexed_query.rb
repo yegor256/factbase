@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../factbase'
+require_relative 'indexed_fact'
 
 # Query with an index, a decorator of another query.
 #
@@ -32,7 +33,6 @@ class Factbase::IndexedQuery
   def each(params = {})
     return to_enum(__method__, params) unless block_given?
     @origin.each(params) do |f|
-      require_relative 'indexed_fact'
       yield Factbase::IndexedFact.new(f, @idx)
     end
   end

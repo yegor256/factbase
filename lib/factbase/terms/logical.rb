@@ -35,7 +35,7 @@ module Factbase::Term::Logical
   # @return [Boolean] Negated boolean result of the operand
   def not(fact, maps)
     assert_args(1)
-    !_only_bool(the_values(0, fact, maps), 0)
+    !_only_bool(_values(0, fact, maps), 0)
   end
 
   # Logical OR of multiple operands
@@ -44,7 +44,7 @@ module Factbase::Term::Logical
   # @return [Boolean] True if any operand evaluates to true, false otherwise
   def or(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return true if _only_bool(the_values(i, fact, maps), i)
+      return true if _only_bool(_values(i, fact, maps), i)
     end
     false
   end
@@ -55,7 +55,7 @@ module Factbase::Term::Logical
   # @return [Boolean] True if all operands evaluate to true, false otherwise
   def and(fact, maps)
     (0..@operands.size - 1).each do |i|
-      return false unless _only_bool(the_values(i, fact, maps), i)
+      return false unless _only_bool(_values(i, fact, maps), i)
     end
     true
   end
@@ -77,9 +77,9 @@ module Factbase::Term::Logical
   # @return [Object] First operand if not nil, otherwise second operand
   def either(fact, maps)
     assert_args(2)
-    v = the_values(0, fact, maps)
+    v = _values(0, fact, maps)
     return v unless v.nil?
-    the_values(1, fact, maps)
+    _values(1, fact, maps)
   end
 
   # Simplifies AND or OR expressions by removing duplicates

@@ -137,7 +137,7 @@ class Factbase
     maps ||= @maps
     term = to_term(term) if term.is_a?(String)
     require_relative 'factbase/query'
-    Factbase::Query.new(maps, term)
+    Factbase::Query.new(maps, term, self)
   end
 
   # Convert a query to a term.
@@ -145,7 +145,7 @@ class Factbase
   # @return [Factbase::Term] The term
   def to_term(query)
     require_relative 'factbase/syntax'
-    Factbase::Syntax.new(query).to_term(self)
+    Factbase::Syntax.new(query).to_term
   end
 
   # Run an ACID transaction, which will either modify the factbase

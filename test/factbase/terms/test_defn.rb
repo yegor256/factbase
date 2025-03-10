@@ -13,36 +13,36 @@ require_relative '../../../lib/factbase/term'
 class TestDefn < Factbase::Test
   def test_defn_simple
     t = Factbase::Term.new(:defn, [:foo, 'self.to_s'])
-    assert(t.evaluate(fact('foo' => 4), []))
+    assert(t.evaluate(fact('foo' => 4), [], Factbase.new))
     t1 = Factbase::Term.new(:foo, ['hello, world!'])
-    assert_equal('(foo \'hello, world!\')', t1.evaluate(fact, []))
+    assert_equal('(foo \'hello, world!\')', t1.evaluate(fact, [], Factbase.new))
   end
 
   def test_defn_again_by_mistake
     t = Factbase::Term.new(:defn, [:and, 'self.to_s'])
     assert_raises(StandardError) do
-      t.evaluate(fact, [])
+      t.evaluate(fact, [], Factbase.new)
     end
   end
 
   def test_defn_bad_name_by_mistake
     t = Factbase::Term.new(:defn, [:to_s, 'self.to_s'])
     assert_raises(StandardError) do
-      t.evaluate(fact, [])
+      t.evaluate(fact, [], Factbase.new)
     end
   end
 
   def test_defn_bad_name_spelling_by_mistake
     t = Factbase::Term.new(:defn, [:'some-key', 'self.to_s'])
     assert_raises(StandardError) do
-      t.evaluate(fact, [])
+      t.evaluate(fact, [], Factbase.new)
     end
   end
 
   def test_undef_simple
     t = Factbase::Term.new(:defn, [:hello, 'self.to_s'])
-    assert(t.evaluate(fact, []))
+    assert(t.evaluate(fact, [], Factbase.new))
     t = Factbase::Term.new(:undef, [:hello])
-    assert(t.evaluate(fact, []))
+    assert(t.evaluate(fact, [], Factbase.new))
   end
 end

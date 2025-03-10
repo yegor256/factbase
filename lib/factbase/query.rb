@@ -21,9 +21,11 @@ require_relative 'tee'
 # License:: MIT
 class Factbase::Query
   # Constructor.
+  # @param [Factbase] fb The factbase
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [String|Factbase::Term] term The query term
-  def initialize(maps, term)
+  def initialize(fb, maps, term)
+    @fb = fb
     @maps = maps
     term = Factbase::Syntax.new(term).to_term if term.is_a?(String)
     @term = term
@@ -48,7 +50,7 @@ class Factbase::Query
       f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
-      r = @term.evaluate(a, @maps)
+      r = @term.evaluate(a, @maps, @fb)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
         raise "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term.inspect}"
       end
@@ -64,7 +66,7 @@ class Factbase::Query
   # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
   def one(params = {})
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    r = @term.evaluate(Factbase::Tee.new(nil, params), @maps)
+    r = @term.evaluate(Factbase::Tee.new(nil, params), @maps, @fb)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
       raise "Incorrect type #{r.class} returned by #{@term.inspect}"
     end
@@ -77,7 +79,7 @@ class Factbase::Query
     deleted = 0
     @maps.delete_if do |m|
       f = Factbase::Fact.new(m)
-      if @term.evaluate(f, @maps)
+      if @term.evaluate(f, @maps, @fb)
         deleted += 1
         true
       else

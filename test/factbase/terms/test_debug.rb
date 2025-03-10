@@ -14,7 +14,7 @@ class TestDebug < Factbase::Test
   def test_traced
     t = Factbase::Term.new(:traced, [Factbase::Term.new(:defn, [:test_debug, 'self.to_s'])])
     assert_output("(traced (defn test_debug 'self.to_s')) -> true\n") do
-      assert(t.evaluate(fact, []))
+      assert(t.evaluate(fact, [], Factbase.new))
     end
   end
 

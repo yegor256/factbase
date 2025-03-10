@@ -11,18 +11,18 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Term::Ordering
-  def prev(fact, maps)
+  def prev(fact, maps, fb)
     assert_args(1)
     before = @prev
-    v = the_values(0, fact, maps)
+    v = _values(0, fact, maps)
     @prev = v
     before
   end
 
-  def unique(fact, maps)
+  def unique(fact, maps, fb)
     @uniques = [] if @uniques.nil?
     assert_args(1)
-    vv = the_values(0, fact, maps)
+    vv = _values(0, fact, maps)
     return false if vv.nil?
     vv = [vv] unless vv.respond_to?(:to_a)
     vv.each do |v|

@@ -86,7 +86,7 @@ class TestQuery < Factbase::Test
     maps = []
     now = Time.now.utc
     maps << { 'foo' => [now] }
-    q = Factbase::Query.new(maps, "(eq foo #{now.iso8601})")
+    q = Factbase::Query.new(Factbase.new, maps, "(eq foo #{now.iso8601})")
     assert_equal(1, q.each.to_a.size)
   end
 
@@ -96,7 +96,7 @@ class TestQuery < Factbase::Test
       { 'bar' => [4, 5] },
       { 'bar' => [5] }
     ]
-    q = Factbase::Query.new(maps, '(eq bar 5)')
+    q = Factbase::Query.new(Factbase.new, maps, '(eq bar 5)')
     assert_equal(2, q.delete!)
     assert_equal(1, maps.size)
   end
@@ -113,7 +113,7 @@ class TestQuery < Factbase::Test
       '(agg (eq bar $v) (count))' => 1,
       '(agg (eq z 40) (count))' => 0
     }.each do |q, expected|
-      result = Factbase::Query.new(maps, q).one(v: 4)
+      result = Factbase::Query.new(Factbase.new, maps, q).one(v: 4)
       if expected.nil?
         assert_nil(result, "#{q} -> nil")
       else
@@ -128,7 +128,7 @@ class TestQuery < Factbase::Test
       { 'bar' => [4, 5] },
       { 'bar' => [5] }
     ]
-    q = Factbase::Query.new(maps, '(never)')
+    q = Factbase::Query.new(Factbase.new, maps, '(never)')
     assert_equal(0, q.delete!)
     assert_equal(3, maps.size)
   end

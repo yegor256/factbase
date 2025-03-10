@@ -11,54 +11,54 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Term::Math
-  def plus(fact, maps)
-    arithmetic(:+, fact, maps)
+  def plus(fact, maps, fb)
+    _arithmetic(:+, fact, maps)
   end
 
-  def minus(fact, maps)
-    arithmetic(:-, fact, maps)
+  def minus(fact, maps, fb)
+    _arithmetic(:-, fact, maps)
   end
 
-  def times(fact, maps)
-    arithmetic(:*, fact, maps)
+  def times(fact, maps, fb)
+    _arithmetic(:*, fact, maps)
   end
 
-  def div(fact, maps)
-    arithmetic(:/, fact, maps)
+  def div(fact, maps, fb)
+    _arithmetic(:/, fact, maps)
   end
 
-  def zero(fact, maps)
+  def zero(fact, maps, fb)
     assert_args(1)
-    vv = the_values(0, fact, maps)
+    vv = _values(0, fact, maps)
     return false if vv.nil?
     vv.any? { |v| (v.is_a?(Integer) || v.is_a?(Float)) && v.zero? }
   end
 
-  def eq(fact, maps)
-    cmp(:==, fact, maps)
+  def eq(fact, maps, fb)
+    _cmp(:==, fact, maps)
   end
 
-  def lt(fact, maps)
-    cmp(:<, fact, maps)
+  def lt(fact, maps, fb)
+    _cmp(:<, fact, maps)
   end
 
-  def gt(fact, maps)
-    cmp(:>, fact, maps)
+  def gt(fact, maps, fb)
+    _cmp(:>, fact, maps)
   end
 
-  def lte(fact, maps)
-    cmp(:<=, fact, maps)
+  def lte(fact, maps, fb)
+    _cmp(:<=, fact, maps)
   end
 
-  def gte(fact, maps)
-    cmp(:>=, fact, maps)
+  def gte(fact, maps, fb)
+    _cmp(:>=, fact, maps)
   end
 
-  def cmp(op, fact, maps)
+  def _cmp(op, fact, maps)
     assert_args(2)
-    lefts = the_values(0, fact, maps)
+    lefts = _values(0, fact, maps)
     return false if lefts.nil?
-    rights = the_values(1, fact, maps)
+    rights = _values(1, fact, maps)
     return false if rights.nil?
     lefts.any? do |l|
       l = l.floor if l.is_a?(Time) && op == :==
@@ -69,12 +69,12 @@ module Factbase::Term::Math
     end
   end
 
-  def arithmetic(op, fact, maps)
+  def _arithmetic(op, fact, maps)
     assert_args(2)
-    lefts = the_values(0, fact, maps)
+    lefts = _values(0, fact, maps)
     return nil if lefts.nil?
     raise 'Too many values at first position, one expected' unless lefts.size == 1
-    rights = the_values(1, fact, maps)
+    rights = _values(1, fact, maps)
     return nil if rights.nil?
     raise 'Too many values at second position, one expected' unless rights.size == 1
     v = lefts[0]
