@@ -62,7 +62,7 @@ class TestTerm < Factbase::Test
   def test_report_missing_term
     t = Factbase::Term.new(:something, [])
     msg = assert_raises(StandardError) do
-      t.evaluate(fact, [])
+      t.evaluate(fact, [], Factbase.new)
     end.message
     assert_includes(msg, 'not defined at (something)', msg)
   end
@@ -70,7 +70,7 @@ class TestTerm < Factbase::Test
   def test_report_other_error
     t = Factbase::Term.new(:at, [])
     msg = assert_raises(StandardError) do
-      t.evaluate(fact, [])
+      t.evaluate(fact, [], Factbase.new)
     end.message
     assert_includes(msg, 'at (at)', msg)
   end

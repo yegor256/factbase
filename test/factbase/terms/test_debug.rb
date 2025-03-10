@@ -19,7 +19,7 @@ class TestDebug < Factbase::Test
   end
 
   def test_traced_raises
-    e = assert_raises(StandardError) { Factbase::Term.new(:traced, ['foo']).evaluate(fact, []) }
+    e = assert_raises(StandardError) { Factbase::Term.new(:traced, ['foo']).evaluate(fact, [], Factbase.new) }
     assert_match(/A term expected, but 'foo' provided/, e.message)
   end
 
@@ -29,7 +29,7 @@ class TestDebug < Factbase::Test
         Factbase::Term.new(
           :traced,
           [Factbase::Term.new(:defn, [:debug, 'self.to_s']), 'something']
-        ).evaluate(fact, [])
+        ).evaluate(fact, [], Factbase.new)
       end
     assert_match(/Too many \(\d+\) operands for 'traced' \(\d+ expected\)/, e.message)
   end

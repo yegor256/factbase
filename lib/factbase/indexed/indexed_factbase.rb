@@ -49,7 +49,7 @@ class Factbase::IndexedFactbase
     end
     q = @origin.query(term, maps)
     if term.abstract?
-      q = Factbase::IndexedQuery.new(q, @idx)
+      q = Factbase::IndexedQuery.new(q, @idx, self)
     end
     q
   end

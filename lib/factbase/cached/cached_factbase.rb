@@ -49,7 +49,7 @@ class Factbase::CachedFactbase
     end
     q = @origin.query(term, maps)
     unless term.abstract?
-      q = Factbase::CachedQuery.new(q, @cache)
+      q = Factbase::CachedQuery.new(q, @cache, self)
     end
     q
   end

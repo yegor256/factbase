@@ -32,7 +32,7 @@ class Factbase::Tallied
   end
 
   def query(query)
-    Query.new(@fb.query(query), @churn)
+    Query.new(@fb.query(query), @churn, @fb)
   end
 
   def txn
@@ -69,24 +69,25 @@ class Factbase::Tallied
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   class Query
-    def initialize(query, churn)
+    def initialize(query, churn, fb)
       @query = query
       @churn = churn
+      @fb = fb
     end
 
-    def one(params = {})
-      @query.one(params)
+    def one(fb = @fb, params = {})
+      @query.one(fb, params)
     end
 
-    def each(params = {}, fb: self, &)
+    def each(fb = @fb, params = {}, &)
       return to_enum(__method__, params) unless block_given?
-      @query.each(params, fb:) do |f|
+      @query.each(fb, params) do |f|
         yield Fact.new(f, @churn)
       end
     end
 
-    def delete!(fb: self)
-      c = @query.delete!(fb:)
+    def delete!(fb = @fb)
+      c = @query.delete!(fb)
       @churn.append(0, c, 0)
       c
     end

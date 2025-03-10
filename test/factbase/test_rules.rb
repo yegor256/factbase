@@ -51,7 +51,7 @@ class TestRules < Factbase::Test
     fb = Factbase::Rules.new(Factbase.new, '(always)')
     f = fb.insert
     f.foo = 42
-    assert_equal(1, fb.query('(agg (eq foo $v) (count))').one(v: 42))
+    assert_equal(1, fb.query('(agg (eq foo $v) (count))').one(Factbase.new, v: 42))
   end
 
   def test_check_only_when_txn_is_closed

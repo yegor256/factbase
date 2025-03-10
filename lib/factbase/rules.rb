@@ -37,11 +37,11 @@ class Factbase::Rules
   end
 
   def insert
-    Fact.new(@fb.insert, @check)
+    Fact.new(@fb.insert, @check, @fb)
   end
 
   def query(query)
-    Query.new(@fb.query(query), @check)
+    Query.new(@fb.query(query), @check, @fb)
   end
 
   def txn
@@ -53,7 +53,7 @@ class Factbase::Rules
       @check = before
       fbt.query('(always)').each do |f|
         next unless later.include?(f)
-        @check.it(f)
+        @check.it(f, @fb)
       end
     end
   end
@@ -88,18 +88,18 @@ class Factbase::Rules
   # Query decorator.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
-  #
   class Query
     decoor(:query)
 
-    def initialize(query, check)
+    def initialize(query, check, fb)
       @query = query
       @check = check
+      @fb = fb
     end
 
-    def each(params = {}, fb: self)
+    def each(fb = @fb, params = {})
       return to_enum(__method__, params) unless block_given?
-      @query.each(params, fb:) do |f|
+      @query.each(fb, params) do |f|
         yield Fact.new(f, @check, fb)
       end
     end
@@ -129,7 +129,7 @@ class Factbase::Rules
       @facts = Set.new
     end
 
-    def it(fact)
+    def it(fact, fb)
       a = fact[@uid]
       return if a.nil?
       @facts << a[0] unless @uid.nil?

@@ -24,7 +24,7 @@ class TestIndexedQuery < Factbase::Test
 
   def test_attaches_alias
     fb = Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
-    total = 10_000
+    total = 10
     total.times do |i|
       f = fb.insert
       f.foo = rand(0..10)

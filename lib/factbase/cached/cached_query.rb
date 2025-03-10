@@ -14,9 +14,10 @@ class Factbase::CachedQuery
   # Constructor.
   # @param [Factbase::Query] origin Original query
   # @param [Hash] cache The cache
-  def initialize(origin, cache)
+  def initialize(origin, cache, fb)
     @origin = origin
     @cache = cache
+    @fb = fb
   end
 
   # Print it as a string.
@@ -29,11 +30,11 @@ class Factbase::CachedQuery
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
-  def each(params = nil)
-    return to_enum(__method__, params) unless block_given?
+  def each(fb = @fb, params = nil)
+    return to_enum(__method__, fb, params) unless block_given?
     key = "each #{@origin}"
     before = @cache[key]
-    @cache[key] = @origin.each.to_a if before.nil?
+    @cache[key] = @origin.each(fb).to_a if before.nil?
     @cache[key].each do |f|
       require_relative 'cached_fact'
       yield Factbase::CachedFact.new(f, @cache)
@@ -43,17 +44,17 @@ class Factbase::CachedQuery
   # Read a single value.
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return The value evaluated
-  def one(_params = nil)
+  def one(fb = @fb, _params = nil)
     key = "one: #{@origin}"
     before = @cache[key]
-    @cache[key] = @origin.one if before.nil?
+    @cache[key] = @origin.one(fb) if before.nil?
     @cache[key]
   end
 
   # Delete all facts that match the query.
   # @return [Integer] Total number of facts deleted
-  def delete!
+  def delete!(fb = @fb)
     @cache.clear
-    @origin.delete!
+    @origin.delete!(fb)
   end
 end

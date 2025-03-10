@@ -41,7 +41,7 @@ class Factbase::Logged
   end
 
   def query(query)
-    Query.new(query, @tube)
+    Query.new(query, @tube, @fb)
   end
 
   def txn
@@ -124,12 +124,13 @@ class Factbase::Logged
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Query
-    def initialize(expr, tube)
+    def initialize(expr, tube, fb)
       @expr = expr
       @tube = tube
+      @fb = fb
     end
 
-    def one(fb = self, params = {})
+    def one(fb = @fb, params = {})
       start = Time.now
       q = Factbase::Syntax.new(@expr).to_term.to_s
       r = nil
@@ -145,7 +146,7 @@ class Factbase::Logged
       r
     end
 
-    def each(fb = self, params = {}, &)
+    def each(fb = @fb, params = {}, &)
       start = Time.now
       q = Factbase::Syntax.new(@expr).to_term.to_s
       if block_given?
@@ -178,7 +179,7 @@ class Factbase::Logged
       end
     end
 
-    def delete!(fb = self)
+    def delete!(fb = @fb)
       r = nil
       start = Time.now
       before = fb.size
