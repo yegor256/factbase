@@ -37,11 +37,11 @@ class Factbase::Rules
   end
 
   def insert
-    Fact.new(@fb.insert, @check)
+    Fact.new(@fb.insert, @check, @fb)
   end
 
   def query(query)
-    Query.new(@fb.query(query), @check)
+    Query.new(@fb.query(query), @check, @fb)
   end
 
   def txn
@@ -53,7 +53,7 @@ class Factbase::Rules
       @check = before
       fbt.query('(always)').each do |f|
         next unless later.include?(f)
-        @check.it(f)
+        @check.it(f, @fb)
       end
     end
   end
@@ -63,9 +63,10 @@ class Factbase::Rules
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Fact
-    def initialize(fact, check)
+    def initialize(fact, check, fb)
       @fact = fact
       @check = check
+      @fb = fb
     end
 
     def to_s
@@ -79,7 +80,7 @@ class Factbase::Rules
     others do |*args|
       r = @fact.method_missing(*args)
       k = args[0].to_s
-      @check.it(@fact) if k.end_with?('=')
+      @check.it(@fact, @fb) if k.end_with?('=')
       r
     end
   end
@@ -87,19 +88,19 @@ class Factbase::Rules
   # Query decorator.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
-  #
   class Query
     decoor(:query)
 
-    def initialize(query, check)
+    def initialize(query, check, fb)
       @query = query
       @check = check
+      @fb = fb
     end
 
-    def each(params = {})
-      return to_enum(__method__, params) unless block_given?
-      @query.each do |f|
-        yield Fact.new(f, @check)
+    def each(fb = @fb, params = {})
+      return to_enum(__method__, fb, params) unless block_given?
+      @query.each(fb, params) do |f|
+        yield Fact.new(f, @check, fb)
       end
     end
   end
@@ -112,8 +113,8 @@ class Factbase::Rules
       @expr = expr
     end
 
-    def it(fact)
-      return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [])
+    def it(fact, fb)
+      return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [], fb)
       e = "#{@expr[0..32]}..." if @expr.length > 32
       raise "The fact doesn't match the #{e.inspect} rule: #{fact}"
     end
@@ -128,7 +129,7 @@ class Factbase::Rules
       @facts = Set.new
     end
 
-    def it(fact)
+    def it(fact, _fb)
       a = fact[@uid]
       return if a.nil?
       @facts << a[0] unless @uid.nil?

@@ -13,18 +13,18 @@ require_relative '../../../lib/factbase/term'
 class TestLogical < Factbase::Test
   def test_not_matching
     t = Factbase::Term.new(:not, [Factbase::Term.new(:always, [])])
-    refute(t.evaluate(fact('foo' => [100]), []))
+    refute(t.evaluate(fact('foo' => [100]), [], Factbase.new))
   end
 
   def test_not_eq_matching
     t = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 100])])
-    assert(t.evaluate(fact('foo' => [42, 12, -90]), []))
-    refute(t.evaluate(fact('foo' => 100), []))
+    assert(t.evaluate(fact('foo' => [42, 12, -90]), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => 100), [], Factbase.new))
   end
 
   def test_either
     t = Factbase::Term.new(:either, [Factbase::Term.new(:at, [5, :foo]), 42])
-    assert_equal([42], t.evaluate(fact('foo' => 4), []))
+    assert_equal([42], t.evaluate(fact('foo' => 4), [], Factbase.new))
   end
 
   def test_or_matching
@@ -35,9 +35,9 @@ class TestLogical < Factbase::Test
         Factbase::Term.new(:eq, [:bar, 5])
       ]
     )
-    assert(t.evaluate(fact('foo' => [4]), []))
-    assert(t.evaluate(fact('bar' => [5]), []))
-    refute(t.evaluate(fact('bar' => [42]), []))
+    assert(t.evaluate(fact('foo' => [4]), [], Factbase.new))
+    assert(t.evaluate(fact('bar' => [5]), [], Factbase.new))
+    refute(t.evaluate(fact('bar' => [42]), [], Factbase.new))
   end
 
   def test_when_matching
@@ -48,8 +48,8 @@ class TestLogical < Factbase::Test
         Factbase::Term.new(:eq, [:bar, 5])
       ]
     )
-    assert(t.evaluate(fact('foo' => 4, 'bar' => 5), []))
-    refute(t.evaluate(fact('foo' => 4), []))
-    assert(t.evaluate(fact('foo' => 5, 'bar' => 5), []))
+    assert(t.evaluate(fact('foo' => 4, 'bar' => 5), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => 4), [], Factbase.new))
+    assert(t.evaluate(fact('foo' => 5, 'bar' => 5), [], Factbase.new))
   end
 end

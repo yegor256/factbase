@@ -27,8 +27,8 @@ class TestAliases < Factbase::Test
       t = Factbase::Syntax.new(q).to_term
       maps.each do |m|
         f = Factbase::Accum.new(fact(m), {}, false)
-        next unless t.evaluate(f, maps)
-        assert(Factbase::Syntax.new(r).to_term.evaluate(f, []), "#{q} -> #{f}")
+        next unless t.evaluate(f, maps, Factbase.new)
+        assert(Factbase::Syntax.new(r).to_term.evaluate(f, [], Factbase.new), "#{q} -> #{f}")
       end
     end
   end
@@ -49,8 +49,8 @@ class TestAliases < Factbase::Test
         f = Factbase::Accum.new(fact(m), {}, false)
         require_relative '../../../lib/factbase/logged'
         f = Factbase::Logged::Fact.new(f, log: Loog::NULL)
-        next unless t.evaluate(f, maps)
-        assert(Factbase::Syntax.new(r).to_term.evaluate(f, []), "#{q} -> #{f} doesn't match #{r}")
+        next unless t.evaluate(f, maps, Factbase.new)
+        assert(Factbase::Syntax.new(r).to_term.evaluate(f, [], Factbase.new), "#{q} -> #{f} doesn't match #{r}")
       end
     end
   end

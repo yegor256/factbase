@@ -80,19 +80,41 @@ class Factbase::Term
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
-  # @param [Factbase] fb Optional factbase reference
-  def initialize(operator, operands, fb: Factbase.new)
+  def initialize(operator, operands)
     @op = operator
     @operands = operands
-    @fb = fb
+  end
+
+  def redress(type, **args)
+    type.new(
+      @op,
+      @operands.map do |op|
+        if op.is_a?(Factbase::Term)
+          op.redress(type, **args)
+        else
+          op
+        end
+      end,
+      **args
+    )
+  end
+
+  # Try to predict which facts from the provided list
+  # should be evaluated. If no prediction can be made,
+  # the same list is returned.
+  # @param [Array<Hash>] maps Records to iterate, maybe
+  # @return [Array<Hash>] Records to iterate
+  def predict(maps)
+    maps
   end
 
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Boolean] TRUE if matches
-  def evaluate(fact, maps)
-    send(@op, fact, maps)
+  def evaluate(fact, maps, fb)
+    send(@op, fact, maps, fb)
   rescue NoMethodError => e
     raise "Probably the term '#{@op}' is not defined at #{self}:\n#{Backtrace.new(e)}"
   rescue StandardError => e
@@ -154,18 +176,18 @@ class Factbase::Term
     "(#{items.join(' ')})"
   end
 
-  private
-
-  def at(fact, maps)
+  def at(fact, maps, fb)
     assert_args(2)
-    i = the_values(0, fact, maps)
+    i = _values(0, fact, maps, fb)
     raise "Too many values (#{i.size}) at first position, one expected" unless i.size == 1
     i = i[0]
     return nil if i.nil?
-    v = the_values(1, fact, maps)
+    v = _values(1, fact, maps, fb)
     return nil if v.nil?
     v[i]
   end
+
+  private
 
   def assert_args(num)
     c = @operands.size
@@ -173,7 +195,7 @@ class Factbase::Term
     raise "Too few (#{c}) operands for '#{@op}' (#{num} expected)" if c < num
   end
 
-  def by_symbol(pos, fact)
+  def _by_symbol(pos, fact)
     o = @operands[pos]
     raise "A symbol expected at ##{pos}, but '#{o}' (#{o.class}) provided" unless o.is_a?(Symbol)
     k = o.to_s
@@ -181,9 +203,9 @@ class Factbase::Term
   end
 
   # @return [Array|nil] Either array of values or NIL
-  def the_values(pos, fact, maps)
+  def _values(pos, fact, maps, fb)
     v = @operands[pos]
-    v = v.evaluate(fact, maps) if v.is_a?(Factbase::Term)
+    v = v.evaluate(fact, maps, fb) if v.is_a?(Factbase::Term)
     v = fact[v.to_s] if v.is_a?(Symbol)
     return v if v.nil?
     unless v.is_a?(Array)

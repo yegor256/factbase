@@ -31,9 +31,9 @@ class TestAggregates < Factbase::Test
       '(agg (eq foo 42) (always))' => '(eq x 1)'
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term
-      f = maps.find { |m| t.evaluate(fact(m), maps) }
+      f = maps.find { |m| t.evaluate(fact(m), maps, Factbase.new) }
       refute_nil(f, "nothing found by: #{q}")
-      assert(Factbase::Syntax.new(r).to_term.evaluate(fact(f), []))
+      assert(Factbase::Syntax.new(r).to_term.evaluate(fact(f), [], Factbase.new))
     end
   end
 
@@ -47,7 +47,7 @@ class TestAggregates < Factbase::Test
       '(empty (eq x 1))' => false
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term
-      assert_equal(r, t.evaluate(nil, maps), q)
+      assert_equal(r, t.evaluate(nil, maps, Factbase.new), q)
     end
   end
 end

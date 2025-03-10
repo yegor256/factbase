@@ -12,9 +12,9 @@ require_relative '../../../lib/factbase/indexed/indexed_factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestCachedQuery < Factbase::Test
+class TestIndexedQuery < Factbase::Test
   def test_queries_many_times
-    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
     total = 5
     total.times { fb.insert }
     total.times do
@@ -22,39 +22,34 @@ class TestCachedQuery < Factbase::Test
     end
   end
 
-  def test_aggregates_too
-    fb = Factbase::CachedFactbase.new(Factbase.new)
-    10_000.times do |i|
+  def test_attaches_alias
+    fb = Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
+    total = 10
+    total.times do |i|
       f = fb.insert
-      f.foo = i
-      f.hello = 1
+      f.foo = rand(0..10)
+      f.bar = rand(0..10)
+      f.xyz = i
     end
-    assert_equal(1, fb.query('(eq foo (agg (exists hello) (min foo)))').each.to_a.size)
+    assert_equal(total, fb.query('(as boom (agg (eq foo $bar) (min xyz)))').each.to_a.size)
   end
 
   def test_joins_too
     fb = Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new))
-    total = 10_000
+    total = 10
     total.times do |i|
       f = fb.insert
-      f.foo = i
-      f.hello = 1
+      f.who = i
     end
-    assert_equal(total, fb.query('(join "bar<=foo" (eq foo (agg (exists hello) (min foo))))').each.to_a.size)
-  end
-
-  def test_caches_while_being_decorated
-    fb = Factbase::SyncFactbase.new(Factbase::CachedFactbase.new(Factbase.new))
-    10_000.times do |i|
+    total.times do |i|
       f = fb.insert
-      f.foo = i
-      f.hello = 1
+      f.friend = i
     end
-    assert_equal(1, fb.query('(eq foo (agg (exists hello) (min foo)))').each.to_a.size)
+    assert_equal(total, fb.query('(and (exists who) (join "f<=friend" (eq friend $who)))').each.to_a.size)
   end
 
   def test_deletes_too
-    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
     fb.insert.foo = 1
     fb.query('(eq foo 1)').delete!
     assert_equal(0, fb.query('(always)').each.to_a.size)
