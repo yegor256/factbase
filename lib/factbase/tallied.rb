@@ -78,15 +78,15 @@ class Factbase::Tallied
       @query.one(params)
     end
 
-    def each(params = {}, &)
+    def each(params = {}, fb: self, &)
       return to_enum(__method__, params) unless block_given?
-      @query.each(params) do |f|
+      @query.each(params, fb:) do |f|
         yield Fact.new(f, @churn)
       end
     end
 
-    def delete!
-      c = @query.delete!
+    def delete!(fb: self)
+      c = @query.delete!(fb:)
       @churn.append(0, c, 0)
       c
     end

@@ -12,53 +12,53 @@ require_relative '../../factbase'
 # License:: MIT
 module Factbase::Term::Math
   def plus(fact, maps, fb)
-    _arithmetic(:+, fact, maps)
+    _arithmetic(:+, fact, maps, fb)
   end
 
   def minus(fact, maps, fb)
-    _arithmetic(:-, fact, maps)
+    _arithmetic(:-, fact, maps, fb)
   end
 
   def times(fact, maps, fb)
-    _arithmetic(:*, fact, maps)
+    _arithmetic(:*, fact, maps, fb)
   end
 
   def div(fact, maps, fb)
-    _arithmetic(:/, fact, maps)
+    _arithmetic(:/, fact, maps, fb)
   end
 
   def zero(fact, maps, fb)
     assert_args(1)
-    vv = _values(0, fact, maps)
+    vv = _values(0, fact, maps, fb)
     return false if vv.nil?
     vv.any? { |v| (v.is_a?(Integer) || v.is_a?(Float)) && v.zero? }
   end
 
   def eq(fact, maps, fb)
-    _cmp(:==, fact, maps)
+    _cmp(:==, fact, maps, fb)
   end
 
   def lt(fact, maps, fb)
-    _cmp(:<, fact, maps)
+    _cmp(:<, fact, maps, fb)
   end
 
   def gt(fact, maps, fb)
-    _cmp(:>, fact, maps)
+    _cmp(:>, fact, maps, fb)
   end
 
   def lte(fact, maps, fb)
-    _cmp(:<=, fact, maps)
+    _cmp(:<=, fact, maps, fb)
   end
 
   def gte(fact, maps, fb)
-    _cmp(:>=, fact, maps)
+    _cmp(:>=, fact, maps, fb)
   end
 
-  def _cmp(op, fact, maps)
+  def _cmp(op, fact, maps, fb)
     assert_args(2)
-    lefts = _values(0, fact, maps)
+    lefts = _values(0, fact, maps, fb)
     return false if lefts.nil?
-    rights = _values(1, fact, maps)
+    rights = _values(1, fact, maps, fb)
     return false if rights.nil?
     lefts.any? do |l|
       l = l.floor if l.is_a?(Time) && op == :==
@@ -69,12 +69,12 @@ module Factbase::Term::Math
     end
   end
 
-  def _arithmetic(op, fact, maps)
+  def _arithmetic(op, fact, maps, fb)
     assert_args(2)
-    lefts = _values(0, fact, maps)
+    lefts = _values(0, fact, maps, fb)
     return nil if lefts.nil?
     raise 'Too many values at first position, one expected' unless lefts.size == 1
-    rights = _values(1, fact, maps)
+    rights = _values(1, fact, maps, fb)
     return nil if rights.nil?
     raise 'Too many values at second position, one expected' unless rights.size == 1
     v = lefts[0]

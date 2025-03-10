@@ -63,9 +63,10 @@ class Factbase::Rules
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Fact
-    def initialize(fact, check)
+    def initialize(fact, check, fb)
       @fact = fact
       @check = check
+      @fb = fb
     end
 
     def to_s
@@ -79,7 +80,7 @@ class Factbase::Rules
     others do |*args|
       r = @fact.method_missing(*args)
       k = args[0].to_s
-      @check.it(@fact) if k.end_with?('=')
+      @check.it(@fact, @fb) if k.end_with?('=')
       r
     end
   end
@@ -96,10 +97,10 @@ class Factbase::Rules
       @check = check
     end
 
-    def each(params = {})
+    def each(params = {}, fb: self)
       return to_enum(__method__, params) unless block_given?
-      @query.each do |f|
-        yield Fact.new(f, @check)
+      @query.each(params, fb:) do |f|
+        yield Fact.new(f, @check, fb)
       end
     end
   end
@@ -112,8 +113,8 @@ class Factbase::Rules
       @expr = expr
     end
 
-    def it(fact)
-      return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [])
+    def it(fact, fb)
+      return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [], fb)
       e = "#{@expr[0..32]}..." if @expr.length > 32
       raise "The fact doesn't match the #{e.inspect} rule: #{fact}"
     end

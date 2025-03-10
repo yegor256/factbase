@@ -18,7 +18,7 @@ module Factbase::Term::Defn
     raise "Can't use '#{fn}' name as a term" if Factbase::Term.instance_methods(true).include?(fn)
     raise "Term '#{fn}' is already defined" if Factbase::Term.private_instance_methods(false).include?(fn)
     raise "The '#{fn}' is a bad name for a term" unless fn.match?(/^[a-z_]+$/)
-    e = "class Factbase::Term\nprivate\ndef #{fn}(fact, maps)\n#{@operands[1]}\nend\nend"
+    e = "class Factbase::Term\nprivate\ndef #{fn}(fact, maps, fb)\n#{@operands[1]}\nend\nend"
     # rubocop:disable Security/Eval
     eval(e)
     # rubocop:enable Security/Eval

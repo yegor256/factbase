@@ -30,9 +30,9 @@ class Factbase::IndexedQuery
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
-  def each(params = {})
+  def each(params = {}, fb: self)
     return to_enum(__method__, params) unless block_given?
-    @origin.each(params) do |f|
+    @origin.each(params, fb:) do |f|
       yield Factbase::IndexedFact.new(f, @idx)
     end
   end
@@ -40,14 +40,14 @@ class Factbase::IndexedQuery
   # Read a single value.
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return The value evaluated
-  def one(params = nil)
-    @origin.one(params)
+  def one(params = nil, fb: self)
+    @origin.one(params, fb:)
   end
 
   # Delete all facts that match the query.
   # @return [Integer] Total number of facts deleted
-  def delete!
+  def delete!(fb: self)
     @idx.clear
-    @origin.delete!
+    @origin.delete!(fb:)
   end
 end

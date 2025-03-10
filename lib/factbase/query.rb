@@ -23,25 +23,24 @@ class Factbase::Query
   # Constructor.
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [String|Factbase::Term] term The query term
-  def initialize(maps, term)
-    term = Factbase::Syntax.new(term).to_term if term.is_a?(String)
-    @iterator = Factbase::Iterator.new(maps, term)
+  def initialize(maps, term, fb)
+    @maps = maps
+    @term = term.is_a?(String) ? Factbase::Syntax.new(term).to_term : term
+    @fb = fb
   end
 
   # Print it as a string.
   # @return [String] The query as a string
   def to_s
-    @iterator.to_s
+    @term.to_s
   end
 
   # Iterate facts one by one.
-  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
-  def each(params = {}, fb: self)
-    return to_enum(__method__, params) unless block_given?
-    @iterator.each(fb) do ||
+  def each(fb = @fb, params = {})
+    return to_enum(__method__, fb, params) unless block_given?
     yielded = 0
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     @term.predict(@maps).each do |m|
@@ -61,10 +60,9 @@ class Factbase::Query
   end
 
   # Read a single value.
-  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
-  def one(fb, params = {})
+  def one(fb = @fb, params = {})
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     r = @term.evaluate(Factbase::Tee.new(nil, params), @maps, fb)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
@@ -74,12 +72,13 @@ class Factbase::Query
   end
 
   # Delete all facts that match the query.
+  # @param [Factbase] fb The factbase
   # @return [Integer] Total number of facts deleted
-  def delete!
+  def delete!(fb = @fb)
     deleted = 0
     @maps.delete_if do |m|
       f = Factbase::Fact.new(m)
-      if @term.evaluate(f, @maps, @fb)
+      if @term.evaluate(f, @maps, fb)
         deleted += 1
         true
       else

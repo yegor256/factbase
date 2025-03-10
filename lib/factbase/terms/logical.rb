@@ -15,7 +15,7 @@ module Factbase::Term::Logical
   # @param [Factbase::Fact] _fact The fact (unused)
   # @param [Array<Factbase::Fact>] _maps All maps available (unused)
   # @return [Boolean] Always returns true
-  def always(_fact, _maps)
+  def always(_fact, _maps, _fb)
     assert_args(0)
     true
   end
@@ -24,7 +24,7 @@ module Factbase::Term::Logical
   # @param [Factbase::Fact] _fact The fact (unused)
   # @param [Array<Factbase::Fact>] _maps All maps available (unused)
   # @return [Boolean] Always returns false
-  def never(_fact, _maps)
+  def never(_fact, _maps, _fb)
     assert_args(0)
     false
   end
@@ -33,18 +33,18 @@ module Factbase::Term::Logical
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @return [Boolean] Negated boolean result of the operand
-  def not(fact, maps)
+  def not(fact, maps, fb)
     assert_args(1)
-    !_only_bool(_values(0, fact, maps), 0)
+    !_only_bool(_values(0, fact, maps, fb), 0)
   end
 
   # Logical OR of multiple operands
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @return [Boolean] True if any operand evaluates to true, false otherwise
-  def or(fact, maps)
+  def or(fact, maps, fb)
     (0..@operands.size - 1).each do |i|
-      return true if _only_bool(_values(i, fact, maps), i)
+      return true if _only_bool(_values(i, fact, maps, fb), i)
     end
     false
   end
@@ -53,9 +53,9 @@ module Factbase::Term::Logical
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @return [Boolean] True if all operands evaluate to true, false otherwise
-  def and(fact, maps)
+  def and(fact, maps, fb)
     (0..@operands.size - 1).each do |i|
-      return false unless _only_bool(_values(i, fact, maps), i)
+      return false unless _only_bool(_values(i, fact, maps, fb), i)
     end
     true
   end
@@ -64,22 +64,22 @@ module Factbase::Term::Logical
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @return [Boolean] True if first operand is false OR both are true
-  def when(fact, maps)
+  def when(fact, maps, fb)
     assert_args(2)
     a = @operands[0]
     b = @operands[1]
-    !a.evaluate(fact, maps) || (a.evaluate(fact, maps) && b.evaluate(fact, maps))
+    !a.evaluate(fact, maps, fb) || (a.evaluate(fact, maps, fb) && b.evaluate(fact, maps, fb))
   end
 
   # Returns the first non-nil value or the second value
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @return [Object] First operand if not nil, otherwise second operand
-  def either(fact, maps)
+  def either(fact, maps, fb)
     assert_args(2)
-    v = _values(0, fact, maps)
+    v = _values(0, fact, maps, fb)
     return v unless v.nil?
-    _values(1, fact, maps)
+    _values(1, fact, maps, fb)
   end
 
   # Simplifies AND or OR expressions by removing duplicates

@@ -14,7 +14,7 @@ module Factbase::Term::Ordering
   def prev(fact, maps, fb)
     assert_args(1)
     before = @prev
-    v = _values(0, fact, maps)
+    v = _values(0, fact, maps, fb)
     @prev = v
     before
   end
@@ -22,7 +22,7 @@ module Factbase::Term::Ordering
   def unique(fact, maps, fb)
     @uniques = [] if @uniques.nil?
     assert_args(1)
-    vv = _values(0, fact, maps)
+    vv = _values(0, fact, maps, fb)
     return false if vv.nil?
     vv = [vv] unless vv.respond_to?(:to_a)
     vv.each do |v|

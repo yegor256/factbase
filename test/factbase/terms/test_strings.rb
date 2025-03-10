@@ -20,7 +20,7 @@ class TestStrings < Factbase::Test
 
   def test_concat
     t = Factbase::Term.new(:concat, [42, 'hi', 3.14, :hey, Time.now])
-    s = t.evaluate(fact, [])
+    s = t.evaluate(fact, [], Factbase.new)
     assert(s.start_with?('42hi3.14'))
   end
 

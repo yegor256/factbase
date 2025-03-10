@@ -41,7 +41,7 @@ class Factbase::Logged
   end
 
   def query(query)
-    Query.new(@fb, query, @tube)
+    Query.new(query, @tube)
   end
 
   def txn
@@ -124,19 +124,18 @@ class Factbase::Logged
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Query
-    def initialize(fb, expr, tube)
-      @fb = fb
+    def initialize(expr, tube)
       @expr = expr
       @tube = tube
     end
 
-    def one(params = {})
+    def one(fb = self, params = {})
       start = Time.now
       q = Factbase::Syntax.new(@expr).to_term.to_s
       r = nil
       tail =
         Factbase::Logged.elapsed do
-          r = @fb.query(@expr).one(params)
+          r = fb.query(@expr).one(fb, params)
         end
       if r.nil?
         @tube.say(start, "Nothing found by '#{q}' #{tail}")
@@ -146,14 +145,14 @@ class Factbase::Logged
       r
     end
 
-    def each(params = {}, &)
+    def each(fb = self, params = {}, &)
       start = Time.now
       q = Factbase::Syntax.new(@expr).to_term.to_s
       if block_given?
         r = nil
         tail =
           Factbase::Logged.elapsed do
-            r = @fb.query(@expr).each(params, &)
+            r = fb.query(@expr).each(fb, params, &)
           end
         raise ".each of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
@@ -166,7 +165,7 @@ class Factbase::Logged
         array = []
         tail =
           Factbase::Logged.elapsed do
-            @fb.query(@expr).each(params) do |f|
+            fb.query(@expr).each(fb, params) do |f|
               array << f
             end
           end
@@ -179,13 +178,13 @@ class Factbase::Logged
       end
     end
 
-    def delete!
+    def delete!(fb = self)
       r = nil
       start = Time.now
-      before = @fb.size
+      before = fb.size
       tail =
         Factbase::Logged.elapsed do
-          r = @fb.query(@expr).delete!
+          r = @fb.query(@expr).delete!(fb)
         end
       raise ".delete! of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
       if before.zero?

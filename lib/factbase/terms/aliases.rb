@@ -15,7 +15,7 @@ module Factbase::Term::Aliases
     assert_args(2)
     a = @operands[0]
     raise "A symbol expected as first argument of 'as'" unless a.is_a?(Symbol)
-    vv = _values(1, fact, maps)
+    vv = _values(1, fact, maps, fb)
     vv&.each { |v| fact.send(:"#{a}=", v) }
     true
   end
