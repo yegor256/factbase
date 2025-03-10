@@ -44,13 +44,9 @@ class Factbase::IndexedFactbase
   # @param [String] term The term to use
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
-    if term.is_a?(String)
-      term = to_term(term)
-    end
+    term = to_term(term) if term.is_a?(String)
     q = @origin.query(term, maps)
-    if term.abstract?
-      q = Factbase::IndexedQuery.new(q, @idx, self)
-    end
+    q = Factbase::IndexedQuery.new(q, @idx, self) if term.abstract?
     q
   end
 

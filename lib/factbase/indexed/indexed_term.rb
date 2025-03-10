@@ -27,9 +27,7 @@ class Factbase::IndexedTerm < Factbase::Term
     when :eq
       if @operands[0].is_a?(Symbol) && !@operands[1].is_a?(Array)
         key = [maps.object_id, @operands[0], @operator]
-        if @idx[key].nil?
-          @idx[key] = maps.group_by { |m| m[@operands[0]] }
-        end
+        @idx[key] = maps.group_by { |m| m[@operands[0]] } if @idx[key].nil?
         @idx[key][@operands[1]] || []
       else
         maps

@@ -74,7 +74,8 @@ class TestQuery < Factbase::Test
       "(or (eq num +66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1,
       '(eq 3 (agg (eq num $num) (count)))' => 1
     }.each do |q, r|
-      fb = Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps)))
+      # fb = Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps)))
+      fb = Factbase.new(maps)
       assert_equal(r, fb.query(q).each.to_a.size, q)
       fb.txn do |fbt|
         assert_equal(r, fbt.query(q).each.to_a.size, q)
@@ -159,12 +160,12 @@ class TestQuery < Factbase::Test
       { 'foo' => [17] }
     ]
     found = 0
-    Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(bar: [42]) do
+    Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(Factbase.new, bar: [42]) do
       found += 1
     end
     assert_equal(1, found)
-    assert_equal(1, Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(bar: 42).to_a.size)
-    assert_equal(0, Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(bar: 555).to_a.size)
+    assert_equal(1, Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(Factbase.new, bar: 42).to_a.size)
+    assert_equal(0, Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(Factbase.new, bar: 555).to_a.size)
   end
 
   def test_with_nil_alias

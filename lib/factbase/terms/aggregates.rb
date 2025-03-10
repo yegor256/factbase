@@ -11,21 +11,21 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Term::Aggregates
-  def min(_fact, maps, fb)
+  def min(_fact, maps, _fb)
     assert_args(1)
     _best(maps) { |v, b| v < b }
   end
 
-  def max(_fact, maps, fb)
+  def max(_fact, maps, _fb)
     assert_args(1)
     _best(maps) { |v, b| v > b }
   end
 
-  def count(_fact, maps, fb)
+  def count(_fact, maps, _fb)
     maps.size
   end
 
-  def nth(_fact, maps, fb)
+  def nth(_fact, maps, _fb)
     assert_args(2)
     pos = @operands[0]
     raise "An integer expected, but #{pos} provided" unless pos.is_a?(Integer)
@@ -34,7 +34,7 @@ module Factbase::Term::Aggregates
     maps[pos][k.to_s]
   end
 
-  def first(_fact, maps, fb)
+  def first(_fact, maps, _fb)
     assert_args(1)
     k = @operands[0]
     raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
@@ -43,7 +43,7 @@ module Factbase::Term::Aggregates
     first[k.to_s]
   end
 
-  def sum(_fact, maps, fb)
+  def sum(_fact, maps, _fb)
     k = @operands[0]
     raise "A symbol expected, but '#{k}' provided" unless k.is_a?(Symbol)
     sum = 0

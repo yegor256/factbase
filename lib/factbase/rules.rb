@@ -129,7 +129,7 @@ class Factbase::Rules
       @facts = Set.new
     end
 
-    def it(fact, fb)
+    def it(fact, _fb)
       a = fact[@uid]
       return if a.nil?
       @facts << a[0] unless @uid.nil?
