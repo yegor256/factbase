@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+facts:
+  - name: Jeff
+  - name: Walter
+  - name: Maude
+  - person: Jeff
+    age: 41
+  - person: Walter
+    age: 45
+queries:
+  - query: (and (join 'age<=age' (eq person $name)) (exists age))
+    size: 2

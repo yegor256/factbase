@@ -42,18 +42,16 @@ class Factbase::SyncFactbase
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
-    @mutex.synchronize do
-      require_relative 'sync_query'
-      Factbase::SyncQuery.new(@origin.query(term, maps), @mutex)
-    end
+    require_relative 'sync_query'
+    Factbase::SyncQuery.new(@origin.query(term, maps), @mutex, self)
   end
 
   # Run an ACID transaction.
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   # @yield [Factbase] Block to execute in transaction
-  def txn(&)
-    @mutex.synchronize do
-      @origin.txn(&)
+  def txn
+    @origin.txn do |fbt|
+      yield fbt
     end
   end
 end

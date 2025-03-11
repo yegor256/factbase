@@ -7,6 +7,7 @@ require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/cached/cached_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
+require_relative '../../../lib/factbase/sync/sync_factbase'
 
 # Query test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)

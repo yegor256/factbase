@@ -9,6 +9,7 @@ require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/query'
 require_relative '../../lib/factbase/cached/cached_factbase'
 require_relative '../../lib/factbase/indexed/indexed_factbase'
+require_relative '../../lib/factbase/sync/sync_factbase'
 
 # Query test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -16,16 +17,21 @@ require_relative '../../lib/factbase/indexed/indexed_factbase'
 # License:: MIT
 class TestQuery < Factbase::Test
   def test_stories
-    Dir[File.join(__dir__, '../../fixtures/stories/**/*.yml')].each do |fixture|
-      base = File.basename(fixture)
-      story = YAML.load_file(fixture)
-      {
-        'plain' => Factbase.new,
-        'cached+plain' => Factbase::CachedFactbase.new(Factbase.new),
-        'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new),
-        'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new)),
-        'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
-      }.each do |badge, fb|
+    {
+      'plain' => Factbase.new,
+      'sync+plain' => Factbase::SyncFactbase.new(Factbase.new),
+      'cached+plain' => Factbase::CachedFactbase.new(Factbase.new),
+      'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new),
+      'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new)),
+      'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new)),
+      'sync+cached+indexed+plain' => Factbase::SyncFactbase.new(
+        Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
+      )
+    }.each do |badge, fb|
+      Dir[File.join(__dir__, '../../fixtures/stories/**/*.yml')].each do |fixture|
+        base = File.basename(fixture)
+        story = YAML.load_file(fixture)
+        fb.query('(always)').delete!
         story['facts'].each do |y|
           f = fb.insert
           y.each do |k, vv|
@@ -37,10 +43,18 @@ class TestQuery < Factbase::Test
         end
         story['queries'].each do |q|
           qry = q['query']
-          size = q['size']
-          assert_equal(size, fb.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge}")
-          fb.txn do |fbt|
-            assert_equal(size, fbt.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge} (in txn)")
+          if q['size']
+            size = q['size']
+            assert_equal(size, fb.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge}")
+            fb.txn do |fbt|
+              assert_equal(size, fbt.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge} (in txn)")
+            end
+          else
+            ret = q['one']
+            assert_equal(ret, fb.query(qry).one, "#{base}: #{qry} at #{badge}")
+            fb.txn do |fbt|
+              assert_equal(ret, fbt.query(qry).one, "#{base}: #{qry} at #{badge} (in txn)")
+            end
           end
         end
       end
