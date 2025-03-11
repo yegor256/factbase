@@ -29,6 +29,22 @@ class TestIndexedQuery < Factbase::Test
     assert_equal(1, fb.query('(eq foo 42)').each.to_a.size)
   end
 
+  def test_finds_by_eq_with_agg
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.insert.foo = 33
+    fb.insert
+    assert_equal(1, fb.query('(eq foo (agg (exists foo) (max foo)))').each.to_a.size)
+  end
+
+  def test_finds_max_value
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.insert.foo = 33
+    fb.insert
+    assert_equal(42, fb.query('(agg (exists foo) (max foo))').one)
+  end
+
   def test_finds_by_eq_with_formula
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     fb.insert.foo = 42
