@@ -12,3 +12,5 @@ facts:
 queries:
   - query: (and (join 'age<=age' (eq person $name)) (exists age))
     size: 2
+  - query: (and (join 'age' (eq person $name)) (exists age))
+    size: 2
