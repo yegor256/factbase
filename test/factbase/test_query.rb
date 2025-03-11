@@ -37,7 +37,7 @@ class TestQuery < Factbase::Test
           y.each do |k, vv|
             vv = [vv] unless vv.is_a?(Array)
             vv.each do |v|
-              f.send("#{k}=", v)
+              f.send(:"#{k}=", v)
             end
           end
         end
