@@ -22,7 +22,7 @@ class Factbase::IndexedTerm < Factbase::Term
     @cacheable = !static? && abstract?
   end
 
-  def predict(maps)
+  def predict(maps, params)
     case @op
     when :eq
       if @operands[0].is_a?(Symbol) && _scalar?(@operands[1])
@@ -36,19 +36,26 @@ class Factbase::IndexedTerm < Factbase::Term
             end
           end
         end
-        @idx[key][@operands[1]] || []
+        vv =
+          if @operands[1].is_a?(Symbol)
+            sym = @operands[1].to_s.gsub(/^\$/, '')
+            params[sym] || []
+          else
+            [@operands[1]]
+          end
+        vv.map { |v| @idx[key][v] || [] }.reduce(&:|)
       else
         maps.to_a
       end
     when :and
-      parts = @operands.map { |o| o.predict(maps) }
+      parts = @operands.map { |o| o.predict(maps, params) }
       if parts.include?(nil)
         maps
       else
         parts.reduce(&:&)
       end
     when :or
-      @operands.map { |o| o.predict(maps) }.reduce(&:|)
+      @operands.map { |o| o.predict(maps, params) }.reduce(&:|)
     when :join, :as
       nil
     else
@@ -59,6 +66,6 @@ class Factbase::IndexedTerm < Factbase::Term
   private
 
   def _scalar?(item)
-    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float)
+    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
   end
 end

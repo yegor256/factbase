@@ -74,12 +74,7 @@ class TestQuery < Factbase::Test
   end
 
   def test_complex_parsing
-    maps = [
-      { 'num' => [42], 'name' => ['Jeff'] },
-      { 'pi' => [3.14], 'num' => [42, 66, 0], 'name' => ['peter'] },
-      { 'time' => [Time.now - 100], 'num' => [0], 'hi' => [4], 'nome' => ['Walter'] }
-    ]
-    {
+    queries = {
       '(eq num 444)' => 0,
       '(eq hi 4)' => 1,
       '(eq time 0)' => 0,
@@ -119,17 +114,23 @@ class TestQuery < Factbase::Test
       '(undef something)' => 3,
       "(or (eq num +66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1,
       '(eq 3 (agg (eq num $num) (count)))' => 1
-    }.each do |q, r|
-      [
-        Factbase.new(maps),
-        Factbase::CachedFactbase.new(Factbase.new(maps)),
-        Factbase::IndexedFactbase.new(Factbase.new(maps)),
-        Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps))),
-        Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps)))
-      ].each do |fb|
-        assert_equal(r, fb.query(q).each.to_a.size, q)
+    }
+    maps = [
+      { 'num' => [42], 'name' => ['Jeff'] },
+      { 'num' => [42, 66, 0], 'pi' => [3.14], 'name' => ['peter'] },
+      { 'num' => [0], 'time' => [Time.now - 100], 'hi' => [4], 'nome' => ['Walter'] }
+    ]
+    {
+      'plain' => Factbase.new(maps),
+      'cached+plain' => Factbase::CachedFactbase.new(Factbase.new(maps)),
+      'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new(maps)),
+      'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps))),
+      'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps)))
+    }.each do |badge, fb|
+      queries.each do |q, r|
+        assert_equal(r, fb.query(q).each.to_a.size, "#{q} in #{badge}")
         fb.txn do |fbt|
-          assert_equal(r, fbt.query(q).each.to_a.size, q)
+          assert_equal(r, fbt.query(q).each.to_a.size, "#{q} in #{badge} (txn)")
         end
       end
     end

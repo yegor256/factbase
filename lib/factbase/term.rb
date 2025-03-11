@@ -104,7 +104,7 @@ class Factbase::Term
   # the same list is returned.
   # @param [Array<Hash>] maps Records to iterate, maybe
   # @return [Array<Hash>] Records to iterate
-  def predict(maps)
+  def predict(maps, _params)
     maps
   end
 
