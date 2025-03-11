@@ -32,7 +32,7 @@ class TestCachedQuery < Factbase::Test
 
   def test_aggregates_too
     fb = Factbase::CachedFactbase.new(Factbase.new)
-    10.times do |i|
+    10_000.times do |i|
       f = fb.insert
       f.foo = i
       f.hello = 1
@@ -53,7 +53,7 @@ class TestCachedQuery < Factbase::Test
 
   def test_caches_while_being_decorated
     fb = Factbase::SyncFactbase.new(Factbase::CachedFactbase.new(Factbase.new))
-    10.times do |i|
+    10_000.times do |i|
       f = fb.insert
       f.foo = i
       f.hello = 1
