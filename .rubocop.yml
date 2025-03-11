@@ -27,7 +27,7 @@ Layout/MultilineMethodCallIndentation:
 Metrics/AbcSize:
   Enabled: false
 Metrics/BlockLength:
-  Max: 30
+  Max: 50
 Metrics/CyclomaticComplexity:
   Max: 25
 Metrics/PerceivedComplexity:

@@ -41,19 +41,21 @@ class TestQuery < Factbase::Test
             end
           end
         end
-        story['queries'].each do |q|
-          qry = q['query']
-          if q['size']
-            size = q['size']
-            assert_equal(size, fb.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge}")
-            fb.txn do |fbt|
-              assert_equal(size, fbt.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge} (in txn)")
-            end
-          else
-            ret = q['one']
-            assert_equal(ret, fb.query(qry).one, "#{base}: #{qry} at #{badge}")
-            fb.txn do |fbt|
-              assert_equal(ret, fbt.query(qry).one, "#{base}: #{qry} at #{badge} (in txn)")
+        2.times do
+          story['queries'].each do |q|
+            qry = q['query']
+            if q['size']
+              size = q['size']
+              assert_equal(size, fb.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge}")
+              fb.txn do |fbt|
+                assert_equal(size, fbt.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge} (in txn)")
+              end
+            else
+              ret = q['one']
+              assert_equal(ret, fb.query(qry).one, "#{base}: #{qry} at #{badge}")
+              fb.txn do |fbt|
+                assert_equal(ret, fbt.query(qry).one, "#{base}: #{qry} at #{badge} (in txn)")
+              end
             end
           end
         end
