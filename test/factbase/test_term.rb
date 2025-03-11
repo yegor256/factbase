@@ -74,4 +74,12 @@ class TestTerm < Factbase::Test
     end.message
     assert_includes(msg, 'at (at)', msg)
   end
+
+  def test_redresses_itself
+    t = Factbase::Term.new(:something, [])
+    require_relative '../../lib/factbase/indexed/indexed_term'
+    t.redress!(Factbase::IndexedTerm)
+    require_relative '../../lib/factbase/cached/cached_term'
+    t.redress!(Factbase::CachedTerm)
+  end
 end

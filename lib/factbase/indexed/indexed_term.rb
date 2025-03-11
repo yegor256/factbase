@@ -10,18 +10,7 @@ require_relative '../../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class Factbase::IndexedTerm < Factbase::Term
-  # Ctor.
-  # @param [Symbol] operator Operator
-  # @param [Array] operands Operands
-  # @param [Factbase] fb Optional factbase reference
-  # @param [Hash] idx Index
-  def initialize(operator, operands, idx: {})
-    super(operator, operands)
-    @idx = idx
-    @cacheable = !static? && abstract?
-  end
-
+module Factbase::IndexedTerm
   def predict(maps, params)
     case @op
     when :eq

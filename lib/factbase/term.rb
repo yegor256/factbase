@@ -85,18 +85,16 @@ class Factbase::Term
     @operands = operands
   end
 
-  def redress(type, **args)
-    type.new(
-      @op,
-      @operands.map do |op|
-        if op.is_a?(Factbase::Term)
-          op.redress(type, **args)
-        else
-          op
-        end
-      end,
-      **args
-    )
+  def redress!(type, **args)
+    extend type
+    args.each { |k, v| send(:instance_variable_set, "@#{k}".to_sym, v) }
+    @operands.map do |op|
+      if op.is_a?(Factbase::Term)
+        op.redress!(type, **args)
+      else
+        op
+      end
+    end
   end
 
   # Try to predict which facts from the provided list

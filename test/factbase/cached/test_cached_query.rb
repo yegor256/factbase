@@ -33,14 +33,15 @@ class TestCachedQuery < Factbase::Test
   end
 
   def test_aggregates_too
-    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb = Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new))
     10_000.times do |i|
       f = fb.insert
       f.foo = i
       f.hello = 1
     end
     3.times do
-      assert_equal(1, fb.query('(eq foo (agg (exists hello) (min foo)))').each.to_a.size)
+      q = fb.query('(eq foo (agg (exists hello) (min foo)))')
+      assert_equal(1, q.each.to_a.size)
     end
   end
 
