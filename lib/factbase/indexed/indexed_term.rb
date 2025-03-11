@@ -25,19 +25,25 @@ class Factbase::IndexedTerm < Factbase::Term
   def predict(maps)
     case @op
     when :eq
-      if @operands[0].is_a?(Symbol) && !@operands[1].is_a?(Array)
-        key = [maps.object_id, @operands[0], @operator]
-        @idx[key] = maps.group_by { |m| m[@operands[0]] } if @idx[key].nil?
+      if @operands[0].is_a?(Symbol) && _scalar?(@operands[1])
+        key = [maps.object_id, @operands[0], @op]
+        @idx[key] = maps.group_by { |m| m[@operands[0].to_s]&.first } if @idx[key].nil?
         @idx[key][@operands[1]] || []
       else
-        maps
+        maps.to_a
       end
     when :and
       @operands.map { |o| o.predict(maps) }.reduce(&:&)
     when :or
       @operands.map { |o| o.predict(maps) }.reduce(&:|)
     else
-      maps
+      maps.to_a
     end
+  end
+
+  private
+
+  def _scalar?(item)
+    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float)
   end
 end

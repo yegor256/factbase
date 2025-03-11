@@ -59,6 +59,14 @@ class Factbase::Taped
     end
   end
 
+  def to_a
+    @origin.to_a
+  end
+
+  def group_by(&)
+    @origin.group_by(&)
+  end
+
   # Decorator of Hash.
   class TapedHash
     def initialize(origin, added)

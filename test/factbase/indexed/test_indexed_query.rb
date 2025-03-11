@@ -22,6 +22,61 @@ class TestIndexedQuery < Factbase::Test
     end
   end
 
+  def test_finds_by_eq
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.insert
+    assert_equal(1, fb.query('(eq foo 42)').each.to_a.size)
+  end
+
+  def test_finds_by_eq_with_formula
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.insert
+    assert_equal(1, fb.query('(eq foo (plus 40 2))').each.to_a.size)
+  end
+
+  def test_finds_by_eq_in_txn
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.insert
+    fb.txn { |fbt| assert_equal(1, fbt.query('(eq foo 42)').each.to_a.size) }
+  end
+
+  def test_finds_with_conjunction
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.insert.bar = 33
+    assert_equal(2, fb.query('(or (exists foo) (exists bar))').each.to_a.size)
+  end
+
+  def test_finds_with_disjunction
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.insert.bar = 33
+    f = fb.insert
+    f.foo = 42
+    f.bar = 33
+    assert_equal(1, fb.query('(and (exists foo) (exists bar))').each.to_a.size)
+  end
+
+  def test_finds_with_inversion
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.insert.bar = 33
+    assert_equal(1, fb.query('(not (exists foo))').each.to_a.size)
+  end
+
+  def test_finds_with_disjunction_in_txn
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.insert.bar = 33
+    f = fb.insert
+    f.foo = 42
+    f.bar = 33
+    fb.txn { |fbt| assert_equal(1, fbt.query('(and (exists foo) (exists bar))').each.to_a.size) }
+  end
+
   def test_attaches_alias
     fb = Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
     total = 10
