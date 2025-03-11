@@ -6,7 +6,7 @@
 require_relative '../lib/factbase'
 
 def bench_factbase(bmk, fb)
-  total = 500
+  total = 20_000
   bmk.report("insert #{total} facts") do
     total.times do
       fact = fb.insert
