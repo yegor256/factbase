@@ -51,7 +51,7 @@ class Factbase::SyncFactbase
   # @yield [Factbase] Block to execute in transaction
   def txn
     @origin.txn do |fbt|
-      yield fbt
+      yield Factbase::SyncFactbase.new(fbt, @mutex)
     end
   end
 end
