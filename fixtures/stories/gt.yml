@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+facts:
+  - name: Jeff Lebowski
+    age: 41
+  - name: Walter Sobchak
+    age: 45
+  - name: Maude Lebowski
+    age: 31
+queries:
+  - query: (gt age 40)
+    size: 2
+  - query: (not (gt age 40))
+    size: 1
+  - query: (and (gt age 30) (matches name "^M.*$"))
+    size: 1

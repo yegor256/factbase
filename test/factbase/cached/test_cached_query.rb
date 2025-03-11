@@ -22,6 +22,13 @@ class TestCachedQuery < Factbase::Test
     end
   end
 
+  def test_negates_correctly
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    assert_equal(1, fb.query('(always)').each.to_a.size)
+    assert_equal(0, fb.query('(not (always))').each.to_a.size)
+  end
+
   def test_aggregates_too
     fb = Factbase::CachedFactbase.new(Factbase.new)
     10_000.times do |i|

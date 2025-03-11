@@ -29,6 +29,15 @@ class TestIndexedQuery < Factbase::Test
     assert_equal(1, fb.query('(eq foo 42)').each.to_a.size)
   end
 
+  def test_finds_by_eq_with_array
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    f = fb.insert
+    f.foo = 33
+    f.foo = 42
+    f.foo = 1
+    assert_equal(1, fb.query('(eq foo 42)').each.to_a.size)
+  end
+
   def test_finds_by_eq_with_agg
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     fb.insert.foo = 42

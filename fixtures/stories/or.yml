@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+facts:
+  - name: BMW
+    price: 5600
+  - name: Ford
+    price: 3200
+    owner: Jeff
+  - name: Toyota
+    price: 9800
+    owners: [Jeff, Walter]
+queries:
+  - query: (or (eq price 5600) (gt price 6000))
+    size: 2
+  - query: (or (eq owner "Jeff") (eq owners "Walter"))
+    size: 2

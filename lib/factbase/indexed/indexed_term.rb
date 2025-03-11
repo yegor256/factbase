@@ -27,7 +27,15 @@ class Factbase::IndexedTerm < Factbase::Term
     when :eq
       if @operands[0].is_a?(Symbol) && _scalar?(@operands[1])
         key = [maps.object_id, @operands[0], @op]
-        @idx[key] = maps.group_by { |m| m[@operands[0].to_s]&.first } if @idx[key].nil?
+        if @idx[key].nil?
+          @idx[key] = {}
+          maps.to_a.each do |m|
+            m[@operands[0].to_s]&.each do |v|
+              @idx[key][v] = [] if @idx[key][v].nil?
+              @idx[key][v].append(m)
+            end
+          end
+        end
         @idx[key][@operands[1]] || []
       else
         maps.to_a

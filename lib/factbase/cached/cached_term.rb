@@ -27,7 +27,7 @@ class Factbase::CachedTerm < Factbase::Term
   # @return [bool] TRUE if matches
   def evaluate(fact, maps, fb)
     return super unless @cacheable
-    key = [@text, maps.object_id]
+    key = [maps.object_id, to_s]
     before = @cache[key]
     @cache[key] = super if before.nil?
     @cache[key]

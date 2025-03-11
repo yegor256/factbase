@@ -15,6 +15,38 @@ require_relative '../../lib/factbase/indexed/indexed_factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class TestQuery < Factbase::Test
+  def test_stories
+    Dir[File.join(__dir__, '../../fixtures/stories/**/*.yml')].each do |fixture|
+      base = File.basename(fixture)
+      story = YAML.load_file(fixture)
+      {
+        'plain' => Factbase.new,
+        'cached+plain' => Factbase::CachedFactbase.new(Factbase.new),
+        'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new),
+        'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new)),
+        'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
+      }.each do |badge, fb|
+        story['facts'].each do |y|
+          f = fb.insert
+          y.each do |k, vv|
+            vv = [vv] unless vv.is_a?(Array)
+            vv.each do |v|
+              f.send("#{k}=", v)
+            end
+          end
+        end
+        story['queries'].each do |q|
+          qry = q['query']
+          size = q['size']
+          assert_equal(size, fb.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge}")
+          fb.txn do |fbt|
+            assert_equal(size, fbt.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge} (in txn)")
+          end
+        end
+      end
+    end
+  end
+
   def test_simple_parsing
     maps = []
     maps << { 'foo' => [42] }
