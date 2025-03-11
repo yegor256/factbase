@@ -20,8 +20,8 @@ class TestQuery < Factbase::Test
     {
       'plain' => Factbase.new,
       'sync+plain' => Factbase::SyncFactbase.new(Factbase.new),
-      'cached+plain' => Factbase::CachedFactbase.new(Factbase.new),
       'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new),
+      'cached+plain' => Factbase::CachedFactbase.new(Factbase.new),
       'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new)),
       'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new)),
       'sync+cached+indexed+plain' => Factbase::SyncFactbase.new(

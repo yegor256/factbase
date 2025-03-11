@@ -41,9 +41,17 @@ class Factbase::IndexedTerm < Factbase::Term
         maps.to_a
       end
     when :and
-      @operands.map { |o| o.predict(maps) }.reduce(&:&)
+      parts = @operands.map { |o| o.predict(maps) }
+      if parts.include?(nil)
+        maps
+      else
+        parts.reduce(&:&)
+      end
     when :or
       @operands.map { |o| o.predict(maps) }.reduce(&:|)
+    when :join
+    when :as
+      nil
     else
       maps.to_a
     end

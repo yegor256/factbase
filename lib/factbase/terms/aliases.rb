@@ -30,7 +30,7 @@ module Factbase::Term::Aliases
       .map { |j| j.size == 1 ? [j[0], j[0]] : j }
     term = @operands[1]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    subset = fb.query(term, maps).each(fact).to_a
+    subset = fb.query(term, maps).each(fb, fact).to_a
     subset.each do |s|
       jumps.each do |to, from|
         s[from]&.each do |v|

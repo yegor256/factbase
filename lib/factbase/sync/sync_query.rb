@@ -27,7 +27,7 @@ class Factbase::SyncQuery
   def each(fb = @fb, params = {}, &)
     return to_enum(__method__, fb, params) unless block_given?
     try_lock do
-      @origin.each(fb, &)
+      @origin.each(fb, params, &)
     end
   end
 

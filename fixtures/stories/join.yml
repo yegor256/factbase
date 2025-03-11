@@ -11,6 +11,8 @@ facts:
     age: 45
 queries:
   - query: (and (join 'age<=age' (eq person $name)) (exists age))
-    size: 2
+    size: 4
   - query: (and (join 'age' (eq person $name)) (exists age))
-    size: 2
+    size: 4
+  - query: (and (join 'x<=age' (eq age (agg (exists person) (max age)))) (eq x 45))
+    size: 5
