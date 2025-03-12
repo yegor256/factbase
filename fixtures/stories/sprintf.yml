@@ -8,3 +8,5 @@ facts:
 queries:
   - query: (sprintf "Hello, %s!" "world")
     one: "Hello, world!"
+  - query: (sprintf "Hello, %s!" (agg (eq age 41) (first name)))
+    one: "Hello, Jeff!"
