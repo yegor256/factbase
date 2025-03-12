@@ -22,7 +22,7 @@ class Factbase::Logged
   # @param [Print] tube The tube to use, if log is NIL
   def initialize(fb, log = nil, time_tolerate: 1, tube: nil)
     raise 'The "fb" is nil' if fb.nil?
-    @fb = fb
+    @origin = fb
     if log.nil?
       raise 'Either "log" or "tube" must be non-NIL' if tube.nil?
       @tube = tube
@@ -31,18 +31,18 @@ class Factbase::Logged
     end
   end
 
-  decoor(:fb)
+  decoor(:origin)
 
   def insert
     start = Time.now
-    f = @fb.insert
-    @tube.say(start, "Inserted new fact ##{@fb.size} in #{start.ago}")
+    f = @origin.insert
+    @tube.say(start, "Inserted new fact ##{@origin.size} in #{start.ago}")
     Fact.new(f, tube: @tube)
   end
 
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
-    Query.new(term, maps, @tube, @fb)
+    Query.new(term, maps, @tube, @origin)
   end
 
   def txn
@@ -50,7 +50,7 @@ class Factbase::Logged
     id = nil
     rollback = false
     r =
-      @fb.txn do |fbt|
+      @origin.txn do |fbt|
         id = fbt.object_id
         yield Factbase::Logged.new(fbt, tube: @tube)
       rescue Factbase::Rollback => e
@@ -131,30 +131,15 @@ class Factbase::Logged
       @fb = fb
     end
 
-    def one(fb = @fb, params = {})
-      start = Time.now
-      q = Factbase::Syntax.new(@term).to_term.to_s
-      r = nil
-      tail =
-        Factbase::Logged.elapsed do
-          r = fb.query(@term, @maps).one(fb, params)
-        end
-      if r.nil?
-        @tube.say(start, "Nothing found by '#{q}' #{tail}")
-      else
-        @tube.say(start, "Found #{r} (#{r.class}) by '#{q}' #{tail}")
-      end
-      r
-    end
-
-    def each(fb = @fb, params = {}, &)
+    def each(_fb = nil, params = {}, &)
+      return to_enum(__method__, @fb, params) unless block_given?
       start = Time.now
       q = Factbase::Syntax.new(@term).to_term.to_s
       if block_given?
         r = nil
         tail =
           Factbase::Logged.elapsed do
-            r = fb.query(@term, @maps).each(fb, params, &)
+            r = @fb.query(@term, @maps).each(@fb, params, &)
           end
         raise ".each of #{@term.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
@@ -167,7 +152,7 @@ class Factbase::Logged
         array = []
         tail =
           Factbase::Logged.elapsed do
-            fb.query(@term, @maps).each(fb, params) do |f|
+            @fb.query(@term, @maps).each(@fb, params) do |f|
               array << f
             end
           end
@@ -180,13 +165,29 @@ class Factbase::Logged
       end
     end
 
-    def delete!(fb = @fb)
-      r = nil
+    def one(_fb = nil, params = {})
       start = Time.now
-      before = fb.size
+      q = Factbase::Syntax.new(@term).to_term.to_s
+      r = nil
       tail =
         Factbase::Logged.elapsed do
-          r = @fb.query(@term).delete!(fb)
+          r = @fb.query(@term, @maps).one(@fb, params)
+        end
+      if r.nil?
+        @tube.say(start, "Nothing found by '#{q}' #{tail}")
+      else
+        @tube.say(start, "Found #{r} (#{r.class}) by '#{q}' #{tail}")
+      end
+      r
+    end
+
+    def delete!(_fb = nil)
+      r = nil
+      start = Time.now
+      before = @fb.size
+      tail =
+        Factbase::Logged.elapsed do
+          r = @fb.query(@term).delete!(@fb)
         end
       raise ".delete! of #{@term.class} returned #{r.class}" unless r.is_a?(Integer)
       if before.zero?
