@@ -40,8 +40,9 @@ class Factbase::Logged
     Fact.new(f, tube: @tube)
   end
 
-  def query(query)
-    Query.new(query, @tube, @fb)
+  def query(term, maps = nil)
+    term = to_term(term) if term.is_a?(String)
+    Query.new(term, maps, @tube, @fb)
   end
 
   def txn
@@ -122,21 +123,21 @@ class Factbase::Logged
   # Query decorator.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
-  #
   class Query
-    def initialize(expr, tube, fb)
-      @expr = expr
+    def initialize(term, maps, tube, fb)
+      @term = term
+      @maps = maps
       @tube = tube
       @fb = fb
     end
 
     def one(fb = @fb, params = {})
       start = Time.now
-      q = Factbase::Syntax.new(@expr).to_term.to_s
+      q = Factbase::Syntax.new(@term).to_term.to_s
       r = nil
       tail =
         Factbase::Logged.elapsed do
-          r = fb.query(@expr).one(fb, params)
+          r = fb.query(@term, @maps).one(fb, params)
         end
       if r.nil?
         @tube.say(start, "Nothing found by '#{q}' #{tail}")
@@ -148,14 +149,14 @@ class Factbase::Logged
 
     def each(fb = @fb, params = {}, &)
       start = Time.now
-      q = Factbase::Syntax.new(@expr).to_term.to_s
+      q = Factbase::Syntax.new(@term).to_term.to_s
       if block_given?
         r = nil
         tail =
           Factbase::Logged.elapsed do
-            r = fb.query(@expr).each(fb, params, &)
+            r = fb.query(@term, @maps).each(fb, params, &)
           end
-        raise ".each of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
+        raise ".each of #{@term.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
           @tube.say(start, "Nothing found by '#{q}' #{tail}")
         else
@@ -166,7 +167,7 @@ class Factbase::Logged
         array = []
         tail =
           Factbase::Logged.elapsed do
-            fb.query(@expr).each(fb, params) do |f|
+            fb.query(@term, @maps).each(fb, params) do |f|
               array << f
             end
           end
@@ -185,15 +186,15 @@ class Factbase::Logged
       before = fb.size
       tail =
         Factbase::Logged.elapsed do
-          r = @fb.query(@expr).delete!(fb)
+          r = @fb.query(@term).delete!(fb)
         end
-      raise ".delete! of #{@expr.class} returned #{r.class}" unless r.is_a?(Integer)
+      raise ".delete! of #{@term.class} returned #{r.class}" unless r.is_a?(Integer)
       if before.zero?
-        @tube.say(start, "There were no facts, nothing deleted by '#{@expr}' #{tail}")
+        @tube.say(start, "There were no facts, nothing deleted by '#{@term}' #{tail}")
       elsif r.zero?
-        @tube.say(start, "No facts out of #{before} deleted by '#{@expr}' #{tail}")
+        @tube.say(start, "No facts out of #{before} deleted by '#{@term}' #{tail}")
       else
-        @tube.say(start, "Deleted #{r} fact(s) out of #{before} by '#{@expr}' #{tail}")
+        @tube.say(start, "Deleted #{r} fact(s) out of #{before} by '#{@term}' #{tail}")
       end
       r
     end
