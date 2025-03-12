@@ -16,7 +16,9 @@ class Factbase::Tee
   # @param [Factbase::Fact] fact Primary fact to use for reading
   # @param [Factbase::Fact] upper Fact to access with a "$" prefix
   def initialize(fact, upper)
+    raise 'Fact is nil' if fact.nil?
     @fact = fact
+    raise 'Upper is nil' if upper.nil?
     @upper = upper
   end
 

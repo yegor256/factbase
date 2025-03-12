@@ -47,7 +47,7 @@ class TestAggregates < Factbase::Test
       '(empty (eq x 1))' => false
     }.each do |q, r|
       t = Factbase::Syntax.new(q).to_term
-      assert_equal(r, t.evaluate(nil, maps, Factbase.new), q)
+      assert_equal(r, t.evaluate(Factbase::Fact.new({}), maps, Factbase.new), q)
     end
   end
 end

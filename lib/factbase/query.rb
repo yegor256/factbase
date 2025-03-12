@@ -64,7 +64,7 @@ class Factbase::Query
   # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
   def one(fb = @fb, params = {})
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    r = @term.evaluate(Factbase::Tee.new(nil, params), @maps, fb)
+    r = @term.evaluate(Factbase::Tee.new(Factbase::Fact.new({}), params), @maps, fb)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
       raise "Incorrect type #{r.class} returned by #{@term.inspect}"
     end

@@ -17,17 +17,7 @@ require_relative '../../lib/factbase/sync/sync_factbase'
 # License:: MIT
 class TestQuery < Factbase::Test
   def test_stories
-    {
-      'plain' => Factbase.new,
-      'sync+plain' => Factbase::SyncFactbase.new(Factbase.new),
-      'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new),
-      'cached+plain' => Factbase::CachedFactbase.new(Factbase.new),
-      'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new)),
-      'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new)),
-      'sync+cached+indexed+plain' => Factbase::SyncFactbase.new(
-        Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
-      )
-    }.each do |badge, fb|
+    with_factbases do |badge, fb|
       Dir[File.join(__dir__, '../../fixtures/stories/**/*.yml')].each do |fixture|
         base = File.basename(fixture)
         story = YAML.load_file(fixture)
@@ -122,13 +112,7 @@ class TestQuery < Factbase::Test
       { 'num' => [42, 66, 0], 'pi' => [3.14], 'name' => ['peter'] },
       { 'num' => [0], 'time' => [Time.now - 100], 'hi' => [4], 'nome' => ['Walter'] }
     ]
-    {
-      'plain' => Factbase.new(maps),
-      'cached+plain' => Factbase::CachedFactbase.new(Factbase.new(maps)),
-      'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new(maps)),
-      'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps))),
-      'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps)))
-    }.each do |badge, fb|
+    with_factbases(maps) do |badge, fb|
       queries.each do |q, r|
         assert_equal(r, fb.query(q).each.to_a.size, "#{q} in #{badge}")
         fb.txn do |fbt|
@@ -162,18 +146,20 @@ class TestQuery < Factbase::Test
       { 'foo' => [42] },
       { 'bar' => [4, 5] }
     ]
-    {
-      '(agg (exists foo) (first foo))' => [42],
-      '(agg (exists z) (first z))' => nil,
-      '(agg (always) (count))' => 2,
-      '(agg (eq bar $v) (count))' => 1,
-      '(agg (eq z 40) (count))' => 0
-    }.each do |q, expected|
-      result = Factbase::Query.new(maps, q, Factbase.new).one(Factbase.new, v: 4)
-      if expected.nil?
-        assert_nil(result, "#{q} -> nil")
-      else
-        assert_equal(expected, result, "#{q} -> #{expected}")
+    with_factbases(maps) do |badge, fb|
+      {
+        '(agg (exists foo) (first foo))' => [42],
+        '(agg (exists z) (first z))' => nil,
+        '(agg (always) (count))' => 2,
+        '(agg (eq bar $v) (count))' => 1,
+        '(agg (eq z 40) (count))' => 0
+      }.each do |q, expected|
+        result = fb.query(q).one(fb, v: 4)
+        if expected.nil?
+          assert_nil(result, "#{q} -> nil in #{badge}")
+        else
+          assert_equal(expected, result, "#{q} -> #{expected} in #{badge}")
+        end
       end
     end
   end
@@ -184,9 +170,11 @@ class TestQuery < Factbase::Test
       { 'bar' => [4, 5] },
       { 'bar' => [5] }
     ]
-    q = Factbase::Query.new(maps, '(never)', Factbase.new)
-    assert_equal(0, q.delete!)
-    assert_equal(3, maps.size)
+    with_factbases(maps) do |badge, fb|
+      q = fb.query('(never)')
+      assert_equal(0, q.delete!, "#{q} in #{badge}")
+      assert_equal(3, maps.size, "#{q} in #{badge}")
+    end
   end
 
   def test_to_array
@@ -232,5 +220,21 @@ class TestQuery < Factbase::Test
     maps = [{ 'foo' => [42] }]
     f = Factbase::Query.new(maps, '(always)', Factbase.new).each.to_a[0]
     assert_includes(f.all_properties, 'foo')
+  end
+
+  private
+
+  def with_factbases(maps = [], &)
+    {
+      'plain' => Factbase.new(maps),
+      'sync+plain' => Factbase::SyncFactbase.new(Factbase.new(maps)),
+      'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new(maps)),
+      'cached+plain' => Factbase::CachedFactbase.new(Factbase.new(maps)),
+      'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps))),
+      'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps))),
+      'sync+cached+indexed+plain' => Factbase::SyncFactbase.new(
+        Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps)))
+      )
+    }.each(&)
   end
 end
