@@ -21,17 +21,17 @@ class TestQuery < Factbase::Test
       Dir[File.join(__dir__, '../../fixtures/stories/**/*.yml')].each do |fixture|
         base = File.basename(fixture)
         story = YAML.load_file(fixture)
-        fb.query('(always)').delete!
-        story['facts'].each do |y|
-          f = fb.insert
-          y.each do |k, vv|
-            vv = [vv] unless vv.is_a?(Array)
-            vv.each do |v|
-              f.send(:"#{k}=", v)
+        2.times do
+          fb.query('(always)').delete!
+          story['facts'].each do |y|
+            f = fb.insert
+            y.each do |k, vv|
+              vv = [vv] unless vv.is_a?(Array)
+              vv.each do |v|
+                f.send(:"#{k}=", v)
+              end
             end
           end
-        end
-        2.times do
           story['queries'].each do |q|
             qry = q['query']
             if q['size']
