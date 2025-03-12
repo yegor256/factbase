@@ -233,9 +233,9 @@ class TestQuery < Factbase::Test
   def with_factbases(maps = [], &)
     {
       'plain' => Factbase.new(maps),
-      'pre+plain' => Factbase::Pre.new(Factbase.new(maps)) { },
+      'pre+plain' => Factbase::Pre.new(Factbase.new(maps)) {},
       'rules+plain' => Factbase::Rules.new(Factbase.new(maps), '(always)'),
-      'inv+plain' => Factbase::Inv.new(Factbase.new(maps)) { },
+      'inv+plain' => Factbase::Inv.new(Factbase.new(maps)) {},
       'sync+plain' => Factbase::SyncFactbase.new(Factbase.new(maps)),
       'tallied+plain' => Factbase::Tallied.new(Factbase.new(maps)),
       'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new(maps)),

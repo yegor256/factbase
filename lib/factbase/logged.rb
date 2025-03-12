@@ -131,8 +131,8 @@ class Factbase::Logged
       @fb = fb
     end
 
-    def each(_fb = nil, params = {}, &)
-      return to_enum(__method__, @fb, params) unless block_given?
+    def each(fb = nil, params = {}, &)
+      return to_enum(__method__, fb, params) unless block_given?
       start = Time.now
       q = Factbase::Syntax.new(@term).to_term.to_s
       if block_given?
