@@ -31,7 +31,9 @@ module Factbase::Term::Aggregates
     raise "An integer expected, but #{pos} provided" unless pos.is_a?(Integer)
     k = @operands[1]
     raise "A symbol expected, but #{k} provided" unless k.is_a?(Symbol)
-    maps[pos][k.to_s]
+    m = maps[pos]
+    return nil if m.nil?
+    m[k.to_s]
   end
 
   def first(_fact, maps, _fb)
