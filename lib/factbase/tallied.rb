@@ -31,8 +31,8 @@ class Factbase::Tallied
     f
   end
 
-  def query(query)
-    Query.new(@fb.query(query), @churn, @fb)
+  def query(query, maps = nil)
+    Query.new(@fb.query(query, maps), @churn, @fb)
   end
 
   def txn
