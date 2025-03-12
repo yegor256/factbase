@@ -42,7 +42,8 @@ class Factbase::CachedQuery
   end
 
   # Read a single value.
-  # @param [Hash] params Optional params accessible in the query via the "$" symbol
+  # @param [Hash] fb The factbase
+  # @param [Hash] _params Optional params accessible in the query via the "$" symbol (unused)
   # @return The value evaluated
   def one(fb = @fb, _params = nil)
     key = "one: #{@origin}"

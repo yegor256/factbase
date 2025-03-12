@@ -32,8 +32,9 @@ class Factbase::SyncQuery
   end
 
   # Read a single value.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
-  # @return The value evaluated
+  # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
   def one(fb = @fb, params = {})
     try_lock do
       @origin.one(fb, params)
@@ -41,6 +42,7 @@ class Factbase::SyncQuery
   end
 
   # Delete all facts that match the query.
+  # @param [Factbase] fb The factbase
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
     try_lock do

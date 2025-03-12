@@ -36,6 +36,7 @@ class Factbase::Query
   end
 
   # Iterate facts one by one.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
@@ -60,6 +61,7 @@ class Factbase::Query
   end
 
   # Read a single value.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
   def one(fb = @fb, params = {})
@@ -72,7 +74,7 @@ class Factbase::Query
   end
 
   # Delete all facts that match the query.
-  # @param [Factbase] fb The factbase
+  # @param [Factbase] fb The factbase to delete from
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
     deleted = 0
