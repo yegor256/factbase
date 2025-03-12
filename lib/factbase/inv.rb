@@ -8,6 +8,17 @@ require 'decoor'
 require_relative '../factbase'
 
 # A decorator of a Factbase, that checks invariants on every set.
+#
+# For example, you can use this decorator if you want to check that every
+# fact has +when+:
+#
+#  fb = Factbase::Inv.new(Factbase.new) do |f, fbt|
+#    assert !f['when'].nil?
+#  end
+#
+# The second argument passed to the block is the factbase, while the first
+# one is the fact just touched.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
@@ -23,8 +34,8 @@ class Factbase::Inv
     Fact.new(@fb.insert, @block)
   end
 
-  def query(query)
-    Query.new(@fb.query(query), @block)
+  def query(query, maps = nil)
+    Query.new(@fb.query(query, maps), @block, self)
   end
 
   def txn
@@ -65,14 +76,15 @@ class Factbase::Inv
   class Query
     decoor(:query)
 
-    def initialize(query, block)
+    def initialize(query, block, fb)
       @query = query
       @block = block
+      @fb = fb
     end
 
-    def each
-      return to_enum(__method__) unless block_given?
-      @query.each do |f|
+    def each(fb = @fb, params = {})
+      return to_enum(__method__, fb, params) unless block_given?
+      @query.each(fb, params) do |f|
         yield Fact.new(f, @block)
       end
     end

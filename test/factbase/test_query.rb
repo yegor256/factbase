@@ -9,6 +9,10 @@ require 'time'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/query'
 require_relative '../../lib/factbase/logged'
+require_relative '../../lib/factbase/pre'
+require_relative '../../lib/factbase/inv'
+require_relative '../../lib/factbase/rules'
+require_relative '../../lib/factbase/tallied'
 require_relative '../../lib/factbase/cached/cached_factbase'
 require_relative '../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../lib/factbase/sync/sync_factbase'
@@ -229,10 +233,14 @@ class TestQuery < Factbase::Test
   def with_factbases(maps = [], &)
     {
       'plain' => Factbase.new(maps),
-      'logged+plain' => Factbase::Logged.new(Factbase.new(maps), Loog::NULL),
+      'pre+plain' => Factbase::Pre.new(Factbase.new(maps)) { },
+      'rules+plain' => Factbase::Rules.new(Factbase.new(maps), '(always)'),
+      'inv+plain' => Factbase::Inv.new(Factbase.new(maps)) { },
       'sync+plain' => Factbase::SyncFactbase.new(Factbase.new(maps)),
+      'tallied+plain' => Factbase::Tallied.new(Factbase.new(maps)),
       'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new(maps)),
       'cached+plain' => Factbase::CachedFactbase.new(Factbase.new(maps)),
+      'logged+plain' => Factbase::Logged.new(Factbase.new(maps), Loog::NULL),
       'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps))),
       'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps))),
       'sync+cached+indexed+plain' => Factbase::SyncFactbase.new(
