@@ -10,7 +10,7 @@ require_relative '../../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-module Factbase::Term::Debug
+module Factbase::Debug
   def traced(fact, maps, fb)
     assert_args(1)
     t = @operands[0]

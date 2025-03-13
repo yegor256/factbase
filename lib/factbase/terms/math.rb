@@ -10,7 +10,7 @@ require_relative '../../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-module Factbase::Term::Math
+module Factbase::Math
   def plus(fact, maps, fb)
     _arithmetic(:+, fact, maps, fb)
   end

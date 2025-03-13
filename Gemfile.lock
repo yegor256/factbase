@@ -58,6 +58,9 @@ GEM
     diff-lcs (1.6.0)
     docile (1.4.1)
     drb (2.2.1)
+    elapsed (0.0.1)
+      loog (> 0)
+      tago (> 0)
     erubi (1.13.1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
@@ -99,6 +102,11 @@ GEM
     psych (5.2.3)
       date
       stringio
+    qbash (0.4.0)
+      backtrace (> 0)
+      elapsed (> 0)
+      loog (> 0)
+      tago (> 0)
     racc (1.8.1)
     rack (3.1.12)
     rack-session (2.1.0)
@@ -216,6 +224,7 @@ DEPENDENCIES
   factbase!
   minitest (= 5.25.5)
   minitest-reporters (= 1.7.1)
+  qbash (> 0)
   rake (= 13.2.1)
   rspec-rails (= 7.1.1)
   rubocop (= 1.73.2)

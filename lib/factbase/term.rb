@@ -45,37 +45,37 @@ class Factbase::Term
   attr_reader :operands
 
   require_relative 'terms/math'
-  include Factbase::Term::Math
+  include Factbase::Math
 
   require_relative 'terms/logical'
-  include Factbase::Term::Logical
+  include Factbase::Logical
 
   require_relative 'terms/aggregates'
-  include Factbase::Term::Aggregates
+  include Factbase::Aggregates
 
   require_relative 'terms/strings'
-  include Factbase::Term::Strings
+  include Factbase::Strings
 
   require_relative 'terms/casting'
-  include Factbase::Term::Casting
+  include Factbase::Casting
 
   require_relative 'terms/meta'
-  include Factbase::Term::Meta
+  include Factbase::Meta
 
   require_relative 'terms/aliases'
-  include Factbase::Term::Aliases
+  include Factbase::Aliases
 
   require_relative 'terms/ordering'
-  include Factbase::Term::Ordering
+  include Factbase::Ordering
 
   require_relative 'terms/defn'
-  include Factbase::Term::Defn
+  include Factbase::Defn
 
   require_relative 'terms/system'
-  include Factbase::Term::System
+  include Factbase::System
 
   require_relative 'terms/debug'
-  include Factbase::Term::Debug
+  include Factbase::Debug
 
   # Ctor.
   # @param [Symbol] operator Operator

@@ -10,7 +10,7 @@ require_relative '../../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-module Factbase::Term::Logical
+module Factbase::Logical
   # Always returns true, regardless of the fact
   # @param [Factbase::Fact] _fact The fact (unused)
   # @param [Array<Factbase::Fact>] _maps All maps available (unused)

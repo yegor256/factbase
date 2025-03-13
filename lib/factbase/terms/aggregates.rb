@@ -10,7 +10,7 @@ require_relative '../../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-module Factbase::Term::Aggregates
+module Factbase::Aggregates
   def min(_fact, maps, _fb)
     assert_args(1)
     _best(maps) { |v, b| v < b }

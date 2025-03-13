@@ -10,7 +10,7 @@ require_relative '../../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-module Factbase::Term::Strings
+module Factbase::Strings
   def concat(fact, maps, fb)
     (0..@operands.length - 1).map { |i| _values(i, fact, maps, fb)&.first }.join
   end

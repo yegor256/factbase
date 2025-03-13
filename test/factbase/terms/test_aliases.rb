@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require 'loog'
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/syntax'

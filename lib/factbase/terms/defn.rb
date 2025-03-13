@@ -10,7 +10,7 @@ require_relative '../../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-module Factbase::Term::Defn
+module Factbase::Defn
   def defn(_fact, _maps, _fb)
     assert_args(2)
     fn = @operands[0]

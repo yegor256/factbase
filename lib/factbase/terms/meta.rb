@@ -10,7 +10,7 @@ require_relative '../../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-module Factbase::Term::Meta
+module Factbase::Meta
   def exists(fact, _maps, _fb)
     assert_args(1)
     !_by_symbol(0, fact).nil?

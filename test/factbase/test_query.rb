@@ -245,6 +245,22 @@ class TestQuery < Factbase::Test
       'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps))),
       'sync+cached+indexed+plain' => Factbase::SyncFactbase.new(
         Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps)))
+      ),
+      'all+plain' => Factbase::Tallied.new(
+        Factbase::Pre.new(
+          Factbase::Rules.new(
+            Factbase::Inv.new(
+              Factbase::SyncFactbase.new(
+                Factbase::CachedFactbase.new(
+                  Factbase::IndexedFactbase.new(
+                    Factbase.new(maps)
+                  )
+                )
+              )
+            ) { nil },
+            '(always)'
+          )
+        ) { nil }
       )
     }.each(&)
   end

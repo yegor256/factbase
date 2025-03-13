@@ -10,7 +10,7 @@ require_relative '../../factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-module Factbase::Term::System
+module Factbase::System
   def env(fact, maps, fb)
     assert_args(2)
     n = _values(0, fact, maps, fb)[0]
