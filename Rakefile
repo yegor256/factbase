@@ -8,6 +8,7 @@ require 'rubygems'
 require 'rake'
 require 'rake/clean'
 require 'shellwords'
+require 'os'
 
 def name
   @name ||= File.basename(Dir['*.gemspec'].first, '.*')
@@ -31,6 +32,7 @@ end
 
 desc 'Run them via Ruby, one by one'
 task :picks do
+  next if OS.windows?
   Dir['test/**/*.rb'].each do |f|
     qbash("bundle exec ruby #{Shellwords.escape(f)}", log: $stdout)
   end
@@ -38,6 +40,7 @@ end
 
 desc 'Require them via Ruby, one by one'
 task :reqs do
+  next unless OS.windows?
   Dir['lib/**/*.rb'].each do |f|
     qbash("bundle exec ruby #{Shellwords.escape(f)}", log: $stdout)
   end
