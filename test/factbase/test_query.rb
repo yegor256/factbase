@@ -44,7 +44,12 @@ class TestQuery < Factbase::Test
               size = q['size']
               assert_equal(size, fb.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge}")
               fb.txn do |fbt|
-                assert_equal(size, fbt.query(qry).each.to_a.size, "#{base}: #{qry} at #{badge} (in txn)")
+                facts = fbt.query(qry).each.to_a
+                assert_equal(size, facts.size, "#{base}: #{qry} at #{badge} (in txn)")
+                facts.each do |fact|
+                  refute_empty(fact.all_properties)
+                  refute_nil(fact.to_s)
+                end
               end
             else
               ret = q['one']

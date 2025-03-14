@@ -74,6 +74,14 @@ class Factbase::Taped
       @added = added
     end
 
+    def keys
+      @origin.keys
+    end
+
+    def map(&)
+      @origin.map(&)
+    end
+
     def [](key)
       v = @origin[key]
       v = TapedArray.new(v, @origin.object_id, @added) if v.is_a?(Array)
