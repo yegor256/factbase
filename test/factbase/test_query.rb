@@ -188,6 +188,19 @@ class TestQuery < Factbase::Test
     end
   end
 
+  def test_scans_and_inserts
+    with_factbases do |_, fb|
+      fb.insert.foo = 42
+      before = fb.size
+      more = 0
+      fb.query('(exists foo)').each do |f|
+        fb.insert.bar = f.foo
+        more += 1
+      end
+      assert_equal(before + more, fb.size)
+    end
+  end
+
   def test_to_array
     maps = []
     maps << { 'foo' => [42] }
