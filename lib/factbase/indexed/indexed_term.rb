@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require 'tago'
 require_relative '../../factbase'
 
 # Term with an index.
@@ -19,6 +20,7 @@ module Factbase::IndexedTerm
   # @param [Hash] params Key/value params to use
   # @return [Array<Hash>|nil] Returns a new array, or NIL if the original array must be used
   def predict(maps, params)
+    return maps if params == {}
     case @op
     when :exists
       key = [maps.object_id, @operands[0], @op]
