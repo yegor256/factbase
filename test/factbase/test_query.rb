@@ -231,6 +231,19 @@ class TestQuery < Factbase::Test
     end
   end
 
+  def test_scans_and_appends_in_queried_txn
+    with_factbases do |_, fb|
+      fb.insert.foo = 42
+      fb.txn do |fbt|
+        fbt.query('(exists foo)').each do |f|
+          f.bar = 33
+        end
+        refute_empty(fbt.query('(exists bar)').each.to_a)
+      end
+      refute_empty(fb.query('(exists bar)').each.to_a)
+    end
+  end
+
   def test_to_array
     maps = []
     maps << { 'foo' => [42] }
