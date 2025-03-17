@@ -90,8 +90,7 @@ module Factbase::IndexedTerm
       if r.nil?
         nil
       else
-        inv = maps.to_a - r.to_a
-        (maps & []) | inv
+        (maps & []) | (maps.to_a - r.to_a)
       end
     end
   end
