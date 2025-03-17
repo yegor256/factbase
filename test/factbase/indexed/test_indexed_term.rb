@@ -69,6 +69,6 @@ class TestIndexedTerm < Factbase::Test
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'alpha' => [] }, {}])
     n = term.predict(maps, { a: 1 })
-    assert_equal(3, n.size)
+    assert_nil(n)
   end
 end

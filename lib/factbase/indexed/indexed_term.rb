@@ -58,22 +58,16 @@ module Factbase::IndexedTerm
           j = vv.map { |v| @idx[key][v] || [] }.reduce(&:|)
           (maps & []) | j
         end
-      else
-        maps
       end
     when :and
       parts = @operands.map { |o| o.predict(maps, params) }
       if parts.include?(nil)
-        maps
+        nil
       else
         parts.reduce(&:&)
       end
     when :or
       @operands.map { |o| o.predict(maps, params) }.reduce(maps & [], &:|)
-    when :join, :as
-      nil
-    else
-      maps
     end
   end
 
