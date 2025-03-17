@@ -85,6 +85,9 @@ class Factbase::Term
     @operands = operands
   end
 
+  # Extend it with the module.
+  # @param [Module] type The type to extend with
+  # @param [Hash] args Attributes to set
   def redress!(type, **args)
     extend type
     args.each { |k, v| send(:instance_variable_set, :"@#{k}", v) }

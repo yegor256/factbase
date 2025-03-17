@@ -64,6 +64,7 @@ class Factbase::Taped
   end
 
   def &(other)
+    return Factbase::Taped.new([], inserted: @inserted, deleted: @deleted, added: @added) if other == []
     join(other, &:&)
   end
 
