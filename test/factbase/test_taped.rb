@@ -43,4 +43,25 @@ class TestTaped < Factbase::Test
     end
     assert_equal(1, t.added.size)
   end
+
+  def test_groups_by
+    t = Factbase::Taped.new([{ f: 5 }, { k: 4 }, { f: 5, k: 4 }])
+    g = t.group_by { |m| m[:f] }
+    assert_equal(2, g[5].size)
+    assert_equal(1, g[nil].size)
+  end
+
+  def test_tracks_factbase
+    t = Factbase::Taped.new([])
+    fb = Factbase.new(t)
+    fb.insert
+    fb.query('(always)').each do |f|
+      f.foo = 42
+      f.foo = 5
+    end
+    fb.query('(always)').delete!
+    assert_equal(1, t.inserted.size)
+    assert_equal(1, t.added.size)
+    assert_equal(1, t.deleted.size)
+  end
 end

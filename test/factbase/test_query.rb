@@ -232,7 +232,7 @@ class TestQuery < Factbase::Test
   end
 
   def test_scans_and_appends_in_queried_txn
-    with_factbases do |_, fb|
+    with_factbases do |badge, fb|
       fb.insert.foo = 42
       fb.txn do |fbt|
         fbt.query('(exists foo)').each do |f|
@@ -240,7 +240,8 @@ class TestQuery < Factbase::Test
         end
         refute_empty(fbt.query('(exists bar)').each.to_a)
       end
-      refute_empty(fb.query('(exists bar)').each.to_a)
+      refute_empty(fb.query('(exists bar)').each.to_a, "in #{badge}")
+      assert_empty(fb.query('(and (exists foo) (not (exists bar)))').each.to_a, "in #{badge}")
     end
   end
 

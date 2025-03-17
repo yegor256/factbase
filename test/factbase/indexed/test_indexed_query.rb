@@ -13,6 +13,15 @@ require_relative '../../../lib/factbase/indexed/indexed_factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class TestIndexedQuery < Factbase::Test
+  def test_queries_and_updates_origin
+    fb = Factbase.new
+    fb.insert.foo = 42
+    Factbase::IndexedQuery.new(fb.query('(exists foo)'), {}, fb).each do |f|
+      f.bar = 33
+    end
+    refute_empty(fb.query('(exists bar)').each.to_a)
+  end
+
   def test_queries_many_times
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     total = 5

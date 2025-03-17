@@ -19,4 +19,18 @@ class TestCachedFactbase < Factbase::Test
     f.bar = 'test'
     assert_equal(1, fb.query('(and (eq foo 1) (eq bar "test"))').each.to_a.size)
   end
+
+  def test_queries_after_update_in_txn
+    origin = Factbase.new
+    fb = Factbase::CachedFactbase.new(origin)
+    fb.insert.foo = 42
+    fb.txn do |fbt|
+      fbt.query('(exists foo)').each do |f|
+        f.bar = 33
+      end
+    end
+    refute_empty(origin.query('(exists bar)').each.to_a)
+    refute_empty(fb.query('(exists bar)').each.to_a)
+  end
+
 end

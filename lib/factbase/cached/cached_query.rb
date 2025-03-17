@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../factbase'
+require_relative 'cached_fact'
 
 # Query with a cache, a decorator of another query.
 #
@@ -30,13 +31,12 @@ class Factbase::CachedQuery
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
-  def each(fb = @fb, params = nil)
+  def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
-    key = "each #{@origin}"
+    key = "each #{@origin} #{params}"
     before = @cache[key]
-    @cache[key] = @origin.each(fb).to_a if before.nil?
+    @cache[key] = @origin.each(fb, params).to_a if before.nil?
     @cache[key].each do |f|
-      require_relative 'cached_fact'
       yield Factbase::CachedFact.new(f, @cache)
     end
   end
@@ -45,10 +45,10 @@ class Factbase::CachedQuery
   # @param [Hash] fb The factbase
   # @param [Hash] _params Optional params accessible in the query via the "$" symbol (unused)
   # @return The value evaluated
-  def one(fb = @fb, _params = nil)
-    key = "one: #{@origin}"
+  def one(fb = @fb, params = {})
+    key = "one: #{@origin} #{params}"
     before = @cache[key]
-    @cache[key] = @origin.one(fb) if before.nil?
+    @cache[key] = @origin.one(fb, params) if before.nil?
     @cache[key]
   end
 
