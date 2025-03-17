@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - name: Jeff
+    age: 41
+    movie: Big Lebowski
+  - name: Walter
+    age: 43
+    friend: Donny
+    movie: Big Lebowski
+queries:
+  - query: (and (eq movie "Big Lebowski") (exists age) (not (exists friend)))
+    size: 1
+  - query: (and (exists age) (not (exists foo)))
+    size: 2
