@@ -64,7 +64,7 @@ module Factbase::IndexedTerm
       if parts.include?(nil)
         maps
       else
-        parts.reduce(maps, &:&)
+        parts.reduce(&:&)
       end
     when :or
       @operands.map { |o| o.predict(maps, params) }.reduce(maps & [], &:|)
