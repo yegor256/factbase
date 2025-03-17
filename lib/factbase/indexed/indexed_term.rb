@@ -20,7 +20,6 @@ module Factbase::IndexedTerm
   # @param [Hash] params Key/value params to use
   # @return [Array<Hash>|nil] Returns a new array, or NIL if the original array must be used
   def predict(maps, params)
-    return maps if params == {}
     case @op
     when :exists
       key = [maps.object_id, @operands[0], @op]
