@@ -25,7 +25,7 @@ class Factbase::SyncFactbase
   # Insert a new fact and return it.
   # @return [Factbase::Fact] The fact just inserted
   def insert
-    @mutex.synchronize do
+    try_lock do
       @origin.insert
     end
   end
@@ -53,5 +53,14 @@ class Factbase::SyncFactbase
     @origin.txn do |fbt|
       yield Factbase::SyncFactbase.new(fbt, @mutex)
     end
+  end
+
+  private
+
+  def try_lock
+    locked = @mutex.try_lock
+    r = yield
+    @mutex.unlock if locked
+    r
   end
 end
