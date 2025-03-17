@@ -32,9 +32,15 @@ module Factbase::IndexedTerm
           else
             [@operands[1]]
           end
-        vv.map { |v| @idx[key][v] || [] }.reduce(&:|)
+        r = maps & []
+        j = vv.map { |v| @idx[key][v] || [] }.reduce(&:|)
+        if j.nil?
+          nil
+        else
+          r | j
+        end
       else
-        maps.to_a
+        maps
       end
     when :and
       parts = @operands.map { |o| o.predict(maps, params) }
@@ -48,7 +54,7 @@ module Factbase::IndexedTerm
     when :join, :as
       nil
     else
-      maps.to_a
+      maps
     end
   end
 

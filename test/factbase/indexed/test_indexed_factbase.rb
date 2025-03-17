@@ -26,8 +26,7 @@ class TestIndexedFactbase < Factbase::Test
   def test_queries_after_update_in_txn
     origin = Factbase.new
     fb = Factbase::IndexedFactbase.new(origin)
-    f = fb.insert
-    f.foo = 42
+    fb.insert.foo = 42
     fb.txn do |fbt|
       fbt.query('(exists foo)').each do |f|
         f.bar = f.foo + 1
@@ -39,9 +38,7 @@ class TestIndexedFactbase < Factbase::Test
 
   def test_queries_after_insert_in_txn
     fb = Factbase::IndexedFactbase.new(Factbase.new)
-    fb.txn do |fbt|
-      fb.insert
-    end
+    fb.txn(&:insert)
     refute_empty(fb.query('(always)').each.to_a)
   end
 end

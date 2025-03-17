@@ -12,11 +12,11 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Taped
-  def initialize(origin)
+  def initialize(origin, inserted: [], deleted: [], added: [])
     @origin = origin
-    @inserted = []
-    @deleted = []
-    @added = []
+    @inserted = inserted
+    @deleted = deleted
+    @added = added
   end
 
   def inserted
@@ -63,8 +63,12 @@ class Factbase::Taped
     @origin.to_a
   end
 
-  def group_by(&)
-    @origin.group_by(&)
+  def &(other)
+    join(other, &:&)
+  end
+
+  def |(other)
+    join(other, &:|)
   end
 
   # Decorator of Hash.
@@ -127,6 +131,27 @@ class Factbase::Taped
     def uniq!
       @added.append(@oid)
       @origin.uniq!
+    end
+  end
+
+  private
+
+  def join(other)
+    n = yield @origin.to_a, other.to_a
+    if other.respond_to?(:inserted)
+      Factbase::Taped.new(
+        n,
+        inserted: @inserted | other.inserted,
+        deleted: @deleted | other.deleted,
+        added: @added | other.added
+      )
+    else
+      Factbase::Taped.new(
+        n,
+        inserted: @inserted,
+        deleted: @deleted,
+        added: @added
+      )
     end
   end
 end

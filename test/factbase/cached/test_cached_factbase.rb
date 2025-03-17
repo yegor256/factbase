@@ -32,5 +32,4 @@ class TestCachedFactbase < Factbase::Test
     refute_empty(origin.query('(exists bar)').each.to_a)
     refute_empty(fb.query('(exists bar)').each.to_a)
   end
-
 end
