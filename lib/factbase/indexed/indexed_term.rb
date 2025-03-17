@@ -75,7 +75,17 @@ module Factbase::IndexedTerm
       end
       r
     when :or
-      @operands.map { |o| o.predict(maps, params) }.reduce(maps & [], &:|)
+      r = nil
+      @operands.each do |o|
+        n = o.predict(maps, params)
+        if n.nil?
+          r = nil
+          break
+        end
+        r = maps & [] if r.nil?
+        r |= n
+      end
+      r
     end
   end
 
