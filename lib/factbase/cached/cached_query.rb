@@ -33,7 +33,7 @@ class Factbase::CachedQuery
   # @return [Integer] Total number of facts yielded
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
-    key = "each #{@origin} #{params}"
+    key = "each #{@origin}" # params are ignored!
     before = @cache[key]
     @cache[key] = @origin.each(fb, params).to_a if before.nil?
     @cache[key].each do |f|
