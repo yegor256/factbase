@@ -15,3 +15,5 @@ queries:
     size: 1
   - query: (and (exists age) (not (exists foo)))
     size: 2
+  - query: (and (exists age) (exists foo))
+    size: 0
