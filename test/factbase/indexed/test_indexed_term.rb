@@ -32,6 +32,15 @@ class TestIndexedTerm < Factbase::Test
     assert_equal(3, n.size)
   end
 
+  def test_predicts_on_not
+    term = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 42])])
+    idx = {}
+    term.redress!(Factbase::IndexedTerm, idx:)
+    maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [22, 42] }, { 'foo' => [22] }])
+    n = term.predict(maps, { a: 1 })
+    assert_equal(1, n.size)
+  end
+
   def test_predicts_on_and
     term = Factbase::Term.new(
       :and,

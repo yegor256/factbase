@@ -22,21 +22,21 @@ module Factbase::IndexedTerm
   def predict(maps, params)
     case @op
     when :exists
-      key = [maps.object_id, @operands[0], @op]
+      key = [maps.object_id, @operands.first, @op]
       if @idx[key].nil?
         @idx[key] = []
-        prop = @operands[0].to_s
+        prop = @operands.first.to_s
         maps.to_a.each do |m|
           @idx[key].append(m) unless m[prop].nil?
         end
       end
       (maps & []) | @idx[key]
     when :eq
-      if @operands[0].is_a?(Symbol) && _scalar?(@operands[1])
-        key = [maps.object_id, @operands[0], @op]
+      if @operands.first.is_a?(Symbol) && _scalar?(@operands[1])
+        key = [maps.object_id, @operands.first, @op]
         if @idx[key].nil?
           @idx[key] = {}
-          prop = @operands[0].to_s
+          prop = @operands.first.to_s
           maps.to_a.each do |m|
             m[prop]&.each do |v|
               @idx[key][v] = [] if @idx[key][v].nil?
@@ -85,6 +85,14 @@ module Factbase::IndexedTerm
         r |= n
       end
       r
+    when :not
+      r = @operands.first.predict(maps, params)
+      if r.nil?
+        nil
+      else
+        inv = maps.to_a - r.to_a
+        (maps & []) | inv
+      end
     end
   end
 
