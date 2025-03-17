@@ -60,12 +60,20 @@ module Factbase::IndexedTerm
         end
       end
     when :and
-      parts = @operands.map { |o| o.predict(maps, params) }
-      if parts.include?(nil)
-        nil
-      else
-        parts.reduce(&:&)
+      r = nil
+      @operands.each do |o|
+        n = o.predict(maps, params)
+        if n.nil?
+          r = nil
+          break
+        end
+        if r.nil?
+          r = n
+        else
+          r &= n
+        end
       end
+      r
     when :or
       @operands.map { |o| o.predict(maps, params) }.reduce(maps & [], &:|)
     end
