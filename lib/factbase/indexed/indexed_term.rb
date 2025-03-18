@@ -81,6 +81,7 @@ module Factbase::IndexedTerm
         else
           r &= n
         end
+        break if r.empty?
       end
       r
     when :or

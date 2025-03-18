@@ -70,11 +70,16 @@ module Factbase::Aggregates
     term.evaluate(nil, subset, fb)
   end
 
-  def empty(fact, maps, fb)
+  def empty(_fact, maps, fb)
     assert_args(1)
     term = @operands[0]
     raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    fb.query(term, maps).each(fb, fact).to_a.empty?
+    # rubocop:disable Lint/UnreachableLoop
+    fb.query(term, maps).each do
+      return false
+    end
+    # rubocop:enable Lint/UnreachableLoop
+    true
   end
 
   def _best(maps)
