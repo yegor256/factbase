@@ -42,12 +42,14 @@ module Factbase::Meta
     _values(0, fact, maps, fb).nil?
   end
 
+  # The property has many (more than one) values.
   def many(fact, maps, fb)
     assert_args(1)
     v = _values(0, fact, maps, fb)
     !v.nil? && v.size > 1
   end
 
+  # The property has exactly one value.
   def one(fact, maps, fb)
     assert_args(1)
     v = _values(0, fact, maps, fb)

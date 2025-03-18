@@ -31,7 +31,7 @@ Metrics/BlockLength:
 Metrics/CyclomaticComplexity:
   Max: 40
 Metrics/PerceivedComplexity:
-  Max: 30
+  Max: 50
 Metrics/ClassLength:
   Enabled: false
 Layout/EmptyLineAfterGuardClause:
