@@ -50,4 +50,14 @@ class TestAggregates < Factbase::Test
       assert_equal(r, t.evaluate(Factbase::Fact.new({}), maps, Factbase.new), q)
     end
   end
+
+  def test_empty_with_params
+    maps = [
+      { 'a' => [3], 'b' => [44] },
+      { 'a' => [4], 'b' => [55] }
+    ]
+    t = Factbase::Syntax.new('(empty (eq b $x))').to_term
+    assert(t.evaluate(Factbase::Fact.new({ 'x' => 42 }), maps, Factbase.new))
+    refute(t.evaluate(Factbase::Fact.new({ 'x' => 44 }), maps, Factbase.new))
+  end
 end

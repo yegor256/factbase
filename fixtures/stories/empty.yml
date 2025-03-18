@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - man: Jeff
+    wife: Sarah
+  - man: Walter
+    wife: Lucy
+  - man: Donny
+    wife: Nicole
+  - man: Peter
+    wife: Dorah
+  - woman: Lucy
+  - woman: Nicole
+  - woman: Dorah
+queries:
+  - query: (and (exists man) (not (empty (and (exists woman) (eq woman $wife)))))
+    size: 3
+  - query: (and (exists man) (empty (and (exists woman) (eq woman $wife))))
+    size: 1
