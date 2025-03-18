@@ -143,9 +143,9 @@ class Factbase::Logged
           end
         raise ".each of #{@term.class} returned #{r.class}" unless r.is_a?(Integer)
         if r.zero?
-          @tube.say(start, "Nothing found by '#{q}' #{tail}")
+          @tube.say(start, "Zero/#{@fb.size} facts found by '#{q}' #{tail}")
         else
-          @tube.say(start, "Found #{r} fact(s) by '#{q}' #{tail}")
+          @tube.say(start, "Found #{r}/#{@fb.size} fact(s) by '#{q}' #{tail}")
         end
         r
       else
@@ -157,9 +157,9 @@ class Factbase::Logged
             end
           end
         if array.empty?
-          @tube.say(start, "Nothing found by '#{q}' #{tail}")
+          @tube.say(start, "Zero/#{@fb.size} found by '#{q}' #{tail}")
         else
-          @tube.say(start, "Found #{array.size} fact(s) by '#{q}' #{tail}")
+          @tube.say(start, "Found #{array.size}/#{@fb.size} fact(s) by '#{q}' #{tail}")
         end
         array
       end
