@@ -238,7 +238,7 @@ class TestQuery < Factbase::Test
         fbt.query('(exists foo)').each do |f|
           f.bar = 33
         end
-        refute_empty(fbt.query('(exists bar)').each.to_a)
+        refute_empty(fbt.query('(exists bar)').each.to_a, "in #{badge}")
       end
       refute_empty(fb.query('(exists bar)').each.to_a, "in #{badge}")
       assert_empty(fb.query('(and (exists foo) (not (exists bar)))').each.to_a, "in #{badge}")
@@ -315,7 +315,10 @@ class TestQuery < Factbase::Test
               Factbase::SyncFactbase.new(
                 Factbase::CachedFactbase.new(
                   Factbase::IndexedFactbase.new(
-                    Factbase.new(maps)
+                    Factbase::Logged.new(
+                      Factbase.new(maps),
+                      Loog::NULL
+                    )
                   )
                 )
               )
