@@ -73,6 +73,7 @@ class Factbase::Taped
   end
 
   def |(other)
+    return Factbase::Taped.new(to_a, inserted: @inserted, deleted: @deleted, added: @added) if other == []
     join(other, &:|)
   end
 
@@ -143,20 +144,13 @@ class Factbase::Taped
 
   def join(other)
     n = yield @origin.to_a, other.to_a
-    if other.respond_to?(:inserted)
-      Factbase::Taped.new(
-        n,
-        inserted: @inserted | other.inserted,
-        deleted: @deleted | other.deleted,
-        added: @added | other.added
-      )
-    else
-      Factbase::Taped.new(
-        n,
-        inserted: @inserted,
-        deleted: @deleted,
-        added: @added
-      )
-    end
+    raise 'Cannot join with another Taped' if other.respond_to?(:inserted)
+    raise 'Can only join with array' unless other.is_a?(Array)
+    Factbase::Taped.new(
+      n,
+      inserted: @inserted,
+      deleted: @deleted,
+      added: @added
+    )
   end
 end

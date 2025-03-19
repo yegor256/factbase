@@ -24,16 +24,33 @@ class TestIndexedFactbase < Factbase::Test
   end
 
   def test_queries_after_update_in_txn
-    origin = Factbase.new
-    fb = Factbase::IndexedFactbase.new(origin)
-    fb.insert.foo = 42
-    fb.txn do |fbt|
-      fbt.query('(exists foo)').each do |f|
-        f.bar = f.foo + 1
+    [
+      '(exists boom)',
+      '(one boom)',
+      '(and (exists boom) (exists boom))',
+      '(and (exists boom) (exists boom) (exists boom))',
+      '(and (one boom) (one boom))',
+      '(and (one boom) (one foo))',
+      '(and (one boom) (one boom) (one boom))',
+      '(and (one boom) (one boom) (one boom) (one foo))',
+      '(and (one boom) (exists boom))',
+      '(and (exists boom) (one boom) (one boom))',
+      '(and (exists boom) (exists boom) (one boom))',
+      '(and (eq foo 42) (exists boom) (one boom) (not (exists bar)))'
+    ].each do |q|
+      origin = Factbase.new
+      fb = Factbase::IndexedFactbase.new(origin)
+      f = fb.insert
+      f.foo = 42
+      f.boom = 33
+      fb.txn do |fbt|
+        fbt.query(q).each do |n|
+          n.bar = n.foo + 1
+        end
       end
+      refute_empty(origin.query('(exists bar)').each.to_a, q)
+      refute_empty(fb.query('(exists bar)').each.to_a, q)
     end
-    refute_empty(origin.query('(exists bar)').each.to_a)
-    refute_empty(fb.query('(exists bar)').each.to_a)
   end
 
   def test_queries_after_insert_in_txn

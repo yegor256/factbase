@@ -20,9 +20,9 @@ module Factbase::IndexedTerm
   # @param [Hash] params Key/value params to use
   # @return [Array<Hash>|nil] Returns a new array, or NIL if the original array must be used
   def predict(maps, params)
+    key = [maps.object_id, @operands.first, @op]
     case @op
     when :one
-      key = [maps.object_id, @operands.first, @op]
       if @idx[key].nil?
         @idx[key] = []
         prop = @operands.first.to_s
@@ -32,7 +32,6 @@ module Factbase::IndexedTerm
       end
       (maps & []) | @idx[key]
     when :exists
-      key = [maps.object_id, @operands.first, @op]
       if @idx[key].nil?
         @idx[key] = []
         prop = @operands.first.to_s
@@ -43,7 +42,6 @@ module Factbase::IndexedTerm
       (maps & []) | @idx[key]
     when :eq
       if @operands.first.is_a?(Symbol) && _scalar?(@operands[1])
-        key = [maps.object_id, @operands.first, @op]
         if @idx[key].nil?
           @idx[key] = {}
           prop = @operands.first.to_s
@@ -79,7 +77,7 @@ module Factbase::IndexedTerm
         if r.nil?
           r = n
         else
-          r &= n
+          r &= n.to_a
         end
         break if r.empty?
       end
@@ -93,7 +91,7 @@ module Factbase::IndexedTerm
           break
         end
         r = maps & [] if r.nil?
-        r |= n
+        r |= n.to_a
       end
       r
     when :not
