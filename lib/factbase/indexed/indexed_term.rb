@@ -54,8 +54,7 @@ module Factbase::IndexedTerm
         end
         vv =
           if @operands[1].is_a?(Symbol)
-            sym = @operands[1].to_s.gsub(/^\$/, '')
-            params[sym] || []
+            params[@operands[1].to_s] || []
           else
             [@operands[1]]
           end
@@ -84,7 +83,7 @@ module Factbase::IndexedTerm
         tuples = _as_tuples(
           @operands.sort_by { |o| o.operands.first }.map do |o|
             if o.operands[1].is_a?(Symbol)
-              params[o.operands[1]] || []
+              params[o.operands[1].to_s] || []
             else
               [o.operands[1]]
             end

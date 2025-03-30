@@ -194,6 +194,16 @@ class TestQuery < Factbase::Test
     end
   end
 
+  def test_finds_with_subsitution
+    maps = [{ 'foo' => [42] }, { 'bar' => [7] }, { 'foo' => [666] }]
+    with_factbases(maps) do |badge, fb|
+      assert_equal(1, fb.query('(eq 2 (agg (eq foo $foo) (count)))').each.to_a.size, "with #{badge}")
+      fb.txn do |fbt|
+        assert_equal(1, fbt.query('(eq 2 (agg (eq foo $foo) (count)))').each.to_a.size, "with #{badge} (txn)")
+      end
+    end
+  end
+
   def test_scans_and_inserts
     with_factbases do |_, fb|
       fb.insert.foo = 42

@@ -61,7 +61,6 @@ class Factbase::Rules
   # Fact decorator.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
-  #
   class Fact
     def initialize(fact, check, fb)
       @fact = fact
@@ -130,9 +129,10 @@ class Factbase::Rules
     end
 
     def it(fact, _fb)
+      return if @uid.nil?
       a = fact[@uid]
       return if a.nil?
-      @facts << a[0] unless @uid.nil?
+      @facts << a[0]
     end
 
     def include?(fact)

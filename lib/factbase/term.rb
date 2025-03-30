@@ -218,6 +218,10 @@ class Factbase::Term
           [v]
         end
     end
+    raise 'Why not array?' unless v.is_a?(Array)
+    unless v.all? { |i| [Float, Integer, String, Time, TrueClass, FalseClass].any? { |t| i.is_a?(t) } }
+      raise 'Wrong type inside'
+    end
     v
   end
 end
