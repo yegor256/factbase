@@ -5,6 +5,7 @@
 
 require_relative '../test__helper'
 require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/accum'
 require_relative '../../lib/factbase/tee'
 require_relative '../../lib/factbase/fact'
 
@@ -28,6 +29,17 @@ class TestTee < Factbase::Test
     prim.foo = 777
     t = Factbase::Tee.new(prim, Factbase::Fact.new({}))
     assert_nil(t['$foo'])
+  end
+
+  def test_fetches_simply
+    t = Factbase::Accum.new(
+      Factbase::Tee.new(
+        Factbase::Fact.new({ 'foo_bar' => [987] }),
+        Factbase::Fact.new({})
+      ),
+      {}, true
+    )
+    assert_equal(987, t.foo_bar)
   end
 
   def test_all_properties

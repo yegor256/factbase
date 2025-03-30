@@ -38,7 +38,7 @@ class Factbase::Tee
       r = [r] unless r.respond_to?(:each) || r.nil?
       r
     else
-      @fact.send(*args)
+      @fact.__send__(*args)
     end
   end
 end
