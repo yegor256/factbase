@@ -46,7 +46,7 @@ class Factbase::Accum
       vv.uniq!
       vv.empty? ? nil : vv
     elsif @props[k].nil?
-      @fact.__send__(*args)
+      @fact.public_send(*args)
     else
       @props[k][0]
     end

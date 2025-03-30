@@ -8,6 +8,10 @@ require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/accum'
 require_relative '../../lib/factbase/fact'
 
+def global_function_for_this_test_only(foo)
+  raise foo
+end
+
 # Accum test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
@@ -22,6 +26,14 @@ class TestAccum < Factbase::Test
     assert_raises(StandardError) { f.foo }
     assert_equal(42, a.foo)
     assert_equal([42], props['foo'])
+  end
+
+  def test_fetches_without_conflict_with_global_name
+    t = Factbase::Accum.new(
+      Factbase::Fact.new({ 'global_function_for_this_test_only' => [2] }),
+      {}, true
+    )
+    assert_equal(2, t.global_function_for_this_test_only)
   end
 
   def test_passes_props

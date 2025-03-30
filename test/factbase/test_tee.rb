@@ -9,6 +9,10 @@ require_relative '../../lib/factbase/accum'
 require_relative '../../lib/factbase/tee'
 require_relative '../../lib/factbase/fact'
 
+def global_function_for_test_only(foo)
+  raise foo
+end
+
 # Tee test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
@@ -40,6 +44,14 @@ class TestTee < Factbase::Test
       {}, true
     )
     assert_equal(987, t.foo_bar)
+  end
+
+  def test_fetches_without_conflict_with_global_name
+    t = Factbase::Tee.new(
+      Factbase::Fact.new({ 'global_function_for_test_only' => [2] }),
+      Factbase::Fact.new({})
+    )
+    assert_equal(2, t.global_function_for_test_only)
   end
 
   def test_all_properties
