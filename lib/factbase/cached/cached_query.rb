@@ -39,6 +39,7 @@ class Factbase::CachedQuery
     @cache[key].each do |f|
       yield Factbase::CachedFact.new(f, @cache)
     end
+    @cache[key].size
   end
 
   # Read a single value.
