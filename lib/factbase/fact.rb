@@ -46,11 +46,6 @@ class Factbase::Fact
     @map.keys
   end
 
-  # When a method is missing, this method is called.
-  # Method missing handler for dynamic property access and setting
-  # @param [Symbol] method The method name being called
-  # @param [Array] args Method arguments
-  # @return [Object] The value retrieved or nil if setting a value
   others do |*args|
     k = args[0].to_s
     if k.end_with?('=')
