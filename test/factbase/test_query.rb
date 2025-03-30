@@ -161,10 +161,13 @@ class TestQuery < Factbase::Test
     ]
     with_factbases(maps) do |badge, fb|
       {
+        '(agg (or (eq foo 42) (eq bar 4)) (min foo))' => 42,
         '(agg (exists foo) (first foo))' => [42],
         '(agg (exists z) (first z))' => nil,
         '(agg (always) (count))' => 2,
         '(agg (eq bar $v) (count))' => 1,
+        '(agg (eq foo 42) (min foo))' => 42,
+        '(agg (and (eq foo 42)) (min foo))' => 42,
         '(agg (eq z 40) (count))' => 0
       }.each do |q, expected|
         result = fb.query(q).one(fb, v: 4)
