@@ -156,11 +156,12 @@ class TestQuery < Factbase::Test
 
   def test_reading_one
     maps = [
-      { 'foo' => [42] },
+      { 'foo' => [42], 'hello' => [4] },
       { 'bar' => [4, 5] }
     ]
     with_factbases(maps) do |badge, fb|
       {
+        '(agg (and (eq foo 42) (eq hello $v)) (min foo))' => 42,
         '(agg (or (eq foo 42) (eq bar 4)) (min foo))' => 42,
         '(agg (exists foo) (first foo))' => [42],
         '(agg (exists z) (first z))' => nil,
@@ -170,7 +171,7 @@ class TestQuery < Factbase::Test
         '(agg (and (eq foo 42)) (min foo))' => 42,
         '(agg (eq z 40) (count))' => 0
       }.each do |q, expected|
-        result = fb.query(q).one(fb, v: 4)
+        result = fb.query(q).one(fb, 'v' => 4)
         if expected.nil?
           assert_nil(result, "#{q} -> nil in #{badge}")
         else
@@ -280,8 +281,8 @@ class TestQuery < Factbase::Test
       found += 1
     end
     assert_equal(1, found)
-    assert_equal(1, Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(Factbase.new, bar: 42).to_a.size)
-    assert_equal(0, Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(Factbase.new, bar: 555).to_a.size)
+    assert_equal(1, Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(Factbase.new, bar: [42]).to_a.size)
+    assert_equal(0, Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(Factbase.new, bar: [555]).to_a.size)
   end
 
   def test_with_nil_alias

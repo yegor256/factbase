@@ -37,10 +37,10 @@ class TestTee < Factbase::Test
     map = {}
     prim = Factbase::Fact.new(map)
     prim.foo = 42
-    t = Factbase::Tee.new(Factbase::Fact.new({}), { 'bar' => 7 })
-    assert_equal(7, t['$bar'])
+    t = Factbase::Tee.new(Factbase::Fact.new({}), { 'bar' => [7] })
+    assert_equal([7], t['$bar'])
     t = Factbase::Tee.new(prim, t)
-    assert_equal(7, t['$bar'])
+    assert_equal([7], t['$bar'])
   end
 
   def test_prints_to_string

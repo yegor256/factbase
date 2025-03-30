@@ -57,7 +57,7 @@ class TestAggregates < Factbase::Test
       { 'a' => [4], 'b' => [55] }
     ]
     t = Factbase::Syntax.new('(empty (eq b $x))').to_term
-    assert(t.evaluate(Factbase::Fact.new({ 'x' => 42 }), maps, Factbase.new))
-    refute(t.evaluate(Factbase::Fact.new({ 'x' => 44 }), maps, Factbase.new))
+    assert(t.evaluate(Factbase::Fact.new({ 'x' => [42] }), maps, Factbase.new))
+    refute(t.evaluate(Factbase::Fact.new({ 'x' => [44] }), maps, Factbase.new))
   end
 end
