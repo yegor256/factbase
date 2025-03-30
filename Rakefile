@@ -18,7 +18,7 @@ def version
   Gem::Specification.load(Dir['*.gemspec'].first).version
 end
 
-task default: %i[clean test picks reqs rubocop yard]
+task default: %i[clean test picks rubocop yard]
 
 require 'rake/testtask'
 desc 'Run all unit tests'
@@ -33,16 +33,10 @@ end
 desc 'Run them via Ruby, one by one'
 task :picks do
   next if OS.windows?
-  Dir['test/**/*.rb'].each do |f|
-    qbash("bundle exec ruby #{Shellwords.escape(f)}", log: $stdout)
-  end
-end
-
-desc 'Require them via Ruby, one by one'
-task :reqs do
-  next if OS.windows?
-  Dir['lib/**/*.rb'].each do |f|
-    qbash("bundle exec ruby #{Shellwords.escape(f)}", log: $stdout)
+  %w[text lib].each do |d|
+    Dir["#{d}/**/*.rb"].each do |f|
+      qbash("bundle exec ruby #{Shellwords.escape(f)}", log: $stdout)
+    end
   end
 end
 
