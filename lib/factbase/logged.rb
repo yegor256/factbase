@@ -131,6 +131,10 @@ class Factbase::Logged
       @fb = fb
     end
 
+    def to_s
+      @term.to_s
+    end
+
     def each(fb = @fb, params = {}, &)
       return to_enum(__method__, fb, params) unless block_given?
       start = Time.now

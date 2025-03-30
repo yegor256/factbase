@@ -92,6 +92,12 @@ class TestLogged < Factbase::Test
     assert_equal(0, Factbase::Logged.new(fb, Loog::NULL).query('(always)').each(&:to_s))
   end
 
+  def test_returns_to_s_correctly
+    fb = Factbase.new
+    q = '(always)'
+    assert_equal(q, fb.query(q).to_s)
+  end
+
   def test_logs_when_enumerator
     fb = Factbase::Logged.new(Factbase.new, Loog::NULL)
     assert_equal(0, fb.query('(always)').each.to_a.size)

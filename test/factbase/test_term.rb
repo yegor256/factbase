@@ -81,5 +81,7 @@ class TestTerm < Factbase::Test
     t.redress!(Factbase::IndexedTerm)
     require_relative '../../lib/factbase/cached/cached_term'
     t.redress!(Factbase::CachedTerm)
+    assert_kind_of(Factbase::CachedTerm, t)
+    refute_kind_of(Factbase::CachedTerm, Factbase::Term.new(:something, []))
   end
 end

@@ -303,17 +303,26 @@ class TestQuery < Factbase::Test
       'sync+plain' => Factbase::SyncFactbase.new(Factbase.new(maps)),
       'tallied+plain' => Factbase::Tallied.new(Factbase.new(maps)),
       'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new(maps)),
+      'indexed+logged+plain' => Factbase::IndexedFactbase.new(
+        Factbase::Logged.new(
+          Factbase.new(maps),
+          Loog::NULL
+        )
+      ),
       'cached+plain' => Factbase::CachedFactbase.new(Factbase.new(maps)),
+      'cached+logged+plain' => Factbase::CachedFactbase.new(
+        Factbase::Logged.new(
+          Factbase.new(maps),
+          Loog::NULL
+        )
+      ),
       'logged+plain' => Factbase::Logged.new(Factbase.new(maps), Loog::NULL),
       'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps))),
       'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps))),
-      'sync+cached+indexed+plain' => Factbase::SyncFactbase.new(
-        Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps)))
-      ),
       'indexed+indexed+plain' => Factbase::IndexedFactbase.new(
         Factbase::IndexedFactbase.new(Factbase.new(maps))
       ),
-      'cached+cached++cached+plain' => Factbase::CachedFactbase.new(
+      'cached+cached+cached+plain' => Factbase::CachedFactbase.new(
         Factbase::CachedFactbase.new(
           Factbase::CachedFactbase.new(
             Factbase.new(maps)
@@ -337,6 +346,12 @@ class TestQuery < Factbase::Test
           )
         )
       ),
+      'sync+logged+plain' => Factbase::SyncFactbase.new(
+        Factbase::Logged.new(
+          Factbase.new(maps),
+          Loog::NULL
+        )
+      ),
       'sync+cached+indexed+logged+plain' => Factbase::SyncFactbase.new(
         Factbase::CachedFactbase.new(
           Factbase::IndexedFactbase.new(
@@ -345,6 +360,27 @@ class TestQuery < Factbase::Test
               Loog::NULL
             )
           )
+        )
+      ),
+      'sync+sync+sync+plain' => Factbase::SyncFactbase.new(
+        Factbase::SyncFactbase.new(
+          Factbase::SyncFactbase.new(
+            Factbase::SyncFactbase.new(
+              Factbase.new(maps)
+            )
+          )
+        )
+      ),
+      'logged+logged+logged+plain' => Factbase::SyncFactbase.new(
+        Factbase::Logged.new(
+          Factbase::Logged.new(
+            Factbase::Logged.new(
+              Factbase.new(maps),
+              Loog::NULL
+            ),
+            Loog::NULL
+          ),
+          Loog::NULL
         )
       ),
       'all+plain' => Factbase::Tallied.new(
