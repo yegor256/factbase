@@ -19,3 +19,5 @@ queries:
     size: 3
   - query: (and (exists man) (empty (and (exists woman) (eq woman $wife))))
     size: 1
+  - query: (empty (eq woman $woman))
+    size: 4

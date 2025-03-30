@@ -35,11 +35,10 @@ class Factbase::Tee
       n = args[1].to_s
       n = n[1..] unless @upper.is_a?(Factbase::Tee)
       r = @upper[n]
-      r = @fact[n] if r.nil?
       r = [r] unless r.respond_to?(:each) || r.nil?
       r
     else
-      @fact.method_missing(*args)
+      @fact.send(*args)
     end
   end
 end

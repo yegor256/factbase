@@ -116,7 +116,10 @@ class TestQuery < Factbase::Test
       "(and (exists time) (not (\t\texists pi)))" => 1,
       '(undef something)' => 3,
       "(or (eq num +66) (lt time #{(Time.now - 200).utc.iso8601}))" => 1,
-      '(eq 3 (agg (eq num $num) (count)))' => 1
+      '(eq 3 (agg (eq num $num) (count)))' => 1,
+      '(and (eq num 42) (not (empty (eq name "Jeff"))))' => 2,
+      '(and (eq num 42) (empty (eq x $name)))' => 2,
+      '(and (eq num 42) (not (empty (eq name $name))))' => 2
     }
     maps = [
       { 'num' => [42], 'name' => ['Jeff'] },
@@ -197,9 +200,9 @@ class TestQuery < Factbase::Test
   def test_finds_with_subsitution
     maps = [{ 'foo' => [42] }, { 'bar' => [7] }, { 'foo' => [666] }]
     with_factbases(maps) do |badge, fb|
-      assert_equal(1, fb.query('(eq 2 (agg (eq foo $foo) (count)))').each.to_a.size, "with #{badge}")
+      assert_equal(0, fb.query('(eq 2 (agg (eq foo $foo) (count)))').each.to_a.size, "with #{badge}")
       fb.txn do |fbt|
-        assert_equal(1, fbt.query('(eq 2 (agg (eq foo $foo) (count)))').each.to_a.size, "with #{badge} (txn)")
+        assert_equal(0, fbt.query('(eq 2 (agg (eq foo $foo) (count)))').each.to_a.size, "with #{badge} (txn)")
       end
     end
   end

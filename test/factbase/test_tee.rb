@@ -23,6 +23,13 @@ class TestTee < Factbase::Test
     assert_equal([13], t['$bar'])
   end
 
+  def test_no_trip_to_prim_if_not_found
+    prim = Factbase::Fact.new({})
+    prim.foo = 777
+    t = Factbase::Tee.new(prim, Factbase::Fact.new({}))
+    assert_nil(t['$foo'])
+  end
+
   def test_all_properties
     prim = Factbase::Fact.new({})
     prim.foo = 42

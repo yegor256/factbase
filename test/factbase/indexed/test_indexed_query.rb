@@ -40,6 +40,15 @@ class TestIndexedQuery < Factbase::Test
     end
   end
 
+  def test_fills_up_the_index
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb.query('(eq x 1)').each.to_a
+    assert_equal(1, idx.size)
+    fb.insert
+    assert_empty(idx)
+  end
+
   def test_finds_by_eq_with_symbol
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     f = fb.insert
@@ -157,6 +166,15 @@ class TestIndexedQuery < Factbase::Test
     3.times do
       assert_equal(total, fb.query('(as boom (agg (eq foo $bar) (min xyz)))').each.to_a.size)
     end
+  end
+
+  def test_joins_simple_one
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb.insert.who = 4
+    fb.insert.friend = 4
+    assert_equal(1, fb.query('(and (exists who) (join "f<=friend" (eq friend $who)))').each.to_a.size)
+    assert_equal(2, idx.size)
   end
 
   def test_joins_too
