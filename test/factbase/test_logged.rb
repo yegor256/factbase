@@ -45,9 +45,8 @@ class TestLogged < Factbase::Test
     fb = Factbase::Logged.new(Factbase::CachedFactbase.new(fb), buf)
     fb.query('(agg (exists bar) (count))').one
     fb.query('(join "foo<=bar" (exists bar))').each.to_a
-    p buf.to_s
-    refute(buf.to_s.include?('\'(count)\''))
-    refute(buf.to_s.include?('\'(exists bar)\''))
+    refute_includes(buf.to_s, '\'(count)\'')
+    refute_includes(buf.to_s, '\'(exists bar)\'')
   end
 
   def test_with_txn

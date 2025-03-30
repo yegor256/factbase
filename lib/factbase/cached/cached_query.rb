@@ -36,10 +36,12 @@ class Factbase::CachedQuery
     key = "each #{@origin}" # params are ignored!
     before = @cache[key]
     @cache[key] = @origin.each(fb, params).to_a if before.nil?
+    c = 0
     @cache[key].each do |f|
+      c += 1
       yield Factbase::CachedFact.new(f, @cache)
     end
-    @cache[key].size
+    c
   end
 
   # Read a single value.
