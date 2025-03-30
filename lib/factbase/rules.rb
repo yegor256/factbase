@@ -41,7 +41,7 @@ class Factbase::Rules
   end
 
   def query(query, maps = nil)
-    Query.new(@fb.query(query, maps), @check, @fb)
+    Query.new(@fb.query(query, maps), @check, self)
   end
 
   def txn

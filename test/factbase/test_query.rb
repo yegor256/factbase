@@ -123,11 +123,13 @@ class TestQuery < Factbase::Test
       { 'num' => [42, 66, 0], 'pi' => [3.14], 'name' => ['peter'] },
       { 'num' => [0], 'time' => [Time.now - 100], 'hi' => [4], 'nome' => ['Walter'] }
     ]
-    with_factbases(maps) do |badge, fb|
-      queries.each do |q, r|
-        assert_equal(r, fb.query(q).each.to_a.size, "#{q} in #{badge}")
-        fb.txn do |fbt|
-          assert_equal(r, fbt.query(q).each.to_a.size, "#{q} in #{badge} (txn)")
+    3.times do |cycle|
+      with_factbases(maps) do |badge, fb|
+        queries.each do |q, r|
+          assert_equal(r, fb.query(q).each.to_a.size, "#{q} in #{badge} (cycle ##{cycle})")
+          fb.txn do |fbt|
+            assert_equal(r, fbt.query(q).each.to_a.size, "#{q} in #{badge} (txn, cycle ##{cycle})")
+          end
         end
       end
     end
@@ -307,6 +309,43 @@ class TestQuery < Factbase::Test
       'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps))),
       'sync+cached+indexed+plain' => Factbase::SyncFactbase.new(
         Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps)))
+      ),
+      'indexed+indexed+plain' => Factbase::IndexedFactbase.new(
+        Factbase::IndexedFactbase.new(Factbase.new(maps))
+      ),
+      'cached+cached++cached+plain' => Factbase::CachedFactbase.new(
+        Factbase::CachedFactbase.new(
+          Factbase::CachedFactbase.new(
+            Factbase.new(maps)
+          )
+        )
+      ),
+      'tallied+pre+rules+inv+plain' => Factbase::Tallied.new(
+        Factbase::Pre.new(
+          Factbase::Rules.new(
+            Factbase::Inv.new(
+              Factbase.new(maps)
+            ) { nil },
+            '(always)'
+          )
+        ) { nil }
+      ),
+      'sync+cached+indexed+plain' => Factbase::SyncFactbase.new(
+        Factbase::CachedFactbase.new(
+          Factbase::IndexedFactbase.new(
+            Factbase.new(maps)
+          )
+        )
+      ),
+      'sync+cached+indexed+logged+plain' => Factbase::SyncFactbase.new(
+        Factbase::CachedFactbase.new(
+          Factbase::IndexedFactbase.new(
+            Factbase::Logged.new(
+              Factbase.new(maps),
+              Loog::NULL
+            )
+          )
+        )
       ),
       'all+plain' => Factbase::Tallied.new(
         Factbase::Pre.new(

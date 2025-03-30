@@ -2,13 +2,14 @@ PATH
   remote: .
   specs:
     factbase (9.0.0)
-      backtrace (>= 0.4.0)
-      decoor (>= 0.0.1)
+      backtrace (~> 0.4)
+      decoor (~> 0.0)
       json (~> 2.7)
-      loog (>= 0.6.0)
+      logger (~> 1.0)
+      loog (~> 0.6)
       nokogiri (~> 1.10)
-      others (>= 0.0.3)
-      tago (>= 0.0.2)
+      others (~> 0.0)
+      tago (~> 0.0)
       yaml (~> 0.3)
 
 GEM
@@ -27,6 +28,7 @@ GEM
     json (2.10.2)
     language_server-protocol (3.17.0.4)
     lint_roller (1.1.0)
+    logger (1.7.0)
     loog (0.6.0)
     minitest (5.25.5)
     minitest-reporters (1.7.1)

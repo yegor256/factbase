@@ -18,6 +18,18 @@ class TestTaped < Factbase::Test
     assert_equal(1, t.inserted.size)
   end
 
+  def test_joins_with_empty
+    t = Factbase::Taped.new([{ foo: 'yes' }])
+    t &= []
+    assert_equal(0, t.size)
+  end
+
+  def test_disjoins_with_empty
+    t = Factbase::Taped.new([{ bar: 'oops' }])
+    t |= []
+    assert_equal(1, t.size)
+  end
+
   def test_tracks_deletion
     t = Factbase::Taped.new([{ x: 1 }, { x: 2 }])
     t.delete_if { |m| m[:x] == 1 }
