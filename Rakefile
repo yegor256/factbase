@@ -33,7 +33,7 @@ end
 desc 'Run them via Ruby, one by one'
 task :picks do
   next if OS.windows?
-  %w[text lib].each do |d|
+  %w[test lib].each do |d|
     Dir["#{d}/**/*.rb"].each do |f|
       qbash("bundle exec ruby #{Shellwords.escape(f)}", log: $stdout)
     end
