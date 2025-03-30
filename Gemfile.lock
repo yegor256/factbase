@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    factbase (0.0.0)
+    factbase (9.0.0)
       backtrace (>= 0.4.0)
       decoor (>= 0.0.1)
       json (~> 2.7)
