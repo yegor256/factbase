@@ -68,18 +68,45 @@ module Factbase::IndexedTerm
       end
     when :and
       r = nil
-      @operands.each do |o|
-        n = o.predict(maps, params)
-        if n.nil?
-          r = nil
-          break
+      if @operands.all? { |o| o.op == :eq } && @operands.size > 1 \
+        && @operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
+        key = [maps.object_id, @operands.map { |o| o.operands.first }, :multi_eq]
+        props = @operands.map { |o| o.operands.first }.sort
+        if @idx[key].nil?
+          @idx[key] = {}
+          maps.to_a.each do |m|
+            _all_tuples(m, props).each do |t|
+              @idx[key][t] = [] if @idx[key][t].nil?
+              @idx[key][t].append(m)
+            end
+          end
         end
-        if r.nil?
-          r = n
-        else
-          r &= n.to_a
+        tuples = _as_tuples(
+          @operands.sort_by { |o| o.operands.first }.map do |o|
+            if o.operands[1].is_a?(Symbol)
+              sym = o.operands[1].to_s.gsub(/^\$/, '')
+              params[sym] || []
+            else
+              [o.operands[1]]
+            end
+          end
+        )
+        j = tuples.map { |t| @idx[key][t] || [] }.reduce(&:|)
+        r = (maps & []) | j
+      else
+        @operands.each do |o|
+          n = o.predict(maps, params)
+          if n.nil?
+            r = nil
+            break
+          end
+          if r.nil?
+            r = n
+          else
+            r &= n.to_a
+          end
+          break if r.empty?
         end
-        break if r.empty?
       end
       r
     when :or
@@ -105,6 +132,40 @@ module Factbase::IndexedTerm
   end
 
   private
+
+  # The input looks like this: [[6, 55], [3], [4, 3, 5]].
+  # The outputh should contain all possible combinations: [[6, 3, 4], [6, 3, 3], [55, 3, 5], ...]
+  def _as_tuples(values)
+    tuples = [values.first]
+    if values.size > 1
+      tails = _as_tuples(values[1..])
+      ext = []
+      tuples.each do |t|
+        tails.each do |tail|
+          ext << (t + tail)
+        end
+      end
+      tuples = ext
+    end
+    tuples
+  end
+
+  def _all_tuples(fact, props)
+    prop = props.first.to_s
+    tuples = []
+    tuples += (fact[prop] || []).zip
+    if props.size > 1
+      tails = _all_tuples(fact, props[1..])
+      ext = []
+      tuples.each do |t|
+        tails.each do |tail|
+          ext << (t + tail)
+        end
+      end
+      tuples = ext
+    end
+    tuples
+  end
 
   def _scalar?(item)
     item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)

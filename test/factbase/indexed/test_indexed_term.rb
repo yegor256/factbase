@@ -59,15 +59,23 @@ class TestIndexedTerm < Factbase::Test
       :and,
       [
         Factbase::Term.new(:eq, [:foo, 42]),
-        Factbase::Term.new(:eq, [:bar, 7])
+        Factbase::Term.new(:eq, %i[bar $a])
       ]
     )
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [22, 42] }, { 'foo' => [22, 42] }])
-    n = term.predict(maps, { a: 1 })
+    n = term.predict(maps, { 'a' => [7] })
     assert_equal(1, n.size)
     assert_kind_of(Factbase::Taped, n)
+  end
+
+  def test_predicts_on_single_and
+    term = Factbase::Term.new(:and, [Factbase::Term.new(:eq, [:foo, 42])])
+    idx = {}
+    term.redress!(Factbase::IndexedTerm, idx:)
+    maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [4] }])
+    assert_equal(1, term.predict(maps, {}).size)
   end
 
   def test_predicts_on_or

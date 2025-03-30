@@ -104,6 +104,7 @@ class Factbase::Term
   # should be evaluated. If no prediction can be made,
   # the same list is returned.
   # @param [Array<Hash>] maps Records to iterate, maybe
+  # @param [Hash] _params Params to use (keys must be strings, not symbols, with values as arrays)
   # @return [Array<Hash>] Records to iterate
   def predict(maps, _params)
     maps
