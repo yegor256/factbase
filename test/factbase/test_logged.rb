@@ -7,6 +7,7 @@ require_relative '../test__helper'
 require 'loog'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/logged'
+require_relative '../../lib/factbase/cached/cached_factbase'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -34,6 +35,19 @@ class TestLogged < Factbase::Test
     fb.insert.bar = 42
     assert_equal(1, fb.query('(agg (exists bar) (count))').one)
     assert_equal([42], fb.query('(agg (exists bar) (first bar))').one)
+  end
+
+  def test_avoid_inner_logging
+    buf = Loog::Buffer.new
+    fb = Factbase.new
+    fb.insert
+    fb.insert.bar = 42
+    fb = Factbase::Logged.new(Factbase::CachedFactbase.new(fb), buf)
+    fb.query('(agg (exists bar) (count))').one
+    fb.query('(join "foo<=bar" (exists bar))').each.to_a
+    p buf.to_s
+    refute(buf.to_s.include?('\'(count)\''))
+    refute(buf.to_s.include?('\'(exists bar)\''))
   end
 
   def test_with_txn

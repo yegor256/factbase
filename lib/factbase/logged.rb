@@ -138,13 +138,13 @@ class Factbase::Logged
     def each(fb = @fb, params = {}, &)
       return to_enum(__method__, fb, params) unless block_given?
       start = Time.now
-      q = Factbase::Syntax.new(@term).to_term.to_s
       r = nil
       tail =
         Factbase::Logged.elapsed do
           r = @fb.query(@term, @maps).each(fb, params, &)
         end
-      raise ".each of #{@term.class} returned #{r.class}" unless r.is_a?(Integer)
+      raise ".query(#{@term.to_s.inspect}).each() of #{@term.class} returned #{r.class}" unless r.is_a?(Integer)
+      q = Factbase::Syntax.new(@term).to_term.to_s
       if r.zero?
         @tube.say(start, "Zero/#{@fb.size} facts found by '#{q}' #{tail}")
       else
