@@ -8,28 +8,11 @@ $stdout.sync = true
 require 'simplecov'
 require 'simplecov-cobertura'
 unless SimpleCov.running
-  # Custom formatter
-  class MyFormatter
-    def format(result)
-      puts 'Coverage:'
-      result.files.sort_by(&:filename).each do |file|
-        per = file.covered_percent
-        # rubocop:disable Style/FormatStringToken
-        puts Kernel.format(
-          '%40s %7.2f%% %s',
-          File.basename(file.filename),
-          per, (' (!)' if per < 90)
-        )
-        # rubocop:enable Style/FormatStringToken
-      end
-    end
-  end
   SimpleCov.command_name('test')
   SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
     [
       SimpleCov::Formatter::HTMLFormatter,
-      SimpleCov::Formatter::CoberturaFormatter,
-      MyFormatter
+      SimpleCov::Formatter::CoberturaFormatter
     ]
   )
   SimpleCov.minimum_coverage 95
