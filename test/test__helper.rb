@@ -6,14 +6,43 @@
 $stdout.sync = true
 
 require 'simplecov'
-SimpleCov.external_at_exit = true
-SimpleCov.start
-
 require 'simplecov-cobertura'
-SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
+unless SimpleCov.running
+  # Custom formatter
+  class MyFormatter
+    def format(result)
+      puts 'Coverage:'
+      result.files.sort_by(&:filename).each do |file|
+        per = file.covered_percent
+        # rubocop:disable Style/FormatStringToken
+        puts Kernel.format(
+          '%40s %7.2f%% %s',
+          File.basename(file.filename),
+          per, (' (!)' if per < 80)
+        )
+        # rubocop:enable Style/FormatStringToken
+      end
+    end
+  end
+  SimpleCov.command_name('test')
+  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+    [
+      SimpleCov::Formatter::HTMLFormatter,
+      SimpleCov::Formatter::CoberturaFormatter,
+      MyFormatter
+    ]
+  )
+  SimpleCov.minimum_coverage 80
+  SimpleCov.minimum_coverage_by_file 80
+  SimpleCov.start do
+    add_filter 'test/'
+    add_filter 'vendor/'
+    add_filter 'target/'
+    track_files 'lib/**/*.rb'
+  end
+end
 
 require 'minitest/autorun'
-
 require 'minitest/reporters'
 Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new]
 
