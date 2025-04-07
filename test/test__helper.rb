@@ -18,7 +18,7 @@ unless SimpleCov.running
         puts Kernel.format(
           '%40s %7.2f%% %s',
           File.basename(file.filename),
-          per, (' (!)' if per < 80)
+          per, (' (!)' if per < 90)
         )
         # rubocop:enable Style/FormatStringToken
       end
@@ -32,13 +32,14 @@ unless SimpleCov.running
       MyFormatter
     ]
   )
-  SimpleCov.minimum_coverage 80
-  SimpleCov.minimum_coverage_by_file 80
+  SimpleCov.minimum_coverage 95
+  SimpleCov.minimum_coverage_by_file 90
   SimpleCov.start do
     add_filter 'test/'
     add_filter 'vendor/'
     add_filter 'target/'
     track_files 'lib/**/*.rb'
+    track_files '*.rb'
   end
 end
 
