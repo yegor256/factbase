@@ -176,7 +176,7 @@ class Factbase
       end
     require_relative 'factbase/taped'
     taped = Factbase::Taped.new(before)
-    begin
+    catch :commit do
       require_relative 'factbase/light'
       yield Factbase::Light.new(Factbase.new(taped))
     rescue Factbase::Rollback

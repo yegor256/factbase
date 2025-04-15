@@ -134,7 +134,7 @@ class TestFactbase < Factbase::Test
       assert_raises(StandardError) do
         fb.txn do |fbt|
           fbt.insert.foo = 42
-          throw 'intentionally'
+          raise 'intentionally'
         end
       end.message, 'intentionally'
     )
@@ -193,7 +193,7 @@ class TestFactbase < Factbase::Test
       assert_raises(StandardError) do
         d.txn do |fbt|
           fbt.insert
-          throw 'oops'
+          raise 'oops'
         end
       end
       d.import(d.export)
@@ -475,5 +475,14 @@ class TestFactbase < Factbase::Test
     fbs.each do |factbase|
       assert_equal(100, factbase.query('(eq foo 42)').each.to_a.size)
     end
+  end
+
+  def test_commits_on_exit_by_throw
+    fb = Factbase.new
+    fb.txn do |fbt|
+      fbt.insert.foo = 1
+      throw :commit
+    end
+    assert_equal(1, fb.size)
   end
 end
