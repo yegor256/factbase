@@ -15,11 +15,11 @@ class TestFact < Factbase::Test
   def test_injects_data_correctly
     map = {}
     f = Factbase::Fact.new(map)
-    f.foo = 1
+    f.foo_bar = 1
     f.bar = 2
     f.bar = 3
     assert_equal(2, map.size)
-    assert_equal([1], map['foo'])
+    assert_equal([1], map['foo_bar'])
     assert_equal([2, 3], map['bar'])
   end
 
