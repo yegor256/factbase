@@ -485,4 +485,16 @@ class TestFactbase < Factbase::Test
     end
     assert_equal(1, fb.size)
   end
+
+  def test_get_raise_for_empty_fact
+    fb = Factbase.new
+    fb.txn do |fbt|
+      f = fbt.insert
+      f.foo = 123
+      f = fbt.query('(always)').each.to_a.first
+      assert_equal(123, f.foo)
+      ex = assert_raises(RuntimeError) { f.bar }
+      assert_equal("Can't find 'bar' attribute out of [foo]", ex.message)
+    end
+  end
 end
