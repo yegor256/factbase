@@ -45,7 +45,7 @@ class Factbase::Taped
   end
 
   def <<(map)
-    @origin << (map)
+    @origin << map
     @inserted.append(map.object_id)
   end
 
@@ -137,7 +137,7 @@ class Factbase::Taped
 
     def <<(item)
       @added.append(@oid)
-      @origin << (item)
+      @origin << item
     end
 
     def uniq!
