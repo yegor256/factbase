@@ -43,6 +43,7 @@ jobs:
           rm stdout.txt
       - uses: peter-evans/create-pull-request@v7
         with:
+          sign-commits: true
           branch: benchmark-results
           commit-message: 'new benchmarking results'
           delete-branch: true
