@@ -56,7 +56,7 @@ GEM
     psych (5.2.4)
       date
       stringio
-    qbash (0.4.0)
+    qbash (0.4.5)
       backtrace (> 0)
       elapsed (> 0)
       loog (> 0)
