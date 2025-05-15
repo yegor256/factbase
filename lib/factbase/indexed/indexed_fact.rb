@@ -20,6 +20,10 @@ class Factbase::IndexedFact
     @idx = idx
   end
 
+  def to_s
+    @origin.to_s
+  end
+
   # When a method is missing, this method is called.
   others do |*args|
     @idx.clear if args[0].to_s.end_with?('=')

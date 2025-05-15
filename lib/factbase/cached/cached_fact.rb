@@ -20,6 +20,10 @@ class Factbase::CachedFact
     @cache = cache
   end
 
+  def to_s
+    @origin.to_s
+  end
+
   # When a method is missing, this method is called.
   others do |*args|
     @cache.clear if args[0].to_s.end_with?('=')
