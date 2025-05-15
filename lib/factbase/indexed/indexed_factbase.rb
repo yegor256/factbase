@@ -22,9 +22,9 @@ class Factbase::IndexedFactbase
   # @param [Factbase] origin Original factbase to decorate
   # @param [Hash] idx Index to use
   def initialize(origin, idx = {})
-    raise 'Wront type of original' unless origin.respond_to?(:query)
+    raise 'Wrong type of original' unless origin.respond_to?(:query)
     @origin = origin
-    raise 'Wront type of index' unless idx.is_a?(Hash)
+    raise 'Wrong type of index' unless idx.is_a?(Hash)
     @idx = idx
   end
 

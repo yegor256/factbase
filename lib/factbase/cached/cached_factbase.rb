@@ -22,9 +22,9 @@ class Factbase::CachedFactbase
   # @param [Factbase] origin Original factbase to decorate
   # @param [Hash] cache Cache to use
   def initialize(origin, cache = {})
-    raise 'Wront type of original' unless origin.respond_to?(:query)
+    raise 'Wrong type of original' unless origin.respond_to?(:query)
     @origin = origin
-    raise 'Wront type of cache' unless cache.is_a?(Hash)
+    raise 'Wrong type of cache' unless cache.is_a?(Hash)
     @cache = cache
   end
 
