@@ -32,4 +32,13 @@ class TestCachedFactbase < Factbase::Test
     refute_empty(origin.query('(exists bar)').each.to_a)
     refute_empty(fb.query('(exists bar)').each.to_a)
   end
+
+  def test_prints_fact_correctly
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    f1 = fb.insert
+    f1.foo = 42
+    assert_equal('[ foo: [42] ]', f1.to_s)
+    f2 = fb.query('(always)').each.to_a.first
+    assert_equal('[ foo: [42] ] + {}', f2.to_s)
+  end
 end
