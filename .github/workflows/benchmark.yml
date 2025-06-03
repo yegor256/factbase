@@ -28,7 +28,7 @@ jobs:
           set -x
           sum=$(
             echo '```text'
-            cat stdout.txt
+            cat stdout.txt | cut -c -71
             echo '```'
             echo
             echo "The results were calculated in [this GHA job][benchmark-gha]"
