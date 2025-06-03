@@ -82,7 +82,7 @@ require 'yaml'
 # License:: MIT
 class Factbase
   # Current version of the gem (changed by .rultor.yml on every release)
-  VERSION = '0.0.0' unless const_defined?(:VERSION)
+  VERSION = '0.11.0' unless const_defined?(:VERSION)
 
   # An exception that may be thrown in a transaction, to roll it back.
   class Rollback < StandardError; end
