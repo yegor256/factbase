@@ -12,12 +12,12 @@ require_relative '../../factbase'
 # License:: MIT
 module Factbase::Strings
   def concat(fact, maps, fb)
-    (0..@operands.length - 1).map { |i| _values(i, fact, maps, fb)&.first }.join
+    (0..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first }.join
   end
 
   def sprintf(fact, maps, fb)
     fmt = _values(0, fact, maps, fb)[0]
-    ops = (1..@operands.length - 1).map { |i| _values(i, fact, maps, fb)&.first }
+    ops = (1..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first }
     format(*([fmt] + ops))
   end
 

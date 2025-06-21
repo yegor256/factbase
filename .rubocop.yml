@@ -14,6 +14,8 @@ plugins:
   - rubocop-minitest
   - rubocop-performance
   - rubocop-rake
+Naming/PredicateMethod:
+  Enabled: false
 Minitest/EmptyLineBeforeAssertionMethods:
   Enabled: false
 Gemspec/RequiredRubyVersion:

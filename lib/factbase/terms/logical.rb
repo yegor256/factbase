@@ -43,7 +43,7 @@ module Factbase::Logical
   # @param [Array<Factbase::Fact>] maps All maps available
   # @return [Boolean] True if any operand evaluates to true, false otherwise
   def or(fact, maps, fb)
-    (0..@operands.size - 1).each do |i|
+    (0..(@operands.size - 1)).each do |i|
       return true if _only_bool(_values(i, fact, maps, fb), i)
     end
     false
@@ -54,7 +54,7 @@ module Factbase::Logical
   # @param [Array<Factbase::Fact>] maps All maps available
   # @return [Boolean] True if all operands evaluate to true, false otherwise
   def and(fact, maps, fb)
-    (0..@operands.size - 1).each do |i|
+    (0..(@operands.size - 1)).each do |i|
       return false unless _only_bool(_values(i, fact, maps, fb), i)
     end
     true
