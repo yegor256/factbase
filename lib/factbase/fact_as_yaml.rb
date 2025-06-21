@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require 'ellipsized'
 require 'yaml'
 require_relative '../factbase'
 
@@ -33,6 +34,8 @@ class Factbase::FactAsYaml
       v = @fact[p]
       hash[p] = v.is_a?(Array) ? v : [v]
     end
-    hash.sort.to_h.to_yaml
+    hash.sort.to_h.map do |k, vv|
+      "#{k}: [#{vv.map { |v| v.is_a?(String) ? v.ellipsized : v }.map(&:inspect).join(', ')}]"
+    end.join("\n")
   end
 end

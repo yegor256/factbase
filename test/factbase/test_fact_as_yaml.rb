@@ -13,6 +13,21 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class TestFactAsYaml < Factbase::Test
+  def test_prints_exactly
+    fb = Factbase.new
+    f = fb.insert
+    f._id = 1
+    f.foo = 42
+    f.foo = 33
+    f.bar = 'hello, world! how are you?'
+    assert_equal(
+      "_id: [1]\n" \
+      "bar: [\"hello, world! how are you?\"]\n" \
+      'foo: [42, 33]',
+      Factbase::FactAsYaml.new(f).to_s
+    )
+  end
+
   def test_simple_rendering
     fb = Factbase.new
     f = fb.insert
