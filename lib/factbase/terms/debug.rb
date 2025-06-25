@@ -19,4 +19,22 @@ module Factbase::Debug
     puts "#{self} -> #{r}"
     r
   end
+
+  def assert(fact, maps, fb)
+    assert_args(2)
+    message = @operands[0]
+    raise "A string expected as first argument of 'assert', but '#{message}' provided" unless message.is_a?(String)
+    t = @operands[1]
+    raise "A term expected as second argument of 'assert', but '#{t}' provided" unless t.is_a?(Factbase::Term)
+    result = t.evaluate(fact, maps, fb)
+    # Convert result to boolean-like evaluation
+    # Arrays are truthy if they contain at least one truthy element
+    if result.is_a?(Array)
+      truthy = result.any? { |v| v && v != 0 }
+    else
+      truthy = result && result != 0
+    end
+    raise message unless truthy
+    true
+  end
 end
