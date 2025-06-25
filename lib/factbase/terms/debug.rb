@@ -29,11 +29,12 @@ module Factbase::Debug
     result = t.evaluate(fact, maps, fb)
     # Convert result to boolean-like evaluation
     # Arrays are truthy if they contain at least one truthy element
-    if result.is_a?(Array)
-      truthy = result.any? { |v| v && v != 0 }
-    else
-      truthy = result && result != 0
-    end
+    truthy =
+      if result.is_a?(Array)
+        result.any? { |v| v && v != 0 }
+      else
+        result && result != 0
+      end
     raise message unless truthy
     true
   end
