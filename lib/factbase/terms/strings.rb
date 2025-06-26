@@ -25,10 +25,10 @@ module Factbase::Strings
     assert_args(2)
     str = _values(0, fact, maps, fb)
     return false if str.nil?
-    raise 'Exactly one string expected' unless str.size == 1
+    raise 'Exactly one string is expected' unless str.size == 1
     re = _values(1, fact, maps, fb)
     raise 'Regexp is nil' if re.nil?
-    raise 'Exactly one regexp expected' unless re.size == 1
+    raise 'Exactly one regexp is expected' unless re.size == 1
     str[0].to_s.match?(re[0])
   end
 end

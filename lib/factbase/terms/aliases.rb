@@ -14,7 +14,7 @@ module Factbase::Aliases
   def as(fact, maps, fb)
     assert_args(2)
     a = @operands[0]
-    raise "A symbol expected as first argument of 'as'" unless a.is_a?(Symbol)
+    raise "A symbol is expected as first argument of 'as'" unless a.is_a?(Symbol)
     vv = _values(1, fact, maps, fb)
     vv&.each { |v| fact.send(:"#{a}=", v) }
     true
@@ -23,13 +23,13 @@ module Factbase::Aliases
   def join(fact, maps, fb)
     assert_args(2)
     jumps = @operands[0]
-    raise "A string expected as first argument of 'join'" unless jumps.is_a?(String)
+    raise "A string is expected as first argument of 'join'" unless jumps.is_a?(String)
     jumps = jumps.split(',')
       .map(&:strip)
       .map { |j| j.split('<=').map(&:strip) }
       .map { |j| j.size == 1 ? [j[0], j[0]] : j }
     term = @operands[1]
-    raise "A term expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
+    raise "A term is expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
     subset = fb.query(term, maps).each(fb, fact).to_a
     subset.each do |s|
       jumps.each do |to, from|

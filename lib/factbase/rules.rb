@@ -14,7 +14,7 @@ require_relative '../factbase/syntax'
 # to insert a fact without this property to lead to a runtime error. Here is how:
 #
 #  fb = Factbase.new
-#  fb = Factabase::Rules.new(fb, '(exists foo)')
+#  fb = Factbase::Rules.new(fb, '(exists foo)')
 #  fb.txn do |fbt|
 #    f = fbt.insert
 #    f.bar = 3 # No exception here

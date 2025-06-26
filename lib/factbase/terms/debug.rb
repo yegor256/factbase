@@ -14,7 +14,7 @@ module Factbase::Debug
   def traced(fact, maps, fb)
     assert_args(1)
     t = @operands[0]
-    raise "A term expected, but '#{t}' provided" unless t.is_a?(Factbase::Term)
+    raise "A term is expected, but '#{t}' provided" unless t.is_a?(Factbase::Term)
     r = t.evaluate(fact, maps, fb)
     puts "#{self} -> #{r}"
     r
@@ -25,12 +25,12 @@ module Factbase::Debug
     message = @operands[0]
     unless message.is_a?(String)
       raise ArgumentError,
-            "A string expected as first argument of 'assert', but '#{message}' provided"
+            "A string is expected as first argument of 'assert', but '#{message}' provided"
     end
     t = @operands[1]
     unless t.is_a?(Factbase::Term)
       raise ArgumentError,
-            "A term expected as second argument of 'assert', but '#{t}' provided"
+            "A term is expected as second argument of 'assert', but '#{t}' provided"
     end
     result = t.evaluate(fact, maps, fb)
     # Convert result to boolean-like evaluation

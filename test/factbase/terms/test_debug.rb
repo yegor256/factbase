@@ -20,7 +20,7 @@ class TestDebug < Factbase::Test
 
   def test_traced_raises
     e = assert_raises(StandardError) { Factbase::Term.new(:traced, ['foo']).evaluate(fact, [], Factbase.new) }
-    assert_match(/A term expected, but 'foo' provided/, e.message)
+    assert_match(/A term is expected, but 'foo' provided/, e.message)
   end
 
   def test_traced_raises_when_too_many_args
@@ -81,7 +81,7 @@ class TestDebug < Factbase::Test
       assert_raises(StandardError) do
         Factbase::Term.new(:assert, [123, Factbase::Term.new(:gt, [:foo, 0])]).evaluate(fact, [], Factbase.new)
       end
-    assert_match(/A string expected as first argument of 'assert', but '123' provided/, e.message)
+    assert_match(/A string is expected as first argument of 'assert', but '123' provided/, e.message)
   end
 
   def test_assert_raises_when_second_arg_not_term
@@ -89,7 +89,7 @@ class TestDebug < Factbase::Test
       assert_raises(StandardError) do
         Factbase::Term.new(:assert, %w[message not_a_term]).evaluate(fact, [], Factbase.new)
       end
-    assert_match(/A term expected as second argument of 'assert', but 'not_a_term' provided/, e.message)
+    assert_match(/A term is expected as second argument of 'assert', but 'not_a_term' provided/, e.message)
   end
 
   def test_assert_raises_when_too_few_args
