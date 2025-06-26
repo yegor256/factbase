@@ -120,11 +120,20 @@ module Factbase::IndexedTerm
       end
       r
     when :not
-      r = @operands.first.predict(maps, params)
+      if @idx[key].nil?
+        yes = @operands.first.predict(maps, params)
+        if yes.nil?
+          @idx[key] = { r: nil }
+        else
+          yes = yes.to_a.to_set
+          @idx[key] = { r: maps.to_a.reject { |m| yes.include?(m) } }
+        end
+      end
+      r = @idx[key][:r]
       if r.nil?
         nil
       else
-        (maps & []) | (maps.to_a - r.to_a)
+        (maps & []) | r
       end
     end
   end

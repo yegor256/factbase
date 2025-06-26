@@ -6,7 +6,7 @@
 require_relative '../lib/factbase'
 
 def bench_query(bmk, fb)
-  total = 500
+  total = 20000
   total.times do |i|
     f = fb.insert
     f.id = i
@@ -15,6 +15,7 @@ def bench_query(bmk, fb)
     f.cost = rand(1..100)
     f.foo = rand(0.0..100.0).round(3)
     f.bar = rand(100..300)
+    f.blue = 1 if rand > 0.5
     f.seenBy = "User#{i}" if i.even?
     f.zzz = "Extra#{i}" if (i % 10).zero?
   end
@@ -25,6 +26,7 @@ def bench_query(bmk, fb)
     '(gt cost 50)',
     '(eq title \'Object Thinking 5000\')',
     '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))',
+    '(and (exists foo) (not (exists blue)))',
     '(eq id (agg (always) (max id)))',
     '(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))'
   ].each do |q|
