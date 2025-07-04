@@ -177,7 +177,12 @@ class Factbase
     taped = Factbase::Taped.new(before)
     catch :commit do
       require_relative 'factbase/light'
-      yield Factbase::Light.new(Factbase.new(taped))
+      commit = false
+      catch :rollback do
+        yield Factbase::Light.new(Factbase.new(taped))
+        commit = true
+      end
+      return 0 unless commit
     rescue Factbase::Rollback
       return 0
     end

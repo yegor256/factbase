@@ -486,6 +486,15 @@ class TestFactbase < Factbase::Test
     assert_equal(1, fb.size)
   end
 
+  def test_rolls_back
+    fb = Factbase.new
+    fb.txn do |fbt|
+      fbt.insert.foo = 1
+      throw :rollback
+    end
+    assert_equal(0, fb.size)
+  end
+
   def test_get_raise_for_empty_fact
     fb = Factbase.new
     fb.txn do |fbt|
