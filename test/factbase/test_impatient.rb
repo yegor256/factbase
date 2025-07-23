@@ -20,6 +20,7 @@ class TestImpatient < Factbase::Test
         super
       end
     end
+
     def query(term, maps = nil)
       maps ||= @maps
       term = to_term(term) if term.is_a?(String)
@@ -34,6 +35,7 @@ class TestImpatient < Factbase::Test
         super
       end
     end
+
     def query(term, maps = nil)
       maps ||= @maps
       term = to_term(term) if term.is_a?(String)
@@ -48,12 +50,14 @@ class TestImpatient < Factbase::Test
         super
       end
     end
+
     def query(term, maps = nil)
       maps ||= @maps
       term = to_term(term) if term.is_a?(String)
       SlowQuery.new(maps, term, self)
     end
   end
+
   def test_simple_query
     fb = Factbase::Impatient.new(Factbase.new)
     fb.insert
@@ -82,11 +86,12 @@ class TestImpatient < Factbase::Test
     1000.times do
       fb.insert.value = rand(1000)
     end
-    ex = assert_raises do
-      fb.query('(always)').each do
-        sleep 0.2
+    ex =
+      assert_raises(StandardError) do
+        fb.query('(always)').each do
+          sleep 0.2
+        end
       end
-    end
     assert_includes(ex.message, 'Query timed out after 0.1 seconds')
   end
 
@@ -96,9 +101,10 @@ class TestImpatient < Factbase::Test
       slow_fb.insert.value = rand(1000)
     end
     fb = Factbase::Impatient.new(slow_fb, timeout: 0.1)
-    ex = assert_raises do
-      fb.query('(always)').one
-    end
+    ex =
+      assert_raises(StandardError) do
+        fb.query('(always)').one
+      end
     assert_includes(ex.message, 'Query timed out after 0.1 seconds')
   end
 
@@ -108,9 +114,10 @@ class TestImpatient < Factbase::Test
       slow_fb.insert.value = i
     end
     fb = Factbase::Impatient.new(slow_fb, timeout: 0.1)
-    ex = assert_raises do
-      fb.query('(gt value 500)').delete!
-    end
+    ex =
+      assert_raises(StandardError) do
+        fb.query('(gt value 500)').delete!
+      end
     assert_includes(ex.message, 'Query timed out after 0.1 seconds')
   end
 
@@ -128,11 +135,12 @@ class TestImpatient < Factbase::Test
     fb = Factbase::Impatient.new(Factbase.new, timeout: 0.1)
     fb.txn do |fbt|
       fbt.insert.slow = 42
-      ex = assert_raises do
-        fbt.query('(always)').each do
-          sleep 0.2
+      ex =
+        assert_raises(StandardError) do
+          fbt.query('(always)').each do
+            sleep 0.2
+          end
         end
-      end
       assert_includes(ex.message, 'Query timed out after 0.1 seconds')
     end
   end
@@ -182,14 +190,15 @@ class TestImpatient < Factbase::Test
     start = Time.now
     result = fb.query('(agg (eq value 42) (first value))').one
     elapsed = Time.now - start
-    assert(elapsed >= 1.5)
+    assert_operator(elapsed, :>=, 1.5)
     assert_equal([42], result)
   end
 
   def test_nil_factbase_raises
-    ex = assert_raises do
-      Factbase::Impatient.new(nil)
-    end
+    ex =
+      assert_raises(StandardError) do
+        Factbase::Impatient.new(nil)
+      end
     assert_equal('The "fb" is nil', ex.message)
   end
 end
