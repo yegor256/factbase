@@ -10,6 +10,7 @@ require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/query'
 require_relative '../../lib/factbase/logged'
 require_relative '../../lib/factbase/pre'
+require_relative '../../lib/factbase/impatient'
 require_relative '../../lib/factbase/inv'
 require_relative '../../lib/factbase/rules'
 require_relative '../../lib/factbase/tallied'
@@ -314,6 +315,7 @@ class TestQuery < Factbase::Test
   def with_factbases(maps = [], &)
     {
       'plain' => Factbase.new(maps),
+      'plain+impatient' => Factbase::Impatient.new(Factbase.new(maps)),
       'pre+plain' => Factbase::Pre.new(Factbase.new(maps)) { nil },
       'rules+plain' => Factbase::Rules.new(Factbase.new(maps), '(always)'),
       'inv+plain' => Factbase::Inv.new(Factbase.new(maps)) { nil },
