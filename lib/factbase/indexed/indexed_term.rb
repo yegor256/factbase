@@ -89,7 +89,7 @@ module Factbase::IndexedTerm
             end
           end
         )
-        j = tuples.map { |t| @idx[key][t] || [] }.reduce(&:&)
+        j = tuples.map { |t| @idx[key][t] || [] }.reduce(&:|)
         r = (maps & []) | j
       else
         @operands.each do |o|
