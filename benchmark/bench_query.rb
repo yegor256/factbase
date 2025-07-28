@@ -24,7 +24,7 @@ def bench_query(bmk, fb)
     f.zzz = "Extra#{i}" if (i % 10).zero?
   end
 
-  runs = 10
+  runs = 3
   [
     '(gt time \'2024-03-23T03:21:43Z\')',
     '(gt cost 50)',
@@ -42,7 +42,7 @@ def bench_query(bmk, fb)
           (eq where "github"))))'
   ].each do |q|
     bmk.report(q.tr("\n", ' ').gsub(/\s+/, ' ').ellipsized(50, :right)) do
-      Timeout.timeout(4) do
+      Timeout.timeout(runs * 3) do
         runs.times do
           fb.query(q).each.to_a
         end

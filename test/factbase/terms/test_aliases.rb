@@ -8,7 +8,6 @@ require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/syntax'
 require_relative '../../../lib/factbase/accum'
-require_relative '../../../lib/factbase/indexed/indexed_term'
 
 # Aliases test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -58,10 +57,13 @@ class TestAliases < Factbase::Test
   end
 
   def test_join_on_big_factbase_with_index
-    total = 2000
-    maps = (0..total).map { { 'a' => [1], 'b' => [2, 3] } }
-    t = Factbase::Syntax.new('(and (eq a 1) (join "c<=b" (and (eq b 2) (eq b 3))))').to_term
+    total = 20_000
+    maps = (0..total).map { |i| { 'a' => [i], 'b' => [2, 3] } }
+    t = Factbase::Syntax.new('(and (eq b 2) (join "c<=b" (and (eq a $a) (eq b 2) (eq b 3))))').to_term
+    require_relative '../../../lib/factbase/indexed/indexed_term'
     t.redress!(Factbase::IndexedTerm, idx: {})
+    require_relative '../../../lib/factbase/cached/cached_term'
+    t.redress!(Factbase::CachedTerm, cache: {})
     matches = 0
     maps.each do |m|
       f = Factbase::Accum.new(fact(m), {}, false)
