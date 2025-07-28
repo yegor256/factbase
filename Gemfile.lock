@@ -29,7 +29,7 @@ GEM
       tago (> 0)
     ellipsized (0.3.0)
     erb (5.0.2)
-    json (2.13.1)
+    json (2.13.2)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
     logger (1.7.0)

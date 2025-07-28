@@ -3,12 +3,16 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require 'ellipsized'
+require 'timeout'
 require_relative '../lib/factbase'
 
 def bench_query(bmk, fb)
   total = 20_000
   total.times do |i|
     f = fb.insert
+    f.what = 'foo'
+    f.where = 'github'
     f.id = i
     f.title = "Object Thinking #{i}"
     f.time = Time.now.iso8601
@@ -28,11 +32,20 @@ def bench_query(bmk, fb)
     '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))',
     '(and (exists foo) (not (exists blue)))',
     '(eq id (agg (always) (max id)))',
-    '(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))'
+    '(join "c<=cost,b<=bar" (eq id (agg (always) (max id))))',
+    '(and
+      (eq what "foo")
+      (join "w<=what"
+        (and
+          (eq id $id)
+          (eq what "foo")
+          (eq where "github"))))'
   ].each do |q|
-    bmk.report(q) do
-      runs.times do
-        fb.query(q).each.to_a
+    bmk.report(q.tr("\n", ' ').gsub(/\s+/, ' ').ellipsized(50, :right)) do
+      Timeout.timeout(4) do
+        runs.times do
+          fb.query(q).each.to_a
+        end
       end
     end
   end
