@@ -11,7 +11,10 @@ facts:
   - person: Walter
     age: 45
 queries:
-  - query: (and (join 'age<=age' (eq person $name)) (exists age))
+  - query: |
+      (and
+        (join 'age<=age' (eq person $name))
+        (exists age))
     size: 4
   - query: (and (join 'age' (eq person $name)) (exists age))
     size: 4

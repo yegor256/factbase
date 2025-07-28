@@ -96,29 +96,29 @@ class TestImpatient < Factbase::Test
   end
 
   def test_query_one_timeout
-    slow_fb = SlowFactbase.new
-    1000.times do
-      slow_fb.insert.value = rand(1000)
+    slow = SlowFactbase.new
+    10_000.times do
+      slow.insert.value = rand(1000)
     end
-    fb = Factbase::Impatient.new(slow_fb, timeout: 0.1)
+    fb = Factbase::Impatient.new(slow, timeout: 0.01)
     ex =
       assert_raises(StandardError) do
-        fb.query('(always)').one
+        fb.query('(agg (min value))').one
       end
-    assert_includes(ex.message, 'Query timed out after 0.1 seconds')
+    assert_includes(ex.message, 'Query timed out after 0.01 seconds')
   end
 
   def test_delete_timeout
-    slow_fb = SlowDeleteFactbase.new
+    slow = SlowDeleteFactbase.new
     1000.times do |i|
-      slow_fb.insert.value = i
+      slow.insert.value = i
     end
-    fb = Factbase::Impatient.new(slow_fb, timeout: 0.1)
+    fb = Factbase::Impatient.new(slow, timeout: 0.01)
     ex =
       assert_raises(StandardError) do
         fb.query('(gt value 500)').delete!
       end
-    assert_includes(ex.message, 'Query timed out after 0.1 seconds')
+    assert_includes(ex.message, 'Query timed out after 0.01 seconds')
   end
 
   def test_with_txn
@@ -184,9 +184,9 @@ class TestImpatient < Factbase::Test
   end
 
   def test_custom_timeout
-    slow_fb = SlowEnoughFactbase.new
-    slow_fb.insert.value = 42
-    fb = Factbase::Impatient.new(slow_fb, timeout: 2)
+    slow = SlowEnoughFactbase.new
+    slow.insert.value = 42
+    fb = Factbase::Impatient.new(slow, timeout: 2)
     start = Time.now
     result = fb.query('(agg (eq value 42) (first value))').one
     elapsed = Time.now - start

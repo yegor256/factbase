@@ -4,7 +4,9 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
+require_relative '../../../lib/factbase/accum'
 require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/syntax'
 
 # Logical test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)

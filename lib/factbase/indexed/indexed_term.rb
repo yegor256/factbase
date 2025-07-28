@@ -94,10 +94,7 @@ module Factbase::IndexedTerm
       else
         @operands.each do |o|
           n = o.predict(maps, params)
-          if n.nil?
-            r = nil
-            break
-          end
+          break if n.nil?
           if r.nil?
             r = n
           else
