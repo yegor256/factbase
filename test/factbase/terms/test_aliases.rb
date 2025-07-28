@@ -58,7 +58,7 @@ class TestAliases < Factbase::Test
   end
 
   def test_join_on_big_factbase_with_index
-    total = 1000
+    total = 2000
     maps = (0..total).map { { 'a' => [1], 'b' => [2, 3] } }
     t = Factbase::Syntax.new('(and (eq a 1) (join "c<=b" (and (eq b 2) (eq b 3))))').to_term
     t.redress!(Factbase::IndexedTerm, idx: {})
