@@ -90,6 +90,7 @@ class Factbase::Term
   # @param [Hash] args Attributes to set
   def redress!(type, **args)
     extend type
+
     args.each { |k, v| send(:instance_variable_set, :"@#{k}", v) }
     @operands.map do |op|
       if op.is_a?(Factbase::Term)
