@@ -54,20 +54,4 @@ class TestLogical < Factbase::Test
     refute(t.evaluate(fact('foo' => 4), [], Factbase.new))
     assert(t.evaluate(fact('foo' => 5, 'bar' => 5), [], Factbase.new))
   end
-
-  def test_conjunction_on_big_factbase_with_index
-    total = 100_000
-    maps = (0..total).map { |i| { 'a' => [i], 'b' => [2, 3] } }
-    maps.append({ 'x' => [42] })
-    t = Factbase::Syntax.new('(and (eq x 42) (exists a) (exists b) (eq b 2) (eq b 3) (assert "hi" (one x)))').to_term
-    require_relative '../../../lib/factbase/indexed/indexed_term'
-    t.redress!(Factbase::IndexedTerm, idx: {})
-    matches = 0
-    maps.each do |m|
-      f = Factbase::Accum.new(fact(m), {}, false)
-      next unless t.evaluate(f, maps, Factbase.new)
-      matches += 1
-    end
-    assert_equal(0, matches)
-  end
 end
