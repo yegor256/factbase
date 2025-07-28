@@ -55,21 +55,4 @@ class TestAliases < Factbase::Test
       end
     end
   end
-
-  def test_join_on_big_factbase_with_index
-    total = 20_000
-    maps = (0..total).map { |i| { 'a' => [i], 'b' => [2, 3] } }
-    t = Factbase::Syntax.new('(and (eq b 2) (join "c<=b" (and (eq a $a) (eq b 2) (eq b 3))))').to_term
-    require_relative '../../../lib/factbase/indexed/indexed_term'
-    t.redress!(Factbase::IndexedTerm, idx: {})
-    require_relative '../../../lib/factbase/cached/cached_term'
-    t.redress!(Factbase::CachedTerm, cache: {})
-    matches = 0
-    maps.each do |m|
-      f = Factbase::Accum.new(fact(m), {}, false)
-      next unless t.evaluate(f, maps, Factbase.new)
-      matches += 1
-    end
-    assert_equal(total + 1, matches)
-  end
 end

@@ -39,7 +39,8 @@ def bench_query(bmk, fb)
         (and
           (eq id $id)
           (eq what "foo")
-          (eq where "github"))))'
+          (eq where "github")))
+      (assert "has it" (one id)))'
   ].each do |q|
     bmk.report(q.tr("\n", ' ').gsub(/\s+/, ' ').ellipsized(50, :right)) do
       Timeout.timeout(runs * 3) do
