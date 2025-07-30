@@ -68,7 +68,7 @@ module Factbase::IndexedTerm
             [@operands[1]]
           end
         if vv.empty?
-          nil
+          (maps & [])
         else
           j = vv.map { |v| @idx[key][v] || [] }.reduce(&:|)
           (maps & []) | j
