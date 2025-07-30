@@ -80,6 +80,7 @@ class TestIndexedFactbase < Factbase::Test
       '(and (eq foo 42) (exists often))',
       '(and (eq foo 42) (exists often) (exists bar) (absent rarely))',
       '(and (eq foo 42) (empty (eq foo 888)))',
+      '(and (eq foo 42) (empty (eq foo $id)))',
       '(and (eq foo 42) (empty (eq foo $often)))',
       '(and (eq foo 42) (empty (exists another)))'
     ].each do |q|
