@@ -92,7 +92,7 @@ class TestImpatient < Factbase::Test
           sleep 0.2
         end
       end
-    assert_includes(ex.message, 'Query timed out after 0.1 seconds')
+    assert_includes(ex.message, 'timed out after')
   end
 
   def test_query_one_timeout
@@ -105,7 +105,7 @@ class TestImpatient < Factbase::Test
       assert_raises(StandardError) do
         fb.query('(agg (min value))').one
       end
-    assert_includes(ex.message, 'Query timed out after 0.01 seconds')
+    assert_includes(ex.message, 'timed out after')
   end
 
   def test_delete_timeout
@@ -118,7 +118,7 @@ class TestImpatient < Factbase::Test
       assert_raises(StandardError) do
         fb.query('(gt value 500)').delete!
       end
-    assert_includes(ex.message, 'Query timed out after 0.01 seconds')
+    assert_includes(ex.message, 'timed out after')
   end
 
   def test_with_txn
@@ -141,7 +141,7 @@ class TestImpatient < Factbase::Test
             sleep 0.2
           end
         end
-      assert_includes(ex.message, 'Query timed out after 0.1 seconds')
+      assert_includes(ex.message, 'timed out after')
     end
   end
 

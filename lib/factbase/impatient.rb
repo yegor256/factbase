@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'decoor'
+require 'tago'
 require 'timeout'
 require_relative 'syntax'
 
@@ -61,7 +62,7 @@ class Factbase::Impatient
         qry.each(fb, params, &)
       end
     rescue Timeout::Error => e
-      raise "Query timed out after #{@timeout} seconds: #{e.message}"
+      raise "each() timed out after #{@timeout.seconds} (#{e.message}): #{@term}"
     end
 
     def one(fb = @fb, params = {})
@@ -70,7 +71,7 @@ class Factbase::Impatient
         qry.one(fb, params)
       end
     rescue Timeout::Error => e
-      raise "Query timed out after #{@timeout} seconds: #{e.message}"
+      raise "one() timed out after #{@timeout.seconds} (#{e.message}): #{@term}"
     end
 
     def delete!(fb = @fb)
@@ -79,7 +80,7 @@ class Factbase::Impatient
         qry.delete!(fb)
       end
     rescue Timeout::Error => e
-      raise "Query timed out after #{@timeout} seconds: #{e.message}"
+      raise "delete!() timed out after #{@timeout.seconds} (#{e.message}): #{@term}"
     end
   end
 end
