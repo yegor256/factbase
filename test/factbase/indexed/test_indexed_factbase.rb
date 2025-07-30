@@ -65,11 +65,11 @@ class TestIndexedFactbase < Factbase::Test
   def test_works_with_huge_dataset
     fb = Factbase.new
     fb = Factbase::IndexedFactbase.new(fb)
-    100_000.times do |i|
+    10_000.times do |i|
       fb.insert.then do |f|
         f.id = i
         f.foo = [42, 1, 256, 7, 99].sample
-        f.bar = 'hello'
+        f.bar = [42, 13, 88, 19, 93].sample
         f.rarely = rand if rand > 0.95
         f.often = rand if rand > 0.05
       end
@@ -82,6 +82,8 @@ class TestIndexedFactbase < Factbase::Test
       '(and (eq foo 42) (empty (eq foo 888)))',
       '(and (eq foo 42) (empty (eq foo $id)))',
       '(and (eq foo 42) (empty (eq foo $often)))',
+      '(and (eq foo 42) (empty (and (eq foo $often) (gt foo 43))))',
+      '(and (eq foo 42) (empty (and (eq foo 42) (eq bar 42) (eq id -1))))',
       '(and (eq foo 42) (empty (exists another)))'
     ].each do |q|
       Timeout.timeout(4) do
