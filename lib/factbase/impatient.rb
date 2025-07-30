@@ -67,18 +67,16 @@ class Factbase::Impatient
 
     def one(fb = @fb, params = {})
       impatient('one') do
-        qry = @fb.query(@term, @maps)
         Timeout.timeout(@timeout) do
-          qry.one(fb, params)
+          @fb.query(@term, @maps).one(fb, params)
         end
       end
     end
 
     def delete!(fb = @fb)
       impatient('delete!') do
-        qry = @fb.query(@term, @maps)
         Timeout.timeout(@timeout) do
-          qry.delete!(fb)
+          @fb.query(@term, @maps).delete!(fb)
         end
       end
     end
