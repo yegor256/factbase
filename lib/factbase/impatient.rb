@@ -56,35 +56,35 @@ class Factbase::Impatient
     end
 
     def each(fb = @fb, params = {}, &)
-      return to_enum(__method__, fb, params) unless block_given?
-      impatient('each') do
-        qry = @fb.query(@term, @maps)
-        Timeout.timeout(@timeout) do
-          qry.each(fb, params, &)
+      a =
+        impatient('each') do
+          @fb.query(@term, @maps).each(fb, params).to_a
         end
+      return a unless block_given?
+      yielded = 0
+      a.each do |f|
+        yield f
+        yielded += 1
       end
+      yielded
     end
 
     def one(fb = @fb, params = {})
       impatient('one') do
-        Timeout.timeout(@timeout) do
-          @fb.query(@term, @maps).one(fb, params)
-        end
+        @fb.query(@term, @maps).one(fb, params)
       end
     end
 
     def delete!(fb = @fb)
       impatient('delete!') do
-        Timeout.timeout(@timeout) do
-          @fb.query(@term, @maps).delete!(fb)
-        end
+        @fb.query(@term, @maps).delete!(fb)
       end
     end
 
     private
 
-    def impatient(name)
-      yield
+    def impatient(name, &)
+      Timeout.timeout(@timeout, &)
     rescue Timeout::Error => e
       raise "#{name}() timed out after #{@timeout.seconds} (#{e.message}), fb size is #{@fb.size}: #{@term}"
     end

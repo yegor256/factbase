@@ -81,20 +81,6 @@ class TestImpatient < Factbase::Test
     assert_equal([42], fb.query('(agg (exists bar) (first bar))').one)
   end
 
-  def test_query_timeout
-    fb = Factbase::Impatient.new(Factbase.new, timeout: 0.1)
-    1000.times do
-      fb.insert.value = rand(1000)
-    end
-    ex =
-      assert_raises(StandardError) do
-        fb.query('(always)').each do
-          sleep 0.2
-        end
-      end
-    assert_includes(ex.message, 'timed out after')
-  end
-
   def test_query_one_timeout
     slow = SlowFactbase.new
     10_000.times do
@@ -129,20 +115,6 @@ class TestImpatient < Factbase::Test
       end
     )
     assert_equal(1, fb.size)
-  end
-
-  def test_with_txn_timeout
-    fb = Factbase::Impatient.new(Factbase.new, timeout: 1)
-    fb.txn do |fbt|
-      fbt.insert.slow = 42
-      ex =
-        assert_raises(StandardError) do
-          fbt.query('(always)').each do
-            sleep 1.1
-          end
-        end
-      assert_includes(ex.message, 'timed out after')
-    end
   end
 
   def test_returns_int
