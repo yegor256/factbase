@@ -20,7 +20,7 @@ class Factbase::Impatient
   def initialize(fb, timeout: 15)
     raise 'The "fb" is nil' if fb.nil?
     @origin = fb
-    @timeout = timeout
+    @timeout = timeout.to_f
   end
 
   decoor(:origin)
