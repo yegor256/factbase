@@ -132,13 +132,13 @@ class TestImpatient < Factbase::Test
   end
 
   def test_with_txn_timeout
-    fb = Factbase::Impatient.new(Factbase.new, timeout: 0.1)
+    fb = Factbase::Impatient.new(Factbase.new, timeout: 1)
     fb.txn do |fbt|
       fbt.insert.slow = 42
       ex =
         assert_raises(StandardError) do
           fbt.query('(always)').each do
-            sleep 0.2
+            sleep 1.1
           end
         end
       assert_includes(ex.message, 'timed out after')
