@@ -40,6 +40,15 @@ module Factbase::IndexedTerm
         end
       end
       (maps & []) | @idx[key]
+    when :absent
+      if @idx[key].nil?
+        @idx[key] = []
+        prop = @operands.first.to_s
+        maps.to_a.each do |m|
+          @idx[key].append(m) if m[prop].nil?
+        end
+      end
+      (maps & []) | @idx[key]
     when :eq
       if @operands.first.is_a?(Symbol) && _scalar?(@operands[1])
         if @idx[key].nil?
