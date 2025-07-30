@@ -57,30 +57,38 @@ class Factbase::Impatient
 
     def each(fb = @fb, params = {}, &)
       return to_enum(__method__, fb, params) unless block_given?
-      qry = @fb.query(@term, @maps)
-      Timeout.timeout(@timeout) do
-        qry.each(fb, params, &)
+      impatient('each') do
+        qry = @fb.query(@term, @maps)
+        Timeout.timeout(@timeout) do
+          qry.each(fb, params, &)
+        end
       end
-    rescue Timeout::Error => e
-      raise "each() timed out after #{@timeout.seconds} (#{e.message}): #{@term}"
     end
 
     def one(fb = @fb, params = {})
-      qry = @fb.query(@term, @maps)
-      Timeout.timeout(@timeout) do
-        qry.one(fb, params)
+      impatient('one') do
+        qry = @fb.query(@term, @maps)
+        Timeout.timeout(@timeout) do
+          qry.one(fb, params)
+        end
       end
-    rescue Timeout::Error => e
-      raise "one() timed out after #{@timeout.seconds} (#{e.message}): #{@term}"
     end
 
     def delete!(fb = @fb)
-      qry = @fb.query(@term, @maps)
-      Timeout.timeout(@timeout) do
-        qry.delete!(fb)
+      impatient('delete!') do
+        qry = @fb.query(@term, @maps)
+        Timeout.timeout(@timeout) do
+          qry.delete!(fb)
+        end
       end
+    end
+
+    private
+
+    def impatient(name)
+      yield
     rescue Timeout::Error => e
-      raise "delete!() timed out after #{@timeout.seconds} (#{e.message}): #{@term}"
+      raise "#{name}() timed out after #{@timeout.seconds} (#{e.message}), fb size is #{@fb.size}: #{@term}"
     end
   end
 end
