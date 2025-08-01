@@ -1,8 +1,11 @@
-coverage/
-.idea/
-*.gem
 .bundle/
 .DS_Store
-rdoc/
-doc/
+.idea/
 .yardoc/
+*.gem
+coverage/
+doc/
+node_modules/
+rdoc/
+vendor/
+.claude/

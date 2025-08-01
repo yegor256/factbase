@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - foo: 42
+    bar: 33
+  - name: Jeff Lebowski
+    age: 41
+  - name: Maude
+    friends: [Jeff, Donny]
+queries:
+  - query: (eq foo 42)
+    size: 1
+  - query: (not (eq foo 42))
+    size: 2
+  - query: (eq foo "42")
+    size: 0
+  - query: (not (eq foo "42"))
+    size: 3
+  - query: (eq foo 10)
+    size: 0
+  - query: (eq friends "Jeff")
+    size: 1
+  - query: (eq friends "Donny")
+    size: 1
+  - query: (eq name "Jeff Lebowski")
+    size: 1
+  - query: (eq bar "Hello")
+    size: 0

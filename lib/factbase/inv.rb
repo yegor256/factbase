@@ -1,32 +1,26 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2024 Yegor Bugayenko
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the 'Software'), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
 
 require 'others'
 require 'decoor'
 require_relative '../factbase'
 
 # A decorator of a Factbase, that checks invariants on every set.
+#
+# For example, you can use this decorator if you want to check that every
+# fact has +when+:
+#
+#  fb = Factbase::Inv.new(Factbase.new) do |f, fbt|
+#    assert !f['when'].nil?
+#  end
+#
+# The second argument passed to the block is the factbase, while the first
+# one is the fact just touched.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Inv
   decoor(:fb)
@@ -36,20 +30,18 @@ class Factbase::Inv
     @block = block
   end
 
-  def dup
-    Factbase::Inv.new(@fb.dup, &@block)
-  end
-
   def insert
     Fact.new(@fb.insert, @block)
   end
 
-  def query(query)
-    Query.new(@fb.query(query), @block)
+  def query(query, maps = nil)
+    Query.new(@fb.query(query, maps), @block, self)
   end
 
-  def txn(this = self, &)
-    @fb.txn(this, &)
+  def txn
+    @fb.txn do |fbt|
+      yield Factbase::Inv.new(fbt, &@block)
+    end
   end
 
   # Fact decorator.
@@ -84,14 +76,15 @@ class Factbase::Inv
   class Query
     decoor(:query)
 
-    def initialize(query, block)
+    def initialize(query, block, fb)
       @query = query
       @block = block
+      @fb = fb
     end
 
-    def each
-      return to_enum(__method__) unless block_given?
-      @query.each do |f|
+    def each(fb = @fb, params = {})
+      return to_enum(__method__, fb, params) unless block_given?
+      @query.each(fb, params) do |f|
         yield Fact.new(f, @block)
       end
     end

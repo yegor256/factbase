@@ -1,33 +1,16 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2024 Yegor Bugayenko
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the 'Software'), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require_relative '../test__helper'
 require_relative '../../lib/factbase/syntax'
 
 # Syntax test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestSyntax < Minitest::Test
+class TestSyntax < Factbase::Test
   def test_parses_string_right
     [
       "(foo 'abc')",
@@ -36,6 +19,26 @@ class TestSyntax < Minitest::Test
       "(foo 'one two three   ' 'tail tail')"
     ].each do |q|
       assert_equal(q, Factbase::Syntax.new(q).to_term.to_s, q)
+    end
+  end
+
+  def test_makes_abstract_terms
+    {
+      '(foo $bar)' => true,
+      '(foo (bar (a (b c (f $bar)))))' => true,
+      '(foo (bar (a (b c (f bar)))))' => false
+    }.each do |q, a|
+      assert_equal(a, Factbase::Syntax.new(q).to_term.abstract?)
+    end
+  end
+
+  def test_makes_static_terms
+    {
+      '(foo bar)' => false,
+      '(foo "bar")' => true,
+      '(agg (always) (max id))' => true
+    }.each do |q, a|
+      assert_equal(a, Factbase::Syntax.new(q).to_term.static?)
     end
   end
 
@@ -50,7 +53,7 @@ class TestSyntax < Minitest::Test
       "(foo 'Hello,\n\nworld!\r\t\n')\n",
       "(or ( a 4) (b 5) (always) (and (always) (c 5) \t\t(r 7 w8s w8is 'Foo')))"
     ].each do |q|
-      assert(!Factbase::Syntax.new(q).to_term.nil?)
+      refute_nil(Factbase::Syntax.new(q).to_term)
     end
   end
 
@@ -85,7 +88,7 @@ class TestSyntax < Minitest::Test
       '(or (eq bar 888) (eq z 1))' => true,
       "(or (gt bar 100) (eq foo 'Hello, world!'))" => true
     }.each do |k, v|
-      assert_equal(v, Factbase::Syntax.new(k).to_term.evaluate(m, []), k)
+      assert_equal(v, Factbase::Syntax.new(k).to_term.evaluate(m, [], Factbase.new), k)
     end
   end
 
@@ -94,6 +97,7 @@ class TestSyntax < Minitest::Test
       '',
       '()',
       '(foo',
+      '(foo $)',
       '(foo 1) (bar 2)',
       'some text',
       '"hello, world!',
@@ -111,7 +115,20 @@ class TestSyntax < Minitest::Test
       msg = assert_raises(q) do
         Factbase::Syntax.new(q).to_term
       end.message
-      assert(msg.include?(q), msg)
+      assert_includes(msg, q, msg)
+    end
+  end
+
+  def test_raises_on_broken_syntax
+    100.times do
+      q = [
+        '(', ')', '#test', '$foo', '%what',
+        '"hello"', '42', '+', '?', '!', '\"',
+        '\'', 'привет'
+      ].shuffle.join(' . ')
+      assert_raises(Factbase::Syntax::Broken, q) do
+        Factbase::Syntax.new(q).to_term
+      end
     end
   end
 
@@ -122,6 +139,28 @@ class TestSyntax < Minitest::Test
       '(and (foo) (or (and (eq a 1))) (eq a 1) (foo))' => '(and (foo) (eq a 1))'
     }.each do |s, t|
       assert_equal(t, Factbase::Syntax.new(s).to_term.to_s)
+    end
+  end
+
+  def test_fails_when_term_is_not_a_class
+    assert_raises(StandardError) { Factbase::Syntax.new('(foo 1)', term: 'hello') }
+  end
+
+  def test_fails_when_term_is_wrong_class
+    assert_raises(StandardError) { Factbase::Syntax.new('(bar 1)', term: String).to_term }
+  end
+
+  def test_fails_when_term_is_incorrectly_defined_class
+    assert_includes(
+      assert_raises(StandardError) { Factbase::Syntax.new('(bar 1)', term: FakeTerm).to_term }.message,
+      'wrong number of arguments'
+    )
+  end
+
+  class FakeTerm < Factbase::Term
+    def initialize(invalid)
+      super
+      @x = invalid
     end
   end
 end

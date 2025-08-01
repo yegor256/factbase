@@ -1,0 +1,36 @@
+# frozen_string_literal: true
+
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+name: benchmark
+'on':
+  push:
+    paths-ignore: ['README.md']
+concurrency:
+  group: benchmark-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  benchmark:
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+      - run: bundle config set --global path "$(pwd)/vendor/bundle"
+      - run: bundle install --no-color
+      - run: bundle exec rake benchmark > stdout.txt
+      - run: .github/publish-benchmark.sh
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          sign-commits: true
+          branch: benchmark-results
+          commit-message: 'new benchmarking results'
+          delete-branch: true
+          title: 'New Benchmarking Results'
+          reviewers: yegor256
+          base: master

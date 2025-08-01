@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - title: Object Thinking
+    price: 29
+  - name: Clean Code
+    price: 27
+  - name: Refactorings
+    price: 41
+queries:
+  - query: (sum price)
+    one: 97

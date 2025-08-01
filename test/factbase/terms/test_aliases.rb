@@ -1,35 +1,19 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2024 Yegor Bugayenko
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the 'Software'), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
 
-require 'minitest/autorun'
+require 'loog'
+require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/syntax'
 require_relative '../../../lib/factbase/accum'
 
 # Aliases test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestAliases < Minitest::Test
+class TestAliases < Factbase::Test
   def test_aliases
     maps = [
       { 'x' => [1], 'y' => [0], 't1' => [Time.now], 't2' => [Time.now] },
@@ -44,8 +28,8 @@ class TestAliases < Minitest::Test
       t = Factbase::Syntax.new(q).to_term
       maps.each do |m|
         f = Factbase::Accum.new(fact(m), {}, false)
-        next unless t.evaluate(f, maps)
-        assert(Factbase::Syntax.new(r).to_term.evaluate(f, []), "#{q} -> #{f}")
+        next unless t.evaluate(f, maps, Factbase.new)
+        assert(Factbase::Syntax.new(r).to_term.evaluate(f, [], Factbase.new), "#{q} -> #{f}")
       end
     end
   end
@@ -64,10 +48,10 @@ class TestAliases < Minitest::Test
       t = Factbase::Syntax.new(q).to_term
       maps.each do |m|
         f = Factbase::Accum.new(fact(m), {}, false)
-        require_relative '../../../lib/factbase/looged'
-        f = Factbase::Looged::Fact.new(f, Loog::NULL)
-        next unless t.evaluate(f, maps)
-        assert(Factbase::Syntax.new(r).to_term.evaluate(f, []), "#{q} -> #{f} doesn't match #{r}")
+        require_relative '../../../lib/factbase/logged'
+        f = Factbase::Logged::Fact.new(f, log: Loog::NULL)
+        next unless t.evaluate(f, maps, Factbase.new)
+        assert(Factbase::Syntax.new(r).to_term.evaluate(f, [], Factbase.new), "#{q} -> #{f} doesn't match #{r}")
       end
     end
   end

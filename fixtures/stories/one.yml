@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - name: Jeff
+    friends: [Walter, Donny, Maude]
+  - name: Walter
+    friends: Donny
+  - name: Donny
+    friends: Walter
+queries:
+  - query: (one friends)
+    size: 2

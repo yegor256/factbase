@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - name: Jeff
+    age: 41
+  - name: Walter
+    age: 45
+  - name: Maude
+    age: 31
+queries:
+  - query: (count)
+    one: 3
+  - query: (agg (eq name "Jeff") (count))
+    one: 1
+  - query: (agg (gt age 40) (count))
+    one: 2

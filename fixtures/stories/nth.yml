@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - name: Jeff
+    cities: [LA, SF]
+  - name: Walter
+    cities: [LA, SF, NYC]
+queries:
+  - query: (eq "NYC" (agg (always) (nth 0 cities)))
+    size: 0
+  - query: (eq "NYC" (agg (always) (nth 1 cities)))
+    size: 2

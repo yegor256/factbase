@@ -1,54 +1,34 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2024 Yegor Bugayenko
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the 'Software'), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
 
+require 'backtrace'
 require 'time'
 require_relative '../factbase'
 require_relative 'fact'
 require_relative 'term'
 
-# Syntax.
+# Syntax parser.
 #
 # This is an internal class, it is not supposed to be instantiated directly.
 #
-# However, you can use it directly, if you need a parser of our syntax. You can
-# create your own "Term" class and let this parser make instances of it for
-# every term it meets in the query:
-#
-#  require 'factbase/syntax'
-#  t = Factbase::Syntax.new('(hello world)', MyTerm).to_term
-#
-# The +MyTerm+ class should have a constructor with two arguments:
-# the operator and the list of operands (Array).
-#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Syntax
+  # If the syntax is broken.
+  class Broken < StandardError; end
+
   # Ctor.
+  #
+  # The class provided as the +term+ argument must have a constructor that accepts
+  # an operator, operands array, and a keyword argument fb. Also, it must be
+  # a child of +Factbase::Term+.
+  #
   # @param [String] query The query, for example "(eq id 42)"
-  # @param [Class] term The class to instantiate to make every term
-  def initialize(query, term: Factbase::Term)
+  def initialize(query)
     @query = query
-    @term = term
   end
 
   # Convert it to a term.
@@ -61,9 +41,9 @@ class Factbase::Syntax
         t
       end
   rescue StandardError => e
-    err = "#{e.message} in \"#{@query}\""
+    err = "#{e.message} (#{Backtrace.new(e)}) in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
-    raise err
+    raise Broken, err
   end
 
   private
@@ -74,20 +54,24 @@ class Factbase::Syntax
     @tokens ||= to_tokens
     raise 'No tokens' if @tokens.empty?
     @ast ||= to_ast(@tokens, 0)
-    raise 'Too many terms' if @ast[1] != @tokens.size
-    term = @ast[0]
-    raise 'No terms found' if term.nil?
-    raise 'Not a term' unless term.is_a?(@term)
-    term
+    raise "Too many terms (#{@ast[1]} != #{@tokens.size})" if @ast[1] != @tokens.size
+    t = @ast[0]
+    raise 'No terms found in the AST' if t.nil?
+    raise "#{t.class.name} is not an instance of Term" unless t.is_a?(Factbase::Term)
+    t
   end
 
   # Reads the stream of tokens, starting at the +at+ position. If the
   # token at the position is not a literal (like 42 or "Hello") but a term,
   # the function recursively calls itself.
   #
-  # The function returns an two-elements array, where the first element
+  # The function returns a two-element array, where the first element
   # is the term/literal and the second one is the position where the
   # scanning should continue.
+  #
+  # @param [Array] tokens Array of tokens
+  # @param [Integer] at Position to start parsing from
+  # @return [Array<Factbase::Term,Integer>] The term detected and ending position
   def to_ast(tokens, at)
     raise "Closing too soon at ##{at}" if tokens[at] == :close
     return [tokens[at], at + 1] unless tokens[at] == :open
@@ -106,20 +90,24 @@ class Factbase::Syntax
       operands << operand
       break if tokens[at] == :close
     end
-    [@term.new(op, operands), at + 1]
+    t = Factbase::Term.new(op, operands)
+    [t, at + 1]
   end
 
   # Turns a query into an array of tokens.
+  # @return [Array] Array of tokens
   def to_tokens
     list = []
     acc = ''
+    quotes = ['\'', '"']
+    spaces = [' ', ')']
     string = false
     comment = false
     @query.to_s.chars.each do |c|
       comment = true if !string && c == '#'
       comment = false if comment && c == "\n"
       next if comment
-      if ['\'', '"'].include?(c)
+      if quotes.include?(c)
         if string && acc[acc.length - 1] == '\\'
           acc = acc[0..-2]
         else
@@ -130,7 +118,7 @@ class Factbase::Syntax
         acc += c
         next
       end
-      if !acc.empty? && [' ', ')'].include?(c)
+      if !acc.empty? && spaces.include?(c)
         list << acc
         acc = ''
       end
@@ -159,7 +147,7 @@ class Factbase::Syntax
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/)
         Time.parse(t)
       else
-        raise "Wrong symbol format (#{t})" unless t.match?(/^[_a-z\$][a-zA-Z0-9_]*$/)
+        raise "Wrong symbol format (#{t})" unless t.match?(/^([_a-z][a-zA-Z0-9_]*|\$[a-z]+)$/)
         t.to_sym
       end
     end

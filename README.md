@@ -1,15 +1,16 @@
 # Single-Table NoSQL-ish In-Memory Database
 
-[![DevOps By Rultor.com](http://www.rultor.com/b/yegor256/factbase)](http://www.rultor.com/p/yegor256/factbase)
+[![DevOps By Rultor.com](https://www.rultor.com/b/yegor256/factbase)](https://www.rultor.com/p/yegor256/factbase)
 [![We recommend RubyMine](https://www.elegantobjects.org/rubymine.svg)](https://www.jetbrains.com/ruby/)
 
 [![rake](https://github.com/yegor256/factbase/actions/workflows/rake.yml/badge.svg)](https://github.com/yegor256/factbase/actions/workflows/rake.yml)
-[![PDD status](http://www.0pdd.com/svg?name=yegor256/factbase)](http://www.0pdd.com/p?name=yegor256/factbase)
-[![Gem Version](https://badge.fury.io/rb/factbase.svg)](http://badge.fury.io/rb/factbase)
+[![PDD status](https://www.0pdd.com/svg?name=yegor256/factbase)](https://www.0pdd.com/p?name=yegor256/factbase)
+[![Gem Version](https://badge.fury.io/rb/factbase.svg)](https://badge.fury.io/rb/factbase)
 [![Test Coverage](https://img.shields.io/codecov/c/github/yegor256/factbase.svg)](https://codecov.io/github/yegor256/factbase?branch=master)
-[![Yard Docs](http://img.shields.io/badge/yard-docs-blue.svg)](http://rubydoc.info/github/yegor256/factbase/master/frames)
+[![Yard Docs](https://img.shields.io/badge/yard-docs-blue.svg)](https://rubydoc.info/github/yegor256/factbase/master/frames)
 [![Hits-of-Code](https://hitsofcode.com/github/yegor256/factbase)](https://hitsofcode.com/view/github/yegor256/factbase)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/yegor256/factbase/blob/master/LICENSE.txt)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fyegor256%2Ffactbase.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fyegor256%2Ffactbase?ref=badge_shield&issueType=license)
 
 This Ruby gem manages an in-memory database of facts.
 A fact is simply a map of properties and values.
@@ -17,7 +18,7 @@ The values are either atomic literals or non-empty sets of literals.
 It is possible to delete a fact, but impossible to delete a property
 from a fact.
 
-**ATTENTION**: The current implemention is naive and,
+**ATTENTION**: The current implementation is naive and,
 because of that, **very slow**. I will be very happy
 if you suggest a better implementation without the change of the interface.
 The `Factbase::query()` method is what mostly needs performance optimization:
@@ -53,6 +54,40 @@ f2 = Factbase.new
 f2.import(File.read(file))
 assert(f2.query('(eq foo 42)').each.to_a.size == 1)
 ```
+
+You can check the presence of an attribute by name and then
+set it, also by name:
+
+```ruby
+n = 'foo'
+if f[n].nil?
+  f.send("#{n}=", 'Hello, world!')
+end
+```
+
+You can make a factbase log all operations:
+
+```ruby
+require 'loog'
+require 'factbase/logged'
+log = Loog::VERBOSE
+fb = Factbase::Logged.new(Factbase.new, log)
+f = fb.insert
+```
+
+You can also count the amount of changes made to a factbase:
+
+```ruby
+require 'loog'
+require 'factbase/tallied'
+log = Loog::VERBOSE
+fb = Factbase::Tallied.new(Factbase.new, log)
+f = fb.insert
+churn = fb.churn
+assert churn.inserted == 1
+```
+
+## Terms
 
 There are some boolean terms available in a query
 (they return either `true` or `false`):
@@ -103,7 +138,7 @@ Also, some simple arithmetic:
 * `(div v1 v2)` is a division of `∏v1` by `∏v2`
 
 It's possible to add and deduct string values to time values, like
-`(plus t '2 days')` or ``(minus t '14 hours')``.
+`(plus t '2 days')` or `(minus t '14 hours')`.
 
 Types may be converted:
 
@@ -156,7 +191,7 @@ There are some system-level terms:
 
 Read
 [these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).
-Make sure you build is green before you contribute
+Make sure your build is green before you contribute
 your pull request. You will need to have
 [Ruby](https://www.ruby-lang.org/en/) 3.2+ and
 [Bundler](https://bundler.io/) installed. Then:
@@ -167,3 +202,43 @@ bundle exec rake
 ```
 
 If it's clean and you don't see any error messages, submit your pull request.
+
+## Benchmark
+
+This is the result of the benchmark:
+
+<!-- benchmark_begin -->
+```text
+                                                                   user
+insert 20000 facts                                             0.658630
+export 20000 facts                                             0.025967
+import 411020 bytes (20000 facts)                              0.024282
+insert 10 facts                                                0.050191
+query 10 times w/txn                                           2.063964
+query 10 times w/o txn                                         0.044326
+modify 10 attrs w/txn                                          1.745367
+delete 10 facts w/txn                                          1.023205
+(and (eq what 'issue-was-closed') (exists... -> 200            2.043080
+(and (eq what 'issue-was-closed') (exists... -> 200/txn        1.019861
+(and (eq what 'issue-was-closed') (exists... -> zero           2.350912
+(and (eq what 'issue-was-closed') (exists... -> zero/txn       1.187649
+(gt time '2024-03-23T03:21:43Z')                               0.304861
+(gt cost 50)                                                   0.234136
+(eq title 'Object Thinking 5000')                              0.091766
+(and (eq foo 42.998) (or (gt bar 200) (absent z...             0.049974
+(and (exists foo) (not (exists blue)))                         0.926298
+(eq id (agg (always) (max id)))                                0.606111
+(join "c<=cost,b<=bar" (eq id (agg (always) (ma...             1.276007
+(and (eq what "foo") (join "w<=what" (and (eq i...             6.827440
+delete!                                                        0.218373
+Taped.append() x50000                                          0.023564
+Taped.each() x125                                              1.348705
+Taped.delete_if() x375                                         0.812740
+```
+
+The results were calculated in [this GHA job][benchmark-gha]
+on 2025-07-28 at 17:02,
+on Linux with 4 CPUs.
+<!-- benchmark_end -->
+
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/16575338618

@@ -1,29 +1,12 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2024 Yegor Bugayenko
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the 'Software'), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
 
 require_relative '../factbase'
-require_relative 'syntax'
-require_relative 'fact'
 require_relative 'accum'
+require_relative 'fact'
+require_relative 'syntax'
 require_relative 'tee'
 
 # Query.
@@ -34,36 +17,43 @@ require_relative 'tee'
 # It is NOT thread-safe!
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Query
   # Constructor.
   # @param [Array<Fact>] maps Array of facts to start with
-  # @param [Mutex] mutex Mutex to sync all modifications to the +maps+
-  # @param [String] query The query as a string
-  def initialize(maps, mutex, query)
+  # @param [String|Factbase::Term] term The query term
+  def initialize(maps, term, fb)
     @maps = maps
-    @mutex = mutex
-    @query = query
+    @term = term.is_a?(String) ? Factbase::Syntax.new(term).to_term : term
+    @fb = fb
+  end
+
+  # Print it as a string.
+  # @return [String] The query as a string
+  def to_s
+    @term.to_s
   end
 
   # Iterate facts one by one.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
-  # @return [Integer] Total number of facts yielded
-  def each(params = {})
-    return to_enum(__method__, params) unless block_given?
-    term = Factbase::Syntax.new(@query).to_term
+  # @return [Integer] Total number of facts yielded (if block given), otherwise enumerator
+  def each(fb = @fb, params = {})
+    return to_enum(__method__, fb, params) unless block_given?
     yielded = 0
-    @maps.each do |m|
+    params = params.transform_keys(&:to_s) if params.is_a?(Hash)
+    maybe = @term.predict(@maps, Factbase::Tee.new({}, params))
+    maybe ||= @maps unless maybe.equal?(@maps)
+    maybe.each do |m|
       extras = {}
-      f = Factbase::Fact.new(@mutex, m)
-      params = params.transform_keys(&:to_s) if params.is_a?(Hash)
+      f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
       a = Factbase::Accum.new(f, extras, false)
-      r = term.evaluate(a, @maps)
+      r = @term.evaluate(a, @maps, fb)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
-        raise "Unexpected evaluation result (#{r.class}), must be Boolean at #{@query}"
+        raise "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term.inspect}"
       end
       next unless r
       yield Factbase::Accum.new(f, extras, true)
@@ -73,32 +63,30 @@ class Factbase::Query
   end
 
   # Read a single value.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
-  # @return The value evaluated
-  def one(params = {})
-    term = Factbase::Syntax.new(@query).to_term
+  # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
+  def one(fb = @fb, params = {})
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    r = term.evaluate(Factbase::Tee.new(nil, params), @maps)
+    r = @term.evaluate(Factbase::Tee.new(Factbase::Fact.new({}), params), @maps, fb)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
-      raise "Incorrect type #{r.class} returned by #{@query}"
+      raise "Incorrect type #{r.class} returned by #{@term.inspect}"
     end
     r
   end
 
   # Delete all facts that match the query.
+  # @param [Factbase] fb The factbase to delete from
   # @return [Integer] Total number of facts deleted
-  def delete!
-    term = Factbase::Syntax.new(@query).to_term
+  def delete!(fb = @fb)
     deleted = 0
-    @mutex.synchronize do
-      @maps.delete_if do |m|
-        f = Factbase::Fact.new(@mutex, m)
-        if term.evaluate(f, @maps)
-          deleted += 1
-          true
-        else
-          false
-        end
+    @maps.delete_if do |m|
+      f = Factbase::Fact.new(m)
+      if @term.evaluate(f, @maps, fb)
+        deleted += 1
+        true
+      else
+        false
       end
     end
     deleted

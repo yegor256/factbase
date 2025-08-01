@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - name: Volvo
+  - name: Ford
+  - name: Toyota
+    price: 5900
+  - name: Toyota
+    price: 4300
+  - name: BMW
+    price: 4400
+queries:
+  - query: (and (exists price) (unique name))
+    size: 2

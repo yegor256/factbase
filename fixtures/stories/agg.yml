@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+facts:
+  - name: Jeff
+    dob: 1979
+  - name: Walter
+    dob: 1976
+  - name: Maude
+    dob: 1983
+queries:
+  - query: (agg (lt dob 1980) (max dob))
+    one: 1979
+  - query: (agg (always) (min dob))
+    one: 1976
+  - query: (agg (and (eq name "Jeff") (lt dob 2025)) (min dob))
+    one: 1979

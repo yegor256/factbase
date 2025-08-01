@@ -1,24 +1,7 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2024 Yegor Bugayenko
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the 'Software'), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
 
 require 'decoor'
 require 'others'
@@ -31,14 +14,14 @@ require_relative '../factbase/syntax'
 # to insert a fact without this property to lead to a runtime error. Here is how:
 #
 #  fb = Factbase.new
-#  fb = Factabase::Rules.new(fb, '(exists foo)')
+#  fb = Factbase::Rules.new(fb, '(exists foo)')
 #  fb.txn do |fbt|
 #    f = fbt.insert
 #    f.bar = 3 # No exception here
 #  end # Runtime exception here (transaction won't commit)
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Rules
   decoor(:fb)
@@ -53,28 +36,24 @@ class Factbase::Rules
     @uid = uid
   end
 
-  def dup
-    Factbase::Rules.new(@fb.dup, @rules, @check, uid: @uid)
-  end
-
   def insert
-    Fact.new(@fb.insert, @check)
+    Fact.new(@fb.insert, @check, @fb)
   end
 
-  def query(query)
-    Query.new(@fb.query(query), @check)
+  def query(query, maps = nil)
+    Query.new(@fb.query(query, maps), @check, self)
   end
 
-  def txn(this = self, &)
+  def txn
     before = @check
     later = Later.new(@uid)
     @check = later
-    @fb.txn(this) do |fbt|
-      yield fbt
+    @fb.txn do |fbt|
+      yield Factbase::Rules.new(fbt, @rules, @check, uid: @uid)
       @check = before
       fbt.query('(always)').each do |f|
         next unless later.include?(f)
-        @check.it(f)
+        @check.it(f, @fb)
       end
     end
   end
@@ -82,11 +61,11 @@ class Factbase::Rules
   # Fact decorator.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
-  #
   class Fact
-    def initialize(fact, check)
+    def initialize(fact, check, fb)
       @fact = fact
       @check = check
+      @fb = fb
     end
 
     def to_s
@@ -100,7 +79,7 @@ class Factbase::Rules
     others do |*args|
       r = @fact.method_missing(*args)
       k = args[0].to_s
-      @check.it(@fact) if k.end_with?('=')
+      @check.it(@fact, @fb) if k.end_with?('=')
       r
     end
   end
@@ -108,19 +87,19 @@ class Factbase::Rules
   # Query decorator.
   #
   # This is an internal class, it is not supposed to be instantiated directly.
-  #
   class Query
     decoor(:query)
 
-    def initialize(query, check)
+    def initialize(query, check, fb)
       @query = query
       @check = check
+      @fb = fb
     end
 
-    def each(params = {})
-      return to_enum(__method__, params) unless block_given?
-      @query.each do |f|
-        yield Fact.new(f, @check)
+    def each(fb = @fb, params = {})
+      return to_enum(__method__, fb, params) unless block_given?
+      @query.each(fb, params) do |f|
+        yield Fact.new(f, @check, fb)
       end
     end
   end
@@ -133,8 +112,8 @@ class Factbase::Rules
       @expr = expr
     end
 
-    def it(fact)
-      return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [])
+    def it(fact, fb)
+      return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [], fb)
       e = "#{@expr[0..32]}..." if @expr.length > 32
       raise "The fact doesn't match the #{e.inspect} rule: #{fact}"
     end
@@ -149,10 +128,11 @@ class Factbase::Rules
       @facts = Set.new
     end
 
-    def it(fact)
+    def it(fact, _fb)
+      return if @uid.nil?
       a = fact[@uid]
       return if a.nil?
-      @facts << a[0] unless @uid.nil?
+      @facts << a[0]
     end
 
     def include?(fact)

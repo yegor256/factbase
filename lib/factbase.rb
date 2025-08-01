@@ -1,24 +1,7 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2024 Yegor Bugayenko
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the 'Software'), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
 
 require 'json'
 require 'yaml'
@@ -54,7 +37,7 @@ require 'yaml'
 #  {
 #    'name': ['Jeff', 'Walter'],
 #    'age': [42, 'unknown'],
-#    'place: 'LA'
+#    'place': 'LA'
 #  }
 #
 # Value sets, as you can see, allow data of different types. However, there
@@ -67,6 +50,24 @@ require 'yaml'
 #  fb2 = Factbase.new # it's empty
 #  fb2.import(File.binread(file))
 #
+# Here's how to use transactions to ensure data consistency:
+#
+#  fb = Factbase.new
+#  # Successful transaction
+#  fb.txn do |fbt|
+#    f = fbt.insert
+#    f.name = 'John'
+#    f.age = 30
+#    # If any error occurs here, all changes will be rolled back
+#  end
+#  # Transaction with rollback
+#  fb.txn do |fbt|
+#    f = fbt.insert
+#    f.name = 'Jane'
+#    f.age = 25
+#    raise Factbase::Rollback # This will undo all changes in this transaction
+#  end
+#
 # It's impossible to delete properties of a fact. It is however possible to
 # delete the entire fact, with the help of the +query()+ and then +delete!()+
 # methods.
@@ -77,26 +78,18 @@ require 'yaml'
 # It is NOT thread-safe!
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase
-  # Current version of the gem (changed by .rultor.yml on every release)
-  VERSION = '0.0.0'
+  require_relative 'factbase/version'
 
   # An exception that may be thrown in a transaction, to roll it back.
   class Rollback < StandardError; end
 
   # Constructor.
-  # @param [Array<Hash>] facts Array of facts to start with
-  def initialize(facts = [])
-    @maps = facts
-    @mutex = Mutex.new
-  end
-
-  # Make a deep duplicate of this factbase.
-  # @return [Factbase] A new factbase
-  def dup
-    Factbase.new(@maps.map { |m| m.transform_values(&:dup) })
+  # @param [Array<Hash>] maps Array of facts to start with
+  def initialize(maps = [])
+    @maps = maps
   end
 
   # Size, the total number of facts in the factbase.
@@ -109,17 +102,15 @@ class Factbase
   #
   # A fact, when inserted, is empty. It doesn't contain any properties.
   #
-  # The operation is thread-safe, meaning that you different threads may
-  # insert facts parallel without breaking the consistency of the factbase.
+  # The operation is thread-safe, meaning that different threads may
+  # insert facts in parallel without breaking the consistency of the factbase.
   #
   # @return [Factbase::Fact] The fact just inserted
   def insert
     map = {}
-    @mutex.synchronize do
-      @maps << map
-    end
+    @maps << map
     require_relative 'factbase/fact'
-    Factbase::Fact.new(@mutex, map)
+    Factbase::Fact.new(map)
   end
 
   # Create a query capable of iterating.
@@ -139,16 +130,27 @@ class Factbase
   # The full list of terms available in the query you can find in the
   # +README.md+ file of the repository.
   #
-  # @param [String] query The query to use for selections
-  def query(query)
+  # @param [String|Factbase::Term] term The query to use for selections
+  # @param [Array<Hash>|nil] maps The subset of maps (if provided)
+  def query(term, maps = nil)
+    maps ||= @maps
+    term = to_term(term) if term.is_a?(String)
     require_relative 'factbase/query'
-    Factbase::Query.new(@maps, @mutex, query)
+    Factbase::Query.new(maps, term, self)
+  end
+
+  # Convert a query to a term.
+  # @param [String] query The query to convert
+  # @return [Factbase::Term] The term
+  def to_term(query)
+    require_relative 'factbase/syntax'
+    Factbase::Syntax.new(query).to_term
   end
 
   # Run an ACID transaction, which will either modify the factbase
   # or rollback in case of an error.
   #
-  # If necessary to terminate a transaction and roolback all changes,
+  # If necessary to terminate a transaction and rollback all changes,
   # you should raise the +Factbase::Rollback+ exception:
   #
   #  fb = Factbase.new
@@ -157,34 +159,55 @@ class Factbase
   #    raise Factbase::Rollback
   #  end
   #
-  # A the end of this script, the factbase will be empty. No facts will
+  # At the end of this script, the factbase will be empty. No facts will be
   # inserted and all changes that happened in the block will be rolled back.
   #
-  # @param [Factbase] this The factbase to use (don't provide this param)
-  # @return [Boolean] TRUE if some changes have been made, FALSE otherwise
-  def txn(this = self)
-    copy = this.dup
-    begin
-      yield copy
-    rescue Factbase::Rollback
-      return false
-    end
-    modified = false
-    @mutex.synchronize do
-      after = Marshal.load(copy.export)
-      after.each_with_index do |m, i|
-        if i >= @maps.size
-          @maps << {}
-          modified = true
-        end
-        m.each do |k, vv|
-          next if @maps[i][k] == vv
-          @maps[i][k] = vv
-          modified = true
-        end
+  # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
+  def txn
+    pairs = {}
+    before =
+      @maps.map do |m|
+        n = m.transform_values(&:dup)
+        # rubocop:disable Lint/HashCompareByIdentity
+        pairs[n.object_id] = m.object_id
+        # rubocop:enable Lint/HashCompareByIdentity
+        n
       end
+    require_relative 'factbase/taped'
+    taped = Factbase::Taped.new(before)
+    catch :commit do
+      require_relative 'factbase/light'
+      commit = false
+      catch :rollback do
+        yield Factbase::Light.new(Factbase.new(taped))
+        commit = true
+      end
+      return 0 unless commit
+    rescue Factbase::Rollback
+      return 0
     end
-    modified
+    require_relative 'factbase/churn'
+    churn = Factbase::Churn.new
+    taped.inserted.each do |oid|
+      b = taped.find_by_object_id(oid)
+      next if b.nil?
+      @maps << b
+      churn.append(1, 0, 0)
+    end
+    garbage = []
+    taped.added.each do |oid|
+      b = taped.find_by_object_id(oid)
+      next if b.nil?
+      garbage << pairs[oid]
+      @maps << b
+      churn.append(0, 0, 1)
+    end
+    taped.deleted.each do |oid|
+      garbage << pairs[oid]
+      churn.append(0, 1, 0)
+    end
+    @maps.delete_if { |m| garbage.include?(m.object_id) }
+    churn
   end
 
   # Export it into a chain of bytes.
@@ -197,7 +220,7 @@ class Factbase
   #
   # The data is binary, it's not a text!
   #
-  # @return [Bytes] The chain of bytes
+  # @return [String] Binary string containing serialized data
   def export
     Marshal.dump(@maps)
   end
@@ -210,9 +233,9 @@ class Factbase
   #  fb.import(File.binread("foo.fb"))
   #
   # The facts that existed in the factbase before importing will remain there.
-  # The facts from the incoming byte stream will added to them.
+  # The facts from the incoming byte stream will be added to them.
   #
-  # @param [Bytes] bytes Byte array to import
+  # @param [String] bytes Binary string to import
   def import(bytes)
     raise 'Empty input, cannot load a factbase' if bytes.empty?
     @maps += Marshal.load(bytes)
