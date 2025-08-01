@@ -20,10 +20,10 @@ module Factbase::Ordering
     before
   end
 
-  def unique(fact, maps)
+  def unique(fact, maps, fb)
     @uniques = Set.new if @uniques.nil?
     assert_args(1)
-    vv = _values(0, fact, maps)
+    vv = _values(0, fact, maps, fb)
     return false if vv.nil?
     vv = [vv] unless vv.respond_to?(:to_a)
     vv.each do |v|
