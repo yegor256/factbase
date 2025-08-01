@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../factbase'
-require 'set'
 
 # Ordering terms.
 #
