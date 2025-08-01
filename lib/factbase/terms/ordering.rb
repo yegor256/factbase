@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require_relative '../../factbase'
+require 'set'
 
 # Ordering terms.
 #
@@ -37,11 +38,11 @@ module Factbase::Term::Ordering
   end
 
   def unique(fact, maps)
-    @uniques = [] if @uniques.nil?
+    @uniques = Set.new if @uniques.nil?
     assert_args(1)
     vv = the_values(0, fact, maps)
     return false if vv.nil?
-    vv = [vv] unless vv.is_a?(Array)
+    vv = [vv] unless vv.respond_to?(:to_a)
     vv.each do |v|
       return false if @uniques.include?(v)
       @uniques << v
