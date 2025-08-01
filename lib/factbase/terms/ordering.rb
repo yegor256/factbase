@@ -20,7 +20,7 @@ module Factbase::Ordering
   end
 
   def unique(fact, maps, fb)
-    @uniques = [] if @uniques.nil?
+    @uniques = Set.new if @uniques.nil?
     assert_args(1)
     vv = _values(0, fact, maps, fb)
     return false if vv.nil?
