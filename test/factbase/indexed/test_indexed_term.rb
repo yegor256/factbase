@@ -120,4 +120,21 @@ class TestIndexedTerm < Factbase::Test
     assert_equal(3, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
+
+  def test_predicts_on_lt
+    term = Factbase::Term.new(:lt, [:foo, 42])
+    idx = {}
+    term.redress!(Factbase::IndexedTerm, idx:)
+    maps = Factbase::Taped.new([
+                                 { 'foo' => [10] },
+                                 { 'foo' => [43] },
+                                 { 'foo' => [42] },
+                                 { 'foo' => [100, 5] },
+                                 { 'bar' => [50] },
+                                 { 'foo' => [41, 42, 43] }
+                               ])
+    n = term.predict(maps, {})
+    assert_equal(3, n.size)
+    assert_kind_of(Factbase::Taped, n)
+  end
 end
