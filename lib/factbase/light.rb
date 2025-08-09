@@ -30,4 +30,8 @@ class Factbase::Light
   def query(query, maps = nil)
     @fb.query(query, maps)
   end
+
+  def txn
+    raise 'You cannot start a transaction inside another transaction'
+  end
 end
