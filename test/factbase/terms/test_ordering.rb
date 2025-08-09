@@ -29,9 +29,9 @@ class TestOrdering < Factbase::Test
   def test_unique_with_array
     t = Factbase::Term.new(:unique_with_array, [:foo])
     refute(t.evaluate(fact, [], Factbase.new))
-    assert(t.evaluate(fact('foo' => [1, 2], [], Factbase.new))
-    refute(t.evaluate(fact('foo' => [2, 3], [], Factbase.new))
-    assert(t.evaluate(fact('foo' => [4, 5], [], Factbase.new))
+    assert(t.evaluate(fact('foo' => [1, 2]), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => [2, 3]), [], Factbase.new))
+    assert(t.evaluate(fact('foo' => [4, 5]), [], Factbase.new))
   end
   
 end
