@@ -33,5 +33,4 @@ class TestOrdering < Factbase::Test
     refute(t.evaluate(fact('foo' => [2, 3]), [], Factbase.new))
     assert(t.evaluate(fact('foo' => [4, 5]), [], Factbase.new))
   end
-  
 end
