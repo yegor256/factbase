@@ -336,8 +336,21 @@ class TestQuery < Factbase::Test
         )
       ),
       'logged+plain' => Factbase::Logged.new(Factbase.new(maps), Loog::NULL),
-      'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps))),
-      'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps))),
+      'indexed+cached+plain' => Factbase::IndexedFactbase.new(
+        Factbase::CachedFactbase.new(Factbase.new(maps))
+      ),
+      'indexed+cached+rules+plain' => Factbase::IndexedFactbase.new(
+        Factbase::CachedFactbase.new(
+          Factbase::Rules.new(
+            Factbase.new(maps),
+            '(always)',
+            uid: '_id'
+          )
+        )
+      ),
+      'cached+indexed+plain' => Factbase::CachedFactbase.new(
+        Factbase::IndexedFactbase.new(Factbase.new(maps))
+      ),
       'indexed+indexed+plain' => Factbase::IndexedFactbase.new(
         Factbase::IndexedFactbase.new(Factbase.new(maps))
       ),
