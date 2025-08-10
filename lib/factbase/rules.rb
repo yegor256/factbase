@@ -78,7 +78,7 @@ class Factbase::Rules
 
     others do |*args|
       r = @fact.method_missing(*args)
-      k = args[0].to_s
+      k = args.first.to_s
       @check.it(@fact, @fb) if k.end_with?('=')
       r
     end
@@ -132,14 +132,16 @@ class Factbase::Rules
       return if @uid.nil?
       a = fact[@uid]
       return if a.nil?
-      @facts << a[0]
+      raise "More than one #{@uid.inspect} in the fact: #{a}" if a.size > 1
+      @facts << a.first
     end
 
     def include?(fact)
       return true if @uid.nil?
       a = fact[@uid]
       return true if a.nil?
-      @facts.include?(a[0])
+      raise "More than one #{@uid.inspect} in the fact: #{a}" if a.size > 1
+      @facts.include?(a.first)
     end
   end
 end
