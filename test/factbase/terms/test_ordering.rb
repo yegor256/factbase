@@ -38,12 +38,8 @@ class TestOrdering < Factbase::Test
     t = Factbase::Term.new(:unique, [:id])
     n = 10_000
     facts = n.times.map do |i|
-      f = @fb.insert
-      f.id = i % 100
-      f
-    end
     Timeout.timeout(1) do
-      facts.each { |fact| t.evaluate(fact, [], @fb) }
+      facts.each { |fact| t.evaluate(fact('id' => i % 100), [], Factbase.new) }
     end
   end
 end
