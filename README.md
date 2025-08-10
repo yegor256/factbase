@@ -13,7 +13,7 @@
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fyegor256%2Ffactbase.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fyegor256%2Ffactbase?ref=badge_shield&issueType=license)
 
 This Ruby gem manages an in-memory database of facts.
-A fact is simply a map of properties and values.
+A fact is simply an associative array of properties and their values.
 The values are either atomic literals or non-empty sets of literals.
 It is possible to delete a fact, but impossible to delete a property
 from a fact.
