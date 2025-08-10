@@ -33,4 +33,17 @@ class TestOrdering < Factbase::Test
     refute(t.evaluate(fact('foo' => [2, 3]), [], Factbase.new))
     assert(t.evaluate(fact('foo' => [4, 5]), [], Factbase.new))
   end
+
+  def test_unique_performance
+    t = Factbase::Term.new(:unique, [:id])
+    n = 10_000
+    facts = n.times.map do |i|
+      f = @fb.insert
+      f.id = i % 100
+      f
+    end
+    Timeout.timeout(1) do
+      facts.each { |fact| t.evaluate(fact, [], @fb) }
+    end
+  end
 end
