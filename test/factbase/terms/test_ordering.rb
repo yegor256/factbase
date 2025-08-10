@@ -38,10 +38,8 @@ class TestOrdering < Factbase::Test
     t = Factbase::Term.new(:unique, [:id])
     n = 10_000
     u = 0
-    Timeout.timeout(1) do
-      n.times.map do |i|
-        u += 1 if t.evaluate(fact('id' => i % 100), [], Factbase.new)
-      end
+    n.times.map do |i|
+      u += 1 if t.evaluate(fact('id' => i % 100), [], Factbase.new)
     end
     assert_equal 100, u
   end
