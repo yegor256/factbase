@@ -39,7 +39,7 @@ class TestOrdering < Factbase::Test
     n = 10_000
     facts = n.times.map do |i|
       Timeout.timeout(1) do
-        assert(t.evaluate(fact('id' => i % 100), [], Factbase.new) 
+        assert(t.evaluate(fact('id' => i % 100), [], Factbase.new)) 
       end
     end
   end
