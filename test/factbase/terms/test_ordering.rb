@@ -37,8 +37,12 @@ class TestOrdering < Factbase::Test
   def test_unique_performance
     t = Factbase::Term.new(:unique, [:id])
     n = 10_000
-    facts = n.times.map do |i|
-      assert(t.evaluate(fact('id' => i % 100), [], Factbase.new)) 
+    u = 0
+    Timeout.timeout(1) do
+      n.times.map do |i|
+        u += 1 if t.evaluate(fact('id' => i % 100), [], Factbase.new)
+      end
     end
+    assert_equal 100, u
   end
 end
