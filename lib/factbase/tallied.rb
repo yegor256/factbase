@@ -75,6 +75,10 @@ class Factbase::Tallied
       @fb = fb
     end
 
+    def to_s
+      @query.to_s
+    end
+
     def one(fb = @fb, params = {})
       @query.one(fb, params)
     end

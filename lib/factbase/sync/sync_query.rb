@@ -20,6 +20,11 @@ class Factbase::SyncQuery
     @fb = fb
   end
 
+  # Turn it to a string.
+  def to_s
+    @origin.to_s
+  end
+
   # Iterate facts one by one.
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one

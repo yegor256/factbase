@@ -265,6 +265,12 @@ class TestQuery < Factbase::Test
     end
   end
 
+  def test_turns_query_to_string
+    with_factbases do |badge, fb|
+      assert_equal('(always)', fb.query('(always)').to_s, "Fails with #{badge}")
+    end
+  end
+
   def test_to_array
     maps = []
     maps << { 'foo' => [42] }

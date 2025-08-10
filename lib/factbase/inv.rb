@@ -82,6 +82,10 @@ class Factbase::Inv
       @fb = fb
     end
 
+    def to_s
+      @query.to_s
+    end
+
     def each(fb = @fb, params = {})
       return to_enum(__method__, fb, params) unless block_given?
       @query.each(fb, params) do |f|
