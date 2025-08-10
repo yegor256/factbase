@@ -18,15 +18,6 @@ The values are either atomic literals or non-empty sets of literals.
 It is possible to delete a fact, but impossible to delete a property
 from a fact.
 
-> [!WARNING]
-> The current implementation is naive and,
-> because of that, **very slow**. I will be very happy
-> if you suggest a better implementation without the change of the interface.
-> The `Factbase::query()` method is what mostly needs performance optimization:
-> currently it simply iterates through all facts in the factbase in order
-> to find those that match the provided terms. Obviously,
-> even a simple indexing may significantly increase performance.
-
 Here is how you use it (it's thread-safe, by the way):
 
 ```ruby
