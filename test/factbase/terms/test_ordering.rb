@@ -25,4 +25,22 @@ class TestOrdering < Factbase::Test
     refute(t.evaluate(fact('foo' => 41), [], Factbase.new))
     assert(t.evaluate(fact('foo' => 1), [], Factbase.new))
   end
+
+  def test_unique_with_array
+    t = Factbase::Term.new(:unique, [:foo])
+    refute(t.evaluate(fact, [], Factbase.new))
+    assert(t.evaluate(fact('foo' => [1, 2]), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => [2, 3]), [], Factbase.new))
+    assert(t.evaluate(fact('foo' => [4, 5]), [], Factbase.new))
+  end
+
+  def test_unique_performance
+    t = Factbase::Term.new(:unique, [:id])
+    n = 10_000
+    u = 0
+    n.times.map do |i|
+      u += 1 if t.evaluate(fact('id' => i % 100), [], Factbase.new)
+    end
+    assert_equal 100, u
+  end
 end
