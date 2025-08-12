@@ -92,7 +92,7 @@ class TestRules < Factbase::Test
     end
   end
 
-  def test_defends_against_id_duplicates
+  def test_fails_if_id_duplicates_are_there_already
     fb = Factbase::Rules.new(Factbase.new, '(always)', uid: 'id')
     fb.insert.then do |f|
       f.id = 1
