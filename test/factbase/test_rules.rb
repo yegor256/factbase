@@ -92,6 +92,21 @@ class TestRules < Factbase::Test
     end
   end
 
+  def test_defends_against_id_duplicates
+    fb = Factbase::Rules.new(Factbase.new, '(always)', uid: 'id')
+    fb.insert.then do |f|
+      f.id = 1
+      f.id = 2
+    end
+    assert_raises(StandardError) do
+      fb.txn do |fbt|
+        fbt.insert.then do |f|
+          f.foo = 42
+        end
+      end
+    end
+  end
+
   def test_in_combination_with_pre
     fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
     fb =
