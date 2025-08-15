@@ -34,7 +34,7 @@ fb.query('(not (exists seen))').each do |f|
 end
 ```
 
-You can save the factbase to the disc and then load it back:
+You can save the factbase to the disk and then load it back:
 
 ```ruby
 file = '/tmp/simple.fb'
@@ -125,7 +125,7 @@ properties in the facts that match `(gt x 5)`
 Also, some simple arithmetic:
 
 * `(plus v1 v2)` is a sum of `∑v1` and `∑v2`
-* `(minus v1 v2)` is a deducation of `∑v2` from `∑v1`
+* `(minus v1 v2)` is a deduction of `∑v2` from `∑v1`
 * `(times v1 v2)` is a multiplication of `∏v1` and `∏v2`
 * `(div v1 v2)` is a division of `∏v1` by `∏v2`
 
@@ -147,7 +147,9 @@ returns `true`
 There are terms that are history of search aware:
 
 * `(prev p)` returns the value of `p` property in the previously seen fact
-* `(unique p)` returns true if the value of `p` property hasn't been seen yet
+* `(unique p1 p2 ...)` returns true if at least one property value
+hasn't been seen yet; returns false when all specified properties
+have duplicate values in this particular combination
 
 The `agg` term enables sub-queries by evaluating the first argument (term)
 over all available facts, passing the entire subset to the second argument,
