@@ -11,6 +11,20 @@ facts:
     price: 4300
   - name: BMW
     price: 4400
+  - name: Mercedes
+    color: red
+    year: 2020
+  - name: Mercedes
+    color: blue
+    year: 2020
+  - name: Mercedes
+    color: red
+    year: 2021
+  - name: Mercedes
+    color: red
+    year: 2020
 queries:
   - query: (and (exists price) (unique name))
     size: 2
+  - query: (and (eq name "Mercedes") (unique color year))
+    size: 3
