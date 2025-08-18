@@ -28,3 +28,7 @@ queries:
     size: 2
   - query: (and (eq name "Mercedes") (unique color year))
     size: 3
+  - query: (unique year)
+    size: 2
+  - query: (unique foo)
+    size: 0
