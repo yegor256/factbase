@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.authors = ['Yegor Bugayenko']
   s.email = 'yegor256@gmail.com'
   s.homepage = 'https://github.com/yegor256/factbase.rb'
-  s.files = `git ls-files`.split($RS)
+  s.files = `git ls-files | grep -v -E '^(test/|\\.|fixtures|benchmark|renovate)'`.split($RS)
   s.rdoc_options = ['--charset=UTF-8']
   s.extra_rdoc_files = ['README.md', 'LICENSE.txt']
   s.add_dependency 'backtrace', '~>0.4'
