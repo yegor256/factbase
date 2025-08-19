@@ -35,7 +35,16 @@ class Factbase::FactAsYaml
       hash[p] = v.is_a?(Array) ? v : [v]
     end
     hash.sort.to_h.map do |k, vv|
-      "#{k}: [#{vv.map { |v| v.is_a?(String) ? v.ellipsized : v }.map(&:inspect).join(', ')}]"
+      [
+        k,
+        ': [',
+        vv.map do |v|
+          v = v.ellipsized if v.is_a?(String)
+          v = v.utc.iso8601 if v.is_a?(Time)
+          v
+        end.map(&:inspect).join(', '),
+        ']'
+      ].join
     end.join("\n")
   end
 end
