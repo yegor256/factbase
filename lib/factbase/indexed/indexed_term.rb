@@ -22,6 +22,8 @@ module Factbase::IndexedTerm
   def predict(maps, params)
     key = [maps.object_id, @operands.first, @op]
     case @op
+    when :unique
+      maps
     when :one
       if @idx[key].nil?
         @idx[key] = []
@@ -145,7 +147,10 @@ module Factbase::IndexedTerm
       else
         @operands.each do |o|
           n = o.predict(maps, params)
-          break if n.nil?
+          if n.nil?
+            r = maps
+            break
+          end
           if r.nil?
             r = n
           else

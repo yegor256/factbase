@@ -37,7 +37,7 @@ class Factbase::Fact
   # Convert it to a string.
   # @return [String] String representation of it (in JSON)
   def to_s
-    "[ #{@map.map { |k, v| "#{k}: #{v}" }.join(', ')} ]"
+    "[ #{@map.map { |k, v| "#{k}: #{v}" }.sort.join(', ')} ]"
   end
 
   # Get a list of all props.

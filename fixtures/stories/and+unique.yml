@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - fruit: apple
+    color: red
+  - fruit: orange
+    color: red
+  - fruit: grape
+    color: red
+  - fruit: strawberry
+    color: red
+queries:
+  - query: (and (unique color) (eq color "red"))
+    size: 1
