@@ -22,22 +22,22 @@ module Factbase::Ordering
   def unique(fact, maps, fb)
     @uniques = {} if @uniques.nil?
     raise "Too few operands for 'unique' (at least 1 expected)" if @operands.empty?
-    results = []
+    dups = 0
     @operands.each_with_index do |_, i|
       @uniques[i] = [] if @uniques[i].nil?
       vv = _values(i, fact, maps, fb)
       return false if vv.nil?
       vv = [vv] unless vv.respond_to?(:to_a)
+      exists = false
       vv.each do |v|
         if @uniques[i].include?(v)
-          results << false
+          exists = true
         else
           @uniques[i] << v
-          results << true
         end
       end
+      dups += 1 if exists
     end
-    return false if results.all?(false)
-    true
+    dups < @operands.size
   end
 end
