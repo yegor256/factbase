@@ -204,35 +204,35 @@ This is the result of the benchmark:
 <!-- benchmark_begin -->
 ```text
                                                                    user
-insert 20000 facts                                             0.638553
-export 20000 facts                                             0.027273
-import 410717 bytes (20000 facts)                              0.021643
-insert 10 facts                                                0.042390
-query 10 times w/txn                                           2.278994
-query 10 times w/o txn                                         0.037285
-modify 10 attrs w/txn                                          2.261902
-delete 10 facts w/txn                                          1.205367
-(and (eq what 'issue-was-closed') (exists... -> 200            2.092734
-(and (eq what 'issue-was-closed') (exists... -> 200/txn        1.032410
-(and (eq what 'issue-was-closed') (exists... -> zero           2.385969
-(and (eq what 'issue-was-closed') (exists... -> zero/txn       1.190590
-(gt time '2024-03-23T03:21:43Z')                               0.321057
-(gt cost 50)                                                   0.210374
-(eq title 'Object Thinking 5000')                              0.055549
-(and (eq foo 42.998) (or (gt bar 200) (absent z...             0.049508
-(and (exists foo) (not (exists blue)))                         0.999753
-(eq id (agg (always) (max id)))                                0.627528
-(join "c<=cost,b<=bar" (eq id (agg (always) (ma...             1.246746
-(and (eq what "foo") (join "w<=what" (and (eq i...             6.881145
-delete!                                                        0.174194
-Taped.append() x50000                                          0.023669
-Taped.each() x125                                              1.423781
-Taped.delete_if() x375                                         0.843940
+insert 20000 facts                                             0.595620
+export 20000 facts                                             0.019511
+import 410903 bytes (20000 facts)                              0.021517
+insert 10 facts                                                0.039990
+query 10 times w/txn                                           2.051662
+query 10 times w/o txn                                         0.043900
+modify 10 attrs w/txn                                          1.928921
+delete 10 facts w/txn                                          1.075461
+(and (eq what 'issue-was-closed') (exists... -> 200            1.120060
+(and (eq what 'issue-was-closed') (exists... -> 200/txn        1.114975
+(and (eq what 'issue-was-closed') (exists... -> zero           1.080422
+(and (eq what 'issue-was-closed') (exists... -> zero/txn       1.131242
+(gt time '2024-03-23T03:21:43Z')                               0.342271
+(gt cost 50)                                                   0.188269
+(eq title 'Object Thinking 5000')                              0.089654
+(and (eq foo 42.998) (or (gt bar 200) (absent z...             0.050858
+(and (exists foo) (not (exists blue)))                         0.920006
+(eq id (agg (always) (max id)))                                0.597035
+(join "c<=cost,b<=bar" (eq id (agg (always) (ma...             1.319789
+(and (eq what "foo") (join "w<=what" (and (eq i...             7.039262
+delete!                                                        0.219260
+Taped.append() x50000                                          0.025503
+Taped.each() x125                                              1.345823
+Taped.delete_if() x375                                         0.818237
 ```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-08-09 at 06:42,
+on 2025-08-21 at 14:27,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/16846550540
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/17129904396
