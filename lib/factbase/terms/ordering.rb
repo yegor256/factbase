@@ -20,24 +20,35 @@ module Factbase::Ordering
   end
 
   def unique(fact, maps, fb)
-    @uniques = {} if @uniques.nil?
+    @seen = Set.new if @seen.nil?
     raise "Too few operands for 'unique' (at least 1 expected)" if @operands.empty?
-    dups = 0
-    @operands.each_with_index do |_, i|
-      @uniques[i] = [] if @uniques[i].nil?
-      vv = _values(i, fact, maps, fb)
-      return false if vv.nil?
-      vv = [vv] unless vv.respond_to?(:to_a)
-      exists = false
-      vv.each do |v|
-        if @uniques[i].include?(v)
-          exists = true
-        else
-          @uniques[i] << v
-        end
-      end
-      dups += 1 if exists
+    vv = (0..(@operands.size - 1)).map { |i| _values(i, fact, maps, fb) }
+    return false if vv.any?(nil)
+    pass = true
+    _cartesian(vv).each do |t|
+      pass = false if @seen.include?(t)
+      @seen << t
     end
-    dups < @operands.size
+    pass
+  end
+
+  private
+
+  # Multiplies arrays and returns a list of all possible combinations
+  # of their elements. If this array is provided:
+  #
+  #  [ [4, 3], [2, 88, 13] ]
+  #
+  # This will be the result:
+  #
+  # [ [4, 2], [4, 88], [4, 13], [3, 2], [3, 88], [3, 13]]
+  def _cartesian(vv)
+    ff = vv.first.zip
+    if vv.one?
+      ff
+    else
+      tail = _cartesian(vv[1..])
+      ff.map { |f| tail.map { |t| f + t } }
+    end
   end
 end

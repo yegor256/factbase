@@ -7,10 +7,10 @@ facts:
     color: red
   - fruit: orange
     color: red
-  - fruit: grape
-    color: red
-  - fruit: strawberry
-    color: red
+  - fruit: apple
+    color: green
+  - fruit: orange
+    color: green
 queries:
-  - query: (and (unique color) (eq color "red"))
-    size: 1
+  - query: (unique fruit color)
+    size: 4

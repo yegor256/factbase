@@ -45,7 +45,7 @@ class TestDebug < Factbase::Test
       assert_raises(RuntimeError) do
         t.evaluate(fact('foo' => -1), [], Factbase.new)
       end
-    assert_equal("all must be positive at (assert 'all must be positive' (gt foo 0))", e.message)
+    assert_includes(e.message, 'all must be positive')
   end
 
   def test_assert_with_zero_value
@@ -54,7 +54,7 @@ class TestDebug < Factbase::Test
       assert_raises(RuntimeError) do
         t.evaluate(fact('foo' => 0), [], Factbase.new)
       end
-    assert_equal("value must not be zero at (assert 'value must not be zero' (gt foo 0))", e.message)
+    assert_includes(e.message, 'value must not be zero')
   end
 
   def test_assert_with_array_true_condition
@@ -68,7 +68,7 @@ class TestDebug < Factbase::Test
       assert_raises(RuntimeError) do
         t.evaluate(fact('foo' => [-1, -2, -3]), [], Factbase.new)
       end
-    assert_equal("at least one positive at (assert 'at least one positive' (gt foo 0))", e.message)
+    assert_includes(e.message, 'at least one positive')
   end
 
   def test_assert_with_mixed_array

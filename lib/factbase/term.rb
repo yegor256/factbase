@@ -121,7 +121,7 @@ class Factbase::Term
   rescue NoMethodError => e
     raise "Probably the term '#{@op}' is not defined at #{self}: #{e.message}"
   rescue StandardError => e
-    raise "#{e.message} at #{self}"
+    raise "#{e.message.inspect} at #{self} at #{e.backtrace[0]}"
   end
 
   # Simplify it if possible.
