@@ -153,7 +153,7 @@ module Factbase::IndexedTerm
           end
           if r.nil?
             r = n
-          else
+          elsif n.size < r.size * 5 # to skip some obvious matchings
             r &= n.to_a
           end
           break if r.empty?
