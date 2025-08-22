@@ -122,8 +122,8 @@ module Factbase::IndexedTerm
       r = nil
       if @operands.all? { |o| o.op == :eq } && @operands.size > 1 \
         && @operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
-        key = [maps.object_id, @operands.map { |o| o.operands.first }, :multi_eq]
         props = @operands.map { |o| o.operands.first }.sort
+        key = [maps.object_id, props, :multi_and_eq]
         if @idx[key].nil?
           @idx[key] = {}
           maps.to_a.each do |m|
@@ -194,7 +194,7 @@ module Factbase::IndexedTerm
   private
 
   # The input looks like this: [[6, 55], [3], [4, 3, 5]].
-  # The outputh should contain all possible combinations: [[6, 3, 4], [6, 3, 3], [55, 3, 5], ...]
+  # The output should contain all possible combinations: [[6, 3, 4], [6, 3, 3], [55, 3, 5], ...]
   def _as_tuples(values)
     tuples = [values.first]
     if values.size > 1
