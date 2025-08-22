@@ -133,8 +133,8 @@ module Factbase::IndexedTerm
             end
           end
         end
-        tuples = _as_tuples(
-          @operands.sort_by { |o| o.operands.first }.map do |o|
+        tuples = Enumerator.product(
+          *@operands.sort_by { |o| o.operands.first }.map do |o|
             if o.operands[1].is_a?(Symbol)
               params[o.operands[1].to_s] || []
             else
@@ -192,23 +192,6 @@ module Factbase::IndexedTerm
   end
 
   private
-
-  # The input looks like this: [[6, 55], [3], [4, 3, 5]].
-  # The output should contain all possible combinations: [[6, 3, 4], [6, 3, 3], [55, 3, 5], ...]
-  def _as_tuples(values)
-    tuples = [values.first]
-    if values.size > 1
-      tails = _as_tuples(values[1..])
-      ext = []
-      tuples.each do |t|
-        tails.each do |tail|
-          ext << (t + tail)
-        end
-      end
-      tuples = ext
-    end
-    tuples
-  end
 
   def _all_tuples(fact, props)
     prop = props.first.to_s
