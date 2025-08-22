@@ -22,8 +22,6 @@ module Factbase::IndexedTerm
   def predict(maps, params)
     key = [maps.object_id, @operands.first, @op]
     case @op
-    when :unique, :empty
-      maps
     when :one
       if @idx[key].nil?
         @idx[key] = []
@@ -147,16 +145,13 @@ module Factbase::IndexedTerm
       else
         @operands.each do |o|
           n = o.predict(maps, params)
-          if n.nil?
-            r = maps
-            break
-          end
+          break if n.nil?
           if r.nil?
             r = n
           elsif n.size < r.size * 8 # to skip some obvious matchings
             r &= n.to_a
           end
-          break if r.size < 512
+          break if r.size < maps.size / 32 # to stop when it's small enough already
         end
       end
       r
