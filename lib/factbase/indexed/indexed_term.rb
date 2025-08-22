@@ -22,7 +22,7 @@ module Factbase::IndexedTerm
   def predict(maps, params)
     key = [maps.object_id, @operands.first, @op]
     case @op
-    when :unique
+    when :unique, :empty
       maps
     when :one
       if @idx[key].nil?
