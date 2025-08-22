@@ -151,8 +151,8 @@ module Factbase::IndexedTerm
           elsif n.size < r.size * 8 # to skip some obvious matchings
             r &= n.to_a
           end
-          break if r.size < maps.size / 32 # to stop when it's small enough already
-          break if r.size < 128 # to stop when it's obviously small
+          break if r.size < maps.size / 32 # it's already small enough
+          break if r.size < 128 # it's obviously already small enough
         end
       end
       r
@@ -166,7 +166,7 @@ module Factbase::IndexedTerm
         end
         r = maps & [] if r.nil?
         r |= n.to_a
-        return maps if r.size > maps.size / 4 # to stop when it's big enough already
+        return maps if r.size > maps.size / 4 # it's big enough already
       end
       r
     when :not
