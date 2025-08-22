@@ -25,30 +25,10 @@ module Factbase::Ordering
     vv = (0..(@operands.size - 1)).map { |i| _values(i, fact, maps, fb) }
     return false if vv.any?(nil)
     pass = true
-    _cartesian(vv).each do |t|
+    Enumerator.product(*vv).to_a.each do |t|
       pass = false if @seen.include?(t)
       @seen << t
     end
     pass
-  end
-
-  private
-
-  # Multiplies arrays and returns a list of all possible combinations
-  # of their elements. If this array is provided:
-  #
-  #  [ [4, 3], [2, 88, 13] ]
-  #
-  # This will be the result:
-  #
-  # [ [4, 2], [4, 88], [4, 13], [3, 2], [3, 88], [3, 13]]
-  def _cartesian(vv)
-    ff = vv.first.zip
-    if vv.one?
-      ff
-    else
-      tail = _cartesian(vv[1..])
-      ff.map { |f| tail.map { |t| f + t } }
-    end
   end
 end
