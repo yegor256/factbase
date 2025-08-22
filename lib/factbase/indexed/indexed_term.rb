@@ -152,6 +152,7 @@ module Factbase::IndexedTerm
             r &= n.to_a
           end
           break if r.size < maps.size / 32 # to stop when it's small enough already
+          break if r.size < 128 # to stop when it's obviously small
         end
       end
       r
