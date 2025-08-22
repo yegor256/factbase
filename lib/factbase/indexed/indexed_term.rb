@@ -166,6 +166,7 @@ module Factbase::IndexedTerm
         end
         r = maps & [] if r.nil?
         r |= n.to_a
+        return maps if r.size > maps.size / 4 # to stop when it's big enough already
       end
       r
     when :not
