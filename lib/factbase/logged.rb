@@ -146,10 +146,11 @@ class Factbase::Logged
         end
       raise ".query(#{@term.to_s.inspect}).each() of #{qry.class} returned #{r.class}" unless r.is_a?(Integer)
       q = Factbase::Syntax.new(@term).to_term.to_s
+      q = "#{q} with {#{params.map { |k, v| "#{k}=#{v}" }.join(', ')}}" if params.is_a?(Hash) && !params.empty?
       if r.zero?
-        @tube.say(start, "Zero/#{@fb.size} facts found by '#{q}' #{tail}")
+        @tube.say(start, "Zero/#{@fb.size} facts found by #{q} #{tail}")
       else
-        @tube.say(start, "Found #{r}/#{@fb.size} fact(s) by '#{q}' #{tail}")
+        @tube.say(start, "Found #{r}/#{@fb.size} fact(s) by #{q} #{tail}")
       end
       r
     end
@@ -180,11 +181,11 @@ class Factbase::Logged
         end
       raise ".delete! of #{@term.class} returned #{r.class}" unless r.is_a?(Integer)
       if before.zero?
-        @tube.say(start, "There were no facts, nothing deleted by '#{@term}' #{tail}")
+        @tube.say(start, "There were no facts, nothing deleted by #{@term} #{tail}")
       elsif r.zero?
-        @tube.say(start, "No facts out of #{before} deleted by '#{@term}' #{tail}")
+        @tube.say(start, "No facts out of #{before} deleted by #{@term} #{tail}")
       else
-        @tube.say(start, "Deleted #{r} fact(s) out of #{before} by '#{@term}' #{tail}")
+        @tube.say(start, "Deleted #{r} fact(s) out of #{before} by #{@term} #{tail}")
       end
       r
     end
