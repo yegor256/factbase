@@ -12,7 +12,9 @@ facts:
 queries:
   - query: (sorted year (always))
     size: 3
-  - query: (and (sorted year (exists year)) (head 1))
+  - query: (head 1 (and (sorted year (exists year))))
     size: 1
-  - query: (and (join 'y' (and (sorted year (eq year $year)) (head 1))) (eq year 2024))
+  - query: (join 'y<=year' (head 1 (sorted year (eq year $year))))
+    size: 3
+  - query: (and (join 'y<=year' (head 1 (sorted year (eq year $year)))) (eq y 2024))
     size: 1

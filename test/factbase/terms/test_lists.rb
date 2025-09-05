@@ -24,6 +24,16 @@ class TestLists < Factbase::Test
     assert_equal('first second third', list.map { |m| m['y'].first }.join(' '))
   end
 
+  def test_join_and_sort
+    maps = [
+      { 'foo' => [888] },
+      { 'foo' => [111] },
+      { 'foo' => [444] }
+    ]
+    ff = Factbase.new(maps).query('(join "f<=foo" (head 1 (sorted foo (eq foo $foo))))').each.to_a
+    assert_equal('888 111 444', ff.map { |m| m['f'].first }.join(' '))
+  end
+
   def test_inverting
     maps = [
       { 'x' => [33] },

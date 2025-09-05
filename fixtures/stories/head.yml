@@ -7,7 +7,7 @@ facts:
   - name: Ford
   - name: Toyota
 queries:
-  - query: (head 1)
+  - query: (head 1 (always))
     size: 1
-  - query: (and (eq name "Volvo") (head 1))
+  - query: (head 1 (eq name "Volvo"))
     size: 1

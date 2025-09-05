@@ -39,4 +39,19 @@ module Factbase::Lists
       .reverse
       .map { |m| m.all_properties.to_h { |k| [k, m[k]] } }
   end
+
+  def head(_fact, _maps, _fb)
+    true
+  end
+
+  def head_predict(maps, fb, params)
+    assert_args(2)
+    max = @operands[0]
+    raise "An integer is expected as first argument of 'sorted'" unless max.is_a?(Integer)
+    term = @operands[1]
+    raise "A term is expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
+    fb.query(term, maps).each(fb, params).to_a
+      .take(max)
+      .map { |m| m.all_properties.to_h { |k| [k, m[k]] } }
+  end
 end

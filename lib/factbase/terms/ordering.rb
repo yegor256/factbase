@@ -31,12 +31,4 @@ module Factbase::Ordering
     end
     pass
   end
-
-  def head(*)
-    max = @operands[0]
-    raise "An integer is expected as first argument of 'head'" unless max.is_a?(Integer)
-    @passed = 0 if @passed.nil?
-    @passed += 1
-    @passed <= max
-  end
 end
