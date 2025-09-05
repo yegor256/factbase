@@ -17,6 +17,7 @@ module Factbase::CachedTerm
   # @return [bool] TRUE if matches
   def evaluate(fact, maps, fb)
     return super unless static? && !abstract?
+    return super if %i[head unique].include?(@op)
     key = [maps.object_id, to_s]
     before = @cache[key]
     @cache[key] = super if before.nil?
