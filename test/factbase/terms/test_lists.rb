@@ -23,4 +23,15 @@ class TestLists < Factbase::Test
     assert(list.all?(Hash), "Why not all hashes in the list: #{list}")
     assert_equal('first second third', list.map { |m| m['y'].first }.join(' '))
   end
+
+  def test_inverting
+    maps = [
+      { 'x' => [33] },
+      { 'x' => [54] },
+      { 'x' => [12] }
+    ]
+    t = Factbase::Syntax.new('(inverted (always))').to_term
+    list = t.predict(maps, Factbase.new, {})
+    assert_equal('12 54 33', list.map { |m| m['x'].first }.join(' '))
+  end
 end

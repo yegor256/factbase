@@ -26,4 +26,17 @@ module Factbase::Lists
       .sort_by { |m| m[prop].first }
       .map { |m| m.all_properties.to_h { |k| [k, m[k]] } }
   end
+
+  def inverted(_fact, _maps, _fb)
+    true
+  end
+
+  def inverted_predict(maps, fb, params)
+    assert_args(1)
+    term = @operands[0]
+    raise "A term is expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
+    fb.query(term, maps).each(fb, params).to_a
+      .reverse
+      .map { |m| m.all_properties.to_h { |k| [k, m[k]] } }
+  end
 end
