@@ -53,6 +53,9 @@ class Factbase::Term
   require_relative 'terms/aggregates'
   include Factbase::Aggregates
 
+  require_relative 'terms/lists'
+  include Factbase::Lists
+
   require_relative 'terms/strings'
   include Factbase::Strings
 
@@ -107,8 +110,13 @@ class Factbase::Term
   # @param [Array<Hash>] maps Records to iterate, maybe
   # @param [Hash] _params Params to use (keys must be strings, not symbols, with values as arrays)
   # @return [Array<Hash>] Records to iterate
-  def predict(maps, _params)
-    maps
+  def predict(maps, fb, params)
+    m = :"#{@op}_predict"
+    if respond_to?(m)
+      send(m, maps, fb, params)
+    else
+      maps
+    end
   end
 
   # Does it match the fact?

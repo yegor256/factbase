@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - make: Volvo
+    year: 2023
+  - make: Ford
+    year: 2021
+  - make: Toyota
+    year: 2024
+queries:
+  - query: (sorted year (always))
+    size: 3
+  - query: (and (sorted year (exists year)) (head 1))
+    size: 1

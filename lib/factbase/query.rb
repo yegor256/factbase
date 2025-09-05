@@ -44,7 +44,7 @@ class Factbase::Query
     return to_enum(__method__, fb, params) unless block_given?
     yielded = 0
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    maybe = @term.predict(@maps, Factbase::Tee.new({}, params))
+    maybe = @term.predict(@maps, fb, Factbase::Tee.new({}, params))
     maybe ||= @maps unless maybe.equal?(@maps)
     maybe.each do |m|
       extras = {}
