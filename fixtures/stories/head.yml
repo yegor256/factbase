@@ -9,3 +9,5 @@ facts:
 queries:
   - query: (head 1)
     size: 1
+  - query: (and (eq name "Volvo") (head 1))
+    size: 1
