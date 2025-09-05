@@ -12,3 +12,5 @@ facts:
 queries:
   - query: (sorted year (always))
     size: 3
+  - query: (and (sorted year (exists year)) (head 1))
+    size: 1
