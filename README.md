@@ -176,6 +176,12 @@ It's also possible to use a sub-query in a shorter form than with the `agg`:
 
 * `(empty q)` is true if the subquery `q` is empty
 
+It's possible to post-process a list of facts, for `agg` and `join`:
+
+* `(sorted p expr)` sorts them by the value of `p` property
+* `(inverted expr)` reverses them
+* `(head n expr)` takes only `n` facts from the head of the list
+
 There are some system-level terms:
 
 * `(env v1 v2)` returns the value of environment variable `v1` or the string
