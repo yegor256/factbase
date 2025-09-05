@@ -19,7 +19,7 @@ module Factbase::IndexedTerm
   # @param [Array<Hash>] maps Array of facts
   # @param [Hash] params Key/value params to use
   # @return [Array<Hash>|nil] Returns a new array, or NIL if the original array must be used
-  def predict(maps, params)
+  def predict(maps, fb, params)
     key = [maps.object_id, @operands.first, @op]
     case @op
     when :one
@@ -144,7 +144,7 @@ module Factbase::IndexedTerm
         r = (maps & []) | j
       else
         @operands.each do |o|
-          n = o.predict(maps, params)
+          n = o.predict(maps, fb, params)
           break if n.nil?
           if r.nil?
             r = n
@@ -159,7 +159,7 @@ module Factbase::IndexedTerm
     when :or
       r = nil
       @operands.each do |o|
-        n = o.predict(maps, params)
+        n = o.predict(maps, fb, params)
         if n.nil?
           r = nil
           break
@@ -171,7 +171,7 @@ module Factbase::IndexedTerm
       r
     when :not
       if @idx[key].nil?
-        yes = @operands.first.predict(maps, params)
+        yes = @operands.first.predict(maps, fb, params)
         if yes.nil?
           @idx[key] = { r: nil }
         else

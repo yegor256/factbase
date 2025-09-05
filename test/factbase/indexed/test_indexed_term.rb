@@ -19,7 +19,7 @@ class TestIndexedTerm < Factbase::Test
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7] }, { 'foo' => [22, 42] }, { 'foo' => [] }])
-    n = term.predict(maps, {})
+    n = term.predict(maps, nil, {})
     assert_equal(2, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
@@ -29,7 +29,7 @@ class TestIndexedTerm < Factbase::Test
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7] }, { 'foo' => [22, 42] }, { 'foo' => [] }])
-    n = term.predict(maps, {})
+    n = term.predict(maps, nil, {})
     assert_equal(3, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
@@ -39,7 +39,7 @@ class TestIndexedTerm < Factbase::Test
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7] }, { 'foo' => [22, 42] }, { 'foo' => [] }])
-    n = term.predict(maps, {})
+    n = term.predict(maps, nil, {})
     assert_equal(1, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
@@ -49,7 +49,7 @@ class TestIndexedTerm < Factbase::Test
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [22, 42] }, { 'foo' => [22] }])
-    n = term.predict(maps, {})
+    n = term.predict(maps, nil, {})
     assert_equal(1, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
@@ -65,7 +65,7 @@ class TestIndexedTerm < Factbase::Test
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [22, 42] }, { 'foo' => [22, 42] }])
-    n = term.predict(maps, Factbase::Tee.new({}, { 'jeff' => [7] }))
+    n = term.predict(maps, nil, Factbase::Tee.new({}, { 'jeff' => [7] }))
     assert_equal(1, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
@@ -75,7 +75,7 @@ class TestIndexedTerm < Factbase::Test
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [4] }])
-    assert_equal(1, term.predict(maps, {}).size)
+    assert_equal(1, term.predict(maps, nil, {}).size)
   end
 
   def test_predicts_on_or
@@ -90,7 +90,7 @@ class TestIndexedTerm < Factbase::Test
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [22, 42] }, { 'foo' => [22, 42] }])
-    n = term.predict(maps, {})
+    n = term.predict(maps, nil, {})
     assert_equal(3, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
@@ -100,7 +100,7 @@ class TestIndexedTerm < Factbase::Test
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'alpha' => [] }, {}])
-    n = term.predict(maps, {})
+    n = term.predict(maps, nil, {})
     assert_nil(n)
   end
 
@@ -108,15 +108,17 @@ class TestIndexedTerm < Factbase::Test
     term = Factbase::Term.new(:gt, [:foo, 42])
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new([
-                                 { 'foo' => [10] },
-                                 { 'foo' => [43] },
-                                 { 'foo' => [42] },
-                                 { 'foo' => [100, 5] },
-                                 { 'bar' => [50] },
-                                 { 'foo' => [41, 42, 43] }
-                               ])
-    n = term.predict(maps, {})
+    maps = Factbase::Taped.new(
+      [
+        { 'foo' => [10] },
+        { 'foo' => [43] },
+        { 'foo' => [42] },
+        { 'foo' => [100, 5] },
+        { 'bar' => [50] },
+        { 'foo' => [41, 42, 43] }
+      ]
+    )
+    n = term.predict(maps, nil, {})
     assert_equal(3, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
@@ -125,15 +127,17 @@ class TestIndexedTerm < Factbase::Test
     term = Factbase::Term.new(:lt, [:foo, 42])
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new([
-                                 { 'foo' => [10] },
-                                 { 'foo' => [43] },
-                                 { 'foo' => [42] },
-                                 { 'foo' => [100, 5] },
-                                 { 'bar' => [50] },
-                                 { 'foo' => [41, 42, 43] }
-                               ])
-    n = term.predict(maps, {})
+    maps = Factbase::Taped.new(
+      [
+        { 'foo' => [10] },
+        { 'foo' => [43] },
+        { 'foo' => [42] },
+        { 'foo' => [100, 5] },
+        { 'bar' => [50] },
+        { 'foo' => [41, 42, 43] }
+      ]
+    )
+    n = term.predict(maps, nil, {})
     assert_equal(3, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
