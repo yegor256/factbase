@@ -21,8 +21,8 @@ class TestFactAsYaml < Factbase::Test
     f.foo = 33
     f.bar = 'hello, world! how are you?'
     assert_equal(
-      "_id: [1]\n" \
-      "bar: [\"hello, world! how are you?\"]\n" \
+      "_id: 1\n" \
+      "bar: \"hello, world! how are you?\"\n" \
       'foo: [42, 33]',
       Factbase::FactAsYaml.new(f).to_s
     )
@@ -36,9 +36,9 @@ class TestFactAsYaml < Factbase::Test
     f.bar = 'hello'
     yaml_str = Factbase::FactAsYaml.new(f).to_s
     yaml = YAML.load(yaml_str)
-    assert_equal(1, yaml['_id'][0])
-    assert_equal('hello', yaml['bar'][0])
-    assert_equal(42, yaml['foo'][0])
+    assert_equal(1, yaml['_id'])
+    assert_equal('hello', yaml['bar'])
+    assert_equal(42, yaml['foo'])
   end
 
   def test_multiple_values

@@ -37,14 +37,26 @@ class Factbase::FactAsYaml
     hash.sort.to_h.map do |k, vv|
       [
         k,
-        ': [',
-        vv.map do |v|
-          v = v.ellipsized if v.is_a?(String)
-          v = v.utc.iso8601 if v.is_a?(Time)
-          v
-        end.map(&:inspect).join(', '),
-        ']'
-      ].join
+        ': ',
+        if vv.one?
+          v_to_s(vv.first)
+        else
+          [
+            '[',
+            vv.map { |v| v_to_s(v) }.join(', '),
+            ']'
+          ]
+        end
+      ].zip.join
     end.join("\n")
+  end
+
+  private
+
+  def v_to_s(val)
+    s = val
+    s = s.inspect.ellipsized if s.is_a?(String)
+    s = s.utc.iso8601 if s.is_a?(Time)
+    s
   end
 end
