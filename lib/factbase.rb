@@ -206,7 +206,7 @@ class Factbase
       garbage << pairs[oid]
       churn.append(0, 1, 0)
     end
-    @maps.delete_if { |m| garbage.include?(m.object_id) }
+    @maps.delete_if { |m| garbage.include?(m.object_id) } unless garbage.empty?
     churn
   end
 
