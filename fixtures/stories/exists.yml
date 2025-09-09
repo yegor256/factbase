@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - city: Moscow
+    age: 875
+    color_of_hair: blond
+  - city: London
+    age: 1900
+    style_of_music: pop
+  - city: Milan
+    age: 2600
+queries:
+  - query: (exists style_of_music)
+    size: 1
+  - query: (exists city)
+    size: 3
