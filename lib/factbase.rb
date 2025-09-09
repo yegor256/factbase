@@ -188,6 +188,7 @@ class Factbase
     end
     require_relative 'factbase/churn'
     churn = Factbase::Churn.new
+    seen = []
     taped.inserted.each do |oid|
       b = taped.find_by_object_id(oid)
       next if b.nil?
@@ -196,6 +197,7 @@ class Factbase
     end
     garbage = []
     taped.added.each do |oid|
+      next if seen.include?(oid)
       b = taped.find_by_object_id(oid)
       next if b.nil?
       garbage << pairs[oid]
