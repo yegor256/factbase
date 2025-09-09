@@ -189,13 +189,20 @@ class Factbase
     require_relative 'factbase/churn'
     churn = Factbase::Churn.new
     seen = []
+    garbage = []
+    taped.deleted.each do |oid|
+      garbage << pairs[oid]
+      seen << oid
+      churn.append(0, 1, 0)
+    end
     taped.inserted.each do |oid|
+      next if seen.include?(oid)
       b = taped.find_by_object_id(oid)
       next if b.nil?
+      seen << oid
       @maps << b
       churn.append(1, 0, 0)
     end
-    garbage = []
     taped.added.each do |oid|
       next if seen.include?(oid)
       b = taped.find_by_object_id(oid)
@@ -203,10 +210,6 @@ class Factbase
       garbage << pairs[oid]
       @maps << b
       churn.append(0, 0, 1)
-    end
-    taped.deleted.each do |oid|
-      garbage << pairs[oid]
-      churn.append(0, 1, 0)
     end
     @maps.delete_if { |m| garbage.include?(m.object_id) } unless garbage.empty?
     churn
