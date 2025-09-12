@@ -60,7 +60,7 @@ class Factbase::Logged
     if rollback
       @tube.say(start, "Txn ##{id} rolled back in #{start.ago}")
     else
-      @tube.say(start, "Txn ##{id} touched #{r} in #{start.ago}")
+      @tube.say(start, "Txn ##{id} touched #{r.zero? ? 'nothing' : r} in #{start.ago}")
     end
     r
   end
