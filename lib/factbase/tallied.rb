@@ -36,8 +36,18 @@ class Factbase::Tallied
   end
 
   def txn
+    before = @churn.dup
+    commit = false
     @fb.txn do |fbt|
-      yield Factbase::Tallied.new(fbt, @churn)
+      catch :rollback do
+        yield Factbase::Tallied.new(fbt, @churn)
+        commit = true
+      end
+    rescue Factbase::Rollback => e
+      @churn = before
+      raise e
+    ensure
+      @churn = before unless commit
     end
   end
 

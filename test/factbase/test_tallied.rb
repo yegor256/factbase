@@ -61,6 +61,24 @@ class TestTallied < Factbase::Test
     assert_equal(2, fb.churn.added)
   end
 
+  def test_counts_in_txn_after_rollback
+    fb = Factbase::Tallied.new(Factbase.new)
+    fb.txn do |fbt|
+      fbt.insert.boom = 3
+      raise Factbase::Rollback
+    end
+    assert_predicate(fb.churn, :zero?)
+  end
+
+  def test_counts_in_txn_after_rollback_throw
+    fb = Factbase::Tallied.new(Factbase.new)
+    fb.txn do |fbt|
+      fbt.insert.boom = 3
+      throw :rollback
+    end
+    assert_predicate(fb.churn, :zero?)
+  end
+
   def test_counts_in_txn_in_threads
     fb = Factbase::Tallied.new(Factbase.new)
     t = 5
