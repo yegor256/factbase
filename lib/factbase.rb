@@ -175,6 +175,8 @@ class Factbase
       end
     require_relative 'factbase/taped'
     taped = Factbase::Taped.new(before)
+    require_relative 'factbase/churn'
+    churn = Factbase::Churn.new
     catch :commit do
       require_relative 'factbase/light'
       commit = false
@@ -182,12 +184,10 @@ class Factbase
         yield Factbase::Light.new(Factbase.new(taped))
         commit = true
       end
-      return 0 unless commit
+      return churn unless commit
     rescue Factbase::Rollback
-      return 0
+      return churn
     end
-    require_relative 'factbase/churn'
-    churn = Factbase::Churn.new
     seen = []
     garbage = []
     taped.deleted.each do |oid|
