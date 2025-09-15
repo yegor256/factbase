@@ -59,7 +59,6 @@ class Factbase::Fact
       v = v.utc if v.is_a?(Time)
       @map[kk] = [] if @map[kk].nil?
       @map[kk] << v
-      @map[kk].uniq!
       nil
     elsif k == '[]'
       @map[args[1].to_s]

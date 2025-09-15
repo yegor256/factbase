@@ -40,7 +40,7 @@ class TestFact < Factbase::Test
     f.foo = 'Hello'
     assert_equal(2, map['foo'].size)
     f.foo = 42
-    assert_equal(2, map['foo'].size)
+    assert_equal(3, map['foo'].size)
   end
 
   def test_fails_when_empty
@@ -83,7 +83,7 @@ class TestFact < Factbase::Test
     f = Factbase::Fact.new(map)
     f.foo = 42
     f.foo = 42
-    assert_equal([42], map['foo'])
+    assert_equal([42, 42], map['foo'])
   end
 
   def test_time_in_utc
