@@ -18,6 +18,17 @@ class TestTaped < Factbase::Test
     assert_equal(1, t.inserted.size)
   end
 
+  def test_checks_for_emptiness
+    t = Factbase::Taped.new([{ foo: 'yes' }])
+    refute_empty(t)
+  end
+
+  def test_joins_with_non_empty
+    t = Factbase::Taped.new([{ foo: 'yes' }])
+    t &= [{ bar: 'no' }]
+    assert_equal(0, t.size)
+  end
+
   def test_joins_with_empty
     t = Factbase::Taped.new([{ foo: 'yes' }])
     t &= []
@@ -28,6 +39,12 @@ class TestTaped < Factbase::Test
     t = Factbase::Taped.new([{ bar: 'oops' }])
     t |= []
     assert_equal(1, t.size)
+  end
+
+  def test_disjoins_with_non_empty
+    t = Factbase::Taped.new([{ bar: 'oops' }])
+    t |= [{ bar: 'no' }]
+    assert_equal(2, t.size)
   end
 
   def test_tracks_deletion
