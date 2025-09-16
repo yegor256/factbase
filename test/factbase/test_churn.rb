@@ -20,6 +20,11 @@ class TestChurn < Factbase::Test
     assert_equal(6, c.to_i)
   end
 
+  def test_converts_empty_to_string
+    c = Factbase::Churn.new
+    assert_equal('nothing', c.to_s)
+  end
+
   def test_checks_for_zero
     c = Factbase::Churn.new
     assert_predicate(c, :zero?)

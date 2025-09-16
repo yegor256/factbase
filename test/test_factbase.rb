@@ -246,7 +246,7 @@ class TestFactbase < Factbase::Test
         fbt.query('(eq bar 55)').each.to_a.first.boom = 44
         raise Factbase::Rollback
       end
-    assert_equal('0i/0d/0a', modified.to_s)
+    assert_equal('nothing', modified.to_s)
     assert_equal(0, modified.to_i)
     assert_equal(1, fb.query('(always)').each.to_a.size)
     assert_equal(0, fb.query('(exists boom)').each.to_a.size)

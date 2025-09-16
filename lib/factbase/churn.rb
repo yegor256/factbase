@@ -19,7 +19,11 @@ class Factbase::Churn
   end
 
   def to_s
-    "#{@inserted}i/#{@deleted}d/#{@added}a"
+    if zero?
+      'nothing'
+    else
+      "#{@inserted}i/#{@deleted}d/#{@added}a"
+    end
   end
 
   def zero?
