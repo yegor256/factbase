@@ -16,6 +16,11 @@ queries:
         (join 'age<=age' (eq person $name))
         (exists age))
     size: 4
+  - query: |
+      (and
+        (join 'foo<=age' (eq person 'something else'))
+        (exists foo))
+    size: 0
   - query: (and (join 'age' (eq person $name)) (exists age))
     size: 4
   - query: (and (join 'x<=age' (eq age (agg (exists person) (max age)))) (eq x 45))
