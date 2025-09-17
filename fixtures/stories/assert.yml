@@ -18,3 +18,8 @@ queries:
         (eq color "red")
         (assert "must be just one weight" (one weight)))
     size: 2
+  - query: |
+      (and
+        (join "w<=weight" (eq fruit $fruit))
+        (assert "must be just one weight" (one w)))
+    size: 3
