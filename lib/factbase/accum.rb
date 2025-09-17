@@ -39,12 +39,20 @@ class Factbase::Accum
       @fact.method_missing(*args) if @pass
     elsif k == '[]'
       kk = args[1].to_s
-      vv = @props[kk].nil? ? [] : @props[kk]
+      vv =
+        if @pass
+          []
+        else
+          @props[kk].nil? ? [] : @props[kk]
+        end
       vvv = @fact.method_missing(*args)
       vvv = [vvv] unless vvv.nil? || vvv.respond_to?(:to_a)
       vv += vvv.to_a unless vvv.nil?
-      vv.uniq!
-      vv.empty? ? nil : vv
+      if vv.empty?
+        @props[kk].nil? ? nil : @props[kk]
+      else
+        vv
+      end
     elsif @props[k].nil?
       @fact.public_send(*args)
     else

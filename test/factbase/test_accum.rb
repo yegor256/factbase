@@ -71,4 +71,14 @@ class TestAccum < Factbase::Test
     a.foo = 42
     assert_equal('[ foo: [42] ]', f.to_s)
   end
+
+  def test_keep_duplicates
+    f = Factbase::Fact.new({})
+    a = Factbase::Accum.new(f, {}, true)
+    a.foo = 42
+    a.foo = 41
+    a.foo = 42
+    a.foo = 42
+    assert_equal([42, 41, 42, 42], f['foo'])
+  end
 end
