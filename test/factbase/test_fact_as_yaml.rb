@@ -19,11 +19,12 @@ class TestFactAsYaml < Factbase::Test
     f._id = 1
     f.foo = 42
     f.foo = 33
+    f.foo = 42
     f.bar = 'hello, world! how are you?'
     assert_equal(
       "_id: 1\n" \
       "bar: \"hello, world! how are you?\"\n" \
-      'foo: [42, 33]',
+      'foo: [42, 33, 42]',
       Factbase::FactAsYaml.new(f).to_s
     )
   end
