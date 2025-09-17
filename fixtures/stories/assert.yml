@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+---
+# yamllint disable rule:line-length
+facts:
+  - fruit: orange
+    color: red
+    weight: 55.9
+  - fruit: apple
+    color: red
+    weight: 50.9
+  - fruit: pear
+    color: green
+    weight: 54.9
+queries:
+  - query: |
+      (and
+        (eq color "red")
+        (assert "must be just one weight" (one weight)))
+    size: 2
