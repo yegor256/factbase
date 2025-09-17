@@ -7,6 +7,7 @@ require 'decoor'
 require 'others'
 require_relative '../factbase'
 require_relative '../factbase/syntax'
+require_relative '../factbase/tallied'
 
 # A decorator of a Factbase, that checks rules on every set.
 #
@@ -49,11 +50,14 @@ class Factbase::Rules
     later = Later.new(@uid)
     @check = later
     @fb.txn do |fbt|
-      yield Factbase::Rules.new(fbt, @rules, @check, uid: @uid)
+      churn = Factbase::Churn.new
+      yield Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn)
       @check = before
-      fbt.query('(always)').each do |f|
-        next unless later.include?(f)
-        @check.it(f, @fb)
+      unless churn.zero?
+        fbt.query('(always)').each do |f|
+          next unless later.include?(f)
+          @check.it(f, @fb)
+        end
       end
     end
   end
