@@ -158,6 +158,17 @@ class TestQuery < Factbase::Test
     assert_equal(1, maps.size)
   end
 
+  def test_delete_by_id
+    maps = [
+      { '_id' => [1], 'fruit' => ['orange'] },
+      { '_id' => [2], 'fruit' => ['apple'] },
+      { '_id' => [3], 'fruit' => ['pear'] }
+    ]
+    q = Factbase::Query.new(maps, '(eq fruit "apple")', Factbase.new)
+    assert_equal(1, q.delete!)
+    assert_equal(2, maps.size)
+  end
+
   def test_reading_one
     maps = [
       { 'foo' => [42], 'hello' => [4] },

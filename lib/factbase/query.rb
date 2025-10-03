@@ -77,17 +77,29 @@ class Factbase::Query
 
   # Delete all facts that match the query.
   # @param [Factbase] fb The factbase to delete from
+  # @param [id] String The id of facts that uniquely identify them
   # @return [Integer] Total number of facts deleted
-  def delete!(fb = @fb)
+  def delete!(fb = @fb, id: '_id')
     deleted = 0
-    @maps.delete_if do |m|
-      f = Factbase::Fact.new(m)
-      if @term.evaluate(f, @maps, fb)
-        deleted += 1
-        true
-      else
-        false
+    ids = []
+    each(fb) do |f|
+      i = f[id]
+      unless i
+        ids = nil
+        break
       end
+      ids << i.first
+    end
+    @maps.delete_if do |m|
+      d =
+        if ids
+          i = m[id]&.first
+          i && ids.include?(i)
+        else
+          @term.evaluate(Factbase::Fact.new(m), @maps, fb)
+        end
+      deleted += 1 if d
+      d
     end
     deleted
   end
