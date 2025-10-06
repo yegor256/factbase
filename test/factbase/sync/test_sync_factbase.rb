@@ -5,6 +5,7 @@
 
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/impatient'
 require_relative '../../../lib/factbase/sync/sync_factbase'
 
 # Sync factbase test.
@@ -18,5 +19,26 @@ class TestSyncFactbase < Factbase::Test
     fb.query('(exists foo)').each do
       fb.insert
     end
+  end
+
+  def test_lock_unlock_mutex
+    fb = Factbase.new
+    fb = Class.new(Factbase::SyncFactbase) do
+      def insert
+        try_lock do
+          sleep 0.5
+          @origin.insert
+        end
+      end
+    end.new(fb)
+    ts = []
+    ts << Thread.new do
+      fb.insert.foo = 42
+    end
+    ts << Thread.new do
+      sleep 0.1
+      assert_equal(1, fb.query('(exists foo)').each.to_a.size)
+    end
+    ts.map(&:join)
   end
 end

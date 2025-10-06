@@ -57,10 +57,11 @@ class Factbase::SyncFactbase
 
   private
 
-  def try_lock
-    locked = @mutex.try_lock
-    r = yield
-    @mutex.unlock if locked
-    r
+  def try_lock(&)
+    if @mutex.owned?
+      yield
+    else
+      @mutex.synchronize(&)
+    end
   end
 end
