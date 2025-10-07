@@ -41,4 +41,25 @@ class TestSyncFactbase < Factbase::Test
     end
     ts.map(&:join)
   end
+
+  def test_nested_lock_in_query_each_and_insert
+    fb = Factbase::SyncFactbase.new(Factbase.new)
+    fb.insert.baz = 43
+    ts = []
+    ts << Thread.new do
+      fb.txn do |fbt|
+        fbt.query('(exists baz)').each do |f|
+          f.foo = 42
+          fbt.insert.foo = 42
+          sleep 0.07
+        end
+      end
+    end
+    ts << Thread.new do
+      sleep 0.03
+      assert_equal(2, fb.query('(exists foo)').each.to_a.size)
+      assert_equal(1, fb.query('(exists baz)').each.to_a.size)
+    end
+    ts.map(&:join)
+  end
 end
