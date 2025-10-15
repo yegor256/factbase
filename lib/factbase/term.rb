@@ -7,6 +7,8 @@ require 'backtrace'
 require_relative '../factbase'
 require_relative 'fact'
 require_relative 'tee'
+require_relative 'terms/unique'
+require_relative 'terms/prev'
 
 # Term.
 #
@@ -68,9 +70,6 @@ class Factbase::Term
   require_relative 'terms/aliases'
   include Factbase::Aliases
 
-  require_relative 'terms/ordering'
-  include Factbase::Ordering
-
   require_relative 'terms/defn'
   include Factbase::Defn
 
@@ -80,12 +79,19 @@ class Factbase::Term
   require_relative 'terms/debug'
   include Factbase::Debug
 
+  require_relative 'terms/shared'
+  include Factbase::TermShared
+
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
   def initialize(operator, operands)
     @op = operator
     @operands = operands
+    @terms = {
+      unique: Factbase::Unique.new(operands),
+      prev: Factbase::Prev.new(operands)
+    }
   end
 
   # Extend it with the module.
@@ -119,13 +125,17 @@ class Factbase::Term
     end
   end
 
-  # Does it match the fact?
+  # Evaluate term on a fact
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @param [Factbase] fb Factbase to use for sub-queries
-  # @return [Boolean] TRUE if matches
+  # @return [Object] The result of evaluation
   def evaluate(fact, maps, fb)
-    send(@op, fact, maps, fb)
+    if @terms.key?(@op)
+      @terms[@op].evaluate(fact, maps, fb)
+    else
+      send(@op, fact, maps, fb)
+    end
   rescue NoMethodError => e
     raise "Probably the term '#{@op}' is not defined at #{self}: #{e.message}"
   rescue StandardError => e
@@ -199,41 +209,5 @@ class Factbase::Term
     v = _values(1, fact, maps, fb)
     return nil if v.nil?
     v[i]
-  end
-
-  private
-
-  def assert_args(num)
-    c = @operands.size
-    raise "Too many (#{c}) operands for '#{@op}' (#{num} expected)" if c > num
-    raise "Too few (#{c}) operands for '#{@op}' (#{num} expected)" if c < num
-  end
-
-  def _by_symbol(pos, fact)
-    o = @operands[pos]
-    raise "A symbol expected at ##{pos}, but '#{o}' (#{o.class}) provided" unless o.is_a?(Symbol)
-    k = o.to_s
-    fact[k]
-  end
-
-  # @return [Array|nil] Either array of values or NIL
-  def _values(pos, fact, maps, fb)
-    v = @operands[pos]
-    v = v.evaluate(fact, maps, fb) if v.is_a?(Factbase::Term)
-    v = fact[v.to_s] if v.is_a?(Symbol)
-    return v if v.nil?
-    unless v.is_a?(Array)
-      v =
-        if v.respond_to?(:each)
-          v.to_a
-        else
-          [v]
-        end
-    end
-    raise 'Why not array?' unless v.is_a?(Array)
-    unless v.all? { |i| [Float, Integer, String, Time, TrueClass, FalseClass].any? { |t| i.is_a?(t) } }
-      raise 'Wrong type inside'
-    end
-    v
   end
 end

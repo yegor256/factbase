@@ -3,27 +3,23 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-
-# Ordering test.
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Test for unique term.
+# Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestOrdering < Factbase::Test
-  def test_prev
-    t = Factbase::Term.new(:prev, [:foo])
-    assert_nil(t.evaluate(fact('foo' => 41), [], Factbase.new))
-    assert_equal([41], t.evaluate(fact('foo' => 5), [], Factbase.new))
-    assert_equal([5], t.evaluate(fact('foo' => 6), [], Factbase.new))
-  end
 
+require_relative '../../test__helper'
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/unique'
+
+class TestUnique < Factbase::Test
   def test_unique
-    t = Factbase::Term.new(:unique, [:foo])
+    t = Factbase::Unique.new([:foo])
     refute(t.evaluate(fact, [], Factbase.new))
     assert(t.evaluate(fact('foo' => 41), [], Factbase.new))
     refute(t.evaluate(fact('foo' => 41), [], Factbase.new))
     assert(t.evaluate(fact('foo' => 1), [], Factbase.new))
+    p t
   end
 
   def test_unique_with_multiple_arguments
