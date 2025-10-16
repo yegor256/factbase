@@ -13,5 +13,5 @@ class Factbase::TermBase
   require_relative 'shared'
   include Factbase::TermShared
 
-  protected :assert_args, :_by_symbol, :_values
+  protected :assert_args, :_by_symbol, :_values, :to_s
 end

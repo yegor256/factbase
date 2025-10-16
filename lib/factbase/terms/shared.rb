@@ -9,6 +9,27 @@
 #  Currently, we use it because we are required to inject all thesse methods into Factbase::Term.
 #  When all the terms will inherit from Factbase::TermBase, we can remove this module.
 module Factbase::TermShared
+  # Turns it into a string.
+  # @return [String] The string of it
+  def to_s
+    @to_s ||=
+      begin
+        items = []
+        items << @op
+        items +=
+          @operands.map do |o|
+            if o.is_a?(String)
+              "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"')}'"
+            elsif o.is_a?(Time)
+              o.utc.iso8601
+            else
+              o.to_s
+            end
+          end
+        "(#{items.join(' ')})"
+      end
+  end
+
   private
 
   def assert_args(num)

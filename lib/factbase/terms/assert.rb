@@ -3,24 +3,26 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require_relative '../../factbase'
+require_relative 'base'
 
-# Debug terms.
-#
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
-# License:: MIT
-module Factbase::Debug
-  def traced(fact, maps, fb)
-    assert_args(1)
-    t = @operands[0]
-    raise "A term is expected, but '#{t}' provided" unless t.is_a?(Factbase::Term)
-    r = t.evaluate(fact, maps, fb)
-    puts "#{self} -> #{r}"
-    r
+# The `Factbase::Assert` class represents an assertion term in the Factbase system.
+# It verifies that a given condition evaluates to true, raising an error with
+# a specified message if the assertion fails.
+class Factbase::Assert < Factbase::TermBase
+  # Constructor.
+  # @param [Array] operands Operands
+  def initialize(operands)
+    super()
+    @operands = operands
+    @op = 'assert'
   end
 
-  def assert(fact, maps, fb)
+  # Evaluate term on a fact.
+  # @param [Factbase::Fact] fact The fact
+  # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Factbase] fb Factbase to use for sub-queries
+  # @return [Boolean] Returns true if the assertion passes, otherwise raises an error with the provided message
+  def evaluate(fact, maps, fb)
     assert_args(2)
     message = @operands[0]
     unless message.is_a?(String)

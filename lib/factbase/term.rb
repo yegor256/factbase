@@ -12,6 +12,8 @@ require_relative 'terms/prev'
 require_relative 'terms/concat'
 require_relative 'terms/sprintf'
 require_relative 'terms/matches'
+require_relative 'terms/traced'
+require_relative 'terms/assert'
 
 # Term.
 #
@@ -76,9 +78,6 @@ class Factbase::Term
   require_relative 'terms/system'
   include Factbase::System
 
-  require_relative 'terms/debug'
-  include Factbase::Debug
-
   require_relative 'terms/shared'
   include Factbase::TermShared
 
@@ -93,7 +92,9 @@ class Factbase::Term
       prev: Factbase::Prev.new(operands),
       concat: Factbase::Concat.new(operands),
       sprintf: Factbase::Sprintf.new(operands),
-      matches: Factbase::Matches.new(operands)
+      matches: Factbase::Matches.new(operands),
+      traced: Factbase::Traced.new(operands),
+      assert: Factbase::Assert.new(operands)
     }
   end
 
@@ -180,27 +181,6 @@ class Factbase::Term
       return true if o.is_a?(Symbol) && o.to_s.start_with?('$')
     end
     false
-  end
-
-  # Turns it into a string.
-  # @return [String] The string of it
-  def to_s
-    @to_s ||=
-      begin
-        items = []
-        items << @op
-        items +=
-          @operands.map do |o|
-            if o.is_a?(String)
-              "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"')}'"
-            elsif o.is_a?(Time)
-              o.utc.iso8601
-            else
-              o.to_s
-            end
-          end
-        "(#{items.join(' ')})"
-      end
   end
 
   def at(fact, maps, fb)
