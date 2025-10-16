@@ -5,6 +5,9 @@
 
 # This module provides shared methods for Factbase terms, including argument validation,
 # symbol-based lookups, and handling of operand values.
+# @todo #302:30min Remove this module and move its methods to Factbase::TermBase.
+#  Currently, we use it because we are required to inject all thesse methods into Factbase::Term.
+#  When all the terms will inherit from Factbase::TermBase, we can remove this module.
 module Factbase::TermShared
   private
 

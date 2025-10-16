@@ -3,25 +3,25 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require_relative '../../factbase'
+require_relative 'base'
 
-# String terms.
+# Matches term.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-module Factbase::Strings
-  def concat(fact, maps, fb)
-    (0..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first }.join
+class Factbase::Matches < Factbase::TermBase
+  def initialize(operands)
+    super()
+    @operands = operands
   end
 
-  def sprintf(fact, maps, fb)
-    fmt = _values(0, fact, maps, fb)[0]
-    ops = (1..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first }
-    format(*([fmt] + ops))
-  end
-
-  def matches(fact, maps, fb)
+  # Evaluate term on a fact.
+  # @param [Factbase::Fact] fact The fact
+  # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Factbase] fb Factbase to use for sub-queries
+  # @return [Boolean] True if the string matches the regexp, false otherwise
+  def evaluate(fact, maps, fb)
     assert_args(2)
     str = _values(0, fact, maps, fb)
     return false if str.nil?

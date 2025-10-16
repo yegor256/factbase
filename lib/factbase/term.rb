@@ -9,6 +9,9 @@ require_relative 'fact'
 require_relative 'tee'
 require_relative 'terms/unique'
 require_relative 'terms/prev'
+require_relative 'terms/concat'
+require_relative 'terms/sprintf'
+require_relative 'terms/matches'
 
 # Term.
 #
@@ -58,9 +61,6 @@ class Factbase::Term
   require_relative 'terms/lists'
   include Factbase::Lists
 
-  require_relative 'terms/strings'
-  include Factbase::Strings
-
   require_relative 'terms/casting'
   include Factbase::Casting
 
@@ -90,7 +90,10 @@ class Factbase::Term
     @operands = operands
     @terms = {
       unique: Factbase::Unique.new(operands),
-      prev: Factbase::Prev.new(operands)
+      prev: Factbase::Prev.new(operands),
+      concat: Factbase::Concat.new(operands),
+      sprintf: Factbase::Sprintf.new(operands),
+      matches: Factbase::Matches.new(operands)
     }
   end
 

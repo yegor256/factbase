@@ -3,15 +3,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative 'base'
 # The Factbase::Unique class provides functionality for evaluating the uniqueness
 # of terms based on provided operands and facts.
-class Factbase::Unique
-  require_relative 'shared'
-  include Factbase::TermShared
-
+class Factbase::Unique < Factbase::TermBase
   # Constructor.
   # @param [Array] operands Operands
   def initialize(operands)
+    super()
     @operands = operands
   end
 
