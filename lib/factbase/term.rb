@@ -14,6 +14,7 @@ require_relative 'terms/sprintf'
 require_relative 'terms/matches'
 require_relative 'terms/traced'
 require_relative 'terms/assert'
+require_relative 'terms/env'
 
 # Term.
 #
@@ -75,9 +76,6 @@ class Factbase::Term
   require_relative 'terms/defn'
   include Factbase::Defn
 
-  require_relative 'terms/system'
-  include Factbase::System
-
   require_relative 'terms/shared'
   include Factbase::TermShared
 
@@ -94,7 +92,8 @@ class Factbase::Term
       sprintf: Factbase::Sprintf.new(operands),
       matches: Factbase::Matches.new(operands),
       traced: Factbase::Traced.new(operands),
-      assert: Factbase::Assert.new(operands)
+      assert: Factbase::Assert.new(operands),
+      env: Factbase::Env.new(operands)
     }
   end
 
