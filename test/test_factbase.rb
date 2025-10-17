@@ -336,7 +336,7 @@ class TestFactbase < Factbase::Test
 
   # In this test, we make sure that different properties can be set
   # concurrently without interfering with each other.
-  # Pay attention, that we use repetition parameter (r) instead of thread index (i)
+  # Pay attention, that we use repetition parameter (r) instead of thread index (_)
   # because one thread may execute multiple jobs.
   def test_different_properties_when_concurrent_inserts
     fb = Factbase.new
@@ -403,31 +403,22 @@ class TestFactbase < Factbase::Test
     end
   end
 
-  # @todo #98:1h I assumed that the test `test_concurrent_queries` would be passed.
-  # I see like this:
-  # ```
-  # [2024-08-22 17:40:19.224] ERROR -- Expected: [0, 1]
-  # Actual: [0, 0]: nil
-  # [2024-08-22 17:40:19.224] ERROR -- Expected: [0, 1]
-  # Actual: [0, 0]: nil
-  # test_concurrent_queries                                        ERROR (0.00s)
-  # Minitest::UnexpectedError:         RuntimeError: Only 0 out of 2 threads completed successfully
-  #           /home/suban/.rbenv/versions/3.3.4/lib/ruby/gems/3.3.0/gems/threads-0.4.0/lib/threads.rb:73:in `assert'
-  #           test/test_factbase.rb:329:in `test_concurrent_queries'
-  # ```
+  # In this test, we make sure that different facts can be initialised
+  # concurrently without interfering with each other.
+  # Pay attention, that we use repetition parameter (r) instead of thread index (_)
+  # because one thread may execute multiple jobs.
   def test_concurrent_queries
-    skip('Does not work')
     fb = Factbase.new
-    Threads.new(2).assert do |i|
+    Threads.new(2).assert do |_, r|
       fact = fb.insert
-      fact.thread_id = i
-      fact.value = i * 10
+      fact.rep = r
+      fact.value = r * 10
     end
     Threads.new(2).assert do
-      results = fb.query('(exists thread_id)').each.to_a
+      results = fb.query('(exists rep)').each.to_a
       assert_equal(2, results.size)
-      thread_ids = results.map(&:thread_id)
-      assert_equal((0..1).to_a, thread_ids.sort)
+      repetitions = results.map(&:rep)
+      assert_equal((0..1).to_a, repetitions.sort)
     end
   end
 
