@@ -50,17 +50,20 @@ class Factbase::SyncFactbase
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   # @yield [Factbase] Block to execute in transaction
   def txn
-    @origin.txn do |fbt|
-      yield Factbase::SyncFactbase.new(fbt, @mutex)
+    try_lock do
+      @origin.txn do |fbt|
+        yield Factbase::SyncFactbase.new(fbt, @mutex)
+      end
     end
   end
 
   private
 
-  def try_lock
-    locked = @mutex.try_lock
-    r = yield
-    @mutex.unlock if locked
-    r
+  def try_lock(&)
+    if @mutex.owned?
+      yield
+    else
+      @mutex.synchronize(&)
+    end
   end
 end
