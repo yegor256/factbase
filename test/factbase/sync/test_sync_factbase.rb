@@ -68,7 +68,11 @@ class TestSyncFactbase < Factbase::Test
         end
       end
     end
-    assert_equal(t + 1, fb.query('(exists foo)').each.to_a.size)
+    assert_equal(
+      t + 1, fb.query('(exists foo)').each.to_a.size,
+      'Number of facts with the foo property, must be equal to the number of threads that insert a new fact ' \
+      'with the foo property + one modifying fact with baz property'
+    )
     assert_equal(t, fb.query('(exists bar)').each.to_a.size)
     fb.query('(exists baz)').each.to_a.then do |fs|
       assert_equal(1, fs.size)

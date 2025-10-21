@@ -13,10 +13,10 @@ require_relative '../../factbase'
 class Factbase::SyncQuery
   # Constructor.
   # @param [Factbase::Query] origin Original query
-  # @param [Mutex] mutex The mutex
-  def initialize(origin, mutex, fb)
+  # @param [Monitor] monitor The monitor
+  def initialize(origin, monitor, fb)
     @origin = origin
-    @mutex = mutex
+    @monitor = monitor
     @fb = fb
   end
 
@@ -58,10 +58,6 @@ class Factbase::SyncQuery
   private
 
   def try_lock(&)
-    if @mutex.owned?
-      yield
-    else
-      @mutex.synchronize(&)
-    end
+    @monitor.synchronize(&)
   end
 end
