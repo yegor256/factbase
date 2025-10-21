@@ -3,24 +3,24 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require_relative '../../factbase'
+require_relative 'base'
 
-# Aliases terms.
-#
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
-# License:: MIT
-module Factbase::Aliases
-  def as(fact, maps, fb)
-    assert_args(2)
-    a = @operands[0]
-    raise "A symbol is expected as first argument of 'as'" unless a.is_a?(Symbol)
-    vv = _values(1, fact, maps, fb)
-    vv&.each { |v| fact.send(:"#{a}=", v) }
-    true
+# The Factbase::Join class is a specialized term that performs
+# join operations between facts based on specified attribute mappings.
+class Factbase::Join < Factbase::TermBase
+  # Constructor.
+  # @param [Array] operands Operands
+  def initialize(operands)
+    super()
+    @operands = operands
   end
 
-  def join(fact, maps, fb)
+  # Evaluate term on a fact.
+  # @param [Factbase::Fact] fact The fact
+  # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Factbase] fb Factbase to use for sub-queries
+  # @return [Boolean] True if succeeded
+  def evaluate(fact, maps, fb)
     assert_args(2)
     jumps = @operands[0]
     raise "A string is expected as first argument of 'join'" unless jumps.is_a?(String)

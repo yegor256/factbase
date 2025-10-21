@@ -17,6 +17,8 @@ require_relative 'terms/assert'
 require_relative 'terms/env'
 require_relative 'terms/defn'
 require_relative 'terms/undef'
+require_relative 'terms/as'
+require_relative 'terms/join'
 
 # Term.
 #
@@ -72,9 +74,6 @@ class Factbase::Term
   require_relative 'terms/meta'
   include Factbase::Meta
 
-  require_relative 'terms/aliases'
-  include Factbase::Aliases
-
   require_relative 'terms/shared'
   include Factbase::TermShared
 
@@ -94,7 +93,9 @@ class Factbase::Term
       assert: Factbase::Assert.new(operands),
       env: Factbase::Env.new(operands),
       defn: Factbase::Defn.new(operands),
-      undef: Factbase::Undef.new(operands)
+      undef: Factbase::Undef.new(operands),
+      as: Factbase::As.new(operands),
+      join: Factbase::Join.new(operands)
     }
   end
 
