@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'decoor'
+require 'monitor'
 require_relative '../../factbase'
 
 # A synchronous thread-safe factbase.
@@ -16,10 +17,10 @@ class Factbase::SyncFactbase
 
   # Constructor.
   # @param [Factbase] origin Original factbase to decorate
-  # @param [Mutex] mutex Mutex to use for synchronization
-  def initialize(origin, mutex = Mutex.new)
+  # @param [Monitor] monitor Monitor to use for synchronization
+  def initialize(origin, monitor = Monitor.new)
     @origin = origin
-    @mutex = mutex
+    @monitor = monitor
   end
 
   # Insert a new fact and return it.
@@ -43,24 +44,23 @@ class Factbase::SyncFactbase
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
     require_relative 'sync_query'
-    Factbase::SyncQuery.new(@origin.query(term, maps), @mutex, self)
+    Factbase::SyncQuery.new(@origin.query(term, maps), @monitor, self)
   end
 
   # Run an ACID transaction.
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   # @yield [Factbase] Block to execute in transaction
   def txn
-    @origin.txn do |fbt|
-      yield Factbase::SyncFactbase.new(fbt, @mutex)
+    try_lock do
+      @origin.txn do |fbt|
+        yield Factbase::SyncFactbase.new(fbt, @monitor)
+      end
     end
   end
 
   private
 
-  def try_lock
-    locked = @mutex.try_lock
-    r = yield
-    @mutex.unlock if locked
-    r
+  def try_lock(&)
+    @monitor.synchronize(&)
   end
 end
