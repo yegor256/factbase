@@ -15,6 +15,8 @@ require_relative 'terms/matches'
 require_relative 'terms/traced'
 require_relative 'terms/assert'
 require_relative 'terms/env'
+require_relative 'terms/defn'
+require_relative 'terms/undef'
 
 # Term.
 #
@@ -73,9 +75,6 @@ class Factbase::Term
   require_relative 'terms/aliases'
   include Factbase::Aliases
 
-  require_relative 'terms/defn'
-  include Factbase::Defn
-
   require_relative 'terms/shared'
   include Factbase::TermShared
 
@@ -93,7 +92,9 @@ class Factbase::Term
       matches: Factbase::Matches.new(operands),
       traced: Factbase::Traced.new(operands),
       assert: Factbase::Assert.new(operands),
-      env: Factbase::Env.new(operands)
+      env: Factbase::Env.new(operands),
+      defn: Factbase::Defn.new(operands),
+      undef: Factbase::Undef.new(operands)
     }
   end
 
