@@ -53,7 +53,8 @@ RuboCop::RakeTask.new(:rubocop) do |task|
 end
 
 desc 'Benchmark them all'
-task :benchmark do
+task :benchmark, [:name] do |_t, args|
+  bname = args[:name] || 'all'
   require_relative 'lib/factbase'
   fb = Factbase.new
   require_relative 'lib/factbase/cached/cached_factbase'
@@ -64,7 +65,13 @@ task :benchmark do
   fb = Factbase::SyncFactbase.new(fb)
   require 'benchmark'
   Benchmark.bm(60) do |b|
-    Dir['benchmark/bench_*.rb'].each do |f|
+    if bname == 'all'
+      Dir['benchmark/bench_*.rb'].each do |f|
+        require_relative f
+        Kernel.send(File.basename(f).gsub(/\.rb$/, '').to_sym, b, fb)
+      end
+    else
+      f = "benchmark/#{bname}.rb"
       require_relative f
       Kernel.send(File.basename(f).gsub(/\.rb$/, '').to_sym, b, fb)
     end
