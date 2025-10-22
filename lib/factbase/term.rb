@@ -19,6 +19,10 @@ require_relative 'terms/defn'
 require_relative 'terms/undef'
 require_relative 'terms/as'
 require_relative 'terms/join'
+require_relative 'terms/exists'
+require_relative 'terms/absent'
+require_relative 'terms/size'
+require_relative 'terms/type'
 
 # Term.
 #
@@ -95,7 +99,11 @@ class Factbase::Term
       defn: Factbase::Defn.new(operands),
       undef: Factbase::Undef.new(operands),
       as: Factbase::As.new(operands),
-      join: Factbase::Join.new(operands)
+      join: Factbase::Join.new(operands),
+      exists: Factbase::Exists.new(operands),
+      absent: Factbase::Absent.new(operands),
+      size: Factbase::Size.new(operands),
+      type: Factbase::Type.new(operands)
     }
   end
 

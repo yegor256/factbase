@@ -11,32 +11,6 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Meta
-  def exists(fact, _maps, _fb)
-    assert_args(1)
-    !_by_symbol(0, fact).nil?
-  end
-
-  def absent(fact, _maps, _fb)
-    assert_args(1)
-    _by_symbol(0, fact).nil?
-  end
-
-  def size(fact, _maps, _fb)
-    assert_args(1)
-    v = _by_symbol(0, fact)
-    return 0 if v.nil?
-    return 1 unless v.respond_to?(:to_a)
-    v.size
-  end
-
-  def type(fact, _maps, _fb)
-    assert_args(1)
-    v = _by_symbol(0, fact)
-    return 'nil' if v.nil?
-    v = v[0] if v.respond_to?(:each) && v.size == 1
-    v.class.to_s
-  end
-
   def nil(fact, maps, fb)
     assert_args(1)
     _values(0, fact, maps, fb).nil?
