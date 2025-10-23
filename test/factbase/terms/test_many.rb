@@ -5,28 +5,19 @@
 
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/many'
 
-# Meta test.
+# Test for 'many' term.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestMeta < Factbase::Test
+class TestMany < Factbase::Test
   def test_many
-    t = Factbase::Term.new(:many, [:foo])
+    t = Factbase::Many.new([:foo])
     refute(t.evaluate(fact('foo' => nil), [], Factbase.new))
     refute(t.evaluate(fact('foo' => 1), [], Factbase.new))
     refute(t.evaluate(fact('foo' => '1234'), [], Factbase.new))
     assert(t.evaluate(fact('foo' => [1, 3, 5]), [], Factbase.new))
-    refute(t.evaluate(fact('foo' => []), [], Factbase.new))
-  end
-
-  def test_one
-    t = Factbase::Term.new(:one, [:foo])
-    assert(t.evaluate(fact('foo' => 1), [], Factbase.new))
-    assert(t.evaluate(fact('foo' => '1234'), [], Factbase.new))
-    assert(t.evaluate(fact('foo' => [1]), [], Factbase.new))
-    refute(t.evaluate(fact('foo' => nil), [], Factbase.new))
-    refute(t.evaluate(fact('foo' => [1, 3, 5]), [], Factbase.new))
     refute(t.evaluate(fact('foo' => []), [], Factbase.new))
   end
 end
