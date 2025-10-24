@@ -23,6 +23,8 @@ require_relative 'terms/exists'
 require_relative 'terms/absent'
 require_relative 'terms/size'
 require_relative 'terms/type'
+require_relative 'terms/nil'
+require_relative 'terms/many'
 
 # Term.
 #
@@ -103,7 +105,9 @@ class Factbase::Term
       exists: Factbase::Exists.new(operands),
       absent: Factbase::Absent.new(operands),
       size: Factbase::Size.new(operands),
-      type: Factbase::Type.new(operands)
+      type: Factbase::Type.new(operands),
+      nil: Factbase::Nil.new(operands),
+      many: Factbase::Many.new(operands)
     }
   end
 
