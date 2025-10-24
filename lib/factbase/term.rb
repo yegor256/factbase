@@ -25,6 +25,7 @@ require_relative 'terms/size'
 require_relative 'terms/type'
 require_relative 'terms/nil'
 require_relative 'terms/many'
+require_relative 'terms/one'
 
 # Term.
 #
@@ -77,9 +78,6 @@ class Factbase::Term
   require_relative 'terms/casting'
   include Factbase::Casting
 
-  require_relative 'terms/meta'
-  include Factbase::Meta
-
   require_relative 'terms/shared'
   include Factbase::TermShared
 
@@ -107,7 +105,8 @@ class Factbase::Term
       size: Factbase::Size.new(operands),
       type: Factbase::Type.new(operands),
       nil: Factbase::Nil.new(operands),
-      many: Factbase::Many.new(operands)
+      many: Factbase::Many.new(operands),
+      one: Factbase::One.new(operands)
     }
   end
 

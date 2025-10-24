@@ -5,23 +5,15 @@
 
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/one'
 
-# Meta test.
+# Test for 'one' term.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestMeta < Factbase::Test
-  def test_many
-    t = Factbase::Term.new(:many, [:foo])
-    refute(t.evaluate(fact('foo' => nil), [], Factbase.new))
-    refute(t.evaluate(fact('foo' => 1), [], Factbase.new))
-    refute(t.evaluate(fact('foo' => '1234'), [], Factbase.new))
-    assert(t.evaluate(fact('foo' => [1, 3, 5]), [], Factbase.new))
-    refute(t.evaluate(fact('foo' => []), [], Factbase.new))
-  end
-
+class TestOne < Factbase::Test
   def test_one
-    t = Factbase::Term.new(:one, [:foo])
+    t = Factbase::One.new([:foo])
     assert(t.evaluate(fact('foo' => 1), [], Factbase.new))
     assert(t.evaluate(fact('foo' => '1234'), [], Factbase.new))
     assert(t.evaluate(fact('foo' => [1]), [], Factbase.new))
