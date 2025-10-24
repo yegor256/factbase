@@ -58,11 +58,20 @@ class Factbase::Logged
         raise e
       end
     if rollback
-      @tube.say(start, "Txn ##{id} rolled back in #{start.ago}")
+      @tube.say(start, "Txn ##{id} rolled back in #{start.ago} (#{stacktrace})")
     else
-      @tube.say(start, "Txn ##{id} touched #{r} in #{start.ago}")
+      stacktrace
+      @tube.say(start, "Txn ##{id} touched #{r} in #{start.ago} (#{stacktrace})")
     end
     r
+  end
+
+  def stacktrace
+    caller_locations
+    .reject { |loc| loc.path.include?('/gems/') || loc.path.include?('/ruby/') }
+    .map { |loc| "#{File.basename(loc.path)}:#{loc.lineno}##{loc.label}" }
+    .reverse
+    .join(' -> ')
   end
 
   # Printer of log messages.

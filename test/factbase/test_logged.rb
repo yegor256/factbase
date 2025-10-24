@@ -118,6 +118,27 @@ class TestLogged < Factbase::Test
     assert_equal(1, fb.query('(always)').each.to_a.size)
   end
 
+  def test_reports_stacktrace_on_success
+    log = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    fb.txn do |fbt|
+      fbt.insert.foo = 42
+    end
+    assert_match(/Txn #.+ in \d+/, log.to_s)
+    assert_match(/test_logged.rb:\d+#test_reports_stacktrace_on_success -> logged.rb:\d+#txn/, log.to_s)
+  end
+
+  def test_reports_stacktrace_on_rollback
+    log = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    fb.txn do |fbt|
+      fbt.insert.foo = 42
+      raise Factbase::Rollback
+    end
+    assert_match(/Txn #.+ rolled back in \d+/, log.to_s)
+    assert_match(/test_logged.rb:\d+#test_reports_stacktrace_on_rollback -> logged.rb:\d+#txn/, log.to_s)
+  end
+
   def test_proper_logging
     log = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, log)
