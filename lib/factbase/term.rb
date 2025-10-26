@@ -26,6 +26,8 @@ require_relative 'terms/type'
 require_relative 'terms/nil'
 require_relative 'terms/many'
 require_relative 'terms/one'
+require_relative 'terms/to_string'
+require_relative 'terms/to_integer'
 
 # Term.
 #
@@ -106,7 +108,9 @@ class Factbase::Term
       type: Factbase::Type.new(operands),
       nil: Factbase::Nil.new(operands),
       many: Factbase::Many.new(operands),
-      one: Factbase::One.new(operands)
+      one: Factbase::One.new(operands),
+      to_string: Factbase::ToString.new(operands),
+      to_integer: Factbase::ToInteger.new(operands)
     }
   end
 

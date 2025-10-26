@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 # Test for unique term.
-# Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 

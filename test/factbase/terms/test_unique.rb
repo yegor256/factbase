@@ -8,7 +8,7 @@ require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/terms/unique'
 
 # Test for unique term.
-# Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class TestUnique < Factbase::Test
