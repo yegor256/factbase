@@ -28,6 +28,8 @@ require_relative 'terms/many'
 require_relative 'terms/one'
 require_relative 'terms/to_string'
 require_relative 'terms/to_integer'
+require_relative 'terms/to_float'
+require_relative 'terms/to_time'
 
 # Term.
 #
@@ -77,9 +79,6 @@ class Factbase::Term
   require_relative 'terms/lists'
   include Factbase::Lists
 
-  require_relative 'terms/casting'
-  include Factbase::Casting
-
   require_relative 'terms/shared'
   include Factbase::TermShared
 
@@ -110,7 +109,9 @@ class Factbase::Term
       many: Factbase::Many.new(operands),
       one: Factbase::One.new(operands),
       to_string: Factbase::ToString.new(operands),
-      to_integer: Factbase::ToInteger.new(operands)
+      to_integer: Factbase::ToInteger.new(operands),
+      to_float: Factbase::ToFloat.new(operands),
+      to_time: Factbase::ToTime.new(operands)
     }
   end
 
