@@ -30,6 +30,7 @@ require_relative 'terms/to_string'
 require_relative 'terms/to_integer'
 require_relative 'terms/to_float'
 require_relative 'terms/to_time'
+require_relative 'terms/sorted'
 
 # Term.
 #
@@ -111,7 +112,8 @@ class Factbase::Term
       to_string: Factbase::ToString.new(operands),
       to_integer: Factbase::ToInteger.new(operands),
       to_float: Factbase::ToFloat.new(operands),
-      to_time: Factbase::ToTime.new(operands)
+      to_time: Factbase::ToTime.new(operands),
+      sorted: Factbase::Sorted.new(operands)
     }
   end
 
@@ -139,7 +141,14 @@ class Factbase::Term
   # @return [Array<Hash>] Records to iterate
   def predict(maps, fb, params)
     m = :"#{@op}_predict"
-    if respond_to?(m)
+    if @terms.key?(@op)
+      t = @terms[@op]
+      if t.respond_to?(:predict)
+        t.predict(maps, fb, params)
+      else
+        maps
+      end
+    elsif respond_to?(m)
       send(m, maps, fb, params)
     else
       maps
