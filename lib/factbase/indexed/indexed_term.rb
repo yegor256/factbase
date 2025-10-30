@@ -21,6 +21,10 @@ module Factbase::IndexedTerm
   # @return [Array<Hash>|nil] Returns a new array, or NIL if the original array must be used
   def predict(maps, fb, params)
     m = :"#{@op}_predict"
+    if @terms.key?(@op)
+      t = @terms[@op]
+      return t.predict(maps, fb, params) if t.respond_to?(:predict)
+    end
     return send(m, maps, fb, params) if respond_to?(m)
     key = [maps.object_id, @operands.first, @op]
     case @op
