@@ -5,13 +5,14 @@
 
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/inverted'
 require_relative '../../../lib/factbase/syntax'
 
-# Lists test.
+# Test for 'inverted' term.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestLists < Factbase::Test
+class TestInverted < Factbase::Test
   def test_inverting
     maps = [
       { 'x' => [33] },

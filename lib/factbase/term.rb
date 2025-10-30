@@ -31,6 +31,8 @@ require_relative 'terms/to_integer'
 require_relative 'terms/to_float'
 require_relative 'terms/to_time'
 require_relative 'terms/sorted'
+require_relative 'terms/inverted'
+require_relative 'terms/head'
 
 # Term.
 #
@@ -77,9 +79,6 @@ class Factbase::Term
   require_relative 'terms/aggregates'
   include Factbase::Aggregates
 
-  require_relative 'terms/lists'
-  include Factbase::Lists
-
   require_relative 'terms/shared'
   include Factbase::TermShared
 
@@ -113,7 +112,9 @@ class Factbase::Term
       to_integer: Factbase::ToInteger.new(operands),
       to_float: Factbase::ToFloat.new(operands),
       to_time: Factbase::ToTime.new(operands),
-      sorted: Factbase::Sorted.new(operands)
+      sorted: Factbase::Sorted.new(operands),
+      inverted: Factbase::Inverted.new(operands),
+      head: Factbase::Head.new(operands)
     }
   end
 
