@@ -24,9 +24,8 @@ module Factbase::IndexedTerm
     if @terms.key?(@op)
       t = @terms[@op]
       return t.predict(maps, fb, params) if t.respond_to?(:predict)
-    elsif respond_to?(m)
-      return send(m, maps, fb, params)
     end
+    return send(m, maps, fb, params) if respond_to?(m)
     key = [maps.object_id, @operands.first, @op]
     case @op
     when :one
