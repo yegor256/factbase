@@ -33,6 +33,7 @@ require_relative 'terms/to_time'
 require_relative 'terms/sorted'
 require_relative 'terms/inverted'
 require_relative 'terms/head'
+require_relative 'terms/plus'
 
 # Term.
 #
@@ -114,7 +115,8 @@ class Factbase::Term
       to_time: Factbase::ToTime.new(operands),
       sorted: Factbase::Sorted.new(operands),
       inverted: Factbase::Inverted.new(operands),
-      head: Factbase::Head.new(operands)
+      head: Factbase::Head.new(operands),
+      plus: Factbase::Plus.new(operands)
     }
   end
 

@@ -88,18 +88,6 @@ class TestMath < Factbase::Test
     refute(t.evaluate(fact('bar' => [100]), [], Factbase.new))
   end
 
-  def test_plus
-    t = Factbase::Term.new(:plus, [:foo, 42])
-    assert_equal(46, t.evaluate(fact('foo' => 4), [], Factbase.new))
-    assert_nil(t.evaluate(fact, [], Factbase.new))
-  end
-
-  def test_plus_time
-    t = Factbase::Term.new(:plus, [:foo, '12 days'])
-    assert_equal(Time.parse('2024-01-13'), t.evaluate(fact('foo' => Time.parse('2024-01-01')), [], Factbase.new))
-    assert_nil(t.evaluate(fact, [], Factbase.new))
-  end
-
   def test_minus
     t = Factbase::Term.new(:minus, [:foo, 42])
     assert_equal(58, t.evaluate(fact('foo' => 100), [], Factbase.new))

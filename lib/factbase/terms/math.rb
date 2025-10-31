@@ -11,10 +11,6 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Math
-  def plus(fact, maps, fb)
-    _arithmetic(:+, fact, maps, fb)
-  end
-
   def minus(fact, maps, fb)
     _arithmetic(:-, fact, maps, fb)
   end
@@ -69,6 +65,10 @@ module Factbase::Math
     end
   end
 
+  # @todo #302:30min Remove the _arithmetic method.
+  #  Currently, we use it because we are required to inject all thesse methods into Factbase::Term.
+  #  But we have Factbase::Arithmetic class for arithmetic operations.
+  #  When all the 'math' terms will use from Factbase::Arithmetic, we can remove this method.
   def _arithmetic(op, fact, maps, fb)
     assert_args(2)
     lefts = _values(0, fact, maps, fb)
