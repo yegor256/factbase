@@ -11,14 +11,6 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Math
-  def minus(fact, maps, fb)
-    _arithmetic(:-, fact, maps, fb)
-  end
-
-  def times(fact, maps, fb)
-    _arithmetic(:*, fact, maps, fb)
-  end
-
   def div(fact, maps, fb)
     _arithmetic(:/, fact, maps, fb)
   end
@@ -79,25 +71,6 @@ module Factbase::Math
     raise 'Too many values at second position, one expected' unless rights.size == 1
     v = lefts[0]
     r = rights[0]
-    if v.is_a?(Time) && r.is_a?(String)
-      (num, units) = r.split
-      num = num.to_i
-      r =
-        case units
-        when 'seconds', 'second'
-          num
-        when 'minutes', 'minute'
-          num * 60
-        when 'hours', 'hour'
-          num * 60 * 60
-        when 'days', 'day'
-          num * 60 * 60 * 24
-        when 'weeks', 'week'
-          num * 60 * 60 * 24 * 7
-        else
-          raise "Unknown time unit '#{units}' in '#{r}"
-        end
-    end
     v.send(op, r)
   end
 end
