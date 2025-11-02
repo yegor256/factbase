@@ -88,6 +88,13 @@ class TestMath < Factbase::Test
     refute(t.evaluate(fact('bar' => [100]), [], Factbase.new))
   end
 
+  def test_gt_time_string
+    t = Factbase::Term.new(:gt, [:foo, '2024-03-23T03:21:43Z'])
+    assert_raises(RuntimeError, 'comparison of Time with String failed') do
+      t.evaluate(fact('foo' => [Time.now]), [], Factbase.new)
+    end
+  end
+
   def test_minus
     t = Factbase::Term.new(:minus, [:foo, 42])
     assert_equal(58, t.evaluate(fact('foo' => 100), [], Factbase.new))

@@ -11,7 +11,7 @@ def bench_lots_facts(bmk, fb)
   total.times do |i|
     f = fb.insert
     f.id = i
-    f.time = Time.now
+    f.created = Time.now
     f.label = %w[bug feature][rand(0..1)]
     f.rpository = 'factbase' if rand(0..1).zero?
   end
