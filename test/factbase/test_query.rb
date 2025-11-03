@@ -196,6 +196,16 @@ class TestQuery < Factbase::Test
     end
   end
 
+  def test_compare_time_with_the_past
+    maps = [
+      { 'time' => Time.now }
+    ]
+    q = Factbase::Query.new(maps, '(gt time \'2024-03-23T03:21:43Z\')', Factbase.new)
+    assert_raises(RuntimeError, 'comparison of Time with String failed') do
+      q.each.next
+    end
+  end
+
   def test_deleting_nothing
     maps = [
       { 'foo' => [42] },
