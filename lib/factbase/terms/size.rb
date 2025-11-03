@@ -17,8 +17,8 @@ class Factbase::Size < Factbase::TermBase
 
   # Evaluate term on a fact.
   # @param [Factbase::Fact] fact The fact
-  # @param [Array<Factbase::Fact>] maps All maps available
-  # @param [Factbase] fb Factbase to use for sub-queries
+  # @param [Array<Factbase::Fact>] _maps All maps available
+  # @param [Factbase] _fb Factbase to use for sub-queries
   # @return [Integer] Size of the operand
   def evaluate(fact, _maps, _fb)
     assert_args(1)

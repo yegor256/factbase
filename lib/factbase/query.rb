@@ -77,7 +77,7 @@ class Factbase::Query
 
   # Delete all facts that match the query.
   # @param [Factbase] fb The factbase to delete from
-  # @param [id] String The id of facts that uniquely identify them
+  # @param [String] id The id of facts that uniquely identify them
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb, id: '_id')
     deleted = 0
