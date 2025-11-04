@@ -11,17 +11,6 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Math
-  def div(fact, maps, fb)
-    _arithmetic(:/, fact, maps, fb)
-  end
-
-  def zero(fact, maps, fb)
-    assert_args(1)
-    vv = _values(0, fact, maps, fb)
-    return false if vv.nil?
-    vv.any? { |v| (v.is_a?(Integer) || v.is_a?(Float)) && v.zero? }
-  end
-
   def eq(fact, maps, fb)
     _cmp(:==, fact, maps, fb)
   end
@@ -61,16 +50,5 @@ module Factbase::Math
   #  Currently, we use it because we are required to inject all thesse methods into Factbase::Term.
   #  But we have Factbase::Arithmetic class for arithmetic operations.
   #  When all the 'math' terms will use from Factbase::Arithmetic, we can remove this method.
-  def _arithmetic(op, fact, maps, fb)
-    assert_args(2)
-    lefts = _values(0, fact, maps, fb)
-    return nil if lefts.nil?
-    raise 'Too many values at first position, one expected' unless lefts.size == 1
-    rights = _values(1, fact, maps, fb)
-    return nil if rights.nil?
-    raise 'Too many values at second position, one expected' unless rights.size == 1
-    v = lefts[0]
-    r = rights[0]
-    v.send(op, r)
-  end
+  def _arithmetic(op, fact, maps, fb); end
 end
