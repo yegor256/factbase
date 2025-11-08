@@ -141,4 +141,42 @@ class TestIndexedTerm < Factbase::Test
     assert_equal(3, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
+
+  # @todo #249:30min Enable unique prediction tests. Right now these tests
+  #  are disabled because unique prediction is not implemented yet. When it's done
+  #  we should enable the tests and make sure they work as expected. Don't
+  #  forget to remove the puzzle.
+  def test_predicts_on_unique
+    skip 'unique prediction is not implemented'
+    term = Factbase::Term.new(:unique, [:foo])
+    idx = {}
+    term.redress!(Factbase::IndexedTerm, idx:)
+    maps = Factbase::Taped.new(
+      [
+        { 'foo' => [42] },
+        { 'foo' => [42] },
+        { 'foo' => [7] },
+        { 'bar' => [100] }
+      ]
+    )
+    n = term.predict(maps, nil, {})
+    assert_equal(3, n.size)
+  end
+
+  def test_predicts_on_unique_with_combinations
+    skip 'unique prediction is not implemented'
+    term = Factbase::Term.new(:unique, %i[foo bar])
+    idx = {}
+    term.redress!(Factbase::IndexedTerm, idx:)
+    maps = Factbase::Taped.new(
+      [
+        { 'foo' => [42], 'bar' => ['a'] },
+        { 'foo' => [7], 'baz' => ['a'] },
+        { 'foo' => [42], 'bar' => ['b'] },
+        { 'foo' => [52] }
+      ]
+    )
+    n = term.predict(maps, nil, {})
+    assert_equal(2, n.size)
+  end
 end
