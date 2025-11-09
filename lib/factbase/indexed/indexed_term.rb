@@ -19,6 +19,9 @@ module Factbase::IndexedTerm
   # @param [Array<Hash>] maps Array of facts
   # @param [Hash] params Key/value params to use
   # @return [Array<Hash>|nil] Returns a new array, or NIL if the original array must be used
+  # @todo #249:30min Improve prediction for 'unique' term. Current prediction is quite naive and
+  #  returns many false positives because it just filters facts which have exactly the same set
+  #  of keys regardless the values. We should introduce more smart prediction.
   def predict(maps, fb, params)
     m = :"#{@op}_predict"
     if @terms.key?(@op)
@@ -191,6 +194,12 @@ module Factbase::IndexedTerm
       else
         (maps & []) | r
       end
+    when :unique
+      if @idx[key].nil?
+        props = @operands.map(&:to_s)
+        @idx[key] = maps.to_a.select { |m| props.all? { |p| !m[p].nil? } }
+      end
+      (maps & []) | @idx[key]
     end
   end
 
