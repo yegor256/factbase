@@ -191,6 +191,12 @@ module Factbase::IndexedTerm
       else
         (maps & []) | r
       end
+    when :unique
+      if @idx[key].nil?
+        props = @operands.map(&:to_s)
+        @idx[key] = maps.to_a.select { |m| props.all? { |p| !m[p].nil? } }
+      end
+      (maps & []) | @idx[key]
     end
   end
 

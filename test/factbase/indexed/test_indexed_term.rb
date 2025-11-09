@@ -142,12 +142,7 @@ class TestIndexedTerm < Factbase::Test
     assert_kind_of(Factbase::Taped, n)
   end
 
-  # @todo #249:30min Enable unique prediction tests. Right now these tests
-  #  are disabled because unique prediction is not implemented yet. When it's done
-  #  we should enable the tests and make sure they work as expected. Don't
-  #  forget to remove the puzzle.
   def test_predicts_on_unique
-    skip 'unique prediction is not implemented'
     term = Factbase::Term.new(:unique, [:foo])
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
@@ -164,7 +159,6 @@ class TestIndexedTerm < Factbase::Test
   end
 
   def test_predicts_on_unique_with_combinations
-    skip 'unique prediction is not implemented'
     term = Factbase::Term.new(:unique, %i[foo bar])
     idx = {}
     term.redress!(Factbase::IndexedTerm, idx:)
