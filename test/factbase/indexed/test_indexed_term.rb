@@ -34,6 +34,9 @@ class TestIndexedTerm < Factbase::Test
     assert_kind_of(Factbase::Taped, n)
   end
 
+  # @todo #363:30min Move the test to a separated class. Since we've moved prediction of 'one' term
+  #  to separated class IndexedOne, let's move this test to a separated test class too in order to be
+  #  consistent with rule 'one class - one test class'
   def test_predicts_on_one
     term = Factbase::Term.new(:one, [:foo])
     idx = {}
