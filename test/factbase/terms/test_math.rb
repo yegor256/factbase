@@ -114,4 +114,17 @@ class TestMath < Factbase::Test
                  t.evaluate(fact('foo' => Time.parse('2024-01-01T10:04')), [], Factbase.new))
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
+
+  # This test won't work on ruby versions prior to 3.4
+  # You can read more about it here:
+  # https://docs.ruby-lang.org/en/3.4/NEWS_md.html#label-Compatibility+issues
+  def test_div_times_not_supported
+    t = Factbase::Term.new(:div, [:birth, Time.new(2024, 1, 1)])
+    assert_includes(
+      assert_raises(RuntimeError) do
+        t.evaluate(fact('birth' => Time.new(2026, 1, 1)), [], Factbase.new)
+      end.message,
+      'undefined method \'/\' for an instance of Time'
+    )
+  end
 end
