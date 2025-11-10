@@ -30,7 +30,7 @@ module Factbase::IndexedTerm
     end
     m = :"#{@op}_predict"
     return send(m, maps, fb, params) if respond_to?(m)
-    init_indexes until @indexes
+    _init_indexes until @indexes
     if @indexes.key?(@op)
       index = @indexes[@op]
       return index.predict(maps, fb, params)
@@ -223,7 +223,7 @@ module Factbase::IndexedTerm
     item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
   end
 
-  def init_indexes
+  def _init_indexes
     @indexes = {
       one: Factbase::IndexedOne.new(self, @idx)
     }
