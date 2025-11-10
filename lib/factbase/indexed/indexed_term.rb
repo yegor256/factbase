@@ -5,6 +5,7 @@
 
 require 'tago'
 require_relative '../../factbase'
+require_relative '../indexed/indexed_one'
 
 # Term with an index.
 #
@@ -23,23 +24,19 @@ module Factbase::IndexedTerm
   #  returns many false positives because it just filters facts which have exactly the same set
   #  of keys regardless the values. We should introduce more smart prediction.
   def predict(maps, fb, params)
-    m = :"#{@op}_predict"
     if @terms.key?(@op)
       t = @terms[@op]
       return t.predict(maps, fb, params) if t.respond_to?(:predict)
     end
+    m = :"#{@op}_predict"
     return send(m, maps, fb, params) if respond_to?(m)
+    _init_indexes until @indexes
+    if @indexes.key?(@op)
+      index = @indexes[@op]
+      return index.predict(maps, fb, params)
+    end
     key = [maps.object_id, @operands.first, @op]
     case @op
-    when :one
-      if @idx[key].nil?
-        @idx[key] = []
-        prop = @operands.first.to_s
-        maps.to_a.each do |m|
-          @idx[key].append(m) if !m[prop].nil? && m[prop].size == 1
-        end
-      end
-      (maps & []) | @idx[key]
     when :exists
       if @idx[key].nil?
         @idx[key] = []
@@ -224,5 +221,11 @@ module Factbase::IndexedTerm
 
   def _scalar?(item)
     item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
+  end
+
+  def _init_indexes
+    @indexes = {
+      one: Factbase::IndexedOne.new(self, @idx)
+    }
   end
 end
