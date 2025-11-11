@@ -15,7 +15,7 @@ class Factbase::IndexedExists
     key = [maps.object_id, @term.operands.first, @term.op]
     if @idx[key].nil?
       @idx[key] = []
-      prop = @operands.first.to_s
+      prop = @term.operands.first.to_s
       maps.to_a.each do |m|
         @idx[key].append(m) unless m[prop].nil?
       end
