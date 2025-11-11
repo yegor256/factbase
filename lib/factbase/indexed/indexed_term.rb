@@ -217,7 +217,8 @@ module Factbase::IndexedTerm
 
   def _init_indexes
     @indexes = {
-      one: Factbase::IndexedOne.new(self, @idx)
+      one: Factbase::IndexedOne.new(self, @idx),
+      exists: Factbase::IndexedExists.new(self, @idx)
     }
   end
 end
