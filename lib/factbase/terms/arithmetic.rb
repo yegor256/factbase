@@ -8,6 +8,7 @@ require_relative 'base'
 # Factbase::Arithmetic is a class for performing arithmetic operations.
 class Factbase::Arithmetic < Factbase::TermBase
   # Constructor.
+  # @param [Symbol] operation The arithmetic operation (e.g., :+, :-, :*, :/)
   # @param [Array] operands Operands
   def initialize(operation, operands)
     super()
