@@ -45,10 +45,4 @@ module Factbase::Math
       end
     end
   end
-
-  # @todo #302:30min Remove the _arithmetic method.
-  #  Currently, we use it because we are required to inject all thesse methods into Factbase::Term.
-  #  But we have Factbase::Arithmetic class for arithmetic operations.
-  #  When all the 'math' terms will use from Factbase::Arithmetic, we can remove this method.
-  def _arithmetic(op, fact, maps, fb); end
 end
