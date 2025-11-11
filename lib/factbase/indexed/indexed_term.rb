@@ -6,6 +6,7 @@
 require 'tago'
 require_relative '../../factbase'
 require_relative '../indexed/indexed_one'
+require_relative '../indexed/indexed_exists'
 
 # Term with an index.
 #
@@ -37,15 +38,6 @@ module Factbase::IndexedTerm
     end
     key = [maps.object_id, @operands.first, @op]
     case @op
-    when :exists
-      if @idx[key].nil?
-        @idx[key] = []
-        prop = @operands.first.to_s
-        maps.to_a.each do |m|
-          @idx[key].append(m) unless m[prop].nil?
-        end
-      end
-      (maps & []) | @idx[key]
     when :absent
       if @idx[key].nil?
         @idx[key] = []
