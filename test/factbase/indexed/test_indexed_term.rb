@@ -37,19 +37,6 @@ class TestIndexedTerm < Factbase::Test
     assert_kind_of(Factbase::Taped, n)
   end
 
-  # @todo #363:30min Move the test to a separated class. Since we've moved prediction of 'one' term
-  #  to separated class IndexedOne, let's move this test to a separated test class too in order to be
-  #  consistent with rule 'one class - one test class'
-  def test_predicts_on_one
-    term = Factbase::Term.new(:one, [:foo])
-    idx = {}
-    term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7] }, { 'foo' => [22, 42] }, { 'foo' => [] }])
-    n = term.predict(maps, nil, {})
-    assert_equal(1, n.size)
-    assert_kind_of(Factbase::Taped, n)
-  end
-
   def test_predicts_on_not
     term = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 42])])
     idx = {}
