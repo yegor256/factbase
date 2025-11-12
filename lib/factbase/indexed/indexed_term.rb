@@ -5,6 +5,7 @@
 
 require 'tago'
 require_relative '../../factbase'
+require_relative '../indexed/indexed_eq'
 require_relative '../indexed/indexed_one'
 require_relative '../indexed/indexed_exists'
 require_relative '../indexed/indexed_absent'
@@ -39,31 +40,6 @@ module Factbase::IndexedTerm
     end
     key = [maps.object_id, @operands.first, @op]
     case @op
-    when :eq
-      if @operands.first.is_a?(Symbol) && _scalar?(@operands[1])
-        if @idx[key].nil?
-          @idx[key] = {}
-          prop = @operands.first.to_s
-          maps.to_a.each do |m|
-            m[prop]&.each do |v|
-              @idx[key][v] = [] if @idx[key][v].nil?
-              @idx[key][v].append(m)
-            end
-          end
-        end
-        vv =
-          if @operands[1].is_a?(Symbol)
-            params[@operands[1].to_s] || []
-          else
-            [@operands[1]]
-          end
-        if vv.empty?
-          (maps & [])
-        else
-          j = vv.map { |v| @idx[key][v] || [] }.reduce(&:|)
-          (maps & []) | j
-        end
-      end
     when :gt
       if @operands.first.is_a?(Symbol) && _scalar?(@operands[1])
         prop = @operands.first.to_s
@@ -209,6 +185,7 @@ module Factbase::IndexedTerm
 
   def _init_indexes
     @indexes = {
+      eq: Factbase::IndexedEq.new(self, @idx),
       one: Factbase::IndexedOne.new(self, @idx),
       exists: Factbase::IndexedExists.new(self, @idx),
       absent: Factbase::IndexedAbsent.new(self, @idx)
