@@ -13,6 +13,10 @@ require_relative '../../../lib/factbase/indexed/indexed_term'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
+# @todo #363:30min Introduce new test for indexed 'absent' term. We've moved the logic for prediction
+#  'absent' term from IndexedTerm class to a separated IndexedAbsent class. But for some reason there's
+#  no test for the term in this TestIndexedTerm. Let's introduce it and move to a separated test class like
+#  it's done with TestIndexedOne.
 class TestIndexedTerm < Factbase::Test
   def test_predicts_on_eq
     term = Factbase::Term.new(:eq, [:foo, 42])

@@ -7,6 +7,7 @@ require 'tago'
 require_relative '../../factbase'
 require_relative '../indexed/indexed_one'
 require_relative '../indexed/indexed_exists'
+require_relative '../indexed/indexed_absent'
 
 # Term with an index.
 #
@@ -38,15 +39,6 @@ module Factbase::IndexedTerm
     end
     key = [maps.object_id, @operands.first, @op]
     case @op
-    when :absent
-      if @idx[key].nil?
-        @idx[key] = []
-        prop = @operands.first.to_s
-        maps.to_a.each do |m|
-          @idx[key].append(m) if m[prop].nil?
-        end
-      end
-      (maps & []) | @idx[key]
     when :eq
       if @operands.first.is_a?(Symbol) && _scalar?(@operands[1])
         if @idx[key].nil?
@@ -218,7 +210,8 @@ module Factbase::IndexedTerm
   def _init_indexes
     @indexes = {
       one: Factbase::IndexedOne.new(self, @idx),
-      exists: Factbase::IndexedExists.new(self, @idx)
+      exists: Factbase::IndexedExists.new(self, @idx),
+      absent: Factbase::IndexedAbsent.new(self, @idx)
     }
   end
 end
