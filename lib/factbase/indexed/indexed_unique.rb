@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: MIT
 
 # Indexed term 'unique'.
+# @todo #249:30min Improve prediction for 'unique' term. Current prediction is quite naive and
+#  returns many false positives because it just filters facts which have exactly the same set
+#  of keys regardless the values. We should introduce more smart prediction.
 class Factbase::IndexedUnique
   def initialize(term, idx)
     @term = term
