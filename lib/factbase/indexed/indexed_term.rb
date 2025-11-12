@@ -8,6 +8,7 @@ require_relative '../../factbase'
 require_relative '../indexed/indexed_one'
 require_relative '../indexed/indexed_exists'
 require_relative '../indexed/indexed_absent'
+require_relative '../indexed/indexed_unique'
 
 # Term with an index.
 #
@@ -175,12 +176,6 @@ module Factbase::IndexedTerm
       else
         (maps & []) | r
       end
-    when :unique
-      if @idx[key].nil?
-        props = @operands.map(&:to_s)
-        @idx[key] = maps.to_a.select { |m| props.all? { |p| !m[p].nil? } }
-      end
-      (maps & []) | @idx[key]
     end
   end
 
@@ -211,7 +206,8 @@ module Factbase::IndexedTerm
     @indexes = {
       one: Factbase::IndexedOne.new(self, @idx),
       exists: Factbase::IndexedExists.new(self, @idx),
-      absent: Factbase::IndexedAbsent.new(self, @idx)
+      absent: Factbase::IndexedAbsent.new(self, @idx),
+      unique: Factbase::IndexedUnique.new(self, @idx)
     }
   end
 end
