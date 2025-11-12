@@ -13,29 +13,28 @@ class Factbase::IndexedEq
   def predict(maps, _fb, params)
     return nil if @idx.nil?
     key = [maps.object_id, @term.operands.first, @term.op]
-    if @term.operands.first.is_a?(Symbol) && _scalar?(@term.operands[1])
-      if @idx[key].nil?
-        @idx[key] = {}
-        prop = @term.operands.first.to_s
-        maps.to_a.each do |m|
-          m[prop]&.each do |v|
-            @idx[key][v] = [] if @idx[key][v].nil?
-            @idx[key][v].append(m)
-          end
+    return unless @term.operands.first.is_a?(Symbol) && _scalar?(@term.operands[1])
+    if @idx[key].nil?
+      @idx[key] = {}
+      prop = @term.operands.first.to_s
+      maps.to_a.each do |m|
+        m[prop]&.each do |v|
+          @idx[key][v] = [] if @idx[key][v].nil?
+          @idx[key][v].append(m)
         end
       end
-      vv =
-        if @term.operands[1].is_a?(Symbol)
-          params[@term.operands[1].to_s] || []
-        else
-          [@term.operands[1]]
-        end
-      if vv.empty?
-        (maps & [])
+    end
+    vv =
+      if @term.operands[1].is_a?(Symbol)
+        params[@term.operands[1].to_s] || []
       else
-        j = vv.map { |v| @idx[key][v] || [] }.reduce(&:|)
-        (maps & []) | j
+        [@term.operands[1]]
       end
+    if vv.empty?
+      (maps & [])
+    else
+      j = vv.map { |v| @idx[key][v] || [] }.reduce(&:|)
+      (maps & []) | j
     end
   end
 
