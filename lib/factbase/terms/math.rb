@@ -12,15 +12,7 @@ require_relative 'compare'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Math
-  def gt(fact, maps, fb)
-    Factbase::Compare.new(:>, @operands).evaluate(fact, maps, fb)
-  end
-
   def lte(fact, maps, fb)
     Factbase::Compare.new(:<=, @operands).evaluate(fact, maps, fb)
-  end
-
-  def gte(fact, maps, fb)
-    Factbase::Compare.new(:>=, @operands).evaluate(fact, maps, fb)
   end
 end
