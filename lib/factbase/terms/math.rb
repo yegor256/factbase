@@ -12,14 +12,6 @@ require_relative 'compare'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Math
-  def eq(fact, maps, fb)
-    Factbase::Compare.new(:==, @operands).evaluate(fact, maps, fb)
-  end
-
-  def lt(fact, maps, fb)
-    Factbase::Compare.new(:<, @operands).evaluate(fact, maps, fb)
-  end
-
   def gt(fact, maps, fb)
     Factbase::Compare.new(:>, @operands).evaluate(fact, maps, fb)
   end

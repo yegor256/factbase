@@ -38,6 +38,8 @@ require_relative 'terms/minus'
 require_relative 'terms/times'
 require_relative 'terms/div'
 require_relative 'terms/zero'
+require_relative 'terms/eq'
+require_relative 'terms/lt'
 
 # Term.
 #
@@ -124,7 +126,9 @@ class Factbase::Term
       minus: Factbase::Minus.new(operands),
       times: Factbase::Times.new(operands),
       div: Factbase::Div.new(operands),
-      zero: Factbase::Zero.new(operands)
+      zero: Factbase::Zero.new(operands),
+      eq: Factbase::Eq.new(operands),
+      lt: Factbase::Lt.new(operands)
     }
   end
 
