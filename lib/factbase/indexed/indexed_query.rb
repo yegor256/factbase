@@ -12,6 +12,8 @@ require_relative 'indexed_fact'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::IndexedQuery
+  include Enumerable
+
   # Constructor.
   # @param [Factbase::Query] origin Original query
   # @param [Hash] idx The index

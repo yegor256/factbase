@@ -57,15 +57,15 @@ desc 'Benchmark them all'
 task :benchmark, [:name] do |_t, args|
   bname = args[:name] || 'all'
   require_relative 'lib/factbase'
-  fb = Factbase.new
   require_relative 'lib/factbase/cached/cached_factbase'
-  fb = Factbase::CachedFactbase.new(fb)
   require_relative 'lib/factbase/indexed/indexed_factbase'
-  fb = Factbase::IndexedFactbase.new(fb)
   require_relative 'lib/factbase/sync/sync_factbase'
-  fb = Factbase::SyncFactbase.new(fb)
   require 'benchmark'
   Benchmark.bm(60) do |b|
+    fb = Factbase.new
+    fb = Factbase::CachedFactbase.new(fb)
+    fb = Factbase::IndexedFactbase.new(fb)
+    fb = Factbase::SyncFactbase.new(fb)
     if bname == 'all'
       Dir['benchmark/bench_*.rb'].each do |f|
         require_relative f
