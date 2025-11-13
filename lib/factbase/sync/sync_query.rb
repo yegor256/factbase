@@ -11,6 +11,8 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::SyncQuery
+  include Enumerable
+
   # Constructor.
   # @param [Factbase::Query] origin Original query
   # @param [Monitor] monitor The monitor

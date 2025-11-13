@@ -20,6 +20,8 @@ require_relative 'tee'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::Query
+  include Enumerable
+
   # Constructor.
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [String|Factbase::Term] term The query term

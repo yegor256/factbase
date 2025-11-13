@@ -77,6 +77,15 @@ class TestQuery < Factbase::Test
     )
   end
 
+  def test_retrieves_all_facts
+    maps = []
+    maps << { 'first' => 'first' }
+    maps << { 'second' => 'second' }
+    maps << { 'third' => 'third' }
+    q = Factbase::Query.new(maps, '(always)', Factbase.new)
+    assert_equal(3, q.count)
+  end
+
   def test_complex_parsing
     queries = {
       '(eq num 444)' => 0,

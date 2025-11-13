@@ -12,6 +12,8 @@ require_relative 'cached_fact'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 class Factbase::CachedQuery
+  include Enumerable
+
   # Constructor.
   # @param [Factbase::Query] origin Original query
   # @param [Hash] cache The cache
