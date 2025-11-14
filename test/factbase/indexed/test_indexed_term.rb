@@ -115,39 +115,4 @@ class TestIndexedTerm < Factbase::Test
     assert_equal(3, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
-
-  # @todo #363:30min Move the test to a separated class. Since we've moved prediction of 'unqieu' term
-  #  to separated class IndexedUnique, let's move this test to a separated test class too in order to be
-  #  consistent with rule 'one class - one test class'
-  def test_predicts_on_unique
-    term = Factbase::Term.new(:unique, [:foo])
-    idx = {}
-    term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new(
-      [
-        { 'foo' => [42] },
-        { 'foo' => [42] },
-        { 'foo' => [7] },
-        { 'bar' => [100] }
-      ]
-    )
-    n = term.predict(maps, nil, {})
-    assert_equal(3, n.size)
-  end
-
-  def test_predicts_on_unique_with_combinations
-    term = Factbase::Term.new(:unique, %i[foo bar])
-    idx = {}
-    term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new(
-      [
-        { 'foo' => [42], 'bar' => ['a'] },
-        { 'foo' => [7], 'baz' => ['a'] },
-        { 'foo' => [42], 'bar' => ['b'] },
-        { 'foo' => [52] }
-      ]
-    )
-    n = term.predict(maps, nil, {})
-    assert_equal(2, n.size)
-  end
 end
