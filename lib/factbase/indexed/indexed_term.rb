@@ -7,6 +7,7 @@ require 'tago'
 require_relative '../../factbase'
 require_relative '../indexed/indexed_eq'
 require_relative '../indexed/indexed_lt'
+require_relative '../indexed/indexed_gt'
 require_relative '../indexed/indexed_one'
 require_relative '../indexed/indexed_exists'
 require_relative '../indexed/indexed_absent'
@@ -39,27 +40,6 @@ module Factbase::IndexedTerm
     end
     key = [maps.object_id, @operands.first, @op]
     case @op
-    when :gt
-      if @operands.first.is_a?(Symbol) && _scalar?(@operands[1])
-        prop = @operands.first.to_s
-        cache_key = [maps.object_id, @operands.first, :sorted]
-        if @idx[cache_key].nil?
-          @idx[cache_key] = []
-          maps.to_a.each do |m|
-            values = m[prop]
-            next if values.nil?
-            values.each do |v|
-              @idx[cache_key] << [v, m]
-            end
-          end
-          @idx[cache_key].sort_by! { |pair| pair[0] }
-        end
-        threshold = @operands[1].is_a?(Symbol) ? params[@operands[1].to_s]&.first : @operands[1]
-        return nil if threshold.nil?
-        i = @idx[cache_key].bsearch_index { |pair| pair[0] > threshold } || @idx[cache_key].size
-        result = @idx[cache_key][i..].map { |pair| pair[1] }.uniq
-        (maps & []) | result
-      end
     when :and
       r = nil
       if @operands.all? { |o| o.op == :eq } && @operands.size > 1 \
@@ -159,6 +139,7 @@ module Factbase::IndexedTerm
     @indexes = {
       eq: Factbase::IndexedEq.new(self, @idx),
       lt: Factbase::IndexedLt.new(self, @idx),
+      gt: Factbase::IndexedGt.new(self, @idx),
       one: Factbase::IndexedOne.new(self, @idx),
       exists: Factbase::IndexedExists.new(self, @idx),
       absent: Factbase::IndexedAbsent.new(self, @idx),
