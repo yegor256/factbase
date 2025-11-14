@@ -40,6 +40,8 @@ require_relative 'terms/div'
 require_relative 'terms/zero'
 require_relative 'terms/eq'
 require_relative 'terms/lt'
+require_relative 'terms/gt'
+require_relative 'terms/gte'
 
 # Term.
 #
@@ -128,7 +130,9 @@ class Factbase::Term
       div: Factbase::Div.new(operands),
       zero: Factbase::Zero.new(operands),
       eq: Factbase::Eq.new(operands),
-      lt: Factbase::Lt.new(operands)
+      lt: Factbase::Lt.new(operands),
+      gt: Factbase::Gt.new(operands),
+      gte: Factbase::Gte.new(operands)
     }
   end
 
