@@ -18,19 +18,6 @@ require_relative '../../../lib/factbase/indexed/indexed_term'
 #  no test for the term in this TestIndexedTerm. Let's introduce it and move to a separated test class like
 #  it's done with TestIndexedOne.
 class TestIndexedTerm < Factbase::Test
-  # @todo #363:30min Move the test to a separated class. Since we've moved prediction of 'eq' term
-  #  to separated class IndexedEq, let's move this test to a separated test class too in order to be
-  #  consistent with rule 'one class - one test class'
-  def test_predicts_on_eq
-    term = Factbase::Term.new(:eq, [:foo, 42])
-    idx = {}
-    term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7] }, { 'foo' => [22, 42] }, { 'foo' => [] }])
-    n = term.predict(maps, nil, {})
-    assert_equal(2, n.size)
-    assert_kind_of(Factbase::Taped, n)
-  end
-
   def test_predicts_on_not
     term = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 42])])
     idx = {}
