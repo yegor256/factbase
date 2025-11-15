@@ -10,6 +10,7 @@ require_relative '../indexed/indexed_lt'
 require_relative '../indexed/indexed_gt'
 require_relative '../indexed/indexed_one'
 require_relative '../indexed/indexed_exists'
+require_relative '../indexed/indexed_and'
 require_relative '../indexed/indexed_absent'
 require_relative '../indexed/indexed_unique'
 
@@ -40,46 +41,6 @@ module Factbase::IndexedTerm
     end
     key = [maps.object_id, @operands.first, @op]
     case @op
-    when :and
-      r = nil
-      if @operands.all? { |o| o.op == :eq } && @operands.size > 1 \
-        && @operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
-        props = @operands.map { |o| o.operands.first }.sort
-        key = [maps.object_id, props, :multi_and_eq]
-        if @idx[key].nil?
-          @idx[key] = {}
-          maps.to_a.each do |m|
-            _all_tuples(m, props).each do |t|
-              @idx[key][t] = [] if @idx[key][t].nil?
-              @idx[key][t].append(m)
-            end
-          end
-        end
-        tuples = Enumerator.product(
-          *@operands.sort_by { |o| o.operands.first }.map do |o|
-            if o.operands[1].is_a?(Symbol)
-              params[o.operands[1].to_s] || []
-            else
-              [o.operands[1]]
-            end
-          end
-        )
-        j = tuples.map { |t| @idx[key][t] || [] }.reduce(&:|)
-        r = (maps & []) | j
-      else
-        @operands.each do |o|
-          n = o.predict(maps, fb, params)
-          break if n.nil?
-          if r.nil?
-            r = n
-          elsif n.size < r.size * 8 # to skip some obvious matchings
-            r &= n.to_a
-          end
-          break if r.size < maps.size / 32 # it's already small enough
-          break if r.size < 128 # it's obviously already small enough
-        end
-      end
-      r
     when :or
       r = nil
       @operands.each do |o|
@@ -114,23 +75,6 @@ module Factbase::IndexedTerm
 
   private
 
-  def _all_tuples(fact, props)
-    prop = props.first.to_s
-    tuples = []
-    tuples += (fact[prop] || []).zip
-    if props.size > 1
-      tails = _all_tuples(fact, props[1..])
-      ext = []
-      tuples.each do |t|
-        tails.each do |tail|
-          ext << (t + tail)
-        end
-      end
-      tuples = ext
-    end
-    tuples
-  end
-
   def _scalar?(item)
     item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
   end
@@ -143,7 +87,8 @@ module Factbase::IndexedTerm
       one: Factbase::IndexedOne.new(self, @idx),
       exists: Factbase::IndexedExists.new(self, @idx),
       absent: Factbase::IndexedAbsent.new(self, @idx),
-      unique: Factbase::IndexedUnique.new(self, @idx)
+      unique: Factbase::IndexedUnique.new(self, @idx),
+      and: Factbase::IndexedAnd.new(self, @idx)
     }
   end
 end
