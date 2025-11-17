@@ -40,6 +40,7 @@ require_relative 'terms/div'
 require_relative 'terms/zero'
 require_relative 'terms/eq'
 require_relative 'terms/lt'
+require_relative 'terms/lte'
 require_relative 'terms/gt'
 require_relative 'terms/gte'
 
@@ -78,9 +79,6 @@ class Factbase::Term
   # The operands of this term
   # @return [Array] The operands
   attr_reader :operands
-
-  require_relative 'terms/math'
-  include Factbase::Math
 
   require_relative 'terms/logical'
   include Factbase::Logical
@@ -131,6 +129,7 @@ class Factbase::Term
       zero: Factbase::Zero.new(operands),
       eq: Factbase::Eq.new(operands),
       lt: Factbase::Lt.new(operands),
+      lte: Factbase::Lte.new(operands),
       gt: Factbase::Gt.new(operands),
       gte: Factbase::Gte.new(operands)
     }
