@@ -33,4 +33,47 @@ class TestIndexedLt < Factbase::Test
     assert_equal(3, n.size)
     assert_kind_of(Factbase::Taped, n)
   end
+
+  def test_predicts_on_lt_with_floats
+    term = Factbase::Term.new(:lt, [:foo, 50.5])
+    idx = {}
+    term.redress!(Factbase::IndexedTerm, idx:)
+    maps = Factbase::Taped.new(
+      [
+        { 'foo' => [50.0] },
+        { 'foo' => [50.5] },
+        { 'foo' => [50.6] },
+        { 'foo' => [49.9, 60.0] },
+        { 'foo' => [30.1] },
+        { 'bar' => [40] }
+      ]
+    )
+    n = term.predict(maps, nil, {})
+    assert_equal(3, n.size)
+    assert_kind_of(Factbase::Taped, n)
+  end
+
+  def test_predicts_on_lt_with_missing_parameter
+    term = Factbase::Term.new(:lt, %i[age $max_age])
+    idx = {}
+    term.redress!(Factbase::IndexedTerm, idx:)
+    maps = Factbase::Taped.new([{ 'age' => [25] }])
+    n = term.predict(maps, nil, {})
+    assert_nil(n)
+  end
+
+  def test_predicts_on_lt_above_threshold
+    term = Factbase::Term.new(:lt, [:foo, 5])
+    idx = {}
+    term.redress!(Factbase::IndexedTerm, idx:)
+    maps = Factbase::Taped.new(
+      [
+        { 'foo' => [10] },
+        { 'foo' => [15] },
+        { 'foo' => [20] }
+      ]
+    )
+    n = term.predict(maps, nil, {})
+    assert_empty(n)
+  end
 end
