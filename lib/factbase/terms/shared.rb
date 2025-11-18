@@ -49,6 +49,7 @@ module Factbase::TermShared
   def _values(pos, fact, maps, fb)
     v = @operands[pos]
     v = v.evaluate(fact, maps, fb) if v.is_a?(Factbase::Term)
+    v = v.evaluate(fact, maps, fb) if v.is_a?(Factbase::TermBase)
     v = fact[v.to_s] if v.is_a?(Symbol)
     return v if v.nil?
     unless v.is_a?(Array)
