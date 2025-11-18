@@ -11,24 +11,6 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Logical
-  # Always returns true, regardless of the fact
-  # @param [Factbase::Fact] _fact The fact (unused)
-  # @param [Array<Factbase::Fact>] _maps All maps available (unused)
-  # @return [Boolean] Always returns true
-  def always(_fact, _maps, _fb)
-    assert_args(0)
-    true
-  end
-
-  # Always returns false, regardless of the fact
-  # @param [Factbase::Fact] _fact The fact (unused)
-  # @param [Array<Factbase::Fact>] _maps All maps available (unused)
-  # @return [Boolean] Always returns false
-  def never(_fact, _maps, _fb)
-    assert_args(0)
-    false
-  end
-
   # Logical negation (NOT) of an operand
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available

@@ -43,6 +43,8 @@ require_relative 'terms/lt'
 require_relative 'terms/lte'
 require_relative 'terms/gt'
 require_relative 'terms/gte'
+require_relative 'terms/always'
+require_relative 'terms/never'
 
 # Term.
 #
@@ -131,7 +133,9 @@ class Factbase::Term
       lt: Factbase::Lt.new(operands),
       lte: Factbase::Lte.new(operands),
       gt: Factbase::Gt.new(operands),
-      gte: Factbase::Gte.new(operands)
+      gte: Factbase::Gte.new(operands),
+      always: Factbase::Always.new(operands),
+      never: Factbase::Never.new(operands)
     }
   end
 
