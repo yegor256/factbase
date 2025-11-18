@@ -9,6 +9,7 @@ require_relative '../indexed/indexed_eq'
 require_relative '../indexed/indexed_lt'
 require_relative '../indexed/indexed_gt'
 require_relative '../indexed/indexed_one'
+require_relative '../indexed/indexed_not'
 require_relative '../indexed/indexed_exists'
 require_relative '../indexed/indexed_and'
 require_relative '../indexed/indexed_absent'
@@ -39,7 +40,6 @@ module Factbase::IndexedTerm
       index = @indexes[@op]
       return index.predict(maps, fb, params)
     end
-    key = [maps.object_id, @operands.first, @op]
     case @op
     when :or
       r = nil
@@ -72,7 +72,8 @@ module Factbase::IndexedTerm
       exists: Factbase::IndexedExists.new(self, @idx),
       absent: Factbase::IndexedAbsent.new(self, @idx),
       unique: Factbase::IndexedUnique.new(self, @idx),
-      and: Factbase::IndexedAnd.new(self, @idx)
+      and: Factbase::IndexedAnd.new(self, @idx),
+      not: Factbase::IndexedNot.new(self, @idx)
     }
   end
 end
