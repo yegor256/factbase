@@ -12,7 +12,7 @@ gem 'minitest-reporters', '~>1.7', require: false
 gem 'os', '~>1.1', require: false
 gem 'qbash', '~>0.4', require: false
 gem 'rake', '~>13.2', require: false
-gem 'rdoc', '6.15.0', require: false # GPL
+gem 'rdoc', '6.15.1', require: false # GPL
 gem 'rubocop', '~>1.74', require: false
 gem 'rubocop-minitest', '~>0.38', require: false
 gem 'rubocop-performance', '~>1.25', require: false
