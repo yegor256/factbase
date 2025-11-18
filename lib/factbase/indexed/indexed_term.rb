@@ -9,6 +9,7 @@ require_relative '../indexed/indexed_eq'
 require_relative '../indexed/indexed_lt'
 require_relative '../indexed/indexed_gt'
 require_relative '../indexed/indexed_one'
+require_relative '../indexed/indexed_not'
 require_relative '../indexed/indexed_exists'
 require_relative '../indexed/indexed_and'
 require_relative '../indexed/indexed_or'
@@ -36,36 +37,10 @@ module Factbase::IndexedTerm
     m = :"#{@op}_predict"
     return send(m, maps, fb, params) if respond_to?(m)
     _init_indexes unless @indexes
-    if @indexes.key?(@op)
-      index = @indexes[@op]
-      return index.predict(maps, fb, params)
-    end
-    key = [maps.object_id, @operands.first, @op]
-    case @op
-    when :not
-      if @idx[key].nil?
-        yes = @operands.first.predict(maps, fb, params)
-        if yes.nil?
-          @idx[key] = { r: nil }
-        else
-          yes = yes.to_a.to_set
-          @idx[key] = { r: maps.to_a.reject { |m| yes.include?(m) } }
-        end
-      end
-      r = @idx[key][:r]
-      if r.nil?
-        nil
-      else
-        (maps & []) | r
-      end
-    end
+    @indexes[@op].predict(maps, fb, params) if @indexes.key?(@op)
   end
 
   private
-
-  def _scalar?(item)
-    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
-  end
 
   def _init_indexes
     @indexes = {
@@ -77,6 +52,7 @@ module Factbase::IndexedTerm
       absent: Factbase::IndexedAbsent.new(self, @idx),
       unique: Factbase::IndexedUnique.new(self, @idx),
       and: Factbase::IndexedAnd.new(self, @idx),
+      not: Factbase::IndexedNot.new(self, @idx),
       or: Factbase::IndexedOr.new(self, @idx)
     }
   end
