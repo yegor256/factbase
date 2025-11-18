@@ -45,10 +45,6 @@ module Factbase::IndexedTerm
 
   private
 
-  def _scalar?(item)
-    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
-  end
-
   def _init_indexes
     @indexes = {
       eq: Factbase::IndexedEq.new(self, @idx),
