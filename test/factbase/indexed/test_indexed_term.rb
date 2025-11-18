@@ -55,6 +55,9 @@ class TestIndexedTerm < Factbase::Test
     assert_equal(1, term.predict(maps, nil, {}).size)
   end
 
+  # @todo #363:30min Move the test to a separated class. Since we've moved prediction of 'or' term
+  #  to separated class IndexedOr, let's move this test to a separated test class too in order to be
+  #  consistent with rule 'one class - one test class'
   def test_predicts_on_or
     term = Factbase::Term.new(
       :or,

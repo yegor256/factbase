@@ -11,6 +11,7 @@ require_relative '../indexed/indexed_gt'
 require_relative '../indexed/indexed_one'
 require_relative '../indexed/indexed_exists'
 require_relative '../indexed/indexed_and'
+require_relative '../indexed/indexed_or'
 require_relative '../indexed/indexed_absent'
 require_relative '../indexed/indexed_unique'
 
@@ -41,19 +42,6 @@ module Factbase::IndexedTerm
     end
     key = [maps.object_id, @operands.first, @op]
     case @op
-    when :or
-      r = nil
-      @operands.each do |o|
-        n = o.predict(maps, fb, params)
-        if n.nil?
-          r = nil
-          break
-        end
-        r = maps & [] if r.nil?
-        r |= n.to_a
-        return maps if r.size > maps.size / 4 # it's big enough already
-      end
-      r
     when :not
       if @idx[key].nil?
         yes = @operands.first.predict(maps, fb, params)
@@ -88,7 +76,8 @@ module Factbase::IndexedTerm
       exists: Factbase::IndexedExists.new(self, @idx),
       absent: Factbase::IndexedAbsent.new(self, @idx),
       unique: Factbase::IndexedUnique.new(self, @idx),
-      and: Factbase::IndexedAnd.new(self, @idx)
+      and: Factbase::IndexedAnd.new(self, @idx),
+      or: Factbase::IndexedOr.new(self, @idx)
     }
   end
 end
