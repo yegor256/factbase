@@ -75,6 +75,21 @@ class TestIndexedTerm < Factbase::Test
     assert_kind_of(Factbase::Taped, n)
   end
 
+  def test_predicts_on_or_with_nil
+    term = Factbase::Term.new(
+      :or,
+      [
+        Factbase::Term.new(:boom, []),
+        Factbase::Term.new(:exists, [:baz])
+      ]
+    )
+    idx = {}
+    term.redress!(Factbase::IndexedTerm, idx:)
+    maps = Factbase::Taped.new([{ 'foo' => [1] }])
+    n = term.predict(maps, nil, {})
+    assert_nil(n)
+  end
+
   def test_predicts_on_others
     term = Factbase::Term.new(:boom, [])
     idx = {}
