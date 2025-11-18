@@ -37,9 +37,7 @@ module Factbase::IndexedTerm
     m = :"#{@op}_predict"
     return send(m, maps, fb, params) if respond_to?(m)
     _init_indexes unless @indexes
-    if @indexes.key?(@op)
-      index = @indexes[@op]
-      return index.predict(maps, fb, params)
+    @indexes[@op].predict(maps, fb, params) if @indexes.key?(@op)
     end
   end
 
