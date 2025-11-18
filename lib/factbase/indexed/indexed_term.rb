@@ -59,7 +59,7 @@ module Factbase::IndexedTerm
       absent: Factbase::IndexedAbsent.new(self, @idx),
       unique: Factbase::IndexedUnique.new(self, @idx),
       and: Factbase::IndexedAnd.new(self, @idx),
-      not: Factbase::IndexedNot.new(self, @idx)
+      not: Factbase::IndexedNot.new(self, @idx),
       or: Factbase::IndexedOr.new(self, @idx)
     }
   end
