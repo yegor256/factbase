@@ -20,7 +20,8 @@ class TestDefn < Factbase::Test
   end
 
   def test_defn_again_by_mistake
-    t = Factbase::Defn.new([:and, 'self.to_s'])
+    t = Factbase::Defn.new([:unexisting_function, 'self.to_s'])
+    t.evaluate(fact, [], Factbase.new)
     assert_raises(StandardError) do
       t.evaluate(fact, [], Factbase.new)
     end

@@ -45,6 +45,9 @@ require_relative 'terms/gt'
 require_relative 'terms/gte'
 require_relative 'terms/always'
 require_relative 'terms/never'
+require_relative 'terms/not'
+require_relative 'terms/or'
+require_relative 'terms/and'
 
 # Term.
 #
@@ -135,7 +138,10 @@ class Factbase::Term
       gt: Factbase::Gt.new(operands),
       gte: Factbase::Gte.new(operands),
       always: Factbase::Always.new(operands),
-      never: Factbase::Never.new(operands)
+      never: Factbase::Never.new(operands),
+      not: Factbase::Not.new(operands),
+      or: Factbase::Or.new(operands),
+      and: Factbase::And.new(operands)
     }
   end
 
