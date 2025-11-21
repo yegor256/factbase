@@ -31,33 +31,6 @@ class TestIndexedTerm < Factbase::Test
     assert_kind_of(Factbase::Taped, n)
   end
 
-  # @todo #363:30min Move the test to a separated class. Since we've moved prediction of 'and' term
-  #  to separated class IndexedAnd, let's move this test to a separated test class too in order to be
-  #  consistent with rule 'one class - one test class'
-  def test_predicts_on_and
-    term = Factbase::Term.new(
-      :and,
-      [
-        Factbase::Term.new(:eq, [:foo, 42]),
-        Factbase::Term.new(:eq, %i[bar $jeff])
-      ]
-    )
-    idx = {}
-    term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [22, 42] }, { 'foo' => [22, 42] }])
-    n = term.predict(maps, nil, Factbase::Tee.new({}, { 'jeff' => [7] }))
-    assert_equal(1, n.size)
-    assert_kind_of(Factbase::Taped, n)
-  end
-
-  def test_predicts_on_single_and
-    term = Factbase::Term.new(:and, [Factbase::Term.new(:eq, [:foo, 42])])
-    idx = {}
-    term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [4] }])
-    assert_equal(1, term.predict(maps, nil, {}).size)
-  end
-
   # @todo #363:30min Move the test to a separated class. Since we've moved prediction of 'or' term
   #  to separated class IndexedOr, let's move this test to a separated test class too in order to be
   #  consistent with rule 'one class - one test class'
