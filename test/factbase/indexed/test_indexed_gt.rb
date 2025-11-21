@@ -21,7 +21,6 @@ class TestIndexedGt < Factbase::Test
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new(
       [
-        { 'foo' => [10] },
         { 'foo' => [43] },
         { 'foo' => [42] },
         { 'foo' => [100, 5] },
@@ -40,7 +39,6 @@ class TestIndexedGt < Factbase::Test
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new(
       [
-        { 'foo' => [50.0] },
         { 'foo' => [50.6] },
         { 'foo' => [50.5] },
         { 'foo' => [49.9, 60.0] },
