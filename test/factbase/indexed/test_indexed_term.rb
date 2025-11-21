@@ -101,26 +101,4 @@ class TestIndexedTerm < Factbase::Test
     n = term.predict(maps, nil, {})
     assert_nil(n)
   end
-
-  # @todo #363:30min Move the test to a separated class. Since we've moved prediction of 'gt' term
-  #  to separated class IndexedGt, let's move this test to a separated test class too in order to be
-  #  consistent with rule 'one class - one test class'
-  def test_predicts_on_gt
-    term = Factbase::Term.new(:gt, [:foo, 42])
-    idx = {}
-    term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new(
-      [
-        { 'foo' => [10] },
-        { 'foo' => [43] },
-        { 'foo' => [42] },
-        { 'foo' => [100, 5] },
-        { 'bar' => [50] },
-        { 'foo' => [41, 42, 43] }
-      ]
-    )
-    n = term.predict(maps, nil, {})
-    assert_equal(3, n.size)
-    assert_kind_of(Factbase::Taped, n)
-  end
 end
