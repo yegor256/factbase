@@ -9,7 +9,7 @@ require_relative 'base'
 class Factbase::Always < Factbase::TermBase
   # Constructor.
   # @param [Array] operands Operands
-  def initialize(operands)
+  def initialize(operands = [])
     super()
     @operands = operands
     @op = :always
