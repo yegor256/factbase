@@ -240,9 +240,17 @@ class Factbase
   # The facts that existed in the factbase before importing will remain there.
   # The facts from the incoming byte stream will be added to them.
   #
+  # This method supports both the original format (Array of maps) and
+  # the IndexedFactbase format (Hash with :maps and :idx keys).
+  #
   # @param [String] bytes Binary string to import
   def import(bytes)
     raise 'Empty input, cannot load a factbase' if bytes.empty?
-    @maps += Marshal.load(bytes)
+    data = Marshal.load(bytes)
+    if data.is_a?(Hash) && data.key?(:maps)
+      @maps += Marshal.load(data[:maps])
+    else
+      @maps += data
+    end
   end
 end

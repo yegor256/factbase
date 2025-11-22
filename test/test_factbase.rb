@@ -89,6 +89,19 @@ class TestFactbase < Factbase::Test
     assert_equal(1, f2.query('(eq foo 42)').each.to_a.size)
   end
 
+  def test_import_from_indexed_factbase
+    require_relative '../lib/factbase/indexed/indexed_factbase'
+    fb1 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb1.insert.foo = 42
+    fb1.insert.bar = 13
+    data = fb1.export
+    fb2 = Factbase.new
+    fb2.import(data)
+    assert_equal(2, fb2.size)
+    assert_equal(1, fb2.query('(eq foo 42)').each.to_a.size)
+    assert_equal(1, fb2.query('(eq bar 13)').each.to_a.size)
+  end
+
   def test_reads_from_empty_file
     fb = Factbase.new
     Tempfile.open do |f|

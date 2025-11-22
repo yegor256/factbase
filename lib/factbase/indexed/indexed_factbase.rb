@@ -61,4 +61,50 @@ class Factbase::IndexedFactbase
       yield Factbase::IndexedFactbase.new(fbt, @idx)
     end
   end
+
+  # Export it into a chain of bytes, including both data and index.
+  #
+  # Here is how you can export it to a file, for example:
+  #
+  #  fb = Factbase::IndexedFactbase.new(Factbase.new)
+  #  fb.insert.foo = 42
+  #  File.binwrite("foo.fb", fb.export)
+  #
+  # The data is binary, it's not a text!
+  #
+  # @return [String] Binary string containing serialized data and index
+  def export
+    Marshal.dump({ maps: @origin.export, idx: @idx })
+  end
+
+  # Import from a chain of bytes, including both data and index.
+  #
+  # Here is how you can read it from a file, for example:
+  #
+  #  fb = Factbase::IndexedFactbase.new(Factbase.new)
+  #  fb.import(File.binread("foo.fb"))
+  #
+  # The facts that existed in the factbase before importing will remain there.
+  # The facts from the incoming byte stream will be added to them.
+  # If the byte stream doesn't contain an index (for backward compatibility),
+  # the index will be empty and will be built on first use.
+  #
+  # @param [String] bytes Binary string to import
+  def import(bytes)
+    raise 'Empty input, cannot load a factbase' if bytes.empty?
+    data = Marshal.load(bytes)
+    if data.is_a?(Hash) && data.key?(:maps)
+      @origin.import(data[:maps])
+      @idx.merge!(data[:idx]) if data[:idx].is_a?(Hash)
+    else
+      @origin.import(bytes)
+      @idx.clear
+    end
+  end
+
+  # Size, the total number of facts in the factbase.
+  # @return [Integer] How many facts are in there
+  def size
+    @origin.size
+  end
 end
