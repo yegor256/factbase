@@ -93,4 +93,67 @@ class TestIndexedFactbase < Factbase::Test
       end
     end
   end
+
+  def test_export_and_import_with_index
+    fb1 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb1.insert.foo = 42
+    fb1.insert.bar = 13
+    assert_equal(1, fb1.query('(eq foo 42)').each.to_a.size)
+    data = fb1.export
+    fb2 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb2.import(data)
+    assert_equal(2, fb2.size)
+    assert_equal(1, fb2.query('(eq foo 42)').each.to_a.size)
+    assert_equal(1, fb2.query('(eq bar 13)').each.to_a.size)
+  end
+
+  def test_export_preserves_index
+    fb1 = Factbase::IndexedFactbase.new(Factbase.new)
+    1000.times do |i|
+      fb1.insert.then do |f|
+        f.id = i
+        f.value = i * 2
+      end
+    end
+    fb1.query('(eq value 100)').each.to_a
+    fb1.query('(gt id 500)').each.to_a
+    fb1.query('(exists value)').each.to_a
+    data = fb1.export
+    fb2 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb2.import(data)
+    assert_equal(1, fb2.query('(eq value 100)').each.to_a.size)
+    assert_equal(499, fb2.query('(gt id 500)').each.to_a.size)
+    assert_equal(1000, fb2.query('(exists value)').each.to_a.size)
+  end
+
+  def test_import_backward_compatibility
+    fb1 = Factbase.new
+    fb1.insert.foo = 42
+    fb1.insert.bar = 13
+    old_format_data = fb1.export
+    fb2 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb2.import(old_format_data)
+    assert_equal(2, fb2.size)
+    assert_equal(1, fb2.query('(eq foo 42)').each.to_a.size)
+    assert_equal(1, fb2.query('(eq bar 13)').each.to_a.size)
+  end
+
+  def test_import_empty_raises_error
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    assert_raises(StandardError) do
+      fb.import('')
+    end
+  end
+
+  def test_multiple_import_accumulates
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 1
+
+    fb1 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb1.insert.foo = 2
+
+    fb.import(fb1.export)
+    assert_equal(2, fb.size)
+    assert_equal(2, fb.query('(exists foo)').each.to_a.size)
+  end
 end
