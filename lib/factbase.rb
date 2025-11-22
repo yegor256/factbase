@@ -247,10 +247,10 @@ class Factbase
   def import(bytes)
     raise 'Empty input, cannot load a factbase' if bytes.empty?
     data = Marshal.load(bytes)
-    if data.is_a?(Hash) && data.key?(:maps)
-      @maps += Marshal.load(data[:maps])
-    else
-      @maps += data
-    end
+    @maps += if data.is_a?(Hash) && data.key?(:maps)
+               Marshal.load(data[:maps])
+             else
+               data
+             end
   end
 end

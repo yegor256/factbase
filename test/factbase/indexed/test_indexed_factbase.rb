@@ -148,10 +148,8 @@ class TestIndexedFactbase < Factbase::Test
   def test_multiple_import_accumulates
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     fb.insert.foo = 1
-
     fb1 = Factbase::IndexedFactbase.new(Factbase.new)
     fb1.insert.foo = 2
-
     fb.import(fb1.export)
     assert_equal(2, fb.size)
     assert_equal(2, fb.query('(exists foo)').each.to_a.size)
