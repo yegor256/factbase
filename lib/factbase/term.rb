@@ -50,6 +50,8 @@ require_relative 'terms/or'
 require_relative 'terms/and'
 require_relative 'terms/when'
 require_relative 'terms/either'
+require_relative 'terms/count'
+require_relative 'terms/first'
 
 # Term.
 #
@@ -145,7 +147,9 @@ class Factbase::Term
       or: Factbase::Or.new(operands),
       and: Factbase::And.new(operands),
       when: Factbase::When.new(operands),
-      either: Factbase::Either.new(operands)
+      either: Factbase::Either.new(operands),
+      count: Factbase::Count.new(operands),
+      first: Factbase::First.new(operands)
     }
   end
 
