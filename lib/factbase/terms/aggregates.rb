@@ -21,10 +21,6 @@ module Factbase::Aggregates
     _best(maps) { |v, b| v > b }
   end
 
-  def count(_fact, maps, _fb)
-    maps.size
-  end
-
   def nth(_fact, maps, _fb)
     assert_args(2)
     pos = @operands[0]
@@ -34,15 +30,6 @@ module Factbase::Aggregates
     m = maps[pos]
     return nil if m.nil?
     m[k.to_s]
-  end
-
-  def first(_fact, maps, _fb)
-    assert_args(1)
-    k = @operands[0]
-    raise "A symbol is expected, but #{k} provided" unless k.is_a?(Symbol)
-    first = maps[0]
-    return nil if first.nil?
-    first[k.to_s]
   end
 
   def sum(_fact, maps, _fb)
