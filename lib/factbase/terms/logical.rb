@@ -11,28 +11,6 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Logical
-  # Logical implication (IF...THEN)
-  # @param [Factbase::Fact] fact The fact
-  # @param [Array<Factbase::Fact>] maps All maps available
-  # @return [Boolean] True if first operand is false OR both are true
-  def when(fact, maps, fb)
-    assert_args(2)
-    a = @operands[0]
-    b = @operands[1]
-    !a.evaluate(fact, maps, fb) || (a.evaluate(fact, maps, fb) && b.evaluate(fact, maps, fb))
-  end
-
-  # Returns the first non-nil value or the second value
-  # @param [Factbase::Fact] fact The fact
-  # @param [Array<Factbase::Fact>] maps All maps available
-  # @return [Object] First operand if not nil, otherwise second operand
-  def either(fact, maps, fb)
-    assert_args(2)
-    v = _values(0, fact, maps, fb)
-    return v unless v.nil?
-    _values(1, fact, maps, fb)
-  end
-
   # Simplifies AND or OR expressions by removing duplicates
   # @return [Factbase::Term] Simplified term
   def and_or_simplify

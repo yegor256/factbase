@@ -48,6 +48,8 @@ require_relative 'terms/never'
 require_relative 'terms/not'
 require_relative 'terms/or'
 require_relative 'terms/and'
+require_relative 'terms/when'
+require_relative 'terms/either'
 
 # Term.
 #
@@ -141,7 +143,9 @@ class Factbase::Term
       never: Factbase::Never.new(operands),
       not: Factbase::Not.new(operands),
       or: Factbase::Or.new(operands),
-      and: Factbase::And.new(operands)
+      and: Factbase::And.new(operands),
+      when: Factbase::When.new(operands),
+      either: Factbase::Either.new(operands)
     }
   end
 
