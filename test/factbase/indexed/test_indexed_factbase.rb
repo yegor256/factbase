@@ -108,22 +108,36 @@ class TestIndexedFactbase < Factbase::Test
   end
 
   def test_export_preserves_index
-    fb1 = Factbase::IndexedFactbase.new(Factbase.new)
-    1000.times do |i|
-      fb1.insert.then do |f|
-        f.id = i
-        f.value = i * 2
+    populate =
+      lambda do |fb|
+        1000.times do |i|
+          fb.insert.then do |f|
+            f.id = i
+            f.value = i * 2
+          end
+        end
       end
-    end
+    fb1 = Factbase::IndexedFactbase.new(Factbase.new)
+    populate.call(fb1)
     fb1.query('(eq value 100)').each.to_a
     fb1.query('(gt id 500)').each.to_a
     fb1.query('(exists value)').each.to_a
-    data = fb1.export
+    data_with_index = fb1.export
+    unmarshalled = Marshal.load(data_with_index)
+    assert(unmarshalled.key?(:idx), 'Exported data should contain :idx key')
+    assert_kind_of(Hash, unmarshalled[:idx], 'Index should be a Hash')
+    refute_empty(unmarshalled[:idx], 'Index should not be empty after queries')
     fb2 = Factbase::IndexedFactbase.new(Factbase.new)
-    fb2.import(data)
+    fb2.import(data_with_index)
     assert_equal(1, fb2.query('(eq value 100)').each.to_a.size)
     assert_equal(499, fb2.query('(gt id 500)').each.to_a.size)
     assert_equal(1000, fb2.query('(exists value)').each.to_a.size)
+    fb3 = Factbase::IndexedFactbase.new(Factbase.new)
+    populate.call(fb3)
+    data_without_index = fb3.export
+    unmarshalled_no_idx = Marshal.load(data_without_index)
+    assert_empty(unmarshalled_no_idx[:idx], 'Index should be empty without queries')
+    assert_operator(data_with_index.size, :>, data_without_index.size, 'Export with index should be larger')
   end
 
   def test_import_backward_compatibility
