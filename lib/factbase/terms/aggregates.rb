@@ -21,32 +21,6 @@ module Factbase::Aggregates
     _best(maps) { |v, b| v > b }
   end
 
-  def nth(_fact, maps, _fb)
-    assert_args(2)
-    pos = @operands[0]
-    raise "An integer is expected, but #{pos} provided" unless pos.is_a?(Integer)
-    k = @operands[1]
-    raise "A symbol is expected, but #{k} provided" unless k.is_a?(Symbol)
-    m = maps[pos]
-    return nil if m.nil?
-    m[k.to_s]
-  end
-
-  def sum(_fact, maps, _fb)
-    k = @operands[0]
-    raise "A symbol is expected, but '#{k}' provided" unless k.is_a?(Symbol)
-    sum = 0
-    maps.each do |m|
-      vv = m[k.to_s]
-      next if vv.nil?
-      vv = [vv] unless vv.respond_to?(:to_a)
-      vv.each do |v|
-        sum += v
-      end
-    end
-    sum
-  end
-
   def agg(fact, maps, fb)
     assert_args(2)
     selector = @operands[0]
