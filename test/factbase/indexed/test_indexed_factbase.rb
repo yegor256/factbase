@@ -140,6 +140,23 @@ class TestIndexedFactbase < Factbase::Test
     assert_operator(data_with_index.size, :>, data_without_index.size, 'Export with index should be larger')
   end
 
+  def test_insert_clears_index
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.query('(eq foo 42)').each.to_a
+    data = fb.export
+    unmarshalled = Marshal.load(data)
+    assert_kind_of(Hash, unmarshalled[:idx])
+    refute_empty(unmarshalled[:idx])
+    fb2 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb2.import(data)
+    fb2.insert.bar = 13
+    data2 = fb2.export
+    unmarshalled2 = Marshal.load(data2)
+    assert_kind_of(Hash, unmarshalled2[:idx])
+    assert_empty(unmarshalled2[:idx])
+  end
+
   def test_import_backward_compatibility
     fb1 = Factbase.new
     fb1.insert.foo = 42
