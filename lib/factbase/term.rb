@@ -52,6 +52,8 @@ require_relative 'terms/when'
 require_relative 'terms/either'
 require_relative 'terms/count'
 require_relative 'terms/first'
+require_relative 'terms/nth'
+require_relative 'terms/sum'
 
 # Term.
 #
@@ -149,7 +151,9 @@ class Factbase::Term
       when: Factbase::When.new(operands),
       either: Factbase::Either.new(operands),
       count: Factbase::Count.new(operands),
-      first: Factbase::First.new(operands)
+      first: Factbase::First.new(operands),
+      nth: Factbase::Nth.new(operands),
+      sum: Factbase::Sum.new(operands)
     }
   end
 
