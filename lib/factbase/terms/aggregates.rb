@@ -21,16 +21,6 @@ module Factbase::Aggregates
     _best(maps) { |v, b| v > b }
   end
 
-  def agg(fact, maps, fb)
-    assert_args(2)
-    selector = @operands[0]
-    raise "A term is expected, but '#{selector}' provided" unless selector.is_a?(Factbase::Term)
-    term = @operands[1]
-    raise "A term is expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
-    subset = fb.query(selector, maps).each(fb, fact).to_a
-    term.evaluate(nil, subset, fb)
-  end
-
   def empty(fact, maps, fb)
     assert_args(1)
     term = @operands[0]
