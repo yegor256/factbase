@@ -78,3 +78,19 @@ task :benchmark, [:name] do |_t, args|
     end
   end
 end
+
+# Run profiling on a benchmark and generate a flamegraph.
+# To run this task, you need to have stackprof installed.
+# https://github.com/tmm1/stackprof
+# To run profiling for a specific benchmark you can run:
+#   bundle exec rake flamegraph\[bench_slow_query\]
+desc 'Profile a benchmark (e.g., flamegraph[bench_slow_query])'
+task :flamegraph, [:name] do |_t, args|
+  require 'stackprof'
+  bname = args[:name] || 'all'
+  puts "Starting profiling for '#{bname}'..."
+  StackProf.run(mode: :cpu, out: 'stackprof-cpu-myapp.dump', raw: true) do
+    Rake::Task['benchmark'].invoke(bname)
+  end
+  `stackprof --d3-flamegraph stackprof-cpu-myapp.dump > flamegraph.html`
+end

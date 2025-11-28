@@ -10,3 +10,6 @@ rdoc/
 vendor/
 .claude/
 .aidy/
+flamegraph.html
+*.flamegraph.html
+stackprof-cpu-myapp.dump
