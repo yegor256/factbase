@@ -55,6 +55,7 @@ require_relative 'terms/first'
 require_relative 'terms/nth'
 require_relative 'terms/sum'
 require_relative 'terms/agg'
+require_relative 'terms/empty'
 
 # Term.
 #
@@ -155,7 +156,8 @@ class Factbase::Term
       first: Factbase::First.new(operands),
       nth: Factbase::Nth.new(operands),
       sum: Factbase::Sum.new(operands),
-      agg: Factbase::Agg.new(operands)
+      agg: Factbase::Agg.new(operands),
+      empty: Factbase::Empty.new(operands)
     }
   end
 
