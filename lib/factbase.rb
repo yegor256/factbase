@@ -164,17 +164,8 @@ class Factbase
   #
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
-    pairs = {}
-    before =
-      @maps.map do |m|
-        n = m.transform_values(&:dup)
-        # rubocop:disable Lint/HashCompareByIdentity
-        pairs[n.object_id] = m.object_id
-        # rubocop:enable Lint/HashCompareByIdentity
-        n
-      end
-    require_relative 'factbase/taped'
-    taped = Factbase::Taped.new(before)
+    require_relative 'factbase/lazy_taped'
+    taped = Factbase::LazyTaped.new(@maps)
     require_relative 'factbase/churn'
     churn = Factbase::Churn.new
     catch :commit do
@@ -188,6 +179,8 @@ class Factbase
     rescue Factbase::Rollback
       return churn
     end
+    return churn unless taped.copied?
+    pairs = taped.pairs
     seen = []
     garbage = []
     taped.deleted.each do |oid|
