@@ -4,35 +4,22 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../factbase'
-
+require_relative 'best'
 # Aggregating terms.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Aggregates
+  MIN = Factbase::Best.new { |v, b| v < b }
+  MAX = Factbase::Best.new { |v, b| v > b }
   def min(_fact, maps, _fb)
     assert_args(1)
-    _best(maps) { |v, b| v < b }
+    MIN.evaluate(@operands[0], maps)
   end
 
   def max(_fact, maps, _fb)
     assert_args(1)
-    _best(maps) { |v, b| v > b }
-  end
-
-  def _best(maps)
-    k = @operands[0]
-    raise "A symbol is expected, but #{k} provided" unless k.is_a?(Symbol)
-    best = nil
-    maps.each do |m|
-      vv = m[k.to_s]
-      next if vv.nil?
-      vv = [vv] unless vv.respond_to?(:to_a)
-      vv.each do |v|
-        best = v if best.nil? || yield(v, best)
-      end
-    end
-    best
+    MAX.evaluate(@operands[0], maps)
   end
 end
