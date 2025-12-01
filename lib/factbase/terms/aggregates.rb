@@ -11,12 +11,7 @@ require_relative 'best'
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
 module Factbase::Aggregates
-  MIN = Factbase::Best.new { |v, b| v < b }
   MAX = Factbase::Best.new { |v, b| v > b }
-  def min(_fact, maps, _fb)
-    assert_args(1)
-    MIN.evaluate(@operands[0], maps)
-  end
 
   def max(_fact, maps, _fb)
     assert_args(1)
