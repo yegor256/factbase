@@ -57,6 +57,7 @@ require_relative 'terms/sum'
 require_relative 'terms/agg'
 require_relative 'terms/empty'
 require_relative 'terms/min'
+require_relative 'terms/max'
 
 # Term.
 #
@@ -96,9 +97,6 @@ class Factbase::Term
 
   require_relative 'terms/logical'
   include Factbase::Logical
-
-  require_relative 'terms/aggregates'
-  include Factbase::Aggregates
 
   require_relative 'terms/shared'
   include Factbase::TermShared
@@ -159,7 +157,8 @@ class Factbase::Term
       sum: Factbase::Sum.new(operands),
       agg: Factbase::Agg.new(operands),
       empty: Factbase::Empty.new(operands),
-      min: Factbase::Min.new(operands)
+      min: Factbase::Min.new(operands),
+      max: Factbase::Max.new(operands)
     }
   end
 
