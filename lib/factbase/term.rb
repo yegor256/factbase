@@ -95,9 +95,6 @@ class Factbase::Term
   # @return [Array] The operands
   attr_reader :operands
 
-  require_relative 'terms/logical'
-  include Factbase::Logical
-
   require_relative 'terms/shared'
   include Factbase::TermShared
 
@@ -220,11 +217,15 @@ class Factbase::Term
   # Simplify it if possible.
   # @return [Factbase::Term] New term or itself
   def simplify
-    m = "#{@op}_simplify"
-    if respond_to?(m, true)
-      send(m)
+    if @terms.key?(@op) && @terms[@op].respond_to?(:simplify)
+      @terms[@op].simplify
     else
-      self
+      m = "#{@op}_simplify"
+      if respond_to?(m, true)
+        send(m)
+      else
+        self
+      end
     end
   end
 
