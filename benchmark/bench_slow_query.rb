@@ -32,7 +32,7 @@ def bench_slow_query(bmk, fb)
     create.call(i + 1)
   end
   bmk.report("(and (eq issue *) (eq repository *) (eq what '*') (eq where '*'))") do
-    Threads.new(Concurrent.processor_count * 20, task_timeout: 20, shutdown_timeout: 60).assert do
+    Threads.new(Concurrent.processor_count * 2, task_timeout: 20, shutdown_timeout: 60).assert do
       # create.call(i + 1) slows down the benchmark significantly
       # with: 16.679675 sec
       # without: 0.212369 sec
