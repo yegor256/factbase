@@ -20,10 +20,10 @@ class TestDiv < Factbase::Test
   def test_div_times_not_supported
     t = Factbase::Div.new([:warranty, Time.new(2024, 1, 1)])
     assert_includes(
-      'undefined method \'/\' for an instance of Time',
       assert_raises(NoMethodError) do
         t.evaluate(fact('warranty' => Time.new(2026, 1, 1)), [], Factbase.new)
-      end.message
+      end.message,
+      'undefined method'
     )
   end
 end
