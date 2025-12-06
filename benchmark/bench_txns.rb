@@ -6,8 +6,8 @@
 require_relative '../lib/factbase'
 
 # To run this benchmark, use:
-# bundle exec rake benchmark\[bench_txn\]
-def bench_lazy_txn(bmk, _fb)
+# bundle exec rake benchmark\[bench_txns\]
+def bench_txns(bmk, _fb)
   sizes = [50_000, 100_000]
   sizes.each do |size|
     fb = Factbase.new
