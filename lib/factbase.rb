@@ -164,17 +164,8 @@ class Factbase
   #
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
-    pairs = {}
-    before =
-      @maps.map do |m|
-        n = m.transform_values(&:dup)
-        # rubocop:disable Lint/HashCompareByIdentity
-        pairs[n.object_id] = m.object_id
-        # rubocop:enable Lint/HashCompareByIdentity
-        n
-      end
-    require_relative 'factbase/taped'
-    taped = Factbase::Taped.new(before)
+    require_relative 'factbase/lazy_taped'
+    taped = Factbase::LazyTaped.new(@maps)
     require_relative 'factbase/churn'
     churn = Factbase::Churn.new
     catch :commit do
@@ -188,30 +179,32 @@ class Factbase
     rescue Factbase::Rollback
       return churn
     end
-    seen = []
-    garbage = []
+    seen = {}.compare_by_identity
+    garbage = {}.compare_by_identity
+    pairs = taped.pairs
     taped.deleted.each do |oid|
-      garbage << pairs[oid]
-      seen << oid
+      original = @maps.find { |m| m.object_id == oid }
+      next if original.nil?
+      garbage[original] = true
       churn.append(0, 1, 0)
     end
     taped.inserted.each do |oid|
-      next if seen.include?(oid)
       b = taped.find_by_object_id(oid)
       next if b.nil?
-      seen << oid
+      next if seen.key?(b)
+      seen[b] = true
       @maps << b
       churn.append(1, 0, 0)
     end
     taped.added.each do |oid|
-      next if seen.include?(oid)
       b = taped.find_by_object_id(oid)
       next if b.nil?
-      garbage << pairs[oid]
+      next if seen.key?(b)
+      garbage[pairs[b]] = true
       @maps << b
       churn.append(0, 0, 1)
     end
-    @maps.delete_if { |m| garbage.include?(m.object_id) } unless garbage.empty?
+    @maps.delete_if { |m| garbage.key?(m) } unless garbage.empty?
     churn
   end
 
