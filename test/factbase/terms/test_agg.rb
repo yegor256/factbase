@@ -5,13 +5,14 @@
 
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/agg'
 require_relative '../../../lib/factbase/syntax'
 
-# Aggregates test.
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Test for the 'agg' term.
+# Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestAggregates < Factbase::Test
+class TestAgg < Factbase::Test
   def test_aggregation
     maps = [
       { 'x' => [1], 'y' => [0], 'z' => [4] },
@@ -37,27 +38,26 @@ class TestAggregates < Factbase::Test
     end
   end
 
-  def test_empty
-    maps = [
-      { 'x' => [1], 'y' => [0], 'z' => [4] },
-      { 'x' => [8], 'y' => [0] }
-    ]
-    {
-      '(empty (eq y 42))' => true,
-      '(empty (eq x 1))' => false
-    }.each do |q, r|
-      t = Factbase::Syntax.new(q).to_term
-      assert_equal(r, t.evaluate(Factbase::Fact.new({}), maps, Factbase.new), q)
-    end
+  def test_agg_with_invalid_arguments
+    assert_includes(assert_raises(RuntimeError) do
+      Factbase::Agg.new(%w[foo bar baz]).evaluate(fact({}), [], Factbase.new)
+    end.message, "Too many (3) operands for 'agg' (2 expected)")
+    assert_includes(assert_raises(RuntimeError) do
+      Factbase::Agg.new(['foo', 42]).evaluate(fact({}), [], Factbase.new)
+    end.message, "A term is expected, but 'foo' provided")
+    assert_includes(assert_raises(RuntimeError) do
+      Factbase::Agg.new([Factbase::Term.new(:eq, ['x', 1]), 'bar']).evaluate(fact({}), [], Factbase.new)
+    end.message, "A term is expected, but 'bar' provided")
   end
 
-  def test_empty_with_params
+  def test_agg_with_correct_arguments
+    t = Factbase::Agg.new([Factbase::Term.new(:eq, [:x, 42]), Factbase::Term.new(:sum, [:y])])
     maps = [
-      { 'a' => [3], 'b' => [44] },
-      { 'a' => [4], 'b' => [55] }
+      { 'x' => [1], 'y' => [0] },
+      { 'x' => [42], 'y' => [11] },
+      { 'x' => [42], 'y' => [31] },
+      { 'x' => [100], 'y' => [50] }
     ]
-    t = Factbase::Syntax.new('(empty (eq b $_x))').to_term
-    assert(t.evaluate(Factbase::Fact.new({ '_x' => [42] }), maps, Factbase.new))
-    refute(t.evaluate(Factbase::Fact.new({ '_x' => [44] }), maps, Factbase.new))
+    assert_equal(42, t.evaluate(fact, maps, Factbase.new))
   end
 end

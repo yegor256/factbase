@@ -52,6 +52,12 @@ require_relative 'terms/when'
 require_relative 'terms/either'
 require_relative 'terms/count'
 require_relative 'terms/first'
+require_relative 'terms/nth'
+require_relative 'terms/sum'
+require_relative 'terms/agg'
+require_relative 'terms/empty'
+require_relative 'terms/min'
+require_relative 'terms/max'
 
 # Term.
 #
@@ -88,12 +94,6 @@ class Factbase::Term
   # The operands of this term
   # @return [Array] The operands
   attr_reader :operands
-
-  require_relative 'terms/logical'
-  include Factbase::Logical
-
-  require_relative 'terms/aggregates'
-  include Factbase::Aggregates
 
   require_relative 'terms/shared'
   include Factbase::TermShared
@@ -149,7 +149,13 @@ class Factbase::Term
       when: Factbase::When.new(operands),
       either: Factbase::Either.new(operands),
       count: Factbase::Count.new(operands),
-      first: Factbase::First.new(operands)
+      first: Factbase::First.new(operands),
+      nth: Factbase::Nth.new(operands),
+      sum: Factbase::Sum.new(operands),
+      agg: Factbase::Agg.new(operands),
+      empty: Factbase::Empty.new(operands),
+      min: Factbase::Min.new(operands),
+      max: Factbase::Max.new(operands)
     }
   end
 
@@ -211,11 +217,15 @@ class Factbase::Term
   # Simplify it if possible.
   # @return [Factbase::Term] New term or itself
   def simplify
-    m = "#{@op}_simplify"
-    if respond_to?(m, true)
-      send(m)
+    if @terms.key?(@op) && @terms[@op].respond_to?(:simplify)
+      @terms[@op].simplify
     else
-      self
+      m = "#{@op}_simplify"
+      if respond_to?(m, true)
+        send(m)
+      else
+        self
+      end
     end
   end
 

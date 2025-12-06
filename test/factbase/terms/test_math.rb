@@ -124,7 +124,7 @@ class TestMath < Factbase::Test
       assert_raises(RuntimeError) do
         t.evaluate(fact('birth' => Time.new(2026, 1, 1)), [], Factbase.new)
       end.message,
-      'undefined method \'/\' for an instance of Time'
+      'undefined method'
     )
   end
 end

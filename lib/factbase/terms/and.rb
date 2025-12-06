@@ -5,6 +5,7 @@
 
 require_relative 'base'
 require_relative 'boolean'
+require_relative 'simplified'
 # The 'and' term that represents a logical AND operation between multiple operands.
 class Factbase::And < Factbase::TermBase
   # Constructor.
@@ -24,5 +25,11 @@ class Factbase::And < Factbase::TermBase
       return false unless Factbase::Boolean.new(_values(i, fact, maps, fb), @operands[i]).bool?
     end
     true
+  end
+
+  def simplify
+    unique = Factbase::Simplified.new(@operands).unique
+    return unique[0] if unique.size == 1
+    Factbase::Term.new(@op, unique)
   end
 end
