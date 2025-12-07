@@ -26,7 +26,7 @@ class Factbase::Agg < Factbase::TermBase
       raise "A term is expected, but '#{selector}' provided"
     end
     term = @operands[1]
-    unless term.is_a?(Factbase::Term) || selector.is_a?(Factbase::TermBase)
+    unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
       raise "A term is expected, but '#{term}' provided"
     end
     subset = fb.query(selector, maps).each(fb, fact).to_a
