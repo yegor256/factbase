@@ -346,6 +346,28 @@ class TestQuery < Factbase::Test
     assert_includes(f.all_properties, 'foo')
   end
 
+  def test_txn_performance_degradation
+    maps = (0..1000).map { |_i| { 'foo' => [rand(10_000)], 'bar' => [rand(10_000)], 'xyz' => [rand(10_000)] } }
+    with_factbases(maps) do |badge, fb|
+      times = []
+      20.times do |x|
+        fb.txn do |fbt|
+          start = Time.now
+          fbt.query("(and (eq foo #{x}) (eq bar #{x}) (eq xyz #{x}))").each.to_a
+          secs = Time.now - start
+          times << (secs * 1000)
+        end
+      end
+      trend = 0
+      times.each_cons(2) do |a, b|
+        trend += b > a ? 1 : -1
+      end
+      assert_operator(
+        trend, :<, times.count / 3, "In #{badge}, the trend is up: #{times.map { |ms| format('%.3f', ms) }.join(', ')}"
+      )
+    end
+  end
+
   private
 
   def with_factbases(maps = [], &)
