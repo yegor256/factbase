@@ -57,9 +57,12 @@ class Factbase::IndexedFactbase
   # Run an ACID transaction.
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
-    @origin.txn do |fbt|
-      yield Factbase::IndexedFactbase.new(fbt, @idx)
-    end
+    result =
+      @origin.txn do |fbt|
+        yield Factbase::IndexedFactbase.new(fbt, @idx)
+      end
+    @idx.clear
+    result
   end
 
   # Export it into a chain of bytes, including both data and index.

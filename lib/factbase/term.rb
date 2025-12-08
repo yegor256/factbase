@@ -86,7 +86,7 @@ require_relative 'terms/max'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class Factbase::Term
+class Factbase::Term < Factbase::TermBase
   # The operator of this term
   # @return [Symbol] The operator
   attr_reader :op
@@ -95,13 +95,11 @@ class Factbase::Term
   # @return [Array] The operands
   attr_reader :operands
 
-  require_relative 'terms/shared'
-  include Factbase::TermShared
-
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
   def initialize(operator, operands)
+    super()
     @op = operator
     @operands = operands
     @terms = {

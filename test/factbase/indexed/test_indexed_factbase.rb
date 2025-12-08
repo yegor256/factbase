@@ -176,6 +176,21 @@ class TestIndexedFactbase < Factbase::Test
     end
   end
 
+  def test_index_does_not_grow_unbounded_during_transactions
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb.insert.foo = rand
+    100.times do
+      fb.txn do |fbt|
+        fbt.query('(exists foo)').each(&:foo)
+      end
+    end
+    assert_operator(
+      idx.size, :<, 10,
+      'Index must not accumulate stale entries across transactions'
+    )
+  end
+
   def test_multiple_import_accumulates
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     fb.insert.foo = 1
