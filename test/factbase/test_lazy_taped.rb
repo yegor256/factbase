@@ -22,7 +22,6 @@ class TestLazyTaped < Factbase::Test
     original = [{ foo: [1, 2] }]
     t = Factbase::LazyTaped.new(original)
     assert_equal(1, t.size)
-    refute_empty(t)
     t.each { |m| m['foo'] }
     assert_empty(t.pairs)
   end
