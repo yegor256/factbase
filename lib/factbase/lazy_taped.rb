@@ -19,6 +19,9 @@ class Factbase::LazyTaped
     @added = []
   end
 
+  # Returns a hash mapping copied maps to their originals.
+  # This is used during transaction commit to identify which original facts
+  # were modified, allowing the factbase to update the correct entries.
   def pairs
     return {} unless @pairs
     result = {}.compare_by_identity
@@ -26,14 +29,22 @@ class Factbase::LazyTaped
     result
   end
 
+  # Returns the unique object IDs of maps that were inserted (newly created).
+  # This is used during transaction commit to identify new facts that need
+  # to be added to the factbase.
   def inserted
     @inserted.uniq
   end
 
+  # Returns the unique object IDs of maps that were deleted.
+  # This is used during transaction commit to identify facts that need
+  # to be removed from the factbase.
   def deleted
     @deleted.uniq
   end
 
+  # Returns the unique object IDs of maps that were modified (properties added).
+  # This is used during transaction commit to track the churn (number of changes).
   def added
     @added.uniq
   end

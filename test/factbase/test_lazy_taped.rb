@@ -41,8 +41,7 @@ class TestLazyTaped < Factbase::Test
     t.each { |m| m['bar'] = 42 }
     refute_empty(t.pairs)
     assert_equal(1, t.added.size)
-    # Original should not be modified
-    assert_nil(original[0]['bar'])
+    assert_nil(original[0]['bar'], 'Original should not be modified')
   end
 
   def test_copies_on_array_append
@@ -51,8 +50,7 @@ class TestLazyTaped < Factbase::Test
     t.each { |m| m['foo'] << 2 }
     refute_empty(t.pairs)
     assert_equal(1, t.added.size)
-    # Original should not be modified
-    assert_equal([1], original[0]['foo'])
+    assert_equal([1], original[0]['foo'], 'Original should not be modified')
     # Copied version should have the new value
     modified = t.find_by_object_id(t.added.first)
     assert_equal([1, 2], modified['foo'])
@@ -137,8 +135,7 @@ class TestLazyTaped < Factbase::Test
     t.each { |m| m['foo'].uniq! }
     refute_empty(t.pairs)
     assert_equal(1, t.added.size)
-    # Original should not be modified
-    assert_equal([1, 1, 2], original[0]['foo'])
+    assert_equal([1, 1, 2], original[0]['foo'], 'Original should not be modified')
   end
 
   def test_array_any

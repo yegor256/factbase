@@ -8,6 +8,8 @@ require_relative 'lazy_taped_array'
 
 class Factbase::LazyTaped
   # Decorator of Hash that triggers copy-on-write.
+  # @todo #424:30min Add dedicated unit tests for LazyTapedHash class.
+  #  Currently this class is tested indirectly through LazyTaped tests.
   class LazyTapedHash
     def initialize(origin, lazy_taped, added)
       @origin = origin
