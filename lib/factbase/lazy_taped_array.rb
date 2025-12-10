@@ -12,6 +12,11 @@ class Factbase::LazyTaped
   #  We should add explicit tests for all public methods including each, [],
   #  to_a, any?, <<, and uniq! to ensure proper copy-on-write behavior.
   class LazyTapedArray
+    # Creates a new lazy array wrapper.
+    # @param origin [Array] The original array to wrap
+    # @param key [String] The key in the parent hash where this array is stored
+    # @param taped_hash [LazyTapedHash] The parent hash wrapper that owns this array
+    # @param added [Array] Accumulator for tracking object IDs of modified facts
     def initialize(origin, key, taped_hash, added)
       @origin = origin
       @key = key

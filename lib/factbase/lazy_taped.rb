@@ -50,7 +50,6 @@ class Factbase::LazyTaped
   end
 
   def find_by_object_id(oid)
-    ensure_copied if @copied
     (@maps || @origin).find { |m| m.object_id == oid }
   end
 

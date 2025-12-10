@@ -50,9 +50,8 @@ class TestLazyTaped < Factbase::Test
     refute_empty(t.pairs)
     assert_equal(1, t.added.size)
     assert_equal([1], original[0]['foo'], 'Original should not be modified')
-    # Copied version should have the new value
     modified = t.find_by_object_id(t.added.first)
-    assert_equal([1, 2], modified['foo'])
+    assert_equal([1, 2], modified['foo'], 'Copied version should have the new value')
   end
 
   def test_copies_on_delete
@@ -189,12 +188,11 @@ class TestLazyTaped < Factbase::Test
     fb = Factbase.new
     fb.insert.foo = 42
     fb.insert.bar = 55
-    # This transaction only reads, should not trigger copy
     churn =
       fb.txn do |fbt|
         fbt.query('(always)').each.to_a
       end
-    assert_equal(0, churn.to_i)
+    assert_equal(0, churn.to_i, 'Read-only transaction should not trigger copy')
   end
 
   def test_modifying_txn_copies_lazily

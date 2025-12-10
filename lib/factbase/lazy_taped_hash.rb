@@ -13,6 +13,10 @@ class Factbase::LazyTaped
   #  We should add explicit tests for all public methods including keys, map,
   #  bracket access, bracket assignment, and the copy-on-write behavior.
   class LazyTapedHash
+    # Creates a new LazyTapedHash decorator.
+    # @param origin [Hash] The original hash being wrapped (not yet copied)
+    # @param lazy_taped [Factbase::LazyTaped] The parent LazyTaped instance that manages copy-on-write
+    # @param added [Array] Array to track object IDs of maps that have been modified
     def initialize(origin, lazy_taped, added)
       @origin = origin
       @lazy_taped = lazy_taped
