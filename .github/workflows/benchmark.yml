@@ -25,7 +25,7 @@ jobs:
       - run: bundle install --no-color
       - run: bundle exec rake benchmark > stdout.txt
       - run: .github/publish-benchmark.sh
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@v8
         with:
           sign-commits: true
           branch: benchmark-results
