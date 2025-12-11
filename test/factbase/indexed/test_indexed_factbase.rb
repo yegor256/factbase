@@ -166,7 +166,7 @@ class TestIndexedFactbase < Factbase::Test
     f2 = fb.insert
     f2.foo = 42
     f2.id = 2
-    assert_equal(2, fb.query('(eq foo 42)').each.to_a.size, 'Should find both facts with foo=42 after incremental index update')
+    assert_equal(2, fb.query('(eq foo 42)').each.to_a.size, 'Should find both facts after incremental update')
     f3 = fb.insert
     f3.foo = 99
     f3.id = 3
