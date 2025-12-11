@@ -6,7 +6,7 @@
 require 'others'
 require_relative '../../factbase'
 
-# A single fact in a factbase, which is sentitive to changes.
+# A single fact in a factbase, which is sensitive to changes.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
@@ -15,9 +15,11 @@ class Factbase::IndexedFact
   # Ctor.
   # @param [Factbase::Fact] origin The original fact
   # @param [Hash] idx The index
-  def initialize(origin, idx)
+  # @param [Boolean] fresh True if this is a newly inserted fact (not yet in index)
+  def initialize(origin, idx, fresh: false)
     @origin = origin
     @idx = idx
+    @fresh = fresh
   end
 
   def to_s
@@ -26,7 +28,9 @@ class Factbase::IndexedFact
 
   # When a method is missing, this method is called.
   others do |*args|
-    @idx.clear if args[0].to_s.end_with?('=')
+    # Only clear index when modifying properties on existing (non-fresh) facts
+    # Fresh facts are not in the index yet, so modifications don't affect it
+    @idx.clear if args[0].to_s.end_with?('=') && !@fresh
     @origin.send(*args)
   end
 end

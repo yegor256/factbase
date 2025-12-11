@@ -31,8 +31,7 @@ class Factbase::CachedFactbase
   # Insert a new fact and return it.
   # @return [Factbase::Fact] The fact just inserted
   def insert
-    @cache.clear
-    Factbase::CachedFact.new(@origin.insert, @cache)
+    Factbase::CachedFact.new(@origin.insert, @cache, fresh: true)
   end
 
   # Convert a query to a term.

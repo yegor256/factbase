@@ -18,14 +18,20 @@ class Factbase::IndexedAnd
       && @term.operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
       props = @term.operands.map { |o| o.operands.first }.sort
       key = [maps.object_id, props, :multi_and_eq]
-      if @idx[key].nil?
-        @idx[key] = {}
-        maps.to_a.each do |m|
+      entry = @idx[key]
+      maps_array = maps.to_a
+      if entry.nil?
+        entry = { index: {}, indexed_count: 0 }
+        @idx[key] = entry
+      end
+      if entry[:indexed_count] < maps_array.size
+        maps_array[entry[:indexed_count]..].each do |m|
           _all_tuples(m, props).each do |t|
-            @idx[key][t] = [] if @idx[key][t].nil?
-            @idx[key][t].append(m)
+            entry[:index][t] ||= []
+            entry[:index][t] << m
           end
         end
+        entry[:indexed_count] = maps_array.size
       end
       tuples = Enumerator.product(
         *@term.operands.sort_by { |o| o.operands.first }.map do |o|
@@ -36,7 +42,7 @@ class Factbase::IndexedAnd
           end
         end
       )
-      j = tuples.map { |t| @idx[key][t] || [] }.reduce(&:|)
+      j = tuples.map { |t| entry[:index][t] || [] }.reduce(&:|)
       r = (maps & []) | j
     else
       @term.operands.each do |o|

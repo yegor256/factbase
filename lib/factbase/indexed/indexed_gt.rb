@@ -15,21 +15,31 @@ class Factbase::IndexedGt
     return unless @term.operands.first.is_a?(Symbol) && _scalar?(@term.operands[1])
     prop = @term.operands.first.to_s
     cache_key = [maps.object_id, @term.operands.first, :sorted]
-    if @idx[cache_key].nil?
-      @idx[cache_key] = []
-      maps.to_a.each do |m|
+
+    entry = @idx[cache_key]
+    maps_array = maps.to_a
+
+    if entry.nil?
+      entry = { sorted: [], indexed_count: 0 }
+      @idx[cache_key] = entry
+    end
+
+    # Incrementally index any new facts
+    if entry[:indexed_count] < maps_array.size
+      maps_array[entry[:indexed_count]..].each do |m|
         values = m[prop]
         next if values.nil?
         values.each do |v|
-          @idx[cache_key] << [v, m]
+          entry[:sorted] << [v, m]
         end
       end
-      @idx[cache_key].sort_by! { |pair| pair[0] }
+      entry[:sorted].sort_by! { |pair| pair[0] }
+      entry[:indexed_count] = maps_array.size
     end
     threshold = @term.operands[1].is_a?(Symbol) ? params[@term.operands[1].to_s]&.first : @term.operands[1]
     return nil if threshold.nil?
-    i = @idx[cache_key].bsearch_index { |pair| pair[0] > threshold } || @idx[cache_key].size
-    result = @idx[cache_key][i..].map { |pair| pair[1] }.uniq
+    i = entry[:sorted].bsearch_index { |pair| pair[0] > threshold } || entry[:sorted].size
+    result = entry[:sorted][i..].map { |pair| pair[1] }.uniq
     (maps & []) | result
   end
 

@@ -50,9 +50,11 @@ class TestIndexedQuery < Factbase::Test
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
     fb.query('(eq x 1)').each.to_a
-    assert_equal(1, idx.size)
+    assert_equal(1, idx.size, 'Index should have one entry after query')
     fb.insert
-    assert_empty(idx)
+    assert_equal(1, idx.size, 'Index should be preserved after insert (incremental indexing)')
+    fb.query('(eq x 1)').each.to_a
+    assert_equal(1, idx.size, 'Index size should remain stable after incremental update')
   end
 
   def test_finds_by_eq_with_symbol

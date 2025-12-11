@@ -13,16 +13,25 @@ class Factbase::IndexedNot
   def predict(maps, fb, params)
     return nil if @idx.nil?
     key = [maps.object_id, @term.operands.first, @term.op]
-    if @idx[key].nil?
+    entry = @idx[key]
+    maps_array = maps.to_a
+    if entry.nil?
+      entry = { facts: nil, indexed_count: 0, yes_set: nil }
+      @idx[key] = entry
+    end
+    if entry[:indexed_count] < maps_array.size
       yes = @term.operands.first.predict(maps, fb, params)
       if yes.nil?
-        @idx[key] = { r: nil }
+        entry[:facts] = nil
+        entry[:yes_set] = nil
       else
-        yes = yes.to_a.to_set
-        @idx[key] = { r: maps.to_a.reject { |m| yes.include?(m) } }
+        yes_set = yes.to_a.to_set
+        entry[:yes_set] = yes_set
+        entry[:facts] = maps_array.reject { |m| yes_set.include?(m) }
       end
+      entry[:indexed_count] = maps_array.size
     end
-    r = @idx[key][:r]
+    r = entry[:facts]
     if r.nil?
       nil
     else

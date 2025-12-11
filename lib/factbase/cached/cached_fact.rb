@@ -6,7 +6,7 @@
 require 'others'
 require_relative '../../factbase'
 
-# A single fact in a factbase, which is sentitive to changes.
+# A single fact in a factbase, which is sensitive to changes.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
@@ -15,9 +15,11 @@ class Factbase::CachedFact
   # Ctor.
   # @param [Factbase::Fact] origin The original fact
   # @param [Hash] cache Cache of queries (to clean it on attribute addition)
-  def initialize(origin, cache)
+  # @param [Boolean] fresh True if this is a newly inserted fact (not yet in cache)
+  def initialize(origin, cache, fresh: false)
     @origin = origin
     @cache = cache
+    @fresh = fresh
   end
 
   def to_s
@@ -26,7 +28,9 @@ class Factbase::CachedFact
 
   # When a method is missing, this method is called.
   others do |*args|
-    @cache.clear if args[0].to_s.end_with?('=')
+    # Only clear cache when modifying properties on existing (non-fresh) facts
+    # Fresh facts are not in the cache yet, so modifications don't affect it
+    @cache.clear if args[0].to_s.end_with?('=') && !@fresh
     @origin.send(*args)
   end
 end

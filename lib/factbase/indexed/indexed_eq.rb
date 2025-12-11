@@ -14,15 +14,21 @@ class Factbase::IndexedEq
     return nil if @idx.nil?
     key = [maps.object_id, @term.operands.first, @term.op]
     return unless @term.operands.first.is_a?(Symbol) && _scalar?(@term.operands[1])
-    if @idx[key].nil?
-      @idx[key] = {}
+    entry = @idx[key]
+    maps_array = maps.to_a
+    if entry.nil?
+      entry = { index: {}, indexed_count: 0 }
+      @idx[key] = entry
+    end
+    if entry[:indexed_count] < maps_array.size
       prop = @term.operands.first.to_s
-      maps.to_a.each do |m|
+      maps_array[entry[:indexed_count]..].each do |m|
         m[prop]&.each do |v|
-          @idx[key][v] = [] if @idx[key][v].nil?
-          @idx[key][v].append(m)
+          entry[:index][v] ||= []
+          entry[:index][v] << m
         end
       end
+      entry[:indexed_count] = maps_array.size
     end
     vv =
       if @term.operands[1].is_a?(Symbol)
@@ -33,7 +39,7 @@ class Factbase::IndexedEq
     if vv.empty?
       (maps & [])
     else
-      j = vv.map { |v| @idx[key][v] || [] }.reduce(&:|)
+      j = vv.map { |v| entry[:index][v] || [] }.reduce(&:|)
       (maps & []) | j
     end
   end

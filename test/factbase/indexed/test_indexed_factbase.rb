@@ -140,21 +140,48 @@ class TestIndexedFactbase < Factbase::Test
     assert_operator(data_with_index.size, :>, data_without_index.size, 'Export with index should be larger')
   end
 
-  def test_insert_clears_index
+  def test_insert_preserves_index
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     fb.insert.foo = 42
     fb.query('(eq foo 42)').each.to_a
     data = fb.export
     unmarshalled = Marshal.load(data)
-    assert_kind_of(Hash, unmarshalled[:idx])
-    refute_empty(unmarshalled[:idx])
+    assert_kind_of(Hash, unmarshalled[:idx], 'Index should be a Hash after export')
+    refute_empty(unmarshalled[:idx], 'Index should not be empty after query')
     fb2 = Factbase::IndexedFactbase.new(Factbase.new)
     fb2.import(data)
     fb2.insert.bar = 13
     data2 = fb2.export
     unmarshalled2 = Marshal.load(data2)
-    assert_kind_of(Hash, unmarshalled2[:idx])
-    assert_empty(unmarshalled2[:idx])
+    assert_kind_of(Hash, unmarshalled2[:idx], 'Index should remain a Hash after insert')
+    refute_empty(unmarshalled2[:idx], 'Index should be preserved after insert (incremental indexing)')
+  end
+
+  def test_insert_allows_incremental_query
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    f1 = fb.insert
+    f1.foo = 42
+    f1.id = 1
+    assert_equal(1, fb.query('(eq foo 42)').each.to_a.size, 'Should find first fact with foo=42')
+    f2 = fb.insert
+    f2.foo = 42
+    f2.id = 2
+    assert_equal(2, fb.query('(eq foo 42)').each.to_a.size, 'Should find both facts with foo=42 after incremental index update')
+    f3 = fb.insert
+    f3.foo = 99
+    f3.id = 3
+    assert_equal(2, fb.query('(eq foo 42)').each.to_a.size, 'Should still find two facts with foo=42')
+    assert_equal(1, fb.query('(eq foo 99)').each.to_a.size, 'Should find one fact with foo=99')
+  end
+
+  def test_property_modification_clears_index
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb.insert.foo = 42
+    fb.query('(eq foo $val)').each(fb, { val: 42 }).to_a
+    refute_empty(idx, 'Index should be populated after abstract query (with variable)')
+    fb.query('(eq foo $val)').each(fb, { val: 42 }) { |f| f.bar = 13 }
+    assert_empty(idx, 'Index should be cleared after modifying existing fact via abstract query')
   end
 
   def test_import_backward_compatibility

@@ -16,10 +16,19 @@ class Factbase::IndexedUnique
   def predict(maps, _fb, _params)
     return nil if @idx.nil?
     key = [maps.object_id, @term.operands.first, @term.op]
-    if @idx[key].nil?
-      props = @term.operands.map(&:to_s)
-      @idx[key] = maps.to_a.select { |m| props.all? { |p| !m[p].nil? } }
+    entry = @idx[key]
+    maps_array = maps.to_a
+    if entry.nil?
+      entry = { facts: [], indexed_count: 0 }
+      @idx[key] = entry
     end
-    (maps & []) | @idx[key]
+    if entry[:indexed_count] < maps_array.size
+      props = @term.operands.map(&:to_s)
+      maps_array[entry[:indexed_count]..].each do |m|
+        entry[:facts] << m if props.all? { |p| !m[p].nil? }
+      end
+      entry[:indexed_count] = maps_array.size
+    end
+    (maps & []) | entry[:facts]
   end
 end

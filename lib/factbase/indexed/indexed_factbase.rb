@@ -31,8 +31,7 @@ class Factbase::IndexedFactbase
   # Insert a new fact and return it.
   # @return [Factbase::Fact] The fact just inserted
   def insert
-    @idx.clear
-    Factbase::IndexedFact.new(@origin.insert, @idx)
+    Factbase::IndexedFact.new(@origin.insert, @idx, fresh: true)
   end
 
   # Convert a query to a term.

@@ -13,13 +13,19 @@ class Factbase::IndexedOne
   def predict(maps, _fb, _params)
     return nil if @idx.nil?
     key = [maps.object_id, @term.operands.first, @term.op]
-    if @idx[key].nil?
-      @idx[key] = []
-      prop = @term.operands.first.to_s
-      maps.to_a.each do |m|
-        @idx[key].append(m) if !m[prop].nil? && m[prop].size == 1
-      end
+    entry = @idx[key]
+    maps_array = maps.to_a
+    if entry.nil?
+      entry = { facts: [], indexed_count: 0 }
+      @idx[key] = entry
     end
-    (maps & []) | @idx[key]
+    if entry[:indexed_count] < maps_array.size
+      prop = @term.operands.first.to_s
+      maps_array[entry[:indexed_count]..].each do |m|
+        entry[:facts] << m if !m[prop].nil? && m[prop].size == 1
+      end
+      entry[:indexed_count] = maps_array.size
+    end
+    (maps & []) | entry[:facts]
   end
 end
