@@ -36,11 +36,11 @@ class Factbase::IndexedEq
       else
         [@term.operands[1]]
       end
-    if vv.empty?
-      (maps & [])
+    j = vv.flat_map { |v| entry[:index][v] || [] }.uniq(&:object_id)
+    if maps.respond_to?(:inserted)
+      Factbase::Taped.new(j, inserted: maps.inserted, deleted: maps.deleted, added: maps.added)
     else
-      j = vv.map { |v| entry[:index][v] || [] }.reduce(&:|)
-      (maps & []) | j
+      j
     end
   end
 

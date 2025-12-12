@@ -11,7 +11,7 @@ require_relative '../../../lib/factbase/indexed/indexed_factbase'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
 # License:: MIT
-class TestIncrementalIndexingBugs < Factbase::Test
+class TestIncrementalIndexing < Factbase::Test
   def test_query_correct_after_adding_property
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     f = fb.insert

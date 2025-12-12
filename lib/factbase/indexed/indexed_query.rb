@@ -46,7 +46,7 @@ class Factbase::IndexedQuery
   # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
-  def one(fb = @fb, params = nil)
+  def one(fb = @fb, params = {})
     @origin.one(fb, params)
   end
 
@@ -54,7 +54,8 @@ class Factbase::IndexedQuery
   # @param [Factbase] fb The factbase
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
+    result = @origin.delete!(fb)
     @idx.clear
-    @origin.delete!(fb)
+    result
   end
 end

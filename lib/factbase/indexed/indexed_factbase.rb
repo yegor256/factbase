@@ -49,8 +49,7 @@ class Factbase::IndexedFactbase
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
     q = @origin.query(term, maps)
-    q = Factbase::IndexedQuery.new(q, @idx, self) if term.abstract?
-    q
+    Factbase::IndexedQuery.new(q, @idx, self)
   end
 
   # Run an ACID transaction.
