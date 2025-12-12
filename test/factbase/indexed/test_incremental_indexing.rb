@@ -6,6 +6,8 @@
 require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
+require_relative '../../../lib/factbase/sync/sync_factbase'
+require_relative '../../../lib/factbase/cached/cached_factbase'
 
 # Tests for incremental indexing bugs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -110,4 +112,16 @@ class TestIncrementalIndexing < Factbase::Test
     f2.bar = 1
     assert_equal(2, fb.query('(and (eq foo 42) (eq bar 1))').each.to_a.size)
   end
+
+  def test_cached_query_sees_fresh_fact
+    fb = Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
+    fb.query('(eq foo 1)').each.to_a # warm cache with empty result
+    f1 = fb.insert
+    f1.foo = 1
+    assert_equal(1, fb.query('(eq foo 1)').each.to_a.size)
+    f2 = fb.insert
+    f2.foo = 1
+    assert_equal(2, fb.query('(eq foo 1)').each.to_a.size)
+  end
+
 end
