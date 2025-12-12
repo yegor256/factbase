@@ -43,11 +43,12 @@ class Factbase::IndexedAnd
         end
       )
       j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id)
-      r = if maps.respond_to?(:inserted)
-            Factbase::Taped.new(j, inserted: maps.inserted, deleted: maps.deleted, added: maps.added)
-          else
-            j
-          end
+      r =
+        if maps.respond_to?(:inserted)
+          Factbase::Taped.new(j, inserted: maps.inserted, deleted: maps.deleted, added: maps.added)
+        else
+          j
+        end
     else
       @term.operands.each do |o|
         n = o.predict(maps, fb, params)
