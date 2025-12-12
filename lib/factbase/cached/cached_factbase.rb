@@ -31,6 +31,7 @@ class Factbase::CachedFactbase
   # Insert a new fact and return it.
   # @return [Factbase::Fact] The fact just inserted
   def insert
+    @cache[:__dirty__] = true
     Factbase::CachedFact.new(@origin.insert, @cache, fresh: true)
   end
 

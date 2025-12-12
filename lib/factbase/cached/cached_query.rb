@@ -35,6 +35,7 @@ class Factbase::CachedQuery
   # @return [Integer] Total number of facts yielded
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
+    invalidate_if_dirty
     key = "each #{@origin}" # params are ignored!
     before = @cache[key]
     @cache[key] = @origin.each(fb, params).to_a if before.nil?
@@ -51,6 +52,7 @@ class Factbase::CachedQuery
   # @param [Hash] params Optional params accessible in the query via the "$" symbol (unused)
   # @return The value evaluated
   def one(fb = @fb, params = {})
+    invalidate_if_dirty
     key = "one: #{@origin} #{params}"
     before = @cache[key]
     @cache[key] = @origin.one(fb, params) if before.nil?
@@ -62,5 +64,15 @@ class Factbase::CachedQuery
   def delete!(fb = @fb)
     @cache.clear
     @origin.delete!(fb)
+  end
+
+  private
+
+  # Clear cache if it was marked dirty by a fresh fact insertion.
+  # This implements lazy invalidation: we don't clear on every insert,
+  # only when a query actually runs after inserts happened.
+  def invalidate_if_dirty
+    return unless @cache.delete(:__dirty__)
+    @cache.clear
   end
 end

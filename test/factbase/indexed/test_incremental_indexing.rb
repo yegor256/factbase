@@ -123,5 +123,4 @@ class TestIncrementalIndexing < Factbase::Test
     f2.foo = 1
     assert_equal(2, fb.query('(eq foo 1)').each.to_a.size)
   end
-
 end
