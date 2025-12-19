@@ -36,7 +36,8 @@ GEM
     logger (1.7.0)
     loog (0.6.1)
       logger (~> 1.0)
-    minitest (5.27.0)
+    minitest (6.0.0)
+      prism (~> 1.5)
     minitest-reporters (1.7.1)
       ansi
       builder
@@ -136,7 +137,7 @@ PLATFORMS
 DEPENDENCIES
   benchmark (~> 0.5)
   factbase!
-  minitest (~> 5.25)
+  minitest (~> 6.0)
   minitest-reporters (~> 1.7)
   os (~> 1.1)
   qbash (~> 0.4)
