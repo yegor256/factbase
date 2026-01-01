@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require 'tago'
@@ -19,7 +19,7 @@ require_relative '../indexed/indexed_unique'
 # Term with an index.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 module Factbase::IndexedTerm
   # Reduces the provided list of facts (maps) to a smaller array, if it's possible.

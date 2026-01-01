@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
@@ -12,7 +12,7 @@ require_relative '../../../lib/factbase/indexed/indexed_one'
 
 # Indexed term 'exists' test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestIndexedExists < Factbase::Test
   def test_predicts_on_exists

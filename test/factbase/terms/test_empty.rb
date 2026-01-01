@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 #
 require_relative '../../test__helper'
@@ -11,7 +11,7 @@ require_relative '../../../lib/factbase/syntax'
 
 # Tests for the 'empty' term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
-# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestEmpty < Factbase::Test
   def test_empty_query

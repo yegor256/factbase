@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# SPDX-FileCopyrightText: Copyright (c) 2024-2025 Yegor Bugayenko
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
@@ -8,7 +8,7 @@ require_relative '../../../lib/factbase/terms/min'
 
 # Test for the 'min' term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
-# Copyright:: Copyright (c) 2024-2025 Yegor Bugayenko
+# Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestMin < Factbase::Test
   def test_not_enough_args
