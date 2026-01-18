@@ -212,52 +212,52 @@ This is the result of the benchmark:
 ```text
                                                                        
 query all facts from an empty factbase                             0.00
-insert 20000 facts                                                 0.67
+insert 20000 facts                                                 0.58
 export 20000 facts                                                 0.02
-import 411032 bytes (20000 facts)                                  0.03
-insert 10 facts                                                    0.04
-query 10 times w/txn                                               2.52
-query 10 times w/o txn                                             0.05
-modify 10 attrs w/txn                                              1.84
-delete 10 facts w/txn                                              2.98
-build index on 5000 facts                                          0.05
+import 410760 bytes (20000 facts)                                  0.01
+insert 10 facts                                                    0.03
+query 10 times w/txn                                               2.35
+query 10 times w/o txn                                             0.11
+modify 10 attrs w/txn                                              2.33
+delete 10 facts w/txn                                              2.38
+build index on 5000 facts                                          0.06
 export 5000 facts with index                                       0.03
-import 5000 facts with persisted index                             0.05
-query 5000 facts using persisted index                             0.11
+import 5000 facts with persisted index                             0.03
+query 5000 facts using persisted index                             0.10
 export 5000 facts without index                                    0.00
 import 5000 facts without index                                    0.04
-query 5000 facts building index on-the-fly                         0.10
-(and (eq what 'issue-was-closed') (exists... -> 200                1.21
-(and (eq what 'issue-was-closed') (exists... -> 200/txn            1.20
-(and (eq what 'issue-was-closed') (exists... -> zero               1.21
-(and (eq what 'issue-was-closed') (exists... -> zero/txn           1.23
-transaction rollback on factbase with 100000 facts                 0.25
-(gt time '2024-03-23T03:21:43Z')                                   0.33
-(gt cost 50)                                                       0.21
-(eq title 'Object Thinking 5000')                                  0.05
-(and (eq foo 42.998) (or (gt bar 200) (absent z...                 0.05
-(and (exists foo) (not (exists blue)))                             1.68
-(eq id (agg (always) (max id)))                                    2.76
-(join "c<=cost,b<=bar" (eq id (agg (always) (ma...                 4.02
-(and (eq what "foo") (join "w<=what" (and (eq i...                 7.68
-delete!                                                            0.56
-(and (eq issue *) (eq repository *) (eq what '*') (eq where '*'))  2.75
-Taped.append() x50000                                              0.16
-Taped.each() x125                                                  1.63
-Taped.delete_if() x375                                             0.84
-50000 facts: read-only txn (no copy needed)                        7.60
-50000 facts: rollback txn (no copy needed)                         7.47
-50000 facts: insert in txn (copy triggered)                        3.64
-50000 facts: modify in txn (copy triggered)                       39.42
-100000 facts: read-only txn (no copy needed)                      15.23
-100000 facts: rollback txn (no copy needed)                       15.17
-100000 facts: insert in txn (copy triggered)                       7.45
-100000 facts: modify in txn (copy triggered)                      73.97
+query 5000 facts building index on-the-fly                         0.08
+(and (eq what 'issue-was-closed') (exists... -> 200                1.05
+(and (eq what 'issue-was-closed') (exists... -> 200/txn            1.13
+(and (eq what 'issue-was-closed') (exists... -> zero               1.05
+(and (eq what 'issue-was-closed') (exists... -> zero/txn           1.14
+transaction rollback on factbase with 100000 facts                 0.19
+(gt time '2024-03-23T03:21:43Z')                                   0.36
+(gt cost 50)                                                       0.27
+(eq title 'Object Thinking 5000')                                  0.03
+(and (eq foo 42.998) (or (gt bar 200) (absent z...                 0.03
+(and (exists foo) (not (exists blue)))                             1.52
+(eq id (agg (always) (max id)))                                    2.74
+(join "c<=cost,b<=bar" (eq id (agg (always) (ma...                 4.27
+(and (eq what "foo") (join "w<=what" (and (eq i...                 6.63
+delete!                                                            0.47
+(and (eq issue *) (eq repository *) (eq what '*') (eq where '*'))  0.42
+Taped.append() x50000                                              0.02
+Taped.each() x125                                                  1.48
+Taped.delete_if() x375                                             0.75
+50000 facts: read-only txn (no copy needed)                        7.97
+50000 facts: rollback txn (no copy needed)                         7.54
+50000 facts: insert in txn (copy triggered)                        3.49
+50000 facts: modify in txn (copy triggered)                       36.99
+100000 facts: read-only txn (no copy needed)                      17.40
+100000 facts: rollback txn (no copy needed)                       17.32
+100000 facts: insert in txn (copy triggered)                       8.64
+100000 facts: modify in txn (copy triggered)                      72.25
 ```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2025-12-11 at 13:29,
+on 2026-01-18 at 14:25,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/20134646978
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/21113227919
