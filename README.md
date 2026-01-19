@@ -27,7 +27,7 @@ f = fb.insert
 f.kind = 'book'
 f.title = 'Object Thinking'
 fb.query('(eq kind "book")').each do |f|
-  f.seen = true
+  f.seen = Time.now
 end
 fb.insert
 fb.query('(not (exists seen))').each do |f|
