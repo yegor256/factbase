@@ -41,4 +41,21 @@ class TestCachedFactbase < Factbase::Test
     f2 = fb.query('(always)').each.to_a.first
     assert_equal('[ foo: [42] ] + {}', f2.to_s)
   end
+
+  def test_fresh_fact_modification_invalidates_index
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    f = fb.insert
+    assert_equal(1, fb.query('(not (exists bar))').each.to_a.size)
+    f.bar = 42
+    assert_equal(0, fb.query('(not (exists bar))').each.to_a.size)
+  end
+
+  def test_fresh_fact_modification_invalidates_cache_for_one_queries
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    f = fb.insert
+    f.value = 42
+    refute_nil(fb.query('(agg (not (exists bar)) (max value))').one)
+    f.bar = 42
+    assert_nil(fb.query('(agg (not (exists bar)) (max value))').one)
+  end
 end
