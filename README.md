@@ -210,7 +210,7 @@ This is the result of the benchmark:
 
 <!-- benchmark_begin -->
 ```text
-                                                                       
+
 query all facts from an empty factbase                             0.00
 insert 20000 facts                                                 0.67
 export 20000 facts                                                 0.02
