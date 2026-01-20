@@ -15,11 +15,9 @@ class Factbase::CachedFact
   # Ctor.
   # @param [Factbase::Fact] origin The original fact
   # @param [Hash] cache Cache of queries (to clean it on attribute addition)
-  # @param [Boolean] fresh True if this is a newly inserted fact (not yet in cache)
-  def initialize(origin, cache, fresh: false)
+  def initialize(origin, cache, **)
     @origin = origin
     @cache = cache
-    @fresh = fresh
   end
 
   def to_s
@@ -28,9 +26,7 @@ class Factbase::CachedFact
 
   # When a method is missing, this method is called.
   others do |*args|
-    # Only clear cache when modifying properties on existing (non-fresh) facts
-    # Fresh facts are not in the cache yet, so modifications don't affect it
-    @cache.clear if args[0].to_s.end_with?('=') && !@fresh
+    @cache.clear if args[0].to_s.end_with?('=')
     @origin.send(*args)
   end
 end
