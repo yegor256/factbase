@@ -42,9 +42,9 @@ file = '/tmp/simple.fb'
 f1 = Factbase.new
 f = f1.insert
 f.foo = 42
-File.save(file, f1.export)
+File.binwrite(file, f1.export)
 f2 = Factbase.new
-f2.import(File.read(file))
+f2.import(File.binread(file))
 assert(f2.query('(eq foo 42)').each.to_a.size == 1)
 ```
 
