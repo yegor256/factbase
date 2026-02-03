@@ -37,6 +37,21 @@ class TestIncrementalIndexing < Factbase::Test
     assert_empty(fb.query('(eq foo 43)').each.to_a)
   end
 
+  def test_delete_clears_fresh
+    fresh = Set.new
+    fb = Factbase::IndexedFactbase.new(Factbase.new, {}, fresh)
+    fb.insert.foo = 42
+    fb.insert.foo = 43
+    assert_equal(2, fresh.size)
+    fb.query('(eq foo 42)').each.to_a
+    assert_equal(0, fresh.size)
+    fb.insert.foo = 44
+    assert_equal(1, fresh.size)
+    fb.query('(eq foo 44)').delete!
+    assert_equal(0, fresh.size)
+    assert_empty(fb.query('(eq foo 44)').each.to_a)
+  end
+
   def test_transaction_clears_index
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
@@ -48,6 +63,29 @@ class TestIncrementalIndexing < Factbase::Test
       raise Factbase::Rollback
     end
     assert_empty(idx)
+  end
+
+  def test_transaction_clears_fresh
+    fresh = Set.new
+    fb = Factbase::IndexedFactbase.new(Factbase.new, {}, fresh)
+    fb.insert.foo = 42
+    fb.query('(eq foo 42)').each.to_a
+    assert_equal(0, fresh.size)
+    fb.txn do |fbt|
+      fbt.insert.bar = 1
+      assert_equal(1, fresh.size)
+      raise Factbase::Rollback
+    end
+    assert_equal(0, fresh.size)
+  end
+
+  def test_query_consistency_after_property_update
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    f = fb.insert
+    f.foo = 42
+    assert_equal(1, fb.query('(eq foo 42)').each.to_a.size)
+    f.foo = 43
+    assert_equal(1, fb.query('(eq foo 43)').each.to_a.size)
   end
 
   def test_fresh_fact_does_not_clear_index

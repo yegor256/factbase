@@ -16,13 +16,13 @@ class TestIndexedQuery < Factbase::Test
   def test_converts_to_string
     fb = Factbase.new
     fb.insert.foo = 42
-    refute_nil(Factbase::IndexedQuery.new(fb.query('(exists foo)'), {}, fb).to_s)
+    refute_nil(Factbase::IndexedQuery.new(fb.query('(exists foo)'), {}, fb, Set.new).to_s)
   end
 
   def test_queries_and_updates_origin
     fb = Factbase.new
     fb.insert.foo = 42
-    Factbase::IndexedQuery.new(fb.query('(exists foo)'), {}, fb).each do |f|
+    Factbase::IndexedQuery.new(fb.query('(exists foo)'), {}, fb, Set.new).each do |f|
       f.bar = 33
     end
     refute_empty(fb.query('(exists bar)').each.to_a)
