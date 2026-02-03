@@ -108,7 +108,7 @@ class Factbase::Syntax
       comment = false if comment && c == "\n"
       next if comment
       if quotes.include?(c)
-        if string && acc[acc.length - 1] == '\\'
+        if string && acc[-1] == '\\'
           acc = acc[0..-2]
         else
           string = !string
