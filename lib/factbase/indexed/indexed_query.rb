@@ -17,10 +17,12 @@ class Factbase::IndexedQuery
   # Constructor.
   # @param [Factbase::Query] origin Original query
   # @param [Hash] idx The index
-  def initialize(origin, idx, fb)
+  # @param [Set] fresh The set of IDs of newly inserted facts
+  def initialize(origin, idx, fb, fresh)
     @origin = origin
     @idx = idx
     @fb = fb
+    @fresh = fresh
   end
 
   # Print it as a string.
@@ -37,7 +39,7 @@ class Factbase::IndexedQuery
     return to_enum(__method__, fb, params) unless block_given?
     a = @origin.each(fb, params).to_a
     a.each do |f|
-      yield Factbase::IndexedFact.new(f, @idx)
+      yield Factbase::IndexedFact.new(f, @idx, @fresh)
     end
     a.size
   end

@@ -21,17 +21,21 @@ class Factbase::IndexedFactbase
   # Constructor.
   # @param [Factbase] origin Original factbase to decorate
   # @param [Hash] idx Index to use
-  def initialize(origin, idx = {})
+  # @param [Set] fresh The set of IDs of newly inserted facts
+  def initialize(origin, idx = {}, fresh = Set.new)
     raise 'Wrong type of original' unless origin.respond_to?(:query)
     @origin = origin
     raise 'Wrong type of index' unless idx.is_a?(Hash)
     @idx = idx
+    @fresh = fresh
   end
 
   # Insert a new fact and return it.
   # @return [Factbase::Fact] The fact just inserted
   def insert
-    Factbase::IndexedFact.new(@origin.insert, @idx, fresh: true)
+    f = Factbase::IndexedFact.new(@origin.insert, @idx, @fresh)
+    @fresh.add(f.object_id)
+    f
   end
 
   # Convert a query to a term.
@@ -49,7 +53,9 @@ class Factbase::IndexedFactbase
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
     q = @origin.query(term, maps)
-    Factbase::IndexedQuery.new(q, @idx, self)
+    q = Factbase::IndexedQuery.new(q, @idx, self, @fresh)
+    @fresh.clear
+    q
   end
 
   # Run an ACID transaction.
@@ -57,9 +63,10 @@ class Factbase::IndexedFactbase
   def txn
     result =
       @origin.txn do |fbt|
-        yield Factbase::IndexedFactbase.new(fbt, @idx)
+        yield Factbase::IndexedFactbase.new(fbt, @idx, @fresh)
       end
     @idx.clear
+    @fresh.clear
     result
   end
 
@@ -101,6 +108,7 @@ class Factbase::IndexedFactbase
       @origin.import(bytes)
       @idx.clear
     end
+    @fresh.clear
   end
 
   # Size, the total number of facts in the factbase.

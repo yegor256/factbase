@@ -15,8 +15,8 @@ class Factbase::IndexedFact
   # Ctor.
   # @param [Factbase::Fact] origin The original fact
   # @param [Hash] idx The index
-  # @param [Boolean] fresh True if this is a newly inserted fact (not yet in index)
-  def initialize(origin, idx, fresh: false)
+  # @param [Set] fresh The shared set of fresh fact IDs
+  def initialize(origin, idx, fresh)
     @origin = origin
     @idx = idx
     @fresh = fresh
@@ -30,7 +30,7 @@ class Factbase::IndexedFact
   others do |*args|
     # Only clear index when modifying properties on existing (non-fresh) facts
     # Fresh facts are not in the index yet, so modifications don't affect it
-    @idx.clear if args[0].to_s.end_with?('=') && !@fresh
+    @idx.clear if args[0].to_s.end_with?('=') && !@fresh.include?(object_id)
     @origin.send(*args)
   end
 end
