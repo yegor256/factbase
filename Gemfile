@@ -10,8 +10,8 @@ gem 'benchmark', '~>0.5', require: false
 gem 'minitest', '~>6.0', require: false
 gem 'minitest-reporters', '~>1.7', require: false
 gem 'os', '~>1.1', require: false
-gem 'qbash', '~>0.4', require: false
 gem 'psych', '5.3.1', require: false # GPL
+gem 'qbash', '~>0.4', require: false
 gem 'rake', '~>13.2', require: false
 gem 'rdoc', '7.1.0', require: false # GPL
 gem 'rubocop', '~>1.74', require: false
