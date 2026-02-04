@@ -141,6 +141,7 @@ DEPENDENCIES
   minitest (~> 6.0)
   minitest-reporters (~> 1.7)
   os (~> 1.1)
+  psych (= 5.3.1)
   qbash (~> 0.4)
   rake (~> 13.2)
   rdoc (= 7.1.0)
@@ -150,9 +151,9 @@ DEPENDENCIES
   rubocop-rake (~> 0.7)
   simplecov (~> 0.22)
   simplecov-cobertura (~> 3.0)
-  stackprof (~> 0.2)
+  stackprof (= 0.2.27)
   threads (~> 0.4)
-  yard (~> 0.9)
+  yard (= 0.9.38)
 
 BUNDLED WITH
    2.6.8
