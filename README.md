@@ -80,6 +80,21 @@ churn = fb.churn
 assert churn.inserted == 1
 ```
 
+Properties are accumulative. Setting a property again adds a value instead of overwriting:
+
+```ruby
+f = fb.insert
+f.foo = 42
+f.foo = 43
+assert(f.foo == 42)
+assert(f['foo'] == [42, 43])
+
+fb.query('(eq foo 43)').each do |f|
+  assert(f.foo == 42)
+  assert(f['foo'].include?(43))
+end
+```
+
 ## Terms
 
 There are some boolean terms available in a query
