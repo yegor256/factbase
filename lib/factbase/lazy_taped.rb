@@ -128,6 +128,7 @@ class Factbase::LazyTaped
   private
 
   def join(other)
+    ensure_copied
     n = yield (@maps || @origin).to_a, other.to_a
     raise 'Cannot join with another Taped' if other.respond_to?(:inserted)
     raise 'Can only join with array' unless other.is_a?(Array)

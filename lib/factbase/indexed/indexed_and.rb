@@ -45,7 +45,7 @@ class Factbase::IndexedAnd
       j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id)
       r =
         if maps.respond_to?(:inserted)
-          Factbase::Taped.new(j, inserted: maps.inserted, deleted: maps.deleted, added: maps.added)
+          maps & j
         else
           j
         end
