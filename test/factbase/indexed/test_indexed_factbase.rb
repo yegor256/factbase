@@ -56,6 +56,39 @@ class TestIndexedFactbase < Factbase::Test
     end
   end
 
+  def test_queries_after_update_rollback_in_txn
+    [
+      '(absent bar)',
+      '(unique foo)',
+      '(exists foo)',
+      '(or (one foo) (exists foo))',
+      '(and (one foo) (exists foo))',
+      '(and (one foo) (not (exists bar)))',
+      '(not (eq foo 41))',
+      '(one foo)',
+      '(lte foo 42)',
+      '(one foo)',
+      '(eq foo 42)',
+      '(gte foo 42)',
+      '(gt foo 41)',
+      '(lt foo 43)'
+    ].each do |q|
+      fb = Factbase::IndexedFactbase.new(Factbase.new)
+      fb.insert.foo = 42
+      fb.txn do |fbt|
+        refute_empty(fbt.query(q).each.to_a, q)
+        fbt.query(q).each do |f|
+          f.foo = 43
+        end
+        raise Factbase::Rollback
+      end
+      refute_empty(fb.query(q).each.to_a, q)
+      fb.query(q).each do |f|
+        assert_equal([42], f['foo'], q)
+      end
+    end
+  end
+
   def test_queries_after_insert_in_txn
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     fb.txn(&:insert)
