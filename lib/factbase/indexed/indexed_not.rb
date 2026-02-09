@@ -34,6 +34,8 @@ class Factbase::IndexedNot
     r = entry[:facts]
     if r.nil?
       nil
+    elsif maps.respond_to?(:ensure_copied!)
+      maps & r
     else
       (maps & []) | r
     end

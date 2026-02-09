@@ -62,7 +62,7 @@ class Factbase::LazyTaped
   end
 
   def <<(map)
-    ensure_copied
+    ensure_copied!
     @maps << map
     @inserted.append(map.object_id)
   end
@@ -81,7 +81,7 @@ class Factbase::LazyTaped
   end
 
   def delete_if
-    ensure_copied
+    ensure_copied!
     @maps.delete_if do |m|
       r = yield m
       @deleted.append(@pairs[m].object_id) if r
@@ -108,7 +108,7 @@ class Factbase::LazyTaped
     join(other, &:|)
   end
 
-  def ensure_copied
+  def ensure_copied!
     return if @copied
     @pairs = {}.compare_by_identity
     @maps =
@@ -121,13 +121,14 @@ class Factbase::LazyTaped
   end
 
   def get_copied_map(original_map)
-    ensure_copied
+    ensure_copied!
     @maps.find { |m| @pairs[m].equal?(original_map) }
   end
 
   private
 
   def join(other)
+    ensure_copied!
     n = yield (@maps || @origin).to_a, other.to_a
     raise 'Cannot join with another Taped' if other.respond_to?(:inserted)
     raise 'Can only join with array' unless other.is_a?(Array)

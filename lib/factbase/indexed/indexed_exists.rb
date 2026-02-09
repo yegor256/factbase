@@ -26,6 +26,10 @@ class Factbase::IndexedExists
       end
       entry[:indexed_count] = maps_array.size
     end
-    (maps & []) | entry[:facts]
+    if maps.respond_to?(:ensure_copied!)
+      maps & entry[:facts]
+    else
+      (maps & []) | entry[:facts]
+    end
   end
 end
