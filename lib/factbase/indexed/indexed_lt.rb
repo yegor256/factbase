@@ -36,7 +36,6 @@ class Factbase::IndexedLt
       end
       entry[:indexed_count] = maps_array.size
     end
-
     threshold = @term.operands[1].is_a?(Symbol) ? params[@term.operands[1].to_s]&.first : @term.operands[1]
     return nil if threshold.nil?
     i = entry[:sorted].bsearch_index { |pair| pair[0] >= threshold } || entry[:sorted].size
