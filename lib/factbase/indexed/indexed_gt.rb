@@ -36,7 +36,7 @@ class Factbase::IndexedGt
     return nil if threshold.nil?
     i = entry[:sorted].bsearch_index { |pair| pair[0] > threshold } || entry[:sorted].size
     result = entry[:sorted][i..].map { |pair| pair[1] }.uniq
-    if maps.respond_to?(:ensure_copied)
+    if maps.respond_to?(:ensure_copied!)
       maps & result
     else
       (maps & []) | result

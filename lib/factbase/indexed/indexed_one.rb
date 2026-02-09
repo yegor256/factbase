@@ -26,7 +26,7 @@ class Factbase::IndexedOne
       end
       entry[:indexed_count] = maps_array.size
     end
-    if maps.respond_to?(:ensure_copied)
+    if maps.respond_to?(:ensure_copied!)
       maps & entry[:facts]
     else
       (maps & []) | entry[:facts]
