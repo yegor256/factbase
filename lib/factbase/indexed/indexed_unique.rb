@@ -4,9 +4,23 @@
 # SPDX-License-Identifier: MIT
 
 # Indexed term 'unique'.
-# @todo #249:30min Improve prediction for 'unique' term. Current prediction is quite naive and
-#  returns many false positives because it just filters facts which have exactly the same set
-#  of keys regardless the values. We should introduce more smart prediction.
+# The @idx[ikey] structure:
+# {
+#   count: Integer (number of facts already processed),
+#   buckets: {
+#     key => {
+#       facts: Array (unique facts found),
+#       seen: Set (composite values already indexed to skip duplicates)
+#     }
+#   }
+# }
+# Example 1: (unique "fruit")
+#   - Apple, Apple, Banana
+#   - count: 3, facts: [Apple, Banana], seen: { [Apple], [Banana] }
+#
+# Example 2: (unique "fruit" "color")
+#   - [Apple, Red], [Apple, Green], [Apple, Red]
+#   - count: 3, facts: [[Apple, Red], [Apple, Green]], seen: { [Apple, Red], [Apple, Green] }
 class Factbase::IndexedUnique
   def initialize(term, idx)
     @term = term
@@ -14,25 +28,29 @@ class Factbase::IndexedUnique
   end
 
   def predict(maps, _fb, _params)
-    return nil if @idx.nil?
-    key = [maps.object_id, @term.operands.first, @term.op]
-    entry = @idx[key]
-    maps_array = maps.to_a
-    if entry.nil?
-      entry = { facts: [], indexed_count: 0 }
-      @idx[key] = entry
-    end
-    if entry[:indexed_count] < maps_array.size
-      props = @term.operands.map(&:to_s)
-      maps_array[entry[:indexed_count]..].each do |m|
-        entry[:facts] << m if props.all? { |p| !m[p].nil? }
-      end
-      entry[:indexed_count] = maps_array.size
-    end
+    operands = @term.operands.map(&:to_s)
+    bucket_key = operands.join('|')
+    idx_key = [maps.object_id, @term.op.to_s, bucket_key]
+    entry = (@idx[idx_key] ||= { buckets: {}, count: 0 })
+    feed(maps.to_a, entry, operands, bucket_key)
+    bucket = entry[:buckets][bucket_key]
     if maps.respond_to?(:ensure_copied!)
-      maps & entry[:facts]
+      maps & (bucket[:facts] || [])
     else
-      (maps & []) | entry[:facts]
+      (maps & []) | (bucket[:facts] || [])
     end
+  end
+
+  private
+
+  def feed(facts, entry, operands, bucket_key)
+    entry[:buckets][bucket_key] ||= { facts: [], seen: Set.new }
+    bucket = entry[:buckets][bucket_key]
+    (facts[entry[:count]..] || []).each do |fact|
+      composite_val = operands.map { |o| fact[o] }
+      next if composite_val.any?(&:nil?)
+      bucket[:facts] << fact if bucket[:seen].add?(composite_val)
+    end
+    entry[:count] = facts.size
   end
 end

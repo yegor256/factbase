@@ -28,7 +28,8 @@ class TestIndexedUnique < Factbase::Test
       ]
     )
     n = term.predict(maps, nil, {})
-    assert_equal(3, n.size)
+    assert_equal(2, n.size)
+    assert_equal([{ 'foo' => [42] }, { 'foo' => [7] }], n.to_a)
   end
 
   def test_predicts_on_unique_with_combinations
@@ -45,5 +46,6 @@ class TestIndexedUnique < Factbase::Test
     )
     n = term.predict(maps, nil, {})
     assert_equal(2, n.size)
+    assert_equal([{ 'foo' => [42], 'bar' => ['a'] }, { 'foo' => [42], 'bar' => ['b'] }], n.to_a)
   end
 end
