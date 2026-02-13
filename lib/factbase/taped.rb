@@ -68,6 +68,10 @@ class Factbase::Taped
     @origin.to_a
   end
 
+  def repack(other)
+    Factbase::Taped.new(other, inserted: @inserted, deleted: @deleted, added: @added)
+  end
+
   def &(other)
     if other == [] || @origin.empty?
       return Factbase::Taped.new([], inserted: @inserted, deleted: @deleted, added: @added)

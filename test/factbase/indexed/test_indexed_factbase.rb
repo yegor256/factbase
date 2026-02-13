@@ -260,4 +260,27 @@ class TestIndexedFactbase < Factbase::Test
     assert_equal(2, fb.size)
     assert_equal(2, fb.query('(exists foo)').each.to_a.size)
   end
+
+  def test_term_exists_keeps_duplicates
+    fb = Factbase.new
+    fb.insert.scope = 1
+    fb.insert.scope = 1
+    assert_equal(2, fb.query('(exists scope)').each.to_a.size)
+  end
+
+  def test_indexed_term_exists_keeps_duplicates
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.scope = 1
+    fb.insert.scope = 1
+    assert_equal(2, fb.query('(exists scope)').each.to_a.size)
+  end
+
+  def test_indexed_term_exists_keeps_duplicates_in_txn
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.txn do |fbt|
+      fbt.insert.scope = 1
+      fbt.insert.scope = 1
+    end
+    assert_equal(2, fb.query('(exists scope)').each.to_a.size)
+  end
 end

@@ -4,6 +4,11 @@
 # SPDX-License-Identifier: MIT
 
 # Indexed term 'exists'.
+# The @idx[key] structure:
+# {
+#   count: Integer (number of facts already processed),
+#   facts: Array (facts found),
+# }
 class Factbase::IndexedExists
   def initialize(term, idx)
     @term = term
@@ -11,25 +16,21 @@ class Factbase::IndexedExists
   end
 
   def predict(maps, _fb, _params)
-    return nil if @idx.nil?
-    key = [maps.object_id, @term.operands.first, @term.op]
+    operand = @term.operands.first.to_s
+    key = [maps.object_id, operand, @term.op]
+    @idx[key] = { facts: [], count: 0 } if @idx[key].nil?
     entry = @idx[key]
-    maps_array = maps.to_a
-    if entry.nil?
-      entry = { facts: [], indexed_count: 0 }
-      @idx[key] = entry
+    feed(maps.to_a, entry, operand)
+    return maps.repack(entry[:facts]) if maps.respond_to?(:repack)
+    entry[:facts]
+  end
+
+  private
+
+  def feed(facts, entry, operand)
+    facts[entry[:count]..].each do |m|
+      entry[:facts] << m unless m[operand].nil?
     end
-    if entry[:indexed_count] < maps_array.size
-      prop = @term.operands.first.to_s
-      maps_array[entry[:indexed_count]..].each do |m|
-        entry[:facts] << m unless m[prop].nil?
-      end
-      entry[:indexed_count] = maps_array.size
-    end
-    if maps.respond_to?(:ensure_copied!)
-      maps & entry[:facts]
-    else
-      (maps & []) | entry[:facts]
-    end
+    entry[:count] = facts.size
   end
 end

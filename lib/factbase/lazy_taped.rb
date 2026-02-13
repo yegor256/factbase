@@ -14,6 +14,7 @@ class Factbase::LazyTaped
     @copied = false
     @maps = nil
     @pairs = nil
+    @inverted_pairs = nil
     @inserted = []
     @deleted = []
     @added = []
@@ -93,6 +94,12 @@ class Factbase::LazyTaped
     (@maps || @origin).to_a
   end
 
+  def repack(other)
+    ensure_copied!
+    copied = other.map { |o| @inverted_pairs[o] || o }
+    Factbase::Taped.new(copied, inserted: @inserted, deleted: @deleted, added: @added)
+  end
+
   def &(other)
     if other == [] || (@maps || @origin).empty?
       return Factbase::Taped.new([], inserted: @inserted, deleted: @deleted, added: @added)
@@ -111,10 +118,12 @@ class Factbase::LazyTaped
   def ensure_copied!
     return if @copied
     @pairs = {}.compare_by_identity
+    @inverted_pairs = {}.compare_by_identity
     @maps =
       @origin.map do |m|
         n = m.transform_values(&:dup)
         @pairs[n] = m
+        @inverted_pairs[m] = n
         n
       end
     @copied = true

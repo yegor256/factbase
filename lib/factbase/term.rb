@@ -176,7 +176,7 @@ class Factbase::Term < Factbase::TermBase
   # Try to predict which facts from the provided list
   # should be evaluated. If no prediction can be made,
   # the same list is returned.
-  # @param [Array<Hash>] maps Records to iterate, maybe
+  # @param [Array<Hash>, Factbase::Taped, Factbase::LazyTaped] maps Records to iterate, maybe
   # @param [Hash] params Params to use (keys must be strings, not symbols, with values as arrays)
   # @return [Array<Hash>] Records to iterate
   def predict(maps, fb, params)
