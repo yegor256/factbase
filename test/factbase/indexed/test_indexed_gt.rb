@@ -7,6 +7,7 @@ require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/taped'
+require_relative '../../../lib/factbase/lazy_taped'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/indexed/indexed_gt'
 
@@ -57,7 +58,21 @@ class TestIndexedGt < Factbase::Test
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'sum' => [25] }])
     n = term.predict(maps, nil, {})
-    assert_nil(n)
+    assert_kind_of(Factbase::Taped, n)
+  end
+
+  def test_predict_decorator_persistence
+    [
+      { input: [{ 'foo' => [40] }], expected: Array },
+      { input: Factbase::Taped.new([{ 'foo' => [40] }]), expected: Factbase::Taped },
+      { input: Factbase::LazyTaped.new([{ 'foo' => [30] }]), expected: Factbase::Taped }
+    ].each do |c|
+      term = Factbase::Term.new(:gt, [:foo, 30])
+      idx = {}
+      term.redress!(Factbase::IndexedTerm, idx:)
+      n = term.predict(c[:input], nil, {})
+      assert_kind_of(c[:expected], n, "Expect #{c[:expected]}, but got #{n.class} for input #{c[:input].class}")
+    end
   end
 
   def test_predicts_on_gt_below_threshold
