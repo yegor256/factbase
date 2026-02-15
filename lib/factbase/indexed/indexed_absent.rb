@@ -11,25 +11,21 @@ class Factbase::IndexedAbsent
   end
 
   def predict(maps, _fb, _params)
-    return nil if @idx.nil?
-    key = [maps.object_id, @term.operands.first, @term.op]
+    prop = @term.operands[0].to_s
+    key = [maps.object_id, prop, @term.op]
+    @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
-    maps_array = maps.to_a
-    if entry.nil?
-      entry = { facts: [], indexed_count: 0 }
-      @idx[key] = entry
+    _feed(maps.to_a, entry, prop)
+    maps.respond_to?(:repack) ? maps.repack(entry[:facts]) : entry[:facts]
+  end
+
+  private
+
+  def _feed(facts, entry, prop)
+    return unless entry[:count] < facts.size
+    facts[entry[:count]..].each do |f|
+      entry[:facts] << f if f[prop].nil?
     end
-    if entry[:indexed_count] < maps_array.size
-      prop = @term.operands.first.to_s
-      maps_array[entry[:indexed_count]..].each do |m|
-        entry[:facts] << m if m[prop].nil?
-      end
-      entry[:indexed_count] = maps_array.size
-    end
-    if maps.respond_to?(:ensure_copied!)
-      maps & entry[:facts]
-    else
-      (maps & []) | entry[:facts]
-    end
+    entry[:count] = facts.size
   end
 end

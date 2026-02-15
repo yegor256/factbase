@@ -261,6 +261,30 @@ class TestIndexedFactbase < Factbase::Test
     assert_equal(2, fb.query('(exists foo)').each.to_a.size)
   end
 
+  def test_term_absent_keeps_duplicates
+    fb = Factbase.new
+    fb.insert.cost = 10
+    fb.insert.cost = 10
+    assert_equal(2, fb.query('(absent scope)').each.to_a.size)
+  end
+
+  def test_indexed_term_absent_keeps_duplicates
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.cost = 10
+    fb.insert.cost = 10
+    assert_equal(2, fb.query('(absent scope)').each.to_a.size)
+  end
+
+  def test_indexed_term_absent_keeps_duplicates_in_txn
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.txn do |fbt|
+      fbt.insert.cost = 10
+      fbt.insert.cost = 10
+      assert_equal(2, fbt.query('(absent scope)').each.to_a.size)
+    end
+    assert_equal(2, fb.query('(absent scope)').each.to_a.size)
+  end
+
   def test_term_exists_keeps_duplicates
     fb = Factbase.new
     fb.insert.scope = 1
