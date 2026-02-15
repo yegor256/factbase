@@ -356,4 +356,28 @@ class TestIndexedFactbase < Factbase::Test
     end
     assert_equal(2, fb.query('(one scope)').each.to_a.size)
   end
+
+  def test_term_lt_keeps_duplicates
+    fb = Factbase.new
+    fb.insert.scope = 10
+    fb.insert.scope = 10
+    assert_equal(2, fb.query('(lt scope 20)').each.to_a.size)
+  end
+
+  def test_indexed_term_lt_keeps_duplicates
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.scope = 10
+    fb.insert.scope = 10
+    assert_equal(2, fb.query('(lt scope 20)').each.to_a.size)
+  end
+
+  def test_indexed_term_lt_keeps_duplicates_in_txn
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.txn do |fbt|
+      fbt.insert.scope = 10
+      fbt.insert.scope = 10
+      assert_equal(2, fbt.query('(lt scope 20)').each.to_a.size)
+    end
+    assert_equal(2, fb.query('(lt scope 20)').each.to_a.size)
+  end
 end
