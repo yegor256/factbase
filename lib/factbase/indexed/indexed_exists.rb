@@ -20,14 +20,13 @@ class Factbase::IndexedExists
     key = [maps.object_id, operand, @term.op]
     @idx[key] = { facts: [], count: 0 } if @idx[key].nil?
     entry = @idx[key]
-    feed(maps.to_a, entry, operand)
-    return maps.repack(entry[:facts]) if maps.respond_to?(:repack)
-    entry[:facts]
+    _feed(maps.to_a, entry, operand)
+    maps.respond_to?(:repack) ? maps.repack(entry[:facts]) : entry[:facts]
   end
 
   private
 
-  def feed(facts, entry, operand)
+  def _feed(facts, entry, operand)
     facts[entry[:count]..].each do |m|
       entry[:facts] << m unless m[operand].nil?
     end
