@@ -33,12 +33,8 @@ class Factbase::IndexedUnique
     idx_key = [maps.object_id, @term.op.to_s, bucket_key]
     entry = (@idx[idx_key] ||= { buckets: {}, count: 0 })
     feed(maps.to_a, entry, operands, bucket_key)
-    bucket = entry[:buckets][bucket_key]
-    if maps.respond_to?(:ensure_copied!)
-      maps & (bucket[:facts] || [])
-    else
-      (maps & []) | (bucket[:facts] || [])
-    end
+    matches = entry[:buckets][bucket_key][:facts]
+    maps.respond_to?(:repack) ? maps.repack(matches) : matches
   end
 
   private
