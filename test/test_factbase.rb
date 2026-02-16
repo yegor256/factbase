@@ -5,6 +5,7 @@
 
 require 'loog'
 require 'threads'
+require_relative '../lib/fuzz'
 require_relative '../lib/factbase'
 require_relative '../lib/factbase/inv'
 require_relative '../lib/factbase/logged'
@@ -33,11 +34,10 @@ class TestFactbase < Factbase::Test
   end
 
   def test_query_many_times
-    fb = Factbase.new
     total = 5
-    total.times { fb.insert }
+    fb = Factbase::Fuzz.make(total)
     total.times do
-      assert_equal(5, fb.query('(always)').each.to_a.size)
+      assert_equal(total, fb.query('(always)').each.to_a.size)
     end
   end
 
@@ -192,20 +192,20 @@ class TestFactbase < Factbase::Test
   end
 
   def test_all_decorators
+    fuzz = Factbase::Fuzz.new
     [
       Factbase::Rules.new(Factbase.new, '(always)'),
       Factbase::Inv.new(Factbase.new) { |_, _| true },
       Factbase::Pre.new(Factbase.new) { |_| true },
       Factbase::Logged.new(Factbase.new, Loog::NULL)
     ].each do |d|
-      f = d.insert
-      f.foo = 42
+      fuzz.feed(d)
       d.txn do |fbt|
-        fbt.insert.bar = 455
+        fuzz.feed(fbt)
       end
       assert_raises(StandardError) do
         d.txn do |fbt|
-          fbt.insert
+          fuzz.feed(fbt)
           raise 'oops'
         end
       end
@@ -287,14 +287,13 @@ class TestFactbase < Factbase::Test
 
   def test_simple_concurrent_inserts_in_txns
     fb = Factbase.new
+    fuzz = Factbase::Fuzz.new
     t = Concurrent.processor_count * 7
     mul = 23
     Threads.new(t).assert do
       assert(
         fb.txn do |fbt|
-          mul.times do |m|
-            fbt.insert.foo = m
-          end
+          fuzz.feed(fbt, mul)
         end
       )
     end
@@ -303,15 +302,14 @@ class TestFactbase < Factbase::Test
 
   def test_simple_concurrent_inserts_in_txns_with_sleep
     fb = Factbase.new
+    fuzz = Factbase::Fuzz.new
     t = Concurrent.processor_count * 13
     mul = 53
     Threads.new(t).assert do
       assert(
         fb.txn do |fbt|
           sleep(0.01)
-          mul.times do |m|
-            fbt.insert.foo = m
-          end
+          fuzz.feed(fbt, mul)
         end
       )
     end
@@ -389,10 +387,10 @@ class TestFactbase < Factbase::Test
 
   def test_concurrent_transactions_with_rollbacks
     fb = Factbase.new
-    Threads.new.assert do |i|
+    fuzz = Factbase::Fuzz.new
+    Threads.new.assert do
       fb.txn do |fbt|
-        fact = fbt.insert
-        fact.thread_id = i
+        fuzz.feed(fbt)
         raise Factbase::Rollback
       end
     end
