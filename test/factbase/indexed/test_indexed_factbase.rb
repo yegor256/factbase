@@ -381,6 +381,32 @@ class TestIndexedFactbase < Factbase::Test
     assert_equal(2, fb.query('(gt scope 10)').each.to_a.size)
   end
 
+  def test_indexed_term_and_keeps_duplicates
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.txn do |fbt|
+      f = fb.insert
+      f.cost = 10
+      f.scope = 10
+      f = fb.insert
+      f.cost = 10
+      f.scope = 10
+      assert_equal(2, fbt.query('(and (eq scope 10) (eq cost 10))').each.to_a.size)
+    end
+    assert_equal(2, fb.query('(and (eq scope 10) (eq cost 10))').each.to_a.size)
+  end
+
+  def test_indexed_term_and_keeps_many_duplicates_facts
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    total = 130
+    total.times do
+      f = fb.insert
+      f.cost = 'cost'
+      f.scope = 'scope'
+    end
+    q = '(and (exists cost) (exists scope))'
+    assert_equal(total, fb.query(q).each.to_a.size)
+  end
+
   def test_term_one_keeps_duplicates
     fb = Factbase.new
     fb.insert.scope = 10

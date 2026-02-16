@@ -43,12 +43,7 @@ class Factbase::IndexedAnd
         end
       )
       j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id)
-      r =
-        if maps.respond_to?(:inserted)
-          maps & j
-        else
-          j
-        end
+      r = maps.respond_to?(:repack) ? maps.repack(j) : j
     else
       @term.operands.each do |o|
         n = o.predict(maps, fb, params)
@@ -56,7 +51,8 @@ class Factbase::IndexedAnd
         if r.nil?
           r = n
         elsif n.size < r.size * 8 # to skip some obvious matchings
-          r &= n.to_a
+          ids = n.to_set(&:object_id)
+          r = r.select { |f| ids.include?(f.object_id) }
         end
         break if r.size < maps.size / 32 # it's already small enough
         break if r.size < 128 # it's obviously already small enough
