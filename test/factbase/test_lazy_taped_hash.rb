@@ -15,45 +15,37 @@ require_relative '../../lib/factbase/lazy_taped_array'
 # License:: MIT
 class TestLazyTapedHash < Factbase::Test
   def test_keys
-    hash, = wrap({ 'foo' => 1, 'bar' => [2] })
-    assert_equal(%w[foo bar], hash.keys)
+    hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
+    assert_read(hash, origin, %w[foo bar], hash.keys)
   end
 
   def test_map
-    hash, = wrap({ 'foo' => 1, 'bar' => [2] })
-    assert_equal(%w[bar=[2] foo=1], hash.map { |k, v| "#{k}=#{v}" }.sort)
+    hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
+    assert_read(hash, origin, %w[bar=[2] foo=1], hash.map { |k, v| "#{k}=#{v}" }.sort)
   end
 
   def test_reed_scalar
-    hash, = wrap({ 'foo' => 1, 'bar' => [2] })
+    hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
     assert_kind_of(Integer, hash['foo'])
-    assert_equal(1, hash['foo'])
+    assert_read(hash, origin, 1, hash['foo'])
   end
 
   def test_reed_array
-    hash, = wrap({ 'foo' => 1, 'bar' => [2] })
+    hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
     assert_kind_of(Factbase::LazyTaped::LazyTapedArray, hash['bar'])
-    assert_equal([2], hash['bar'].to_a)
+    assert_read(hash, origin, [2], hash['bar'].to_a)
   end
 
   def test_write_scalar
-    hash, _, added = wrap({ 'foo' => 1, 'bar' => [2] })
+    hash, origin, added = wrap({ 'foo' => 1, 'bar' => [2] })
     hash['baz'] = 4
-    assert_equal(4, hash['baz'])
-    refute_empty(added)
+    assert_write(hash, origin, added, 4, hash['baz'])
   end
 
   def test_write_array
-    hash, _, added = wrap({ 'foo' => 1, 'bar' => [2] })
+    hash, origin, added = wrap({ 'foo' => 1, 'bar' => [2] })
     hash['baz'] = [4]
-    assert_equal(4, hash['baz'][0])
-    refute_empty(added)
-  end
-
-  def test_ensure_copied_after_insertion
-    hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
-    hash['foo'] = [2]
-    assert_copied(hash, origin)
+    assert_write(hash, origin, added, 4, hash['baz'][0])
   end
 
   def test_ensure_copied_after_ensure_copied_map
@@ -68,29 +60,11 @@ class TestLazyTapedHash < Factbase::Test
     assert_copied(hash, origin)
   end
 
-  def test_not_ensure_copied_after_reed
-    hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
-    hash['foo']
-    refute_copied(hash, origin)
-  end
-
-  def test_not_ensure_copied_after_keys
-    hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
-    hash.keys
-    refute_copied(hash, origin)
-  end
-
   def test_tracking_id
     hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
     assert_equal(origin.object_id, hash.tracking_id)
     hash.ensure_copied_map
     refute_equal(origin.object_id, hash.tracking_id)
-  end
-
-  def test_not_ensure_copied_after_map
-    hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
-    hash.map { |k, v| "#{k}=#{v}" }
-    refute_copied(hash, origin)
   end
 
   def test_copying_state
@@ -101,8 +75,8 @@ class TestLazyTapedHash < Factbase::Test
   end
 
   def test_delegates_size
-    hash, = wrap({ 'a' => 1, 'b' => 2 })
-    assert_equal(2, hash.size)
+    hash, origin, = wrap({ 'a' => 1, 'b' => 2 })
+    assert_read(hash, origin, 2, hash.size)
   end
 
   private
@@ -122,5 +96,16 @@ class TestLazyTapedHash < Factbase::Test
   def refute_copied(hash, origin)
     assert_equal(origin.object_id, hash.tracking_id)
     refute_predicate(hash, :copied?)
+  end
+
+  def assert_read(hash, origin, expected, actual)
+    assert_equal(expected, actual)
+    refute_copied(hash, origin)
+  end
+
+  def assert_write(hash, origin, added, expected, actual)
+    assert_equal(expected, actual)
+    refute_empty(added)
+    assert_copied(hash, origin)
   end
 end
