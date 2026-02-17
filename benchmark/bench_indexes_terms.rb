@@ -14,7 +14,7 @@ def bench_indexes_terms(bmk, _fb)
   selectivity = 20
   raise ArgumentError, 'selectivity must be between 0 and 100' unless selectivity.between?(0, 100)
   # Returns true for the first N facts to ensure deterministic selectivity.
-  include = ->(i) { i < total * selectivity / 100 }
+  include = ->(i) { i <= total * selectivity / 100 }
   # Cardinality defines the diversity of "noise" data (non-matching facts).
   # High cardinality (e.g., 1000) makes matching facts stand out more,
   # while low cardinality (e.g., 2) creates many duplicates, forcing
@@ -28,7 +28,7 @@ def bench_indexes_terms(bmk, _fb)
       seed: lambda { |fb|
         (1..total).each do |i|
           f = fb.insert.tap { |f| f.id = i }
-          f.status = 1 if include.call(i)
+          f.status = 1 unless include.call(i)
         end
       }
     },
@@ -58,7 +58,7 @@ def bench_indexes_terms(bmk, _fb)
       seed: lambda { |fb|
         (1..total).each do |i|
           f = fb.insert.tap { |f| f.id = i }
-          f.status = include.call(i) ? 1 : rand(2..cardinality)
+          f.status = include.call(i) ? rand(2..cardinality) : 1
         end
       }
     },
@@ -83,14 +83,30 @@ def bench_indexes_terms(bmk, _fb)
       }
     },
     {
-      term: 'and',
-      query: '(and (eq status 1) (gt tag 1))',
+      term: 'and eq',
+      query: '(and (eq status 1) (eq tag 1))',
       seed: lambda { |fb|
         (1..total).each do |i|
           f = fb.insert.tap { |f| f.id = i }
           matched = include.call(i)
           f.status = matched ? 1 : rand(2..cardinality)
           f.tag = matched ? 1 : rand(2..cardinality)
+        end
+      }
+    },
+    {
+      term: 'and complex',
+      query: '(and (eq status 1) (absent tag))',
+      seed: lambda { |fb|
+        (1..total).each do |i|
+          f = fb.insert.tap { |f| f.id = i }
+          matched = include.call(i)
+          if matched
+            f.status = 1
+          else
+            f.status = 0
+            f.tag = 1
+          end
         end
       }
     },
