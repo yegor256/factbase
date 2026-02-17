@@ -8,7 +8,7 @@ def bench_indexes_terms(bmk, _fb)
   total = 15_000
   pretty_total = total >= 1000 ? "#{total / 1000}k" : total.to_s
   # Iterations (repeats) for each benchmark run.
-  iterations = 5
+  repeat = 10
   # Selectivity controls how many facts match the predicate.
   # For example, 2 means 2% of facts will satisfy the condition.
   selectivity = 20
@@ -144,21 +144,26 @@ def bench_indexes_terms(bmk, _fb)
     c[:seed].call(fb_plain)
     report = "query #{pretty_total} facts  sel: #{selectivity}%  card: #{cardinality} "
     bmk.report("#{report} #{c[:term]} plain") do
-      iterations.times { fb_plain.query(c[:query]).each.to_a }
+      repeat.times { fb_plain.query(c[:query]).each.to_a }
     end
-    # force empty index
-    idx = {}
-    # force empty fresh
-    fresh = Set.new
-    fb_indexed = Factbase::IndexedFactbase.new(Factbase.new, idx, fresh)
-    c[:seed].call(fb_indexed)
+    fb_cold = Factbase.new
+    c[:seed].call(fb_cold)
     bmk.report("#{report} #{c[:term]} indexed(cold)") do
-      fb_indexed.query(c[:query].to_s).each.to_a
+      repeat.times do
+        idx = {}
+        fresh = Set.new
+        fb_indexed_cold = Factbase::IndexedFactbase.new(fb_cold, idx, fresh)
+        fb_indexed_cold.query(c[:query].to_s).each.to_a
+      end
     end
+    idx = {}
+    fresh = Set.new
+    fb_indexed_warm = Factbase::IndexedFactbase.new(Factbase.new, idx, fresh)
+    c[:seed].call(fb_indexed_warm)
     # force warm
-    fb_indexed.query(c[:query].to_s).each.to_a
+    fb_indexed_warm.query(c[:query].to_s).each.to_a
     bmk.report("#{report} #{c[:term]} indexed(warm)") do
-      iterations.times { fb_indexed.query(c[:query].to_s).each.to_a }
+      repeat.times { fb_indexed_warm.query(c[:query].to_s).each.to_a }
     end
   end
 end
