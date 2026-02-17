@@ -7,6 +7,7 @@ require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/taped'
+require_relative '../../../lib/factbase/lazy_taped'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/indexed/indexed_lt'
 
@@ -59,7 +60,21 @@ class TestIndexedLt < Factbase::Test
     term.redress!(Factbase::IndexedTerm, idx:)
     maps = Factbase::Taped.new([{ 'age' => [25] }])
     n = term.predict(maps, nil, {})
-    assert_nil(n)
+    assert_kind_of(Factbase::Taped, n)
+  end
+
+  def test_predict_decorator_persistence
+    [
+      { input: [{ 'foo' => [40] }], expected: Array },
+      { input: Factbase::Taped.new([{ 'foo' => [20] }]), expected: Factbase::Taped },
+      { input: Factbase::LazyTaped.new([{ 'foo' => [20] }]), expected: Factbase::Taped }
+    ].each do |c|
+      term = Factbase::Term.new(:lt, [:foo, 30])
+      idx = {}
+      term.redress!(Factbase::IndexedTerm, idx:)
+      n = term.predict(c[:input], nil, {})
+      assert_kind_of(c[:expected], n, "Expect #{c[:expected]}, but got #{n.class} for input #{c[:input].class}")
+    end
   end
 
   def test_predicts_on_lt_above_threshold
