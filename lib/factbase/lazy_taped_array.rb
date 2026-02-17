@@ -7,10 +7,6 @@ require_relative '../factbase'
 
 class Factbase::LazyTaped
   # Decorator of Array that triggers copy-on-write.
-  # @todo #424:30min Add dedicated unit tests for LazyTapedArray class.
-  #  Currently this class is tested indirectly through LazyTaped tests.
-  #  We should add explicit tests for all public methods including each, [],
-  #  to_a, any?, <<, and uniq! to ensure proper copy-on-write behavior.
   class LazyTapedArray
     # Creates a new lazy array wrapper.
     # @param origin [Array] The original array to wrap
