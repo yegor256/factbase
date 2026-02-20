@@ -27,7 +27,7 @@ class Factbase::Traced < Factbase::TermBase
     t = @operands[0]
     raise "A term is expected, but '#{t}' provided" unless t.is_a?(Factbase::Term)
     r = t.evaluate(fact, maps, fb)
-    puts "#{self} -> #{r}"
+    puts "#{self} -> #{r}" # rubocop:disable Lint/Debugger
     r
   end
 end
