@@ -346,41 +346,53 @@ class TestQuery < Factbase::Test
     assert_includes(f.all_properties, 'foo')
   end
 
-  # @todo #330:90min Fix the flaky test 'test_txn_performance_degradation'.
-  # The 'test_txn_performance_degradation' sometimes fails, sometimes passes.
-  # The reason is not clear yet.
-  # I got the following error message:
-  # ```
-  #  In indexed+cached+rules+plain, the trend is up: 2.483, 2.567, 2.872,
-  #  2.785, 2.798, 2.895, 3.114, 3.152, 3.087, 3.094.
-  #  Expected 5 to be < 5.
-  #  test/factbase/test_query.rb:366:in 'block in TestQuery#test_txn_performance_degradation'
-  #  test/factbase/test_query.rb:496:in 'Hash#each'
-  #  test/factbase/test_query.rb:496:in 'TestQuery#with_factbases'
-  #  test/factbase/test_query.rb:352:in 'TestQuery#test_txn_performance_degradation'
-  # ```
-  # It needs investigation.
+  # This performance test monitors transaction stability across factbase implementations.
+  # We use a dual-layer statistical filter to catch three specific failure cases:
+  #
+  # 1) "Slow Death" (O(N) vs O(1)): Constant performance degradation.
+  #    Example: 10ms, 12ms, 15ms, 18ms, 22ms, 26ms...
+  #
+  # 2) "Explosive Growth" (Memory Leaks/Heavy Cycles): Exponential slowdown.
+  #    Example: 10ms, 11ms, 15ms, 30ms, 60ms, 120ms...
+  #
+  # 3) "Constant Instability" (Jitter/Lock Contention): Unstable latencies.
+  #    Example: 10ms, 25ms, 10ms, 30ms, 11ms, 35ms...
   def test_txn_performance_degradation
-    skip('Flaky test, to be fixed later, see the puzzle above')
     size = 1000
-    maps = (0..1000).map { |_i| { 'foo' => [rand(size)], 'bar' => [rand(size)], 'xyz' => [rand(size)] } }
+    srand(42)
+    maps = (0..size).map { |_i| { 'foo' => [rand(size)], 'bar' => [rand(size)], 'xyz' => [rand(size)] } }
     with_factbases(maps) do |badge, fb|
+      GC.enable
+      GC.start
       times = []
-      10.times do |x|
-        fb.txn do |fbt|
-          start = Time.now
-          fbt.query("(and (eq foo #{x}) (eq bar #{x}) (eq xyz #{x}))").each.to_a
-          secs = Time.now - start
-          times << (secs * 1000)
-        end
+      vals = (0..5).to_a
+      # warm
+      vals.each do |x|
+        fb.query("(and (eq foo #{x}) (eq bar #{x}) (eq xyz #{x}))").each.to_a
       end
-      trend = 0
-      times.each_cons(2) do |a, b|
-        trend += b > a ? 1 : -1
+      20.times do |_x|
+        GC.disable
+        x = vals.sample
+        start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        fb.txn { |fbt| fbt.query("(and (eq foo #{x}) (eq bar #{x}) (eq xyz #{x}))").each.to_a }
+        times << (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start)
+        GC.enable
       end
-      assert_operator(
-        trend, :<, times.count / 2, "In #{badge}, the trend is up: #{times.map { |ms| format('%.3f', ms) }.join(', ')}"
-      )
+      fmt_times = times.map { |s| format('%.3fms', s * 1000) }.join(', ')
+      # 1. Neighbor-to-neighbor spikes check (max 20% jump allowed)
+      # This catches sudden, but consistent performance glitches.
+      threshold = 1.20
+      spikes = times.each_cons(2).count { |a, b| b > a * threshold }
+      assert_operator(spikes, :<=, times.count / 2, "In #{badge}, too many spikes: #{fmt_times}")
+      # 2. Global drift check (comparing medians of two halves)
+      # We use median to ignore accidental one-off outliers (like a single 30ms spike).
+      # Median picks the "typical" performance from each half of the test.
+      mid = times.size / 2
+      f_median = times.first(mid).sort[mid / 2]
+      s_median = times.last(mid).sort[mid / 2]
+      drift = (s_median / f_median).round(2)
+      drift_limit = 1.5 # Allow up to 50% slow-down over the entire run
+      assert_operator(drift, :<=, drift_limit, "In #{badge}, median drift #{drift}x: #{fmt_times}")
     end
   end
 
