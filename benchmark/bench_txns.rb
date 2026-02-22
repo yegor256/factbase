@@ -31,7 +31,7 @@ def bench_txns(bmk, _fb)
       repeats.times { fb_ins_plain.insert.bar = 999 }
     end
     fb_ins_txn = feed.call(Factbase.new, size)
-    bmk.report("#{size} facts: insert in txn (copy triggered)") do
+    bmk.report("#{size} facts: insert in txn (no copy triggered)") do
       repeats.times do
         fb_ins_txn.txn do |fbt|
           fbt.insert.bar = 999

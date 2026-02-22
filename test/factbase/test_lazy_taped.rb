@@ -12,6 +12,17 @@ require_relative '../../lib/factbase/lazy_taped'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLazyTaped < Factbase::Test
+  def test_copied_state
+    t = Factbase::LazyTaped.new([{ 'foo' => [1] }])
+    refute_predicate(t, :copied?)
+    t.each { |m| m['foo'] }
+    refute_predicate(t, :copied?)
+    t << { 'bar' => [2] }
+    refute_predicate(t, :copied?)
+    t.delete_if { |m| m['foo'] == [1] }
+    assert_predicate(t, :copied?)
+  end
+
   def test_tracks_insertion
     t = Factbase::LazyTaped.new([])
     t << {}
@@ -23,14 +34,14 @@ class TestLazyTaped < Factbase::Test
     t = Factbase::LazyTaped.new(original)
     assert_equal(1, t.size)
     t.each { |m| m['foo'] }
-    assert_empty(t.pairs)
+    refute_predicate(t, :copied?)
   end
 
-  def test_copies_on_insert
+  def test_does_not_copy_on_insert
     original = [{ foo: [1] }]
     t = Factbase::LazyTaped.new(original)
     t << { bar: [2] }
-    refute_empty(t.pairs)
+    refute_predicate(t, :copied?)
     assert_equal(2, t.size)
   end
 
@@ -38,7 +49,7 @@ class TestLazyTaped < Factbase::Test
     original = [{ 'foo' => [1] }]
     t = Factbase::LazyTaped.new(original)
     t.each { |m| m['bar'] = 42 }
-    refute_empty(t.pairs)
+    assert_predicate(t, :copied?)
     assert_equal(1, t.added.size)
     assert_nil(original[0]['bar'], 'Original should not be modified')
   end
@@ -47,7 +58,7 @@ class TestLazyTaped < Factbase::Test
     original = [{ 'foo' => [1] }]
     t = Factbase::LazyTaped.new(original)
     t.each { |m| m['foo'] << 2 }
-    refute_empty(t.pairs)
+    assert_predicate(t, :copied?)
     assert_equal(1, t.added.size)
     assert_equal([1], original[0]['foo'], 'Original should not be modified')
     modified = t.find_by_object_id(t.added.first)
@@ -58,7 +69,7 @@ class TestLazyTaped < Factbase::Test
     original = [{ foo: [1] }, { bar: [2] }]
     t = Factbase::LazyTaped.new(original)
     t.delete_if { |m| m[:foo] }
-    refute_empty(t.pairs)
+    assert_predicate(t, :copied?)
     assert_equal(1, t.deleted.size)
     assert_equal(1, t.size)
   end
@@ -131,7 +142,7 @@ class TestLazyTaped < Factbase::Test
     original = [{ 'foo' => [1, 1, 2] }]
     t = Factbase::LazyTaped.new(original)
     t.each { |m| m['foo'].uniq! }
-    refute_empty(t.pairs)
+    assert_predicate(t, :copied?)
     assert_equal(1, t.added.size)
     assert_equal([1, 1, 2], original[0]['foo'], 'Original should not be modified')
   end

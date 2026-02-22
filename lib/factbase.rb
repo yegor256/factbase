@@ -181,7 +181,6 @@ class Factbase
     end
     seen = {}.compare_by_identity
     garbage = {}.compare_by_identity
-    pairs = taped.pairs
     taped.deleted.each do |oid|
       original = @maps.find { |m| m.object_id == oid }
       next if original.nil?
@@ -200,7 +199,8 @@ class Factbase
       b = taped.find_by_object_id(oid)
       next if b.nil?
       next if seen.key?(b)
-      garbage[pairs[b]] = true
+      original = taped.source_of(b)
+      garbage[original] = true if original
       @maps << b
       churn.append(0, 0, 1)
     end
