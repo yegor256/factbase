@@ -18,7 +18,6 @@ class TestUnique < Factbase::Test
     assert(t.evaluate(fact('foo' => 41), [], Factbase.new))
     refute(t.evaluate(fact('foo' => 41), [], Factbase.new))
     assert(t.evaluate(fact('foo' => 1), [], Factbase.new))
-    p t
   end
 
   def test_unique_with_multiple_arguments

@@ -88,7 +88,7 @@ desc 'Profile a benchmark (e.g., flamegraph[bench_slow_query])'
 task :flamegraph, [:name] do |_t, args|
   require 'stackprof'
   bname = args[:name] || 'all'
-  puts "Starting profiling for '#{bname}'..."
+  puts "Starting profiling for '#{bname}'..." # rubocop:disable Lint/Debugger
   StackProf.run(mode: :cpu, out: 'stackprof-cpu-myapp.dump', raw: true) do
     Rake::Task['benchmark'].invoke(bname)
   end
