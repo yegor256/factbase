@@ -68,6 +68,14 @@ class Factbase::Taped
     @origin.to_a
   end
 
+  def map(&)
+    each.map(&)
+  end
+
+  def [](idx)
+    @origin[idx]
+  end
+
   def repack(other)
     Factbase::Taped.new(other, inserted: @inserted, deleted: @deleted, added: @added)
   end

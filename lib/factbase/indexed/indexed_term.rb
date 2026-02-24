@@ -22,6 +22,7 @@ require_relative '../indexed/indexed_unique'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 module Factbase::IndexedTerm
+  MASK_SIZE = 60
   # Reduces the provided list of facts (maps) to a smaller array, if it's possible.
   #
   # NIL must be returned if indexing is prohibited in this case.
@@ -51,7 +52,7 @@ module Factbase::IndexedTerm
       exists: Factbase::IndexedExists.new(self, @idx),
       absent: Factbase::IndexedAbsent.new(self, @idx),
       unique: Factbase::IndexedUnique.new(self, @idx),
-      and: Factbase::IndexedAnd.new(self, @idx),
+      and: Factbase::IndexedAnd.new(self, @idx, MASK_SIZE),
       not: Factbase::IndexedNot.new(self, @idx),
       or: Factbase::IndexedOr.new(self, @idx)
     }

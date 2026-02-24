@@ -86,6 +86,16 @@ class Factbase::LazyTaped
     end
   end
 
+  def map(&)
+    return to_enum(__method__) unless block_given?
+    each.map(&)
+  end
+
+  def [](idx)
+    return @staged[idx] if copied?
+    idx < @origin.size ? @origin[idx] : @staged[idx - @origin.size]
+  end
+
   def delete_if
     ensure_copied!
     @staged.delete_if do |m|
@@ -119,11 +129,9 @@ class Factbase::LazyTaped
 
   def ensure_copied!
     return if copied?
-    @origin.each do |o|
-      c = o.transform_values(&:dup)
-      _track(c, o)
-      @staged << c
-    end
+    @staged = @origin.map do |o|
+      o.transform_values(&:dup).tap { |c| _track(c, o) }
+    end.concat(@staged)
     @copied = true
   end
 
