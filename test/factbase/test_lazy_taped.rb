@@ -254,4 +254,38 @@ class TestLazyTaped < Factbase::Test
     assert_equal(42, fact.foo)
     assert_raises(StandardError) { fact.bar }
   end
+
+  def test_unsafe_each_in_txn
+    fb = Factbase.new
+    (1..5).each { |i| fb.insert.id = i }
+    seen = []
+    fb.txn do |fbt|
+      (6..9).each { |i| fbt.insert.id = i }
+      fbt.query('(always)').each do |f|
+        f.tag = 'foo' if f.id == 4
+        fbt.insert.id = 10 if f.id == 4
+        seen << f.id
+      end
+      assert_equal((1..10).to_a, seen)
+      assert_equal(10, fbt.size)
+    end
+  end
+
+  def test_safe_each_in_txn
+    fb = Factbase.new
+    (1..10).each { |i| fb.insert.id = i }
+    seen = []
+    fb.txn do |fbt|
+      fbt.query('(always)').to_a.each do |f|
+        seen << f.id
+        f.tag = 'foo' if f.id == 4
+        fbt.query("(eq id #{f.id - 1})").delete!
+        fbt.insert.id = 99
+        fbt.query("(eq id #{f.id})").delete!
+      end
+      assert_equal((1..10).to_a, seen)
+      assert_equal(10, fb.size)
+      assert_equal(10, fbt.query('(eq id 99)').each.to_a.size)
+    end
+  end
 end
