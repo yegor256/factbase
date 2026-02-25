@@ -95,6 +95,30 @@ fb.query('(eq foo 43)').each do |f|
 end
 ```
 
+Deleting while iterating is unsafe and may cause elements to be skipped:
+
+```ruby
+fb = Factbase.new
+fb.insert.id = 1
+fb.insert.id = 2
+fb.query('(always)').each do |f|
+  fb.query("(eq id #{f.id})").delete!
+end
+assert(1 == fb.size)
+```
+
+To safely delete, use a snapshot:
+
+```ruby
+fb = Factbase.new
+fb.insert.id = 1
+fb.insert.id = 2
+fb.query('(always)').to_a.each do |f|
+  fb.query("(eq id #{f.id})").delete!
+end
+assert(0 == fb.size)
+```
+
 ## Terms
 
 There are some boolean terms available in a query

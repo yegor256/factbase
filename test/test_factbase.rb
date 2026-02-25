@@ -500,21 +500,4 @@ class TestFactbase < Factbase::Test
       assert_equal("Can't find 'bar' attribute out of [foo]", ex.message)
     end
   end
-
-  def test_each_snapshot_safety
-    fb = Factbase.new
-    (1..10).each { |i| fb.insert.id = i }
-    seen = []
-    fb.txn do |fbt|
-      fbt.query('(always)').each do |f|
-        seen << f.id
-        fbt.query("(eq id #{f.id - 1})").delete!
-        fbt.insert.id = 99
-        fbt.query("(eq id #{f.id})").delete!
-      end
-      assert_equal((1..10).to_a, seen)
-      assert_equal(10, fb.size)
-      assert_equal(10, fbt.query('(eq id 99)').each.to_a.size)
-    end
-  end
 end
