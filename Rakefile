@@ -20,6 +20,12 @@ end
 
 task default: %i[clean test picks rubocop yard]
 
+def tail(args = ARGV)
+  i = args.index('--')
+  return '' if i.nil? || args[i + 1].nil?
+  args[i..].join(' ')
+end
+
 require 'rake/testtask'
 desc 'Run all unit tests'
 Rake::TestTask.new(:test) do |test|
@@ -28,6 +34,7 @@ Rake::TestTask.new(:test) do |test|
   test.pattern = 'test/**/test_*.rb'
   test.warning = true
   test.verbose = false
+  test.options = tail
 end
 
 desc 'Run them via Ruby, one by one'
