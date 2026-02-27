@@ -372,7 +372,6 @@ class TestFactbase < Factbase::Test
   # ```
   # See details here https://github.com/yegor256/factbase/actions/runs/10492255419/job/29068637032
   def test_concurrent_transactions_inserts
-    skip('Does not work')
     t = Concurrent.processor_count * 19
     fb = Factbase.new
     Threads.new(t).assert do |i|
@@ -380,6 +379,29 @@ class TestFactbase < Factbase::Test
         fact = fbt.insert
         fact.thread_id = i
       end
+    end
+    if t != fb.size || t != fb.query('(exists thread_id)').each.to_a.size
+      puts "\n" + "!" * 30 + " HEISENBUG DIAGNOSTICS " + "!" * 30 # rubocop:disable all
+      puts "Timestamp: #{Time.now.utc}" # rubocop:disable all
+      puts "OS: #{RbConfig::CONFIG['host_os']} | Ruby: #{RUBY_VERSION} | Engine: #{RUBY_ENGINE}" # rubocop:disable all
+      puts "CPU Cores (Concurrent): #{Concurrent.processor_count}" # rubocop:disable all
+      puts "Active Threads: #{Thread.list.size}" # rubocop:disable all
+      # Capture OS-level context switches if on Linux
+      if File.exist?('/proc/self/status')
+        puts "Process Status (Context Switches):" # rubocop:disable all
+        puts `grep -i "ctxt_switches" /proc/self/status` # rubocop:disable all
+      end
+      # Analyze exactly which thread data is missing
+      actual_ids = fb.query('(exists thread_id)').each.to_a.map { |f| f.thread_id }.compact.sort  # rubocop:disable all
+      expected_ids = (0...t).to_a
+      missing = expected_ids - actual_ids
+      duplicates = actual_ids.select { |id| actual_ids.count(id) > 1 }.uniq
+      puts "Stats: Expected=#{t}, ActualSize=#{fb.size}, QuerySize=#{actual_ids.size}" # rubocop:disable all
+      puts "Missing IDs: #{missing.inspect}" # rubocop:disable all
+      puts "Duplicate IDs: #{duplicates.inspect}" unless duplicates.empty? # rubocop:disable all
+      # Check if any threads are still running in the background
+      puts "Thread List Details: #{Thread.list.map { |th| th.status }.inspect}" # rubocop:disable all
+      puts "!" * 77 + "\n" # rubocop:disable all
     end
     assert_equal(t, fb.size)
     assert_equal(t, fb.query('(exists thread_id)').each.to_a.size)
