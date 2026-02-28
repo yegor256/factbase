@@ -51,8 +51,9 @@ class Factbase::IndexedAnd
         if r.nil?
           r = n
         elsif n.size < r.size * 8 # to skip some obvious matchings
-          ids = n.to_set(&:object_id)
-          r = r.select { |f| ids.include?(f.object_id) }
+          small, large = n.size < r.size ? [n.to_a, r.to_a] : [r.to_a, n.to_a]
+          ids = Set.new(small.map(&:object_id))
+          r = large.select { |f| ids.include?(f.object_id) }
         end
         break if r.size < maps.size / 32 # it's already small enough
         break if r.size < 128 # it's obviously already small enough
