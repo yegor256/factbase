@@ -251,89 +251,89 @@ This is the result of the benchmark:
 ```text
                                                                        
 query all facts from an empty factbase                             0.00
-insert 20000 facts                                                 0.66
+insert 20000 facts                                                 0.62
 export 20000 facts                                                 0.02
-import 410996 bytes (20000 facts)                                  0.02
+import 411101 bytes (20000 facts)                                  0.01
 insert 10 facts                                                    0.00
-query 10 times w/txn                                               2.13
+query 10 times w/txn                                               2.01
 query 10 times w/o txn                                             0.12
-modify 10 attrs w/txn                                              1.62
-delete 10 facts w/txn                                             10.22
+modify 10 attrs w/txn                                              1.55
+delete 10 facts w/txn                                             10.06
 build index on 5000 facts                                          0.03
 export 5000 facts with index                                       0.04
-import 5000 facts with persisted index                             0.03
-query 5000 facts using persisted index                             0.08
-export 5000 facts without index                                    0.02
+import 5000 facts with persisted index                             0.05
+query 5000 facts using persisted index                             0.07
+export 5000 facts without index                                    0.00
 import 5000 facts without index                                    0.01
-query 5000 facts building index on-the-fly                         0.07
+query 5000 facts building index on-the-fly                         0.09
 query 15k facts  sel: 20%  card: 10  absent plain                  0.60
 query 15k facts  sel: 20%  card: 10  absent indexed(cold)          0.17
-query 15k facts  sel: 20%  card: 10  absent indexed(warm)          0.16
+query 15k facts  sel: 20%  card: 10  absent indexed(warm)          0.15
 query 15k facts  sel: 20%  card: 10  exists plain                  0.57
 query 15k facts  sel: 20%  card: 10  exists indexed(cold)          0.17
 query 15k facts  sel: 20%  card: 10  exists indexed(warm)          0.13
-query 15k facts  sel: 20%  card: 10  eq plain                      0.86
-query 15k facts  sel: 20%  card: 10  eq indexed(cold)              0.26
-query 15k facts  sel: 20%  card: 10  eq indexed(warm)              0.19
-query 15k facts  sel: 20%  card: 10  not plain                     1.16
-query 15k facts  sel: 20%  card: 10  not indexed(cold)             0.53
-query 15k facts  sel: 20%  card: 10  not indexed(warm)             0.51
-query 15k facts  sel: 20%  card: 10  gt plain                      0.88
-query 15k facts  sel: 20%  card: 10  gt indexed(cold)              0.29
-query 15k facts  sel: 20%  card: 10  gt indexed(warm)              0.24
+query 15k facts  sel: 20%  card: 10  eq plain                      0.87
+query 15k facts  sel: 20%  card: 10  eq indexed(cold)              0.25
+query 15k facts  sel: 20%  card: 10  eq indexed(warm)              0.22
+query 15k facts  sel: 20%  card: 10  not plain                     1.11
+query 15k facts  sel: 20%  card: 10  not indexed(cold)             0.51
+query 15k facts  sel: 20%  card: 10  not indexed(warm)             0.45
+query 15k facts  sel: 20%  card: 10  gt plain                      0.87
+query 15k facts  sel: 20%  card: 10  gt indexed(cold)              0.28
+query 15k facts  sel: 20%  card: 10  gt indexed(warm)              0.20
 query 15k facts  sel: 20%  card: 10  lt plain                      0.87
-query 15k facts  sel: 20%  card: 10  lt indexed(cold)              0.29
+query 15k facts  sel: 20%  card: 10  lt indexed(cold)              0.28
 query 15k facts  sel: 20%  card: 10  lt indexed(warm)              0.20
-query 15k facts  sel: 20%  card: 10  and eq plain                  1.43
-query 15k facts  sel: 20%  card: 10  and eq indexed(cold)          0.91
-query 15k facts  sel: 20%  card: 10  and eq indexed(warm)          0.50
-query 15k facts  sel: 20%  card: 10  and complex plain             1.38
-query 15k facts  sel: 20%  card: 10  and complex indexed(cold)     0.51
-query 15k facts  sel: 20%  card: 10  and complex indexed(warm)     0.45
+query 15k facts  sel: 20%  card: 10  and eq plain                  1.39
+query 15k facts  sel: 20%  card: 10  and eq indexed(cold)          0.85
+query 15k facts  sel: 20%  card: 10  and eq indexed(warm)          0.49
+query 15k facts  sel: 20%  card: 10  and complex plain             1.35
+query 15k facts  sel: 20%  card: 10  and complex indexed(cold)     0.49
+query 15k facts  sel: 20%  card: 10  and complex indexed(warm)     0.44
 query 15k facts  sel: 20%  card: 10  one plain                     0.75
-query 15k facts  sel: 20%  card: 10  one indexed(cold)             0.21
-query 15k facts  sel: 20%  card: 10  one indexed(warm)             0.16
-query 15k facts  sel: 20%  card: 10  or plain                      2.02
-query 15k facts  sel: 20%  card: 10  or indexed(cold)              0.46
-query 15k facts  sel: 20%  card: 10  or indexed(warm)              0.32
-query 15k facts  sel: 20%  card: 10  unique plain                  1.87
-query 15k facts  sel: 20%  card: 10  unique indexed(cold)          0.67
-query 15k facts  sel: 20%  card: 10  unique indexed(warm)          0.42
+query 15k facts  sel: 20%  card: 10  one indexed(cold)             0.20
+query 15k facts  sel: 20%  card: 10  one indexed(warm)             0.15
+query 15k facts  sel: 20%  card: 10  or plain                      2.04
+query 15k facts  sel: 20%  card: 10  or indexed(cold)              0.42
+query 15k facts  sel: 20%  card: 10  or indexed(warm)              0.36
+query 15k facts  sel: 20%  card: 10  unique plain                  1.90
+query 15k facts  sel: 20%  card: 10  unique indexed(cold)          0.66
+query 15k facts  sel: 20%  card: 10  unique indexed(warm)          0.37
 (and (eq what 'issue-was-closed') (exists... -> 200                1.08
-(and (eq what 'issue-was-closed') (exists... -> 200/txn            1.24
-(and (eq what 'issue-was-closed') (exists... -> zero               1.08
-(and (eq what 'issue-was-closed') (exists... -> zero/txn           1.28
+(and (eq what 'issue-was-closed') (exists... -> 200/txn            1.25
+(and (eq what 'issue-was-closed') (exists... -> zero               1.10
+(and (eq what 'issue-was-closed') (exists... -> zero/txn           1.26
 transaction rollback on factbase with 100000 facts                 0.01
-(gt time '2024-03-23T03:21:43Z')                                   0.31
-(gt cost 50)                                                       0.14
-(eq title 'Object Thinking 5000')                                  0.02
+(gt time '2024-03-23T03:21:43Z')                                   0.22
+(gt cost 50)                                                       0.10
+(eq title 'Object Thinking 5000')                                  0.06
 (and (eq foo 42.998) (or (gt bar 200) (absent z...                 0.03
-(and (exists foo) (not (exists blue)))                             1.23
-(eq id (agg (always) (max id)))                                    2.80
-(join "c<=cost,b<=bar" (eq id (agg (always) (ma...                 4.44
-(and (eq what "foo") (join "w<=what" (and (eq i...                 7.39
-delete!                                                            0.44
-(and (eq issue *) (eq repository *) (eq what '*') (eq where '*'))  0.41
+(and (exists foo) (not (exists blue)))                             1.16
+(eq id (agg (always) (max id)))                                    2.76
+(join "c<=cost,b<=bar" (eq id (agg (always) (ma...                 4.70
+(and (eq what "foo") (join "w<=what" (and (eq i...                 7.13
+delete!                                                            0.45
+(and (eq issue *) (eq repository *) (eq what '*') (eq where '*'))  0.39
 Taped.append() x50000                                              0.02
 Taped.each() x125                                                  1.10
-Taped.delete_if() x375                                             0.86
-50000 facts: plain read (no txn)                                   4.10
-50000 facts: read-only txn (no copy)                               5.33
+Taped.delete_if() x375                                             0.85
+50000 facts: plain read (no txn)                                   4.11
+50000 facts: read-only txn (no copy)                               5.29
 50000 facts: plain insert (no txn)                                 0.00
 50000 facts: insert in txn (no copy triggered)                     0.00
 50000 facts: plain modify (no txn)                                28.59
-50000 facts: modify in txn (copy triggered)                       37.78
-100000 facts: plain read (no txn)                                  8.33
-100000 facts: read-only txn (no copy)                             12.80
+50000 facts: modify in txn (copy triggered)                       38.48
+100000 facts: plain read (no txn)                                  8.44
+100000 facts: read-only txn (no copy)                             10.67
 100000 facts: plain insert (no txn)                                0.00
 100000 facts: insert in txn (no copy triggered)                    0.00
-100000 facts: plain modify (no txn)                               57.26
-100000 facts: modify in txn (copy triggered)                      75.84
+100000 facts: plain modify (no txn)                               57.23
+100000 facts: modify in txn (copy triggered)                      75.93
 ```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2026-02-26 at 06:08,
+on 2026-03-01 at 11:19,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/22430010182
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/22542225881
