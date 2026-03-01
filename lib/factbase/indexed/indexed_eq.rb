@@ -10,7 +10,7 @@ class Factbase::IndexedEq
     @idx = idx
   end
 
-  def predict(maps, _fb, params)
+  def predict(maps, _fb, params, _context = [], _tail = [])
     first_operand = @term.operands[0]
     second_operand = @term.operands[1]
     return unless first_operand.is_a?(Symbol) && _scalar?(second_operand)

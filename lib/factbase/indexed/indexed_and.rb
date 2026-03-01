@@ -10,12 +10,12 @@ class Factbase::IndexedAnd
     @idx = idx
   end
 
-  def predict(maps, fb, params)
+  def predict(maps, fb, params, _context = [], _tail = [])
     return nil if @idx.nil?
     key = [maps.object_id, @term.operands.first, @term.op]
     r = nil
     if @term.operands.all? { |o| o.op == :eq } && @term.operands.size > 1 \
-      && @term.operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
+       && @term.operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
       props = @term.operands.map { |o| o.operands.first }.sort
       key = [maps.object_id, props, :multi_and_eq]
       entry = @idx[key]
@@ -45,8 +45,9 @@ class Factbase::IndexedAnd
       j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id)
       r = maps.respond_to?(:repack) ? maps.repack(j) : j
     else
+      context = []
       @term.operands.each do |o|
-        n = o.predict(maps, fb, params)
+        n = o.predict(maps, fb, params, context, r || [])
         break if n.nil?
         if r.nil?
           r = n
@@ -57,6 +58,8 @@ class Factbase::IndexedAnd
         end
         break if r.size < maps.size / 32 # it's already small enough
         break if r.size < 128 # it's obviously already small enough
+        resolved = o.operands.map { |op| params.respond_to?(:resolve) ? params.resolve(op) : [op] }
+        context << [o.op, resolved.flatten]
       end
     end
     r

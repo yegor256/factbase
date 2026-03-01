@@ -10,7 +10,7 @@ class Factbase::IndexedGt
     @idx = idx
   end
 
-  def predict(maps, _fb, params)
+  def predict(maps, _fb, params, _context = [], _tail = [])
     op1, op2 = @term.operands
     return unless op1.is_a?(Symbol) && _scalar?(op2)
     prop = op1.to_s
