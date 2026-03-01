@@ -11,7 +11,8 @@ require_relative '../lib/factbase'
 # It ensures that complex queries run appropriate time
 # To run this benchmark, use:
 # bundle exec rake benchmark\[bench_slow_query\]
-def bench_slow_query(bmk, fb)
+def bench_slow_query(bmk, fb, cycles)
+  fb = Factbase::SyncFactbase.new(fb)
   repos = 1_000
   platfrorms = %w[github gitlab bitbucket]
   actions = %w[issue-was-opened issue-was-closed pr-was-opened pr-was-merged]
@@ -32,13 +33,15 @@ def bench_slow_query(bmk, fb)
     create.call(i + 1)
   end
   bmk.report("(and (eq issue *) (eq repository *) (eq what '*') (eq where '*'))") do
-    Threads.new(Concurrent.processor_count * 2, task_timeout: 20, shutdown_timeout: 60).assert do
-      # create.call(i + 1) slows down the benchmark significantly
-      # with: 16.679675 sec
-      # without: 0.212369 sec
-      create.call(rand(10_000))
-      size = fb.query(queries.sample).count
-      raise "Expected to find at least one fact, but got #{size}" if size.zero?
+    cycles.times do
+      Threads.new(Concurrent.processor_count * 2, task_timeout: 20, shutdown_timeout: 60).assert do
+        # create.call(i + 1) slows down the benchmark significantly
+        # with: 16.679675 sec
+        # without: 0.212369 sec
+        create.call(rand(10_000))
+        size = fb.query(queries.sample).count
+        raise "Expected to find at least one fact, but got #{size}" if size.zero?
+      end
     end
   end
 end

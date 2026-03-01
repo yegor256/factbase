@@ -6,7 +6,7 @@
 require_relative '../lib/factbase'
 require_relative '../lib/factbase/taped'
 
-def bench_taped(bmk, _fb)
+def bench_taped(bmk, _fb, _)
   maps = []
   taped = Factbase::Taped.new(maps)
 
