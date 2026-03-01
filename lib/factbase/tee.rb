@@ -31,6 +31,11 @@ class Factbase::Tee
       (@upper.is_a?(Hash) ? @upper.keys : @upper.all_properties)
   end
 
+  def resolve(val)
+    return [val] unless val.is_a?(Symbol)
+    self[val.to_s] || [val]
+  end
+
   others do |*args|
     if args[0].to_s == '[]' && args[1].start_with?('$')
       n = args[1].to_s

@@ -27,19 +27,20 @@ class Factbase::IndexedUnique
     @idx = idx
   end
 
-  def predict(maps, _fb, _params)
-    operands = @term.operands.map(&:to_s)
+  def predict(maps, _fb, params, context, tail)
+    operands = _resolve_operands(params)
     bucket_key = operands.join('|')
-    idx_key = [maps.object_id, @term.op.to_s, bucket_key]
+    idx_key = [maps.object_id, @term.op.to_s, bucket_key, context]
     entry = (@idx[idx_key] ||= { buckets: {}, count: 0 })
-    feed(maps.to_a, entry, operands, bucket_key)
+    source = context.empty? ? maps : tail
+    _feed(source.to_a, entry, operands, bucket_key)
     matches = entry[:buckets][bucket_key][:facts]
     maps.respond_to?(:repack) ? maps.repack(matches) : matches
   end
 
   private
 
-  def feed(facts, entry, operands, bucket_key)
+  def _feed(facts, entry, operands, bucket_key)
     entry[:buckets][bucket_key] ||= { facts: [], seen: Set.new }
     bucket = entry[:buckets][bucket_key]
     (facts[entry[:count]..] || []).each do |fact|
@@ -48,5 +49,11 @@ class Factbase::IndexedUnique
       bucket[:facts] << fact if bucket[:seen].add?(composite_val)
     end
     entry[:count] = facts.size
+  end
+
+  def _resolve_operands(params)
+    @term.operands.map do |op|
+      params.respond_to?(:resolve) ? params.resolve(op) : [op]
+    end.flatten.map(&:to_s)
   end
 end

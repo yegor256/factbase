@@ -10,7 +10,7 @@ class Factbase::IndexedOr
     @idx = idx
   end
 
-  def predict(maps, fb, params)
+  def predict(maps, fb, params, _context = [], _tail = [])
     return nil if @idx.nil?
     r = nil
     @term.operands.each do |o|

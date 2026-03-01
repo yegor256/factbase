@@ -10,7 +10,7 @@ class Factbase::IndexedNot
     @idx = idx
   end
 
-  def predict(maps, fb, params)
+  def predict(maps, fb, params, _context = [], _tail = [])
     sub = @term.operands.first
     key = [maps.object_id, sub, @term.op]
     @idx[key] ||= { facts: nil, count: 0, yes_set: nil }
