@@ -405,6 +405,7 @@ class TestIndexedFactbase < Factbase::Test
     end
     q = '(and (exists cost) (exists scope))'
     assert_equal(total, fb.query(q).each.to_a.size)
+    fb.txn { |fbt| assert_equal(total, fbt.query(q).each.to_a.size) }
   end
 
   def test_term_one_keeps_duplicates
