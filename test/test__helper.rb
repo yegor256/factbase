@@ -7,7 +7,7 @@ $stdout.sync = true
 
 require 'simplecov'
 require 'simplecov-cobertura'
-unless SimpleCov.running || ENV['PICKS']
+unless SimpleCov.running || ENV['PICKS'] || ARGV.include?('--no-cov')
   SimpleCov.command_name('test')
   SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
     [
@@ -18,6 +18,7 @@ unless SimpleCov.running || ENV['PICKS']
   SimpleCov.minimum_coverage 95
   SimpleCov.minimum_coverage_by_file 90
   SimpleCov.start do
+    add_filter 'Rakefile'
     add_filter 'test/'
     add_filter 'vendor/'
     add_filter 'target/'
