@@ -5,9 +5,11 @@
 
 require_relative '../lib/factbase'
 
-def bench_empty(bmk, fb)
-  bmk.report('query all facts from an empty factbase') do
-    size = fb.query('(always)').count
-    raise "Expected zero facts in an empty factbase, got #{size}" unless size.zero?
+def bench_empty(bmk, fb, cycles)
+  bmk.report('void scan') do
+    cycles.times do
+      size = fb.query('(always)').count
+      raise "Expected 0, got #{size}" unless size.zero?
+    end
   end
 end

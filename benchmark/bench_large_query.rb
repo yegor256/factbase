@@ -6,8 +6,9 @@
 require_relative '../lib/factbase'
 require_relative '../lib/factbase/logged'
 
-def bench_large_query(bmk, fb)
-  total = 200
+def bench_large_query(bmk, fb, cycles)
+  total = 3000
+  p_total = "#{total / 1000}k"
   repo = 'foo'
   total.times do |i|
     f = fb.insert
@@ -84,15 +85,14 @@ def bench_large_query(bmk, fb)
       (eq where $where)
       (eq issue $issue)
       (eq repository $repository))))".gsub(/\s+/, ' ')
-
-  cycles = 1
-  bmk.report("#{q[0..40]}... -> #{total}") do
+  label = "#{fb.size / 1000}k facts: large query:"
+  bmk.report("#{label} match #{p_total}") do
     cycles.times do
       t = fb.query(q).each.to_a.size
       raise "Found #{t} facts, expected to find #{total}" unless t == total
     end
   end
-  bmk.report("#{q[0..40]}... -> #{total}/txn") do
+  bmk.report("#{label} match #{p_total} in txn") do
     cycles.times do
       fb.txn do |fbt|
         t = fbt.query(q).each.to_a.size
@@ -111,13 +111,13 @@ def bench_large_query(bmk, fb)
     f.issue = i
     f.repository = repo
   end
-  bmk.report("#{q[0..40]}... -> zero") do
+  bmk.report("#{label} match zero") do
     cycles.times do
       t = fb.query(q).each.to_a.size
       raise "Found #{t} facts, expected to find nothing" unless t.zero?
     end
   end
-  bmk.report("#{q[0..40]}... -> zero/txn") do
+  bmk.report("#{label} match zero in txn") do
     cycles.times do
       fb.txn do |fbt|
         t = fbt.query(q).each.to_a.size

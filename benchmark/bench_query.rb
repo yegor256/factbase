@@ -7,7 +7,7 @@ require 'ellipsized'
 require 'timeout'
 require_relative '../lib/factbase'
 
-def bench_query(bmk, fb)
+def bench_query(bmk, fb, cycles)
   total = 20_000
   total.times do |i|
     f = fb.insert
@@ -23,8 +23,6 @@ def bench_query(bmk, fb)
     f.seenBy = "User#{i}" if i.even?
     f.zzz = "Extra#{i}" if (i % 10).zero?
   end
-
-  runs = 3
   [
     '(gt time \'2024-03-23T03:21:43Z\')',
     '(gt cost 50)',
@@ -43,14 +41,13 @@ def bench_query(bmk, fb)
       (assert "has it" (one id)))'
   ].each do |q|
     bmk.report(q.tr("\n", ' ').gsub(/\s+/, ' ').ellipsized(50, :right)) do
-      Timeout.timeout(runs * 3) do
-        runs.times do
-          fb.query(q).each.to_a
+      Timeout.timeout(cycles * 3) do
+        cycles.times do
+          fb.query(q).each.size
         end
       end
     end
   end
-
   bmk.report('delete!') do
     fb.query('(gt foo 50)').delete!
   end

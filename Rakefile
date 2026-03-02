@@ -61,27 +61,30 @@ RuboCop::RakeTask.new(:rubocop) do |task|
 end
 
 desc 'Benchmark them all'
-task :benchmark, [:name] do |_t, args|
-  bname = args[:name] || 'all'
+task :benchmark, [:name, :cycles] do |_t, args|
+  bname = args[:name] || 'essential'
+  cycles = (args[:cycles] || 5).to_i
   require_relative 'lib/factbase'
   require_relative 'lib/factbase/cached/cached_factbase'
   require_relative 'lib/factbase/indexed/indexed_factbase'
   require_relative 'lib/factbase/sync/sync_factbase'
   require 'benchmark'
   Benchmark.bm(60) do |b|
-    fb = Factbase.new
-    fb = Factbase::CachedFactbase.new(fb)
-    fb = Factbase::IndexedFactbase.new(fb)
-    fb = Factbase::SyncFactbase.new(fb)
-    if bname == 'all'
-      Dir['benchmark/bench_*.rb'].each do |f|
-        require_relative f
-        Kernel.send(File.basename(f).gsub(/\.rb$/, '').to_sym, b, fb)
+    files =
+      case bname
+      when 'all'
+        Dir['benchmark/bench_*.rb']
+      when 'essential'
+        %w[empty serialization txns large_query].map { |f| "benchmark/bench_#{f}.rb" }
+      else
+        ["benchmark/#{bname}.rb"]
       end
-    else
-      f = "benchmark/#{bname}.rb"
+    files.each do |f|
       require_relative f
-      Kernel.send(File.basename(f).gsub(/\.rb$/, '').to_sym, b, fb)
+      fb = Factbase.new
+      fb = Factbase::IndexedFactbase.new(fb)
+      fb = Factbase::CachedFactbase.new(fb)
+      Kernel.send(File.basename(f).gsub(/\.rb$/, '').to_sym, b, fb, cycles)
     end
   end
 end
