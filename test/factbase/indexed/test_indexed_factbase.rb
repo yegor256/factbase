@@ -455,4 +455,16 @@ class TestIndexedFactbase < Factbase::Test
     end
     assert_equal(2, fb.query('(lt scope 20)').each.to_a.size)
   end
+
+  def test_unique_and_context
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    (1..200).each do |i|
+      f = fb.insert
+      f.id = i
+      f.foo = (i <= 50 ? 1 : 2)
+      f.bar = 3
+    end
+    found = fb.query('(and (eq foo 2) (unique bar))').each.to_a
+    assert_equal([51], found.map(&:id))
+  end
 end
