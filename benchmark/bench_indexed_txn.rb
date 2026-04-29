@@ -16,22 +16,38 @@ def bench_indexed_txn(bmk, _fb, cycles)
   [total].each do |n|
     p_total = "#{n / 1_000}k"
 
-    # Query after insert-only txn: index should stay warm
     fb_ins = Factbase::IndexedFactbase.new(Factbase.new)
-    n.times { |i| fb_ins.insert.tap { |f| f.id = i; f.type = 'issue'; f.status = i < 10 ? 'open' : 'closed' } }
+    n.times do |i|
+      f = fb_ins.insert
+      f.id = i
+      f.type = 'issue'
+      f.status = i < 10 ? 'open' : 'closed'
+    end
     bmk.report("#{p_total} facts: query after insert txn") do
       cycles.times do |i|
-        fb_ins.txn { |fbt| fbt.insert.tap { |f| f.id = n + i; f.type = 'comment' } }
+        fb_ins.txn do |fbt|
+          f = fbt.insert
+          f.id = n + i
+          f.type = 'comment'
+        end
         fb_ins.query("(and (eq type 'issue') (eq status 'open'))").each.size
       end
     end
 
-    # Query after delete txn: index must be cleared (correctness check)
     fb_del = Factbase::IndexedFactbase.new(Factbase.new)
-    n.times { |i| fb_del.insert.tap { |f| f.id = i; f.type = 'issue'; f.status = 'open' } }
+    n.times do |i|
+      f = fb_del.insert
+      f.id = i
+      f.type = 'issue'
+      f.status = 'open'
+    end
     bmk.report("#{p_total} facts: query after delete txn") do
       cycles.times do
-        fb_del.txn { |fbt| fbt.insert.tap { |f| f.type = 'tmp'; f.status = 'tmp' } }
+        fb_del.txn do |fbt|
+          f = fbt.insert
+          f.type = 'tmp'
+          f.status = 'tmp'
+        end
         fb_del.query("(and (eq type 'issue') (eq status 'open'))").each.size
       end
     end
