@@ -61,11 +61,12 @@ class Factbase::IndexedFactbase
   # Run an ACID transaction.
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
+    inner_idx = {}
     result =
       @origin.txn do |fbt|
-        yield Factbase::IndexedFactbase.new(fbt, @idx, @fresh)
+        yield Factbase::IndexedFactbase.new(fbt, inner_idx, @fresh)
       end
-    @idx.clear
+    @idx.clear if result.deleted.positive? || result.added.positive?
     @fresh.clear
     result
   end

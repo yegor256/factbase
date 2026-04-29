@@ -52,15 +52,15 @@ class TestIncrementalIndexing < Factbase::Test
     assert_empty(fb.query('(eq foo 44)').each.to_a)
   end
 
-  def test_transaction_clears_index
+  def test_transaction_clears_index_on_delete
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
     fb.insert.foo = 42
+    fb.insert.foo = 43
     fb.query('(eq foo 42)').each.to_a
     refute_empty(idx)
     fb.txn do |fbt|
-      fbt.insert.bar = 1
-      raise Factbase::Rollback
+      fbt.query('(eq foo 43)').delete!
     end
     assert_empty(idx)
   end
