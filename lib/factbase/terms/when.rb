@@ -24,6 +24,7 @@ class Factbase::When < Factbase::TermBase
     assert_args(2)
     a = @operands[0]
     b = @operands[1]
-    !a.evaluate(fact, maps, fb) || (a.evaluate(fact, maps, fb) && b.evaluate(fact, maps, fb))
+    r = a.evaluate(fact, maps, fb)
+    !r || b.evaluate(fact, maps, fb)
   end
 end
