@@ -100,6 +100,7 @@ class TestQuery < Factbase::Test
       '(eq "Integer" (type num))' => 2,
       '(eq "Integer" (type hi))' => 1,
       '(when (eq num 0) (exists time))' => 2,
+      '(when (unique num) (or (eq num 0) (eq num 42)))' => 3,
       '(unique num)' => 1,
       '(unique name)' => 2,
       '(unique pi)' => 1,
