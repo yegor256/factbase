@@ -27,4 +27,48 @@ class TestWhen < Factbase::Test
       end
     end
   end
+
+  def test_evaluates_first_operand_only_once
+    counter = CountingTerm.new(true)
+    t = Factbase::When.new([counter, Factbase::Always.new])
+    assert(t.evaluate(fact, [], Factbase.new))
+    assert_equal(1, counter.calls)
+  end
+
+  def test_evaluates_first_operand_only_once_when_false
+    counter = CountingTerm.new(false)
+    t = Factbase::When.new([counter, Factbase::Always.new])
+    assert(t.evaluate(fact, [], Factbase.new))
+    assert_equal(1, counter.calls)
+  end
+
+  def test_unique_inside_when_passes_all_facts
+    fb = Factbase.new
+    3.times { fb.insert.x = 1 }
+    assert_equal(3, fb.query('(when (unique x) (eq x 1))').each.to_a.size)
+  end
+
+  def test_unique_inside_when_with_distinct_values
+    fb = Factbase.new
+    [1, 2, 3].each { |v| fb.insert.x = v }
+    assert_equal(1, fb.query('(when (unique x) (eq x 1))').each.to_a.size)
+  end
+
+  # Term that counts how many times it is evaluated.
+  class CountingTerm < Factbase::TermBase
+    attr_reader :calls
+
+    def initialize(result)
+      super()
+      @operands = []
+      @op = :counting
+      @result = result
+      @calls = 0
+    end
+
+    def evaluate(_fact, _maps, _fb)
+      @calls += 1
+      @result
+    end
+  end
 end
