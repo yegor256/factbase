@@ -227,6 +227,80 @@ There are some system-level terms:
 * `(env v1 v2)` returns the value of environment variable `v1` or the string
 `v2` if it's not set
 
+## Architecture
+
+The entire database is a single flat [Ruby](https://www.ruby-lang.org/en/)
+  `Array` of `Hash` objects held in RAM (`Factbase#@maps`). There are no
+  tables, schemas, or type enforcement beyond four scalar types: `Integer`,
+  `Float`, `String`, and `Time`. This contrasts with
+  [SQLite](https://sqlite.org/) (fixed-column tables on disk) and
+  [MongoDB](https://www.mongodb.com/) (typed document collections). New
+  programmers must understand that all data vanishes on process exit unless
+  `export`/`import` is called explicitly.
+
+Each property of a fact is a non-empty ordered set of values rather than a
+  single value. Assigning `f.foo = 1` then `f.foo = 2` produces
+  `f['foo'] == [1, 2]`; each assignment appends. Reading `f.foo` returns
+  the first element; `f['foo']` returns the full array. This accumulative
+  semantics differs from [SQL](https://www.iso.org/standard/76583.html)
+  (one value per column) and most NoSQL stores where assignment overwrites.
+  New programmers must expect multi-element arrays on every property read.
+
+Queries use a custom Lisp-style
+  [S-expression](https://en.wikipedia.org/wiki/S-expression) language:
+  `(and (eq kind 'book') (gt age 10))`. `Factbase::Syntax` tokenizes and
+  parses a query string into an AST of `Factbase::Term` objects;
+  `Factbase::Query#each` evaluates that AST against every fact. This
+  differs from [SQL](https://www.iso.org/standard/76583.html),
+  [XPath](https://www.w3.org/TR/xpath-31/), and
+  [JSONPath](https://datatracker.ietf.org/doc/html/rfc9535). New
+  programmers add operators by implementing a term class, not by modifying
+  parser grammar.
+
+Each query operator (`eq`, `gt`, `agg`, `join`, etc.) is a separate class
+  under `lib/factbase/terms/`. `Factbase::Term` holds a dispatch hash
+  (`@terms`) mapping operator symbols to instances and delegates `evaluate`
+  and `predict` calls there. This is not a class hierarchy — adding a new
+  operator requires a new file in `terms/` and a registration line in the
+  `Factbase::Term` constructor. New programmers extending the query
+  language must follow this two-step pattern.
+
+Transactions are ACID and implemented via lazy copy-on-write journaling.
+  `Factbase#txn` wraps the array in `Factbase::LazyTaped`, which defers
+  physical duplication of hash objects until the first write. Inserts,
+  deletes, and property additions are tracked by Ruby `object_id`. On
+  commit the journal is replayed into the main array; raising
+  `Factbase::Rollback` discards it. Nesting transactions is explicitly
+  forbidden by `Factbase::Light`. This differs from SQLite's
+  [WAL](https://sqlite.org/wal.html) and PostgreSQL's
+  [MVCC](https://www.postgresql.org/docs/current/mvcc.html).
+
+Cross-cutting capabilities — thread safety, indexing, constraint
+  validation, logging, and change counting — are added via decorators:
+  `Factbase::SyncFactbase`, `Factbase::IndexedFactbase`,
+  `Factbase::Rules`, `Factbase::Logged`, and `Factbase::Tallied`. The
+  [`decoor`](https://github.com/yegor256/decoor) gem provides delegation
+  boilerplate. The bare `Factbase` class is not thread-safe; new
+  programmers must wrap it with `SyncFactbase` before sharing across
+  threads.
+
+Persistence uses Ruby's
+  [`Marshal`](https://ruby-doc.org/core/Marshal.html), serializing the
+  internal array of hashes to a binary blob via `Marshal.dump`. The format
+  is Ruby-version-specific and not portable across major Ruby versions or
+  platforms, unlike [JSON](https://www.json.org/json-en.html) or
+  [Protocol Buffers](https://protobuf.dev/). Output-only decorators
+  `Factbase::ToJson`, `Factbase::ToXml`, and `Factbase::ToYaml` exist but
+  do not support round-trip import.
+
+`Factbase::IndexedFactbase` lazily builds a hash-based inverted index for
+  equality queries, keyed by array `object_id`, property name, and
+  operator. The index is built incrementally on each query and invalidated
+  entirely on any mutation (delete or property addition). Without this
+  decorator every `query#each` call performs a full linear scan over all
+  facts. New programmers should add `IndexedFactbase` whenever the
+  factbase holds more than a few thousand facts.
+
 ## How to contribute
 
 Read
