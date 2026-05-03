@@ -3,12 +3,10 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-# Test for unique term.
+# Base class for all terms.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
-
-# Base class for all terms.
 class Factbase::TermBase
   # Turns it into a string.
   # @return [String] The string of it

@@ -152,7 +152,7 @@ There are a few terms that return non-boolean values:
 * `(size v)` is the cardinality of `v` (zero if `v` is `nil`)
 * `(type v)` is the type of `v`
 (`"String"`, `"Integer"`, `"Float"`, `"Time"`, or `"Array"`)
-* `(either v1 v1)` is `v2` if `v1` is `nil`
+* `(either v1 v2)` is `v2` if `v1` is `nil`
 
 It's possible to modify the facts retrieved, on fly:
 

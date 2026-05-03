@@ -6,7 +6,7 @@
 require_relative 'base'
 
 # This class represents a specialized 'sum' term.
-# This term  calculates the sum of values for a specified key.
+# This term calculates the sum of values for a specified key.
 class Factbase::Sum < Factbase::TermBase
   # Constructor.
   # @param [Array] operands Operands

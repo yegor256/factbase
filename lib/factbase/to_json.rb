@@ -9,7 +9,7 @@ require_relative '../factbase/flatten'
 
 # Factbase to JSON converter.
 #
-# This class helps converting an entire Factbase to YAML format, for example:
+# This class helps converting an entire Factbase to JSON format, for example:
 #
 #  require 'factbase/to_json'
 #  fb = Factbase.new

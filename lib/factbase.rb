@@ -102,9 +102,6 @@ class Factbase
   #
   # A fact, when inserted, is empty. It doesn't contain any properties.
   #
-  # The operation is thread-safe, meaning that different threads may
-  # insert facts in parallel without breaking the consistency of the factbase.
-  #
   # @return [Factbase::Fact] The fact just inserted
   def insert
     map = {}

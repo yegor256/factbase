@@ -8,7 +8,7 @@ require 'others'
 require_relative '../factbase'
 require_relative 'churn'
 
-# A decorator of a Factbase, that count all operations and then returns
+# A decorator of a Factbase, that counts all operations and then returns
 # an instance of Factbase::Churn.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)

@@ -10,7 +10,7 @@ require_relative '../factbase/flatten'
 
 # Factbase to XML converter.
 #
-# This class helps converting an entire Factbase to YAML format, for example:
+# This class helps converting an entire Factbase to XML format, for example:
 #
 #  require 'factbase/to_xml'
 #  fb = Factbase.new
