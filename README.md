@@ -290,7 +290,7 @@ Persistence uses Ruby's
   is Ruby-version-specific and not portable across major Ruby versions or
   platforms, unlike [JSON](https://www.json.org/json-en.html) or
   [Protocol Buffers](https://protobuf.dev/). Output-only decorators
-  `Factbase::ToJson`, `Factbase::ToXml`, and `Factbase::ToYaml` exist but
+  `Factbase::ToJSON`, `Factbase::ToXML`, and `Factbase::ToYAML` exist but
   do not support round-trip import.
 
 `Factbase::IndexedFactbase` lazily builds a hash-based inverted index for
