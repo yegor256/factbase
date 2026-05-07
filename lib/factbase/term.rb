@@ -14,6 +14,7 @@ require_relative 'terms/sprintf'
 require_relative 'terms/matches'
 require_relative 'terms/contains'
 require_relative 'terms/starts_with'
+require_relative 'terms/ends_with'
 require_relative 'terms/traced'
 require_relative 'terms/assert'
 require_relative 'terms/env'
@@ -112,6 +113,7 @@ class Factbase::Term < Factbase::TermBase
       matches: Factbase::Matches.new(operands),
       contains: Factbase::Contains.new(operands),
       starts_with: Factbase::StartsWith.new(operands),
+      ends_with: Factbase::EndsWith.new(operands),
       traced: Factbase::Traced.new(operands),
       assert: Factbase::Assert.new(operands),
       env: Factbase::Env.new(operands),
