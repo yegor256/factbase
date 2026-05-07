@@ -146,6 +146,7 @@ There are string manipulators:
 * `(sprintf v v1 v2 ...)` — creates a string by `v` format with params
 * `(matches v s)` — if any `v` matches the `s` regular expression
 * `(contains v s)` — if any value of `v` contains any value of `s` (substring match)
+* `(starts_with v s)` — if any `v` starts with `s`
 
 There are a few terms that return non-boolean values:
 
