@@ -129,8 +129,7 @@ There are some boolean terms available in a query
 * `(not b)` is the inverse of `b`
 * `(or b1 b2 ...)` is `true` if at least one argument is `true`
 * `(and b1 b2 ...)` — if all arguments are `true`
-* `(when b1 b2)` — if `b1` is `true` and `b2` is `true`
-or `b1` is `false`
+* `(when b1 b2)` — true if `b1` is `false`, or if both `b1` and `b2` are `true`
 * `(exists p)` — if `p` property exists
 * `(absent p)` — if `p` property is absent
 * `(zero v)` — if any `v` equals to zero
