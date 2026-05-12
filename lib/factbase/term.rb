@@ -12,6 +12,7 @@ require_relative 'terms/prev'
 require_relative 'terms/concat'
 require_relative 'terms/sprintf'
 require_relative 'terms/matches'
+require_relative 'terms/contains'
 require_relative 'terms/traced'
 require_relative 'terms/assert'
 require_relative 'terms/env'
@@ -108,6 +109,7 @@ class Factbase::Term < Factbase::TermBase
       concat: Factbase::Concat.new(operands),
       sprintf: Factbase::Sprintf.new(operands),
       matches: Factbase::Matches.new(operands),
+      contains: Factbase::Contains.new(operands),
       traced: Factbase::Traced.new(operands),
       assert: Factbase::Assert.new(operands),
       env: Factbase::Env.new(operands),
