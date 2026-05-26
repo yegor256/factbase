@@ -17,7 +17,7 @@ class TestToTime < Factbase::Test
     assert_equal('Time', t.evaluate(fact, [], Factbase.new).class.to_s)
   end
 
-  def test_rejects_unparseable_value
+  def test_rejects_unparsable_value
     t = Factbase::ToTime.new(['hello'])
     e =
       assert_raises(RuntimeError) do
