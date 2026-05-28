@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
 
 # Math test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -90,7 +90,7 @@ class TestMath < Factbase::Test
 
   def test_gt_time_string
     t = Factbase::Term.new(:gt, [:foo, '2024-03-23T03:21:43Z'])
-    assert_raises(RuntimeError, 'comparison of Time with String failed') do
+    assert_raises(StandardError, 'comparison of Time with String failed') do
       t.evaluate(fact('foo' => [Time.now]), [], Factbase.new)
     end
   end
@@ -103,15 +103,19 @@ class TestMath < Factbase::Test
 
   def test_minus_time
     t = Factbase::Term.new(:minus, [:foo, '4 hours'])
-    assert_equal(Time.parse('2024-01-01T06:04'),
-                 t.evaluate(fact('foo' => Time.parse('2024-01-01T10:04')), [], Factbase.new))
+    assert_equal(
+      Time.parse('2024-01-01T06:04'),
+      t.evaluate(fact('foo' => Time.parse('2024-01-01T10:04')), [], Factbase.new)
+    )
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
 
   def test_minus_time_singular
     t = Factbase::Term.new(:minus, [:foo, '1 hour'])
-    assert_equal(Time.parse('2024-01-01T09:04'),
-                 t.evaluate(fact('foo' => Time.parse('2024-01-01T10:04')), [], Factbase.new))
+    assert_equal(
+      Time.parse('2024-01-01T09:04'),
+      t.evaluate(fact('foo' => Time.parse('2024-01-01T10:04')), [], Factbase.new)
+    )
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
 
@@ -121,7 +125,7 @@ class TestMath < Factbase::Test
   def test_div_times_not_supported
     t = Factbase::Term.new(:div, [:birth, Time.new(2024, 1, 1)])
     assert_includes(
-      assert_raises(RuntimeError) do
+      assert_raises(StandardError) do
         t.evaluate(fact('birth' => Time.new(2026, 1, 1)), [], Factbase.new)
       end.message,
       'undefined method'

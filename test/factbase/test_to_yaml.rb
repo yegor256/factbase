@@ -20,8 +20,7 @@ class TestToYAML < Factbase::Test
     f.foo = 42
     f.foo = 256
     fb.insert._id = 2
-    to = Factbase::ToYAML.new(fb)
-    yaml = YAML.load(to.yaml)
+    yaml = YAML.load(Factbase::ToYAML.new(fb).yaml)
     assert_equal(2, yaml.size)
     assert_equal(42, yaml[0]['foo'][0])
     assert_equal(256, yaml[0]['foo'][1])

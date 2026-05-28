@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/not'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/not'
 
 # Test for the 'not' term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -21,8 +21,10 @@ class TestNot < Factbase::Test
   end
 
   def test_not_with_arguments
-    assert_includes(assert_raises(RuntimeError) do
-      Factbase::Term.new(:not, %i[foo bar]).evaluate(fact('foo' => true, 'bar' => false), [], Factbase.new)
-    end.message, "Too many (2) operands for 'not' (1 expected)")
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase::Term.new(:not, %i[foo bar]).evaluate(fact('foo' => true, 'bar' => false), [], Factbase.new)
+      end.message, "Too many (2) operands for 'not' (1 expected)"
+    )
   end
 end

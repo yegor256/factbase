@@ -52,13 +52,13 @@ class Factbase::Taped
   def each
     return to_enum(__method__) unless block_given?
     @origin.each do |m|
-      yield TapedHash.new(m, @added)
+      yield(TapedHash.new(m, @added))
     end
   end
 
   def delete_if
     @origin.delete_if do |m|
-      r = yield m
+      r = yield(m)
       @deleted.append(m.object_id) if r
       r
     end
@@ -153,14 +153,8 @@ class Factbase::Taped
   private
 
   def join(other)
-    n = yield @origin.to_a, other.to_a
-    raise 'Cannot join with another Taped' if other.respond_to?(:inserted)
-    raise 'Can only join with array' unless other.is_a?(Array)
-    Factbase::Taped.new(
-      n,
-      inserted: @inserted,
-      deleted: @deleted,
-      added: @added
-    )
+    raise(ArgumentError, 'Cannot join with another Taped') if other.respond_to?(:inserted)
+    raise(ArgumentError, 'Can only join with array') unless other.is_a?(Array)
+    Factbase::Taped.new(yield(@origin.to_a, other.to_a), inserted: @inserted, deleted: @deleted, added: @added)
   end
 end

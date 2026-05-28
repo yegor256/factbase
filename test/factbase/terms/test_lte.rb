@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
-#
-require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/terms/lte'
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+require_relative '../../test__helper'
 
 # Tests for the 'lte' term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -19,7 +18,6 @@ class TestLte < Factbase::Test
   end
 
   def test_compares_not_greater_than
-    t = Factbase::Lte.new([:number, 42])
-    refute(t.evaluate(fact('number' => 100), [], Factbase.new))
+    refute(Factbase::Lte.new([:number, 42]).evaluate(fact('number' => 100), [], Factbase.new))
   end
 end

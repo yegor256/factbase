@@ -106,7 +106,7 @@ class Factbase
   def insert
     map = {}
     @maps << map
-    require_relative 'factbase/fact'
+    require_relative('factbase/fact')
     Factbase::Fact.new(map)
   end
 
@@ -132,7 +132,7 @@ class Factbase
   def query(term, maps = nil)
     maps ||= @maps
     term = to_term(term) if term.is_a?(String)
-    require_relative 'factbase/query'
+    require_relative('factbase/query')
     Factbase::Query.new(maps, term, self)
   end
 
@@ -140,7 +140,7 @@ class Factbase
   # @param [String] query The query to convert
   # @return [Factbase::Term] The term
   def to_term(query)
-    require_relative 'factbase/syntax'
+    require_relative('factbase/syntax')
     Factbase::Syntax.new(query).to_term
   end
 
@@ -161,15 +161,15 @@ class Factbase
   #
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
-    require_relative 'factbase/lazy_taped'
+    require_relative('factbase/lazy_taped')
     taped = Factbase::LazyTaped.new(@maps)
-    require_relative 'factbase/churn'
+    require_relative('factbase/churn')
     churn = Factbase::Churn.new
-    catch :commit do
-      require_relative 'factbase/light'
+    catch(:commit) do
+      require_relative('factbase/light')
       commit = false
-      catch :rollback do
-        yield Factbase::Light.new(Factbase.new(taped))
+      catch(:rollback) do
+        yield(Factbase::Light.new(Factbase.new(taped)))
         commit = true
       end
       return churn unless commit
@@ -235,7 +235,7 @@ class Factbase
   #
   # @param [String] bytes Binary string to import
   def import(bytes)
-    raise 'Empty input, cannot load a factbase' if bytes.empty?
+    raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?
     data = Marshal.load(bytes)
     @maps +=
       if data.is_a?(Hash) && data.key?(:maps)

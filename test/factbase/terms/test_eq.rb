@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
-#
-require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/terms/eq'
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+require_relative '../../test__helper'
 
 # Tests for the 'eq' term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -13,12 +12,10 @@ require_relative '../../../lib/factbase/terms/eq'
 # License:: MIT
 class TestEq < Factbase::Test
   def test_compares_equal
-    t = Factbase::Eq.new([:number, 42])
-    assert(t.evaluate(fact('number' => 42), [], Factbase.new))
+    assert(Factbase::Eq.new([:number, 42]).evaluate(fact('number' => 42), [], Factbase.new))
   end
 
   def test_compares_not_equal
-    t = Factbase::Eq.new([:number, 42])
-    refute(t.evaluate(fact('number' => 100), [], Factbase.new))
+    refute(Factbase::Eq.new([:number, 42]).evaluate(fact('number' => 100), [], Factbase.new))
   end
 end

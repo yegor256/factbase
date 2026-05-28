@@ -21,9 +21,6 @@ class Factbase::Prev < Factbase::TermBase
   # @return [Object] The previous value
   def evaluate(fact, maps, fb)
     assert_args(1)
-    before = @prev
-    v = _values(0, fact, maps, fb)
-    @prev = v
-    before
+    @prev.tap { @prev = _values(0, fact, maps, fb) }
   end
 end

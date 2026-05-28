@@ -25,9 +25,9 @@ class Factbase::Traced < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(1)
     t = @operands[0]
-    raise "A term is expected, but '#{t}' provided" unless t.is_a?(Factbase::Term)
+    raise(ArgumentError, "A term is expected, but '#{t}' provided") unless t.is_a?(Factbase::Term)
     r = t.evaluate(fact, maps, fb)
-    puts "#{self} -> #{r}" # rubocop:disable Lint/Debugger
+    puts("#{self} -> #{r}") # rubocop:disable Lint/Debugger
     r
   end
 end

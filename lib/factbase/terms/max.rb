@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../factbase'
-require_relative 'best'
 require_relative 'base'
+require_relative 'best'
 
 # The 'max' term.
 # This term calculates the max value among the evaluated operands.

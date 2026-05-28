@@ -5,15 +5,15 @@
 
 require 'tago'
 require_relative '../../factbase'
-require_relative '../indexed/indexed_eq'
-require_relative '../indexed/indexed_lt'
-require_relative '../indexed/indexed_gt'
-require_relative '../indexed/indexed_one'
-require_relative '../indexed/indexed_not'
-require_relative '../indexed/indexed_exists'
-require_relative '../indexed/indexed_and'
-require_relative '../indexed/indexed_or'
 require_relative '../indexed/indexed_absent'
+require_relative '../indexed/indexed_and'
+require_relative '../indexed/indexed_eq'
+require_relative '../indexed/indexed_exists'
+require_relative '../indexed/indexed_gt'
+require_relative '../indexed/indexed_lt'
+require_relative '../indexed/indexed_not'
+require_relative '../indexed/indexed_one'
+require_relative '../indexed/indexed_or'
 require_relative '../indexed/indexed_unique'
 
 # Term with an index.
@@ -35,7 +35,7 @@ module Factbase::IndexedTerm
       return t.predict(maps, fb, params) if t.respond_to?(:predict)
     end
     m = :"#{@op}_predict"
-    return send(m, maps, fb, params) if respond_to?(m)
+    return __send__(m, maps, fb, params) if respond_to?(m)
     _init_indexes unless @indexes
     @indexes[@op].predict(maps, fb, params) if @indexes.key?(@op)
   end

@@ -44,6 +44,8 @@ class Factbase::IndexedLt
   def _search(entry, target)
     idx = entry[:facts].bsearch_index { |v, _| v >= target }
     res = idx.nil? ? entry[:facts] : entry[:facts][0...idx]
-    res.map { |_, f| f }.uniq(&:object_id)
+    facts = res.map { |_, f| f }
+    facts.uniq!(&:object_id)
+    facts
   end
 end

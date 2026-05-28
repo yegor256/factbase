@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/env'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/env'
 
 # Test for env term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -14,14 +14,12 @@ require_relative '../../../lib/factbase/terms/env'
 class TestEnv < Factbase::Test
   def test_env
     ENV.store('FOO', 'bar')
-    t = Factbase::Env.new(['FOO', ''])
-    assert_equal('bar', t.evaluate(fact, [], Factbase.new))
+    assert_equal('bar', Factbase::Env.new(['FOO', '']).evaluate(fact, [], Factbase.new))
   end
 
   def test_default
     ENV.delete('FOO')
-    t = Factbase::Env.new(['FOO', 'мой друг'])
-    assert_equal('мой друг', t.evaluate(fact, [], Factbase.new))
+    assert_equal('мой друг', Factbase::Env.new(['FOO', 'мой друг']).evaluate(fact, [], Factbase.new))
   end
 
   def test_when_default_is_absent

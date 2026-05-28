@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/accum'
+require_relative '../../../lib/factbase/syntax'
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/as'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/as'
-require_relative '../../../lib/factbase/syntax'
-require_relative '../../../lib/factbase/accum'
 
 # Test for 'as' term.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)

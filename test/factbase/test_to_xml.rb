@@ -16,27 +16,21 @@ class TestToXML < Factbase::Test
   def test_simple_rendering
     fb = Factbase.new
     fb.insert.t = Time.now
-    to = Factbase::ToXML.new(fb)
-    xml = Nokogiri::XML.parse(to.xml)
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     refute_empty(xml.xpath('/fb/f[t]'))
-    assert_match(
-      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/, xml.xpath('/fb/f/t/text()').text
-    )
+    assert_match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/, xml.xpath('/fb/f/t/text()').text)
   end
 
   def test_complex_rendering
     fb = Factbase.new
     fb.insert.t = "\uffff < > & ' \""
-    to = Factbase::ToXML.new(fb)
-    xml = Nokogiri::XML.parse(to.xml)
-    refute_empty(xml.xpath('/fb/f[t]'))
+    refute_empty(Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml).xpath('/fb/f[t]'))
   end
 
   def test_meta_data_presence
     fb = Factbase.new
     fb.insert.x = 42
-    to = Factbase::ToXML.new(fb)
-    xml = Nokogiri::XML.parse(to.xml)
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     refute_empty(xml.xpath('/fb[@version]'))
     refute_empty(xml.xpath('/fb[@size]'))
   end
@@ -46,8 +40,7 @@ class TestToXML < Factbase::Test
     f = fb.insert
     f.type = 1
     f.f = 2
-    to = Factbase::ToXML.new(fb)
-    xml = Nokogiri::XML.parse(to.xml)
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     refute_empty(xml.xpath('/fb/f/type'))
     refute_empty(xml.xpath('/fb/f/f'))
   end
@@ -80,8 +73,7 @@ class TestToXML < Factbase::Test
     f.t = 40
     f.a = 10
     f.c = 1
-    to = Factbase::ToXML.new(fb)
-    xml = Nokogiri::XML.parse(to.xml)
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     %w[a c t x].each_with_index do |e, i|
       refute_empty(xml.xpath("/fb/f/#{e}[count(preceding-sibling::*) = #{i}]"), e)
     end

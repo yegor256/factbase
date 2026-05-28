@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase/lazy_taped'
+require_relative '../../lib/factbase/lazy_taped_array'
+require_relative '../../lib/factbase/lazy_taped_hash'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase/lazy_taped'
-require_relative '../../lib/factbase/lazy_taped_hash'
-require_relative '../../lib/factbase/lazy_taped_array'
 
 # Test for Factbase::LazyTaped::LazyTapedHash.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -21,7 +21,7 @@ class TestLazyTapedHash < Factbase::Test
 
   def test_map
     hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
-    assert_read(hash, origin, %w[bar=[2] foo=1], hash.map { |k, v| "#{k}=#{v}" }.sort)
+    assert_read(hash, origin, %w[bar=[2] foo=1], hash.map { |k, v| "#{k}=#{v}" }.sort!)
   end
 
   def test_reed_scalar
@@ -84,8 +84,7 @@ class TestLazyTapedHash < Factbase::Test
   def wrap(input)
     added = []
     origin = [{ 'foo' => 1 }, input, { 'baz' => [3] }]
-    lt = Factbase::LazyTaped.new(origin)
-    [Factbase::LazyTaped::LazyTapedHash.new(origin[1], lt, added), origin[1], added]
+    [Factbase::LazyTaped::LazyTapedHash.new(origin[1], Factbase::LazyTaped.new(origin), added), origin[1], added]
   end
 
   def assert_copied(hash, origin)

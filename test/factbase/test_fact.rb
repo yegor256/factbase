@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/fact'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/fact'
 
 # Fact test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -24,8 +24,7 @@ class TestFact < Factbase::Test
   end
 
   def test_simple_resetting
-    map = {}
-    f = Factbase::Fact.new(map)
+    f = Factbase::Fact.new({})
     f.foo = 42
     assert_equal(42, f.foo, f.to_s)
     f.foo = 256
@@ -74,7 +73,7 @@ class TestFact < Factbase::Test
 
   def test_set_by_name
     f = Factbase::Fact.new({})
-    f.send(:_foo_bar=, 42)
+    f.__send__(:_foo_bar=, 42)
     assert_equal(42, f._foo_bar, f.to_s)
   end
 

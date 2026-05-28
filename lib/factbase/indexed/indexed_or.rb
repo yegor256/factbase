@@ -11,7 +11,7 @@ class Factbase::IndexedOr
   end
 
   def predict(maps, fb, params)
-    return nil if @idx.nil?
+    return if @idx.nil?
     r = nil
     @term.operands.each do |o|
       n = o.predict(maps, fb, params)
@@ -21,7 +21,7 @@ class Factbase::IndexedOr
       end
       r = maps & [] if r.nil?
       r |= n.to_a
-      return maps if r.size > maps.size / 4 # it's big enough already
+      return maps if r.size > maps.size / 4
     end
     r
   end

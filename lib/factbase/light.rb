@@ -32,6 +32,6 @@ class Factbase::Light
   end
 
   def txn
-    raise 'You cannot start a transaction inside another transaction'
+    raise(StandardError, 'You cannot start a transaction inside another transaction')
   end
 end

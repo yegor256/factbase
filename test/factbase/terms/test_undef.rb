@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/defn'
+require_relative '../../../lib/factbase/terms/undef'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/defn'
-require_relative '../../../lib/factbase/terms/undef'
 
 # Test for undef term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)

@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/defn'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/defn'
 
 # Test for defn term.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -13,10 +13,11 @@ require_relative '../../../lib/factbase/terms/defn'
 # License:: MIT
 class TestDefn < Factbase::Test
   def test_defn_simple
-    t = Factbase::Defn.new([:foo, 'self.to_s'])
-    assert(t.evaluate(fact('foo' => 4), [], Factbase.new))
-    t1 = Factbase::Term.new(:foo, ['hello, world!'])
-    assert_equal('(foo \'hello, world!\')', t1.evaluate(fact, [], Factbase.new))
+    assert(Factbase::Defn.new([:foo, 'self.to_s']).evaluate(fact('foo' => 4), [], Factbase.new))
+    assert_equal(
+      '(foo \'hello, world!\')',
+      Factbase::Term.new(:foo, ['hello, world!']).evaluate(fact, [], Factbase.new)
+    )
   end
 
   def test_defn_again_by_mistake

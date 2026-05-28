@@ -36,13 +36,12 @@ class Factbase::CachedQuery
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
     invalidate_if_dirty!
-    key = "each #{@origin}" # params are ignored!
-    before = @cache[key]
-    @cache[key] = @origin.each(fb, params).to_a if before.nil?
+    key = "each #{@origin}"
+    @cache[key] = @origin.each(fb, params).to_a if @cache[key].nil?
     c = 0
     @cache[key].each do |f|
       c += 1
-      yield Factbase::CachedFact.new(f, @cache)
+      yield(Factbase::CachedFact.new(f, @cache))
     end
     c
   end
@@ -54,8 +53,7 @@ class Factbase::CachedQuery
   def one(fb = @fb, params = {})
     invalidate_if_dirty!
     key = "one: #{@origin} #{params}"
-    before = @cache[key]
-    @cache[key] = @origin.one(fb, params) if before.nil?
+    @cache[key] = @origin.one(fb, params) if @cache[key].nil?
     @cache[key]
   end
 

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/pre'
+require_relative '../../lib/factbase/rules'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/rules'
-require_relative '../../lib/factbase/pre'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -14,10 +14,7 @@ require_relative '../../lib/factbase/pre'
 # License:: MIT
 class TestRules < Factbase::Test
   def test_simple_checking
-    fb = Factbase::Rules.new(
-      Factbase.new,
-      '(when (exists first) (exists second))'
-    )
+    fb = Factbase::Rules.new(Factbase.new, '(when (exists first) (exists second))')
     f1 = fb.insert
     f1.second = 2
     f1.first = 1
@@ -30,17 +27,12 @@ class TestRules < Factbase::Test
   def test_check_with_id
     fb = Factbase::Rules.new(Factbase.new, '(exists foo)', uid: 'id')
     fb.txn do |fbt|
-      f = fbt.insert
-      f.foo = 42
+      fbt.insert.foo = 42
     end
   end
 
   def test_to_string
-    fb = Factbase::Rules.new(
-      Factbase.new,
-      '(when (exists a) (exists b))'
-    )
-    f = fb.insert
+    f = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))').insert
     f.foo = 42
     s = f.to_s
     assert_predicate(s.length, :positive?, s)
@@ -49,8 +41,7 @@ class TestRules < Factbase::Test
 
   def test_query_one
     fb = Factbase::Rules.new(Factbase.new, '(always)')
-    f = fb.insert
-    f.foo = 42
+    fb.insert.foo = 42
     assert_equal(1, fb.query('(agg (eq foo $v) (count))').one(Factbase.new, v: 42))
   end
 

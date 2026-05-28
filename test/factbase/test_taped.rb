@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/taped'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/taped'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -19,8 +19,7 @@ class TestTaped < Factbase::Test
   end
 
   def test_checks_for_emptiness
-    t = Factbase::Taped.new([{ foo: 'yes' }])
-    refute_empty(t)
+    refute_empty(Factbase::Taped.new([{ foo: 'yes' }]))
   end
 
   def test_joins_with_non_empty
@@ -64,8 +63,7 @@ class TestTaped < Factbase::Test
   end
 
   def test_tracks_addition_uniquely
-    h = { f: 5 }
-    t = Factbase::Taped.new([h])
+    t = Factbase::Taped.new([{ f: 5 }])
     t.each do |m|
       m[:bar] = 66
       m[:foo] = 77

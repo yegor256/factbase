@@ -23,9 +23,9 @@ class Factbase::IndexedFactbase
   # @param [Hash] idx Index to use
   # @param [Set] fresh The set of IDs of newly inserted facts
   def initialize(origin, idx = {}, fresh = Set.new)
-    raise 'Wrong type of original' unless origin.respond_to?(:query)
+    raise(ArgumentError, 'Wrong type of original') unless origin.respond_to?(:query)
     @origin = origin
-    raise 'Wrong type of index' unless idx.is_a?(Hash)
+    raise(ArgumentError, 'Wrong type of index') unless idx.is_a?(Hash)
     @idx = idx
     @fresh = fresh
   end
@@ -64,7 +64,7 @@ class Factbase::IndexedFactbase
     inner_idx = {}
     result =
       @origin.txn do |fbt|
-        yield Factbase::IndexedFactbase.new(fbt, inner_idx, @fresh)
+        yield(Factbase::IndexedFactbase.new(fbt, inner_idx, @fresh))
       end
     @idx.clear if result.deleted.positive? || result.added.positive?
     @fresh.clear
@@ -100,7 +100,7 @@ class Factbase::IndexedFactbase
   #
   # @param [String] bytes Binary string to import
   def import(bytes)
-    raise 'Empty input, cannot load a factbase' if bytes.empty?
+    raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?
     data = Marshal.load(bytes)
     if data.is_a?(Hash) && data.key?(:maps)
       @origin.import(data[:maps])

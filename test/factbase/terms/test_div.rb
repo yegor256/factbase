@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/div'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/div'
 
 # Test for 'div' term.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -13,8 +13,7 @@ require_relative '../../../lib/factbase/terms/div'
 # License:: MIT
 class TestDiv < Factbase::Test
   def test_div_numbers
-    t = Factbase::Div.new([:balance, 100])
-    assert_equal(420, t.evaluate(fact('balance' => 42_000), [], Factbase.new))
+    assert_equal(420, Factbase::Div.new([:balance, 100]).evaluate(fact('balance' => 42_000), [], Factbase.new))
   end
 
   def test_div_times_not_supported

@@ -35,12 +35,9 @@ def bench_slow_query(bmk, fb, cycles)
   bmk.report("(and (eq issue *) (eq repository *) (eq what '*') (eq where '*'))") do
     cycles.times do
       Threads.new(Concurrent.processor_count * 2, task_timeout: 20, shutdown_timeout: 60).assert do
-        # create.call(i + 1) slows down the benchmark significantly
-        # with: 16.679675 sec
-        # without: 0.212369 sec
         create.call(rand(10_000))
         size = fb.query(queries.sample).count
-        raise "Expected to find at least one fact, but got #{size}" if size.zero?
+        raise(ArgumentError, "Expected to find at least one fact, but got #{size}") if size.zero?
       end
     end
   end

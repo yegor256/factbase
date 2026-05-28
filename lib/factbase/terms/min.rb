@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../factbase'
-require_relative 'best'
 require_relative 'base'
+require_relative 'best'
 
 # The 'min' term.
 # This term calculates the minimum value among the evaluated operands.

@@ -3,12 +3,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-# Test for Factbase::Fuzz.
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Author:: Philip Belousov (belousovfilip@gmail.com)
-# Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
-# License:: MIT
-#
 require 'minitest/autorun'
 
 class TestRakefile < Minitest::Test

@@ -36,18 +36,18 @@ class Factbase::Fuzz
   def initialize
     @next_num = 0
     @max_comments = 10
-    raise 'Not enough messages for fuzzing' if MESSAGES.size < @max_comments
+    raise(StandardError, 'Not enough messages for fuzzing') if MESSAGES.size < @max_comments
   end
 
   def self.make(count = 1000)
-    raise "Count must be positive: #{count}" if count.negative?
+    raise(ArgumentError, "Count must be positive: #{count}") if count.negative?
     fb = Factbase.new
     Factbase::Fuzz.new.feed(fb, count)
     fb
   end
 
   def feed(fb, count = 1)
-    raise "Count must be positive: #{count}" if count.negative?
+    raise(ArgumentError, "Count must be positive: #{count}") if count.negative?
     count.times do
       pull_request(fb, @next_num += 1)
     end

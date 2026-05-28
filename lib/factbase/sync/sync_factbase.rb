@@ -43,7 +43,7 @@ class Factbase::SyncFactbase
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
-    require_relative 'sync_query'
+    require_relative('sync_query')
     Factbase::SyncQuery.new(@origin.query(term, maps), @monitor, self)
   end
 
@@ -53,7 +53,7 @@ class Factbase::SyncFactbase
   def txn
     try_lock do
       @origin.txn do |fbt|
-        yield Factbase::SyncFactbase.new(fbt, @monitor)
+        yield(Factbase::SyncFactbase.new(fbt, @monitor))
       end
     end
   end

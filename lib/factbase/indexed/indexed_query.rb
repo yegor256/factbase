@@ -39,7 +39,7 @@ class Factbase::IndexedQuery
     return to_enum(__method__, fb, params) unless block_given?
     a = @origin.each(fb, params).to_a
     a.each do |f|
-      yield Factbase::IndexedFact.new(f, @idx, @fresh)
+      yield(Factbase::IndexedFact.new(f, @idx, @fresh))
     end
     a.size
   end
@@ -56,8 +56,6 @@ class Factbase::IndexedQuery
   # @param [Factbase] fb The factbase
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
-    result = @origin.delete!(fb)
-    @idx.clear
-    result
+    @origin.delete!(fb).tap { @idx.clear }
   end
 end

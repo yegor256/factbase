@@ -33,15 +33,14 @@ class Factbase::TermBase
 
   def assert_args(num)
     c = @operands.size
-    raise "Too many (#{c}) operands for '#{@op}' (#{num} expected)" if c > num
-    raise "Too few (#{c}) operands for '#{@op}' (#{num} expected)" if c < num
+    raise(ArgumentError, "Too many (#{c}) operands for '#{@op}' (#{num} expected)") if c > num
+    raise(ArgumentError, "Too few (#{c}) operands for '#{@op}' (#{num} expected)") if c < num
   end
 
   def _by_symbol(pos, fact)
     o = @operands[pos]
-    raise "A symbol expected at ##{pos}, but '#{o}' (#{o.class}) provided" unless o.is_a?(Symbol)
-    k = o.to_s
-    fact[k]
+    raise(ArgumentError, "A symbol expected at ##{pos}, but '#{o}' (#{o.class}) provided") unless o.is_a?(Symbol)
+    fact[o.to_s]
   end
 
   # @return [Array|nil] Either array of values or NIL
@@ -59,9 +58,9 @@ class Factbase::TermBase
           [v]
         end
     end
-    raise 'Why not array?' unless v.is_a?(Array)
+    raise(ArgumentError, 'Why not array?') unless v.is_a?(Array)
     unless v.all? { |i| [Float, Integer, String, Time, TrueClass, FalseClass].any? { |t| i.is_a?(t) } }
-      raise 'Wrong type inside'
+      raise(ArgumentError, 'Wrong type inside')
     end
     v
   end

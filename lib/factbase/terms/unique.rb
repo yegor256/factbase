@@ -21,14 +21,10 @@ class Factbase::Unique < Factbase::TermBase
   # @return [Boolean] True if the value is unique, false otherwise
   def evaluate(fact, maps, fb)
     @seen = Set.new if @seen.nil?
-    raise "Too few operands for 'unique' (at least 1 expected)" if @operands.empty?
+    raise(ArgumentError, "Too few operands for 'unique' (at least 1 expected)") if @operands.empty?
     vv = (0..(@operands.size - 1)).map { |i| _values(i, fact, maps, fb) }
     return false if vv.any?(nil)
-    pass = true
-    Enumerator.product(*vv).to_a.each do |t|
-      pass = false if @seen.include?(t)
-      @seen << t
-    end
-    pass
+    tuples = Enumerator.product(*vv).to_a
+    tuples.none? { |t| @seen.include?(t) }.tap { tuples.each { |t| @seen << t } }
   end
 end

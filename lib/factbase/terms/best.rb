@@ -10,7 +10,7 @@ class Factbase::Best
   end
 
   def evaluate(key, maps)
-    raise "A symbol is expected, but #{key} provided" unless key.is_a?(Symbol)
+    raise(ArgumentError, "A symbol is expected, but #{key} provided") unless key.is_a?(Symbol)
     best = nil
     maps.each do |m|
       vv = m[key.to_s]

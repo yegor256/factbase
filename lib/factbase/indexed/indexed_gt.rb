@@ -44,6 +44,8 @@ class Factbase::IndexedGt
   def _search(entry, target)
     idx = entry[:facts].bsearch_index { |v, _| v > target }
     return [] if idx.nil?
-    entry[:facts][idx..].map { |_, f| f }.uniq(&:object_id)
+    facts = entry[:facts][idx..].map { |_, f| f }
+    facts.uniq!(&:object_id)
+    facts
   end
 end

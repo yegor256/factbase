@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/flatten'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/flatten'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -13,16 +13,16 @@ require_relative '../../lib/factbase/flatten'
 # License:: MIT
 class TestFlatten < Factbase::Test
   def test_mapping
-    maps = [{ 'b' => [42], 'i' => 1 }, { 'a' => 33, 'i' => 0 }, { 'c' => %w[hey you], 'i' => 2 }]
-    to = Factbase::Flatten.new(maps, 'i').it
+    to = Factbase::Flatten.new(
+      [{ 'b' => [42], 'i' => 1 }, { 'a' => 33, 'i' => 0 }, { 'c' => %w[hey you], 'i' => 2 }],
+      'i'
+    ).it
     assert_equal(33, to[0]['a'])
     assert_equal(42, to[1]['b'])
     assert_equal(2, to[2]['c'].size)
   end
 
   def test_without_sorter
-    maps = [{ 'b' => [42], 'i' => [44] }, { 'a' => 33 }]
-    to = Factbase::Flatten.new(maps, 'i').it
-    assert_equal(33, to[0]['a'])
+    assert_equal(33, Factbase::Flatten.new([{ 'b' => [42], 'i' => [44] }, { 'a' => 33 }], 'i').it[0]['a'])
   end
 end

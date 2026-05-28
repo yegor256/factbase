@@ -5,12 +5,12 @@
 
 require 'loog'
 require 'threads'
-require_relative '../lib/fuzz'
 require_relative '../lib/factbase'
 require_relative '../lib/factbase/inv'
 require_relative '../lib/factbase/logged'
 require_relative '../lib/factbase/pre'
 require_relative '../lib/factbase/rules'
+require_relative '../lib/fuzz'
 require_relative 'test__helper'
 
 # Factbase main module test.
@@ -42,9 +42,7 @@ class TestFactbase < Factbase::Test
   end
 
   def test_converts_query_to_term
-    fb = Factbase.new
-    term = fb.to_term('(eq foo 42)')
-    assert_equal('(eq foo 42)', term.to_s)
+    assert_equal('(eq foo 42)', Factbase.new.to_term('(eq foo 42)').to_s)
   end
 
   def test_simple_setting
@@ -90,13 +88,12 @@ class TestFactbase < Factbase::Test
   end
 
   def test_import_from_indexed_factbase
-    require_relative '../lib/factbase/indexed/indexed_factbase'
+    require_relative('../lib/factbase/indexed/indexed_factbase')
     fb1 = Factbase::IndexedFactbase.new(Factbase.new)
     fb1.insert.foo = 42
     fb1.insert.bar = 13
-    data = fb1.export
     fb2 = Factbase.new
-    fb2.import(data)
+    fb2.import(fb1.export)
     assert_equal(2, fb2.size)
     assert_equal(1, fb2.query('(eq foo 42)').each.to_a.size)
     assert_equal(1, fb2.query('(eq bar 13)').each.to_a.size)
@@ -147,7 +144,7 @@ class TestFactbase < Factbase::Test
       assert_raises(StandardError) do
         fb.txn do |fbt|
           fbt.insert.foo = 42
-          raise 'intentionally'
+          raise(StandardError, 'intentionally')
         end
       end.message, 'intentionally'
     )
@@ -160,8 +157,7 @@ class TestFactbase < Factbase::Test
     n.foo = 1
     n.foo = 2
     fb.txn do |fbt|
-      f = fbt.query('(gt foo 0)').each.to_a.first
-      assert_equal(1, f.foo)
+      assert_equal(1, fbt.query('(gt foo 0)').each.to_a.first.foo)
     end
   end
 
@@ -177,7 +173,7 @@ class TestFactbase < Factbase::Test
   end
 
   def test_run_txn_with_inv
-    fb = Factbase::Inv.new(Factbase.new) { |_p, v| throw 'oops' if v == 42 }
+    fb = Factbase::Inv.new(Factbase.new) { |_p, v| throw('oops') if v == 42 }
     fb.insert.bar = 3
     fb.insert.foo = 5
     assert_equal(2, fb.size)
@@ -206,7 +202,7 @@ class TestFactbase < Factbase::Test
       assert_raises(StandardError) do
         d.txn do |fbt|
           fuzz.feed(fbt)
-          raise 'oops'
+          raise(StandardError, 'oops')
         end
       end
       d.import(d.export)
@@ -241,7 +237,7 @@ class TestFactbase < Factbase::Test
       fbt.insert.bar = 333
       fbt.query('(eq bar 555)').delete!
       fbt.insert.bar = 555
-      fbt.query('(eq bar 777)').delete! # nothing to be deleted
+      fbt.query('(eq bar 777)').delete!
       n1 = fbt.insert
       n1.bar = 9
       n1.bar = 99
@@ -251,13 +247,12 @@ class TestFactbase < Factbase::Test
 
   def test_txn_with_rollback
     fb = Factbase.new
-    n = fb.insert
-    n.bar = 55
+    fb.insert.bar = 55
     modified =
       fb.txn do |fbt|
         fbt.insert.bar = 33
         fbt.query('(eq bar 55)').each.to_a.first.boom = 44
-        raise Factbase::Rollback
+        raise(Factbase::Rollback)
       end
     assert_equal('nothing', modified.to_s)
     assert_equal(0, modified.to_i)
@@ -267,11 +262,9 @@ class TestFactbase < Factbase::Test
 
   def test_modifies_existing_fact_in_txn
     fb = Factbase.new
-    n = fb.insert
-    n.foo = 1
+    fb.insert.foo = 1
     fb.txn do |fbt|
-      f = fbt.query('(always)').each.to_a.first
-      f.bar = 2
+      fbt.query('(always)').each.to_a.first.bar = 2
     end
     assert_equal(1, fb.query('(eq foo 1)').each.to_a.size)
   end
@@ -352,14 +345,14 @@ class TestFactbase < Factbase::Test
   def test_different_properties_when_concurrent_inserts
     fb = Factbase.new
     Threads.new(5).assert do |_, r|
-      fb.insert.send(:"prop_#{r}=", r)
+      fb.insert.__send__(:"prop_#{r}=", r)
     end
     assert_equal(5, fb.size)
     Threads.new(5).assert do |_, r|
       prop = "prop_#{r}"
       f = fb.query("(eq #{prop} #{r})").each.to_a
       assert_equal(1, f.count)
-      assert_equal(r, f.first.send(prop.to_sym))
+      assert_equal(r, f.first.__send__(prop.to_sym))
     end
   end
 
@@ -376,8 +369,7 @@ class TestFactbase < Factbase::Test
     fb = Factbase.new
     Threads.new(t).assert do |i|
       fb.txn do |fbt|
-        fact = fbt.insert
-        fact.thread_id = i
+        fbt.insert.thread_id = i
       end
     end
     if t != fb.size || t != fb.query('(exists thread_id)').each.to_a.size
@@ -386,20 +378,16 @@ class TestFactbase < Factbase::Test
       puts "OS: #{RbConfig::CONFIG['host_os']} | Ruby: #{RUBY_VERSION} | Engine: #{RUBY_ENGINE}" # rubocop:disable all
       puts "CPU Cores (Concurrent): #{Concurrent.processor_count}" # rubocop:disable all
       puts "Active Threads: #{Thread.list.size}" # rubocop:disable all
-      # Capture OS-level context switches if on Linux
       if File.exist?('/proc/self/status')
         puts "Process Status (Context Switches):" # rubocop:disable all
         puts `grep -i "ctxt_switches" /proc/self/status` # rubocop:disable all
       end
-      # Analyze exactly which thread data is missing
       actual_ids = fb.query('(exists thread_id)').each.to_a.map { |f| f.thread_id }.compact.sort  # rubocop:disable all
-      expected_ids = (0...t).to_a
-      missing = expected_ids - actual_ids
-      duplicates = actual_ids.select { |id| actual_ids.count(id) > 1 }.uniq
+      duplicates = actual_ids.select { |id| actual_ids.count(id) > 1 }
+      duplicates.uniq!
       puts "Stats: Expected=#{t}, ActualSize=#{fb.size}, QuerySize=#{actual_ids.size}" # rubocop:disable all
-      puts "Missing IDs: #{missing.inspect}" # rubocop:disable all
+      puts "Missing IDs: #{((0...t).to_a - actual_ids).inspect}" # rubocop:disable all
       puts "Duplicate IDs: #{duplicates.inspect}" unless duplicates.empty? # rubocop:disable all
-      # Check if any threads are still running in the background
       puts "Thread List Details: #{Thread.list.map { |th| th.status }.inspect}" # rubocop:disable all
       puts "!" * 77 + "\n" # rubocop:disable all
     end
@@ -413,7 +401,7 @@ class TestFactbase < Factbase::Test
     Threads.new.assert do
       fb.txn do |fbt|
         fuzz.feed(fbt)
-        raise Factbase::Rollback
+        raise(Factbase::Rollback)
       end
     end
     assert_equal(0, fb.size)
@@ -450,8 +438,7 @@ class TestFactbase < Factbase::Test
     Threads.new(2).assert do
       results = fb.query('(exists rep)').each.to_a
       assert_equal(2, results.size)
-      repetitions = results.map(&:rep)
-      assert_equal((0..1).to_a, repetitions.sort)
+      assert_equal((0..1).to_a, results.map(&:rep).sort!)
     end
   end
 
@@ -468,8 +455,7 @@ class TestFactbase < Factbase::Test
       facts = fb.query('(eq value 42)').each.to_a
       assert_equal(100, facts.size)
       facts.each do |fact|
-        new_fact = new_fb.query("(eq value #{fact.value})").each.to_a.first
-        assert_equal(fact.value, new_fact.value)
+        assert_equal(fact.value, new_fb.query("(eq value #{fact.value})").each.to_a.first.value)
       end
     end
   end
@@ -478,8 +464,7 @@ class TestFactbase < Factbase::Test
     fb = Factbase.new
     mutex = Mutex.new
     Threads.new(100).assert do
-      fact = fb.insert
-      fact.foo = 42
+      fb.insert.foo = 42
     end
     fbs = []
     Threads.new(100).assert do
@@ -497,7 +482,7 @@ class TestFactbase < Factbase::Test
     fb = Factbase.new
     fb.txn do |fbt|
       fbt.insert.foo = 1
-      throw :commit
+      throw(:commit)
     end
     assert_equal(1, fb.size)
   end
@@ -506,7 +491,7 @@ class TestFactbase < Factbase::Test
     fb = Factbase.new
     fb.txn do |fbt|
       fbt.insert.foo = 1
-      throw :rollback
+      throw(:rollback)
     end
     assert_equal(0, fb.size)
   end
@@ -518,8 +503,7 @@ class TestFactbase < Factbase::Test
       f.foo = 123
       f = fbt.query('(always)').each.to_a.first
       assert_equal(123, f.foo)
-      ex = assert_raises(RuntimeError) { f.bar }
-      assert_equal("Can't find 'bar' attribute out of [foo]", ex.message)
+      assert_equal("Can't find 'bar' attribute out of [foo]", assert_raises(StandardError) { f.bar }.message)
     end
   end
 end

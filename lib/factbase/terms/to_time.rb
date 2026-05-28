@@ -22,7 +22,7 @@ class Factbase::ToTime < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(1)
     vv = _values(0, fact, maps, fb)
-    return nil if vv.nil?
+    return if vv.nil?
     Time.parse(vv[0].to_s)
   end
 end

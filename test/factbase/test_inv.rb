@@ -17,7 +17,7 @@ class TestInv < Factbase::Test
   def test_simple_checking
     fb =
       Factbase::Inv.new(Factbase.new) do |p, v|
-        raise 'oops' if v.is_a?(String) && p == 'b'
+        raise(StandardError, 'oops') if v.is_a?(String) && p == 'b'
       end
     f = fb.insert
     f.a = 42
@@ -32,7 +32,7 @@ class TestInv < Factbase::Test
   def test_pre_and_inv
     fb =
       Factbase::Inv.new(Factbase.new) do |p, v|
-        raise 'oops' if v.is_a?(String) && p == 'b'
+        raise(StandardError, 'oops') if v.is_a?(String) && p == 'b'
       end
     fb =
       Factbase::Pre.new(fb) do |f|

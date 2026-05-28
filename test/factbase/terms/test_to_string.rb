@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/to_string'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/to_string'
 
 # Test for 'to_string' term.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -13,7 +13,6 @@ require_relative '../../../lib/factbase/terms/to_string'
 # License:: MIT
 class TestToString < Factbase::Test
   def test_to_str
-    t = Factbase::ToString.new([Time.now])
-    assert_equal('String', t.evaluate(fact, [], Factbase.new).class.to_s)
+    assert_equal('String', Factbase::ToString.new([Time.now]).evaluate(fact, [], Factbase.new).class.to_s)
   end
 end

@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/cached/cached_factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
+require_relative '../../../lib/factbase/sync/sync_factbase'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase'
-require_relative '../../../lib/factbase/indexed/indexed_factbase'
-require_relative '../../../lib/factbase/sync/sync_factbase'
-require_relative '../../../lib/factbase/cached/cached_factbase'
 
 # Tests for incremental indexing bugs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -16,8 +16,7 @@ require_relative '../../../lib/factbase/cached/cached_factbase'
 class TestIncrementalIndexing < Factbase::Test
   def test_query_correct_after_adding_property
     fb = Factbase::IndexedFactbase.new(Factbase.new)
-    f = fb.insert
-    f.foo = 42
+    fb.insert.foo = 42
     assert_equal(1, fb.query('(eq foo 42)').each.to_a.size)
     assert_empty(fb.query('(exists bar)').each.to_a)
     fb.query('(eq foo 42)').each { |fact| fact.bar = 99 }
@@ -74,7 +73,7 @@ class TestIncrementalIndexing < Factbase::Test
     fb.txn do |fbt|
       fbt.insert.bar = 1
       assert_equal(1, fresh.size)
-      raise Factbase::Rollback
+      raise(Factbase::Rollback)
     end
     assert_equal(0, fresh.size)
   end
@@ -153,12 +152,10 @@ class TestIncrementalIndexing < Factbase::Test
 
   def test_cached_query_sees_fresh_fact
     fb = Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new))
-    fb.query('(eq foo 1)').each.to_a # warm cache with empty result
-    f1 = fb.insert
-    f1.foo = 1
+    fb.query('(eq foo 1)').each.to_a
+    fb.insert.foo = 1
     assert_equal(1, fb.query('(eq foo 1)').each.to_a.size)
-    f2 = fb.insert
-    f2.foo = 1
+    fb.insert.foo = 1
     assert_equal(2, fb.query('(eq foo 1)').each.to_a.size)
   end
 end

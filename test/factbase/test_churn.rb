@@ -21,18 +21,15 @@ class TestChurn < Factbase::Test
   end
 
   def test_converts_empty_to_string
-    c = Factbase::Churn.new
-    assert_equal('nothing', c.to_s)
+    assert_equal('nothing', Factbase::Churn.new.to_s)
   end
 
   def test_checks_for_zero
-    c = Factbase::Churn.new
-    assert_predicate(c, :zero?)
+    assert_predicate(Factbase::Churn.new, :zero?)
   end
 
   def test_makes_a_duplicate
-    c = Factbase::Churn.new
-    assert_predicate(c.dup, :zero?)
+    assert_predicate(Factbase::Churn.new.dup, :zero?)
   end
 
   def test_concatenates_with_other
@@ -40,7 +37,6 @@ class TestChurn < Factbase::Test
     c1.append(1, 6, 3)
     c2 = Factbase::Churn.new
     c2.append(3, 2, 46)
-    c3 = c1 + c2
-    assert_equal('4i/8d/49a', c3.to_s)
+    assert_equal('4i/8d/49a', (c1 + c2).to_s)
   end
 end

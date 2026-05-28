@@ -25,13 +25,15 @@ class Factbase::Defn < Factbase::TermBase
   def evaluate(_fact, _maps, _fb)
     assert_args(2)
     fn = @operands[0]
-    raise "A symbol expected as first argument of 'defn'" unless fn.is_a?(Symbol)
-    raise "Can't use '#{fn}' name as a term" if Factbase::Term.method_defined?(fn)
-    raise "Term '#{fn}' is already defined" if Factbase::Term.private_method_defined?(fn, false)
-    raise "The '#{fn}' is a bad name for a term" unless fn.match?(/^[a-z_]+$/)
-    e = "class Factbase::Term\nprivate\ndef #{fn}(fact, maps, fb)\n#{@operands[1]}\nend\nend"
+    raise(ArgumentError, "A symbol expected as first argument of 'defn'") unless fn.is_a?(Symbol)
+    raise(ArgumentError, "Can't use '#{fn}' name as a term") if Factbase::Term.method_defined?(fn)
+    raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term.private_method_defined?(fn, false)
+    raise(ArgumentError, "The '#{fn}' is a bad name for a term") unless fn.match?(/^[a-z_]+$/)
     # rubocop:disable Security/Eval
-    eval(e)
+    eval(
+      "class Factbase::Term\nprivate\ndef #{fn}(fact, maps, fb)\n#{@operands[1]}\nend\nend",
+      binding, __FILE__, __LINE__ - 1
+    )
     # rubocop:enable Security/Eval
     true
   end

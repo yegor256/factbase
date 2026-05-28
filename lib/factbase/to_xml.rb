@@ -30,23 +30,20 @@ class Factbase::ToXML
   # @return [String] The factbase in XML format
   def xml
     bytes = @fb.export
-    meta = {
-      version: Factbase::VERSION,
-      size: bytes.size
-    }
+    meta = { version: Factbase::VERSION, size: bytes.size }
     Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
       xml.fb(meta) do
         Factbase::Flatten.new(Marshal.load(bytes), @sorter).it.each do |m|
           xml.f_ do
             m.sort.to_h.each do |k, vv|
               if vv.is_a?(Array)
-                xml.send(:"#{k}_") do
+                xml.__send__(:"#{k}_") do
                   vv.each do |v|
-                    xml.send(:v, to_str(v), t: type_of(v))
+                    xml.__send__(:v, to_str(v), t: type_of(v))
                   end
                 end
               else
-                xml.send(:"#{k}_", to_str(vv), t: type_of(vv))
+                xml.__send__(:"#{k}_", to_str(vv), t: type_of(vv))
               end
             end
           end

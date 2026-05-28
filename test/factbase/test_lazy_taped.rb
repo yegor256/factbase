@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/lazy_taped'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/lazy_taped'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -30,16 +30,14 @@ class TestLazyTaped < Factbase::Test
   end
 
   def test_does_not_copy_on_read
-    original = [{ foo: [1, 2] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ foo: [1, 2] }])
     assert_equal(1, t.size)
     t.each { |m| m['foo'] }
     refute_predicate(t, :copied?)
   end
 
   def test_does_not_copy_on_insert
-    original = [{ foo: [1] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ foo: [1] }])
     t << { bar: [2] }
     refute_predicate(t, :copied?)
     assert_equal(2, t.size)
@@ -61,13 +59,11 @@ class TestLazyTaped < Factbase::Test
     assert_predicate(t, :copied?)
     assert_equal(1, t.added.size)
     assert_equal([1], original[0]['foo'], 'Original should not be modified')
-    modified = t.find_by_object_id(t.added.first)
-    assert_equal([1, 2], modified['foo'], 'Copied version should have the new value')
+    assert_equal([1, 2], t.find_by_object_id(t.added.first)['foo'], 'Copied version should have the new value')
   end
 
   def test_copies_on_delete
-    original = [{ foo: [1] }, { bar: [2] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ foo: [1] }, { bar: [2] }])
     t.delete_if { |m| m[:foo] }
     assert_predicate(t, :copied?)
     assert_equal(1, t.deleted.size)
@@ -100,13 +96,11 @@ class TestLazyTaped < Factbase::Test
 
   def test_to_a_without_copy
     original = [{ foo: 1 }, { bar: 2 }]
-    t = Factbase::LazyTaped.new(original)
-    assert_equal(original, t.to_a)
+    assert_equal(original, Factbase::LazyTaped.new(original).to_a)
   end
 
   def test_to_a_after_modification
-    original = [{ 'foo' => [1] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ 'foo' => [1] }])
     t.each { |m| m['bar'] = 42 }
     arr = t.to_a
     assert_equal(1, arr.size)
@@ -117,20 +111,17 @@ class TestLazyTaped < Factbase::Test
     t = Factbase::LazyTaped.new([])
     map = { 'test' => [1] }
     t << map
-    found = t.find_by_object_id(map.object_id)
-    assert_equal(map, found)
+    assert_equal(map, t.find_by_object_id(map.object_id))
   end
 
   def test_enumerable_without_block
-    t = Factbase::LazyTaped.new([{ a: 1 }, { b: 2 }])
-    enum = t.each
+    enum = Factbase::LazyTaped.new([{ a: 1 }, { b: 2 }]).each
     assert_instance_of(Enumerator, enum)
     assert_equal(2, enum.count)
   end
 
   def test_tracks_addition_uniquely
-    original = [{ 'f' => [5] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ 'f' => [5] }])
     t.each do |m|
       m['bar'] = 66
       m['foo'] = 77
@@ -148,48 +139,42 @@ class TestLazyTaped < Factbase::Test
   end
 
   def test_array_any
-    original = [{ 'foo' => [1, 2, 3] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ 'foo' => [1, 2, 3] }])
     found = false
     t.each { |m| found = m['foo'].any?(2) }
     assert(found)
   end
 
   def test_array_index_access
-    original = [{ 'foo' => [10, 20, 30] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ 'foo' => [10, 20, 30] }])
     result = nil
     t.each { |m| result = m['foo'][1] }
     assert_equal(20, result)
   end
 
   def test_array_to_a
-    original = [{ 'foo' => [1, 2] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ 'foo' => [1, 2] }])
     arr = nil
     t.each { |m| arr = m['foo'].to_a }
     assert_equal([1, 2], arr)
   end
 
   def test_array_each_enumerable
-    original = [{ 'foo' => [1, 2, 3] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ 'foo' => [1, 2, 3] }])
     sum = 0
     t.each { |m| m['foo'].each { |v| sum += v } }
     assert_equal(6, sum)
   end
 
   def test_hash_keys
-    original = [{ 'foo' => [1], 'bar' => [2] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ 'foo' => [1], 'bar' => [2] }])
     keys = nil
     t.each { |m| keys = m.keys }
     assert_equal(%w[foo bar], keys)
   end
 
   def test_hash_map
-    original = [{ 'foo' => [1], 'bar' => [2] }]
-    t = Factbase::LazyTaped.new(original)
+    t = Factbase::LazyTaped.new([{ 'foo' => [1], 'bar' => [2] }])
     result = nil
     t.each { |m| result = m.transform_values(&:first) }
     assert_equal({ 'foo' => 1, 'bar' => 2 }, result)
@@ -199,21 +184,23 @@ class TestLazyTaped < Factbase::Test
     fb = Factbase.new
     fb.insert.foo = 42
     fb.insert.bar = 55
-    churn =
+    assert_equal(
+      0,
       fb.txn do |fbt|
         fbt.query('(always)').each.to_a
-      end
-    assert_equal(0, churn.to_i, 'Read-only transaction should not trigger copy')
+      end.to_i, 'Read-only transaction should not trigger copy'
+    )
   end
 
   def test_modifying_txn_copies_lazily
     fb = Factbase.new
     fb.insert.foo = 42
-    churn =
+    assert_equal(
+      1,
       fb.txn do |fbt|
         fbt.query('(always)').each { |f| f.bar = 99 }
-      end
-    assert_equal(1, churn.to_i)
+      end.to_i
+    )
     fact = fb.query('(always)').each.to_a.first
     assert_equal(42, fact.foo)
     assert_equal(99, fact.bar)
@@ -221,11 +208,12 @@ class TestLazyTaped < Factbase::Test
 
   def test_insert_in_txn
     fb = Factbase.new
-    churn =
+    assert_equal(
+      1,
       fb.txn do |fbt|
         fbt.insert.foo = 123
-      end
-    assert_equal(1, churn.to_i)
+      end.to_i
+    )
     assert_equal(1, fb.size)
     assert_equal(123, fb.query('(always)').each.to_a.first.foo)
   end
@@ -234,11 +222,12 @@ class TestLazyTaped < Factbase::Test
     fb = Factbase.new
     fb.insert.foo = 1
     fb.insert.foo = 2
-    churn =
+    assert_equal(
+      1,
       fb.txn do |fbt|
         fbt.query('(eq foo 1)').delete!
-      end
-    assert_equal(1, churn.to_i)
+      end.to_i
+    )
     assert_equal(1, fb.size)
     assert_equal(2, fb.query('(always)').each.to_a.first.foo)
   end
@@ -248,7 +237,7 @@ class TestLazyTaped < Factbase::Test
     fb.insert.foo = 42
     fb.txn do |fbt|
       fbt.query('(always)').each { |f| f.bar = 99 }
-      raise Factbase::Rollback
+      raise(Factbase::Rollback)
     end
     fact = fb.query('(always)').each.to_a.first
     assert_equal(42, fact.foo)

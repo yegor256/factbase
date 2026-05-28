@@ -18,7 +18,7 @@ class Factbase::IndexedNot
     _feed(maps.to_a, entry) do
       sub.predict(maps, fb, params)
     end
-    return nil if entry[:facts].nil?
+    return if entry[:facts].nil?
     maps.respond_to?(:repack) ? maps.repack(entry[:facts]) : entry[:facts]
   end
 

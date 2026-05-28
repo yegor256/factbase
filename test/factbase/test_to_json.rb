@@ -18,9 +18,7 @@ class TestToJSON < Factbase::Test
     f = fb.insert
     f.foo = 42
     f.foo = 256
-    to = Factbase::ToJSON.new(fb)
-    json = JSON.parse(to.json)
-    assert_equal(256, json[0]['foo'][1])
+    assert_equal(256, JSON.parse(Factbase::ToJSON.new(fb).json)[0]['foo'][1])
   end
 
   def test_sort_keys

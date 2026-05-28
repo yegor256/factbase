@@ -24,9 +24,8 @@ class Factbase::CachedFact
     @origin.to_s
   end
 
-  # When a method is missing, this method is called.
   others do |*args|
     @cache.clear if args[0].to_s.end_with?('=')
-    @origin.send(*args)
+    @origin.__send__(*args)
   end
 end

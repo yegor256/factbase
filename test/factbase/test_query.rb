@@ -7,16 +7,16 @@ require_relative '../test__helper'
 require 'loog'
 require 'time'
 require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/query'
+require_relative '../../lib/factbase/cached/cached_factbase'
+require_relative '../../lib/factbase/impatient'
+require_relative '../../lib/factbase/indexed/indexed_factbase'
+require_relative '../../lib/factbase/inv'
 require_relative '../../lib/factbase/logged'
 require_relative '../../lib/factbase/pre'
-require_relative '../../lib/factbase/impatient'
-require_relative '../../lib/factbase/inv'
+require_relative '../../lib/factbase/query'
 require_relative '../../lib/factbase/rules'
-require_relative '../../lib/factbase/tallied'
-require_relative '../../lib/factbase/cached/cached_factbase'
-require_relative '../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../lib/factbase/sync/sync_factbase'
+require_relative '../../lib/factbase/tallied'
 
 # Query test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -35,7 +35,7 @@ class TestQuery < Factbase::Test
             y.each do |k, vv|
               vv = [vv] unless vv.is_a?(Array)
               vv.each do |v|
-                f.send(:"#{k}=", v)
+                f.__send__(:"#{k}=", v)
               end
             end
           end
@@ -82,8 +82,7 @@ class TestQuery < Factbase::Test
     maps << { 'first' => 'first' }
     maps << { 'second' => 'second' }
     maps << { 'third' => 'third' }
-    q = Factbase::Query.new(maps, '(always)', Factbase.new)
-    assert_equal(3, q.count)
+    assert_equal(3, Factbase::Query.new(maps, '(always)', Factbase.new).count)
   end
 
   def test_complex_parsing
@@ -153,18 +152,12 @@ class TestQuery < Factbase::Test
     maps = []
     now = Time.now.utc
     maps << { 'foo' => [now] }
-    q = Factbase::Query.new(maps, "(eq foo #{now.iso8601})", Factbase.new)
-    assert_equal(1, q.each.to_a.size)
+    assert_equal(1, Factbase::Query.new(maps, "(eq foo #{now.iso8601})", Factbase.new).each.to_a.size)
   end
 
   def test_simple_deleting
-    maps = [
-      { 'foo' => [42] },
-      { 'bar' => [4, 5] },
-      { 'bar' => [5] }
-    ]
-    q = Factbase::Query.new(maps, '(eq bar 5)', Factbase.new)
-    assert_equal(2, q.delete!)
+    maps = [{ 'foo' => [42] }, { 'bar' => [4, 5] }, { 'bar' => [5] }]
+    assert_equal(2, Factbase::Query.new(maps, '(eq bar 5)', Factbase.new).delete!)
     assert_equal(1, maps.size)
   end
 
@@ -174,16 +167,12 @@ class TestQuery < Factbase::Test
       { '_id' => [2], 'fruit' => ['apple'] },
       { '_id' => [3], 'fruit' => ['pear'] }
     ]
-    q = Factbase::Query.new(maps, '(eq fruit "apple")', Factbase.new)
-    assert_equal(1, q.delete!)
+    assert_equal(1, Factbase::Query.new(maps, '(eq fruit "apple")', Factbase.new).delete!)
     assert_equal(2, maps.size)
   end
 
   def test_reading_one
-    maps = [
-      { 'foo' => [42], 'hello' => [4] },
-      { 'bar' => [4, 5] }
-    ]
+    maps = [{ 'foo' => [42], 'hello' => [4] }, { 'bar' => [4, 5] }]
     with_factbases(maps) do |badge, fb|
       {
         '(agg (and (eq foo 42) (eq hello $v)) (min foo))' => 42,
@@ -207,21 +196,14 @@ class TestQuery < Factbase::Test
   end
 
   def test_compare_time_with_the_past
-    maps = [
-      { 'time' => Time.now }
-    ]
-    q = Factbase::Query.new(maps, '(gt time \'2024-03-23T03:21:43Z\')', Factbase.new)
-    assert_raises(RuntimeError, 'comparison of Time with String failed') do
+    q = Factbase::Query.new([{ 'time' => Time.now }], '(gt time \'2024-03-23T03:21:43Z\')', Factbase.new)
+    assert_raises(StandardError, 'comparison of Time with String failed') do
       q.each.next
     end
   end
 
   def test_deleting_nothing
-    maps = [
-      { 'foo' => [42] },
-      { 'bar' => [4, 5] },
-      { 'bar' => [5] }
-    ]
+    maps = [{ 'foo' => [42] }, { 'bar' => [4, 5] }, { 'bar' => [5] }]
     with_factbases(maps) do |badge, fb|
       q = fb.query('(never)')
       assert_equal(0, q.delete!, "#{q} in #{badge}")
@@ -248,7 +230,7 @@ class TestQuery < Factbase::Test
         fb.insert.bar = f.foo
         more += 1
       end
-      assert_equal(before + more, fb.size)
+      assert_equal(before + more, fb.size, "before was #{before}")
     end
   end
 
@@ -263,7 +245,7 @@ class TestQuery < Factbase::Test
           more += 1
         end
       end
-      assert_equal(before + more, fb.size)
+      assert_equal(before + more, fb.size, "before was #{before}")
     end
   end
 
@@ -278,7 +260,7 @@ class TestQuery < Factbase::Test
           more += 1
         end
       end
-      assert_equal(before + more, fb.size)
+      assert_equal(before + more, fb.size, "before was #{before}")
     end
   end
 
@@ -311,8 +293,7 @@ class TestQuery < Factbase::Test
   def test_returns_int
     maps = []
     maps << { 'foo' => [1] }
-    q = Factbase::Query.new(maps, '(eq foo 1)', Factbase.new)
-    assert_equal(1, q.each(&:to_s))
+    assert_equal(1, Factbase::Query.new(maps, '(eq foo 1)', Factbase.new).each(&:to_s))
   end
 
   def test_with_aliases
@@ -323,10 +304,7 @@ class TestQuery < Factbase::Test
   end
 
   def test_with_params
-    maps = [
-      { 'foo' => [42] },
-      { 'foo' => [17] }
-    ]
+    maps = [{ 'foo' => [42] }, { 'foo' => [17] }]
     found = 0
     Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(Factbase.new, bar: [42]) do
       found += 1
@@ -337,40 +315,33 @@ class TestQuery < Factbase::Test
   end
 
   def test_with_nil_alias
-    maps = [{ 'foo' => [42] }]
-    assert_nil(Factbase::Query.new(maps, '(as bar (plus xxx 3))', Factbase.new).each.to_a[0]['bar'])
+    assert_nil(Factbase::Query.new([{ 'foo' => [42] }], '(as bar (plus xxx 3))', Factbase.new).each.to_a[0]['bar'])
   end
 
   def test_get_all_properties
-    maps = [{ 'foo' => [42] }]
-    f = Factbase::Query.new(maps, '(always)', Factbase.new).each.to_a[0]
-    assert_includes(f.all_properties, 'foo')
+    assert_includes(
+      Factbase::Query.new([{ 'foo' => [42] }], '(always)', Factbase.new).each.to_a[0].all_properties,
+      'foo'
+    )
   end
 
   # This test ensures that the number of objects allocated during a transaction
   def test_txn_performance_degradation
-    # The maximum allowed growth percentage for memory allocations (5 = 5%).
     max_growth = 5
     size = 1000
     maps = (0..1000).map { |_i| { 'foo' => [rand(size)], 'bar' => [rand(size)], 'xyz' => [rand(size)] } }
     with_factbases(maps) do |badge, fb|
-      # Warmup.
       (1..10).each do |x|
         fb.query("(and (eq foo #{x}) (eq bar #{x}) (eq xyz #{x}))").each.to_a
       end
-      stats = []
+      snapshots = [GC.stat(:total_allocated_objects)]
       (1..10).each do |x|
-        before = GC.stat(:total_allocated_objects)
         fb.txn { |fbt| fbt.query("(and (eq foo #{x}) (eq bar #{x}) (eq xyz #{x}))").each.to_a }
-        after = GC.stat(:total_allocated_objects)
-        stats << (after - before)
+        snapshots << GC.stat(:total_allocated_objects)
       end
+      stats = snapshots.each_cons(2).map { |a, b| b - a }
       half = stats.size / 2
-      l_avg = (stats.first(half).sum / half.to_f)
-      r_avg = (stats.last(half).sum / half.to_f)
-      # Calculate the actual growth percentage to make logs more informative.
-      # If l_avg is 100 and r_avg is 105, degradation will be 5.0%.
-      growth = ((r_avg / l_avg * 100) - 100).round(2)
+      growth = (((stats.last(half).sum / Float(half)) / (stats.first(half).sum / Float(half)) * 100) - 100).round(2)
       assert_operator(max_growth, :>, growth, "#{badge}. Growth #{growth}% Max #{max_growth}%. Total objects: #{stats}")
     end
   end
@@ -387,23 +358,11 @@ class TestQuery < Factbase::Test
       'sync+plain' => Factbase::SyncFactbase.new(Factbase.new(maps)),
       'tallied+plain' => Factbase::Tallied.new(Factbase.new(maps)),
       'indexed+plain' => Factbase::IndexedFactbase.new(Factbase.new(maps)),
-      'indexed+logged+plain' => Factbase::IndexedFactbase.new(
-        Factbase::Logged.new(
-          Factbase.new(maps),
-          Loog::NULL
-        )
-      ),
+      'indexed+logged+plain' => Factbase::IndexedFactbase.new(Factbase::Logged.new(Factbase.new(maps), Loog::NULL)),
       'cached+plain' => Factbase::CachedFactbase.new(Factbase.new(maps)),
-      'cached+logged+plain' => Factbase::CachedFactbase.new(
-        Factbase::Logged.new(
-          Factbase.new(maps),
-          Loog::NULL
-        )
-      ),
+      'cached+logged+plain' => Factbase::CachedFactbase.new(Factbase::Logged.new(Factbase.new(maps), Loog::NULL)),
       'logged+plain' => Factbase::Logged.new(Factbase.new(maps), Loog::NULL),
-      'indexed+cached+plain' => Factbase::IndexedFactbase.new(
-        Factbase::CachedFactbase.new(Factbase.new(maps))
-      ),
+      'indexed+cached+plain' => Factbase::IndexedFactbase.new(Factbase::CachedFactbase.new(Factbase.new(maps))),
       'indexed+cached+rules+plain' => Factbase::IndexedFactbase.new(
         Factbase::CachedFactbase.new(
           Factbase::Rules.new(
@@ -413,12 +372,8 @@ class TestQuery < Factbase::Test
           )
         )
       ),
-      'cached+indexed+plain' => Factbase::CachedFactbase.new(
-        Factbase::IndexedFactbase.new(Factbase.new(maps))
-      ),
-      'indexed+indexed+plain' => Factbase::IndexedFactbase.new(
-        Factbase::IndexedFactbase.new(Factbase.new(maps))
-      ),
+      'cached+indexed+plain' => Factbase::CachedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps))),
+      'indexed+indexed+plain' => Factbase::IndexedFactbase.new(Factbase::IndexedFactbase.new(Factbase.new(maps))),
       'cached+cached+cached+plain' => Factbase::CachedFactbase.new(
         Factbase::CachedFactbase.new(
           Factbase::CachedFactbase.new(
@@ -443,12 +398,7 @@ class TestQuery < Factbase::Test
           )
         )
       ),
-      'sync+logged+plain' => Factbase::SyncFactbase.new(
-        Factbase::Logged.new(
-          Factbase.new(maps),
-          Loog::NULL
-        )
-      ),
+      'sync+logged+plain' => Factbase::SyncFactbase.new(Factbase::Logged.new(Factbase.new(maps), Loog::NULL)),
       'sync+cached+indexed+logged+plain' => Factbase::SyncFactbase.new(
         Factbase::CachedFactbase.new(
           Factbase::IndexedFactbase.new(

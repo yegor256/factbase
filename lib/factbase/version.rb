@@ -8,6 +8,5 @@
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase
-  # Current version of the gem (changed by .rultor.yml on every release)
   VERSION = '0.0.0' unless const_defined?(:VERSION)
 end

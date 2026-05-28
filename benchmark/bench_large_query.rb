@@ -50,7 +50,6 @@ def bench_large_query(bmk, fb, cycles)
     f.issue = i
     f.repository = repo
   end
-
   q = "(and
     (eq what 'issue-was-closed')
     (exists where)
@@ -89,18 +88,17 @@ def bench_large_query(bmk, fb, cycles)
   bmk.report("#{label} match #{p_total}") do
     cycles.times do
       t = fb.query(q).each.to_a.size
-      raise "Found #{t} facts, expected to find #{total}" unless t == total
+      raise(ArgumentError, "Found #{t} facts, expected to find #{total}") unless t == total
     end
   end
   bmk.report("#{label} match #{p_total} in txn") do
     cycles.times do
       fb.txn do |fbt|
         t = fbt.query(q).each.to_a.size
-        raise "Found #{t} facts, expected to find #{total}" unless t == total
+        raise(ArgumentError, "Found #{t} facts, expected to find #{total}") unless t == total
       end
     end
   end
-
   total.times do |i|
     f = fb.insert
     f.id = i
@@ -114,14 +112,14 @@ def bench_large_query(bmk, fb, cycles)
   bmk.report("#{label} match zero") do
     cycles.times do
       t = fb.query(q).each.to_a.size
-      raise "Found #{t} facts, expected to find nothing" unless t.zero?
+      raise(ArgumentError, "Found #{t} facts, expected to find nothing") unless t.zero?
     end
   end
   bmk.report("#{label} match zero in txn") do
     cycles.times do
       fb.txn do |fbt|
         t = fbt.query(q).each.to_a.size
-        raise "Found #{t} facts, expected to find nothing" unless t.zero?
+        raise(ArgumentError, "Found #{t} facts, expected to find nothing") unless t.zero?
       end
     end
   end

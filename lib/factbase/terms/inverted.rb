@@ -26,9 +26,9 @@ class Factbase::Inverted < Factbase::TermBase
   def predict(maps, fb, params)
     assert_args(1)
     term = @operands[0]
-    raise "A term is expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
+    raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
     fb.query(term, maps).each(fb, params).to_a
       .reverse
-      .map { |m| m.all_properties.to_h { |k| [k, m[k]] } }
+      .map! { |m| m.all_properties.to_h { |k| [k, m[k]] } }
   end
 end

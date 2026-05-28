@@ -24,7 +24,7 @@ class Factbase::Empty < Factbase::TermBase
     assert_args(1)
     term = @operands[0]
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
-      raise "A term is expected, but '#{term}' provided"
+      raise(ArgumentError, "A term is expected, but '#{term}' provided")
     end
     # rubocop:disable Lint/UnreachableLoop
     fb.query(term, maps).each(fb, fact) do

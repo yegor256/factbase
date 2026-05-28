@@ -27,11 +27,11 @@ class Factbase::Head < Factbase::TermBase
   def predict(maps, fb, params)
     assert_args(2)
     max = @operands[0]
-    raise "An integer is expected as first argument of '#{@op}'" unless max.is_a?(Integer)
+    raise(ArgumentError, "An integer is expected as first argument of '#{@op}'") unless max.is_a?(Integer)
     term = @operands[1]
-    raise "A term is expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
+    raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
     fb.query(term, maps).each(fb, params).to_a
       .take(max)
-      .map { |m| m.all_properties.to_h { |k| [k, m[k]] } }
+      .map! { |m| m.all_properties.to_h { |k| [k, m[k]] } }
   end
 end

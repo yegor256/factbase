@@ -14,6 +14,7 @@ plugins:
   - rubocop-minitest
   - rubocop-performance
   - rubocop-rake
+  - rubocop-elegant
 Naming/PredicateMethod:
   Enabled: false
 Minitest/EmptyLineBeforeAssertionMethods:
@@ -48,6 +49,96 @@ Security/MarshalLoad:
   Enabled: false
 Layout/MultilineAssignmentLayout:
   Enabled: true
+Elegant/GoodMethodName:
+  Exclude:
+    - 'benchmark/**/*'
+    - '**/test_*.rb'
+    - '**/*Test.rb'
+  AllowedNames:
+    - '_all_tuples'
+    - '_assert_absent'
+    - '_assert_not'
+    - '_assert_one'
+    - '_by_symbol'
+    - '_feed'
+    - '_init_indexes'
+    - '_join'
+    - '_resolve'
+    - '_scalar?'
+    - '_search'
+    - '_tape'
+    - '_track'
+    - '_values'
+    - '[]'
+    - '[]='
+    - '&'
+    - '+'
+    - '<<'
+    - '|'
+    - 'all_properties'
+    - 'assert_args'
+    - 'current_array'
+    - 'current_map'
+    - 'delete_if'
+    - 'ensure_copied_map'
+    - 'ensure_copied!'
+    - 'find_by_object_id'
+    - 'get_copied_array'
+    - 'get_copied_map'
+    - 'invalidate_if_dirty!'
+    - 'method_missing'
+    - 'pull_request'
+    - 'respond_to_missing?'
+    - 'source_of'
+    - 'tracking_id'
+    - 'try_lock'
+    - 'type_of'
+    - 'v_to_s'
+Elegant/GoodVariableName:
+  Exclude:
+    - 'benchmark/**/*'
+    - '**/test_*.rb'
+    - '**/*Test.rb'
+  AllowedNames:
+    - '@copied_map'
+    - '@lazy_taped'
+    - '@max_comments'
+    - '@next_num'
+    - '@taped_hash'
+    - '@time_tolerate'
+    - '@to_s'
+    - '@to_term'
+    - 'at1'
+    - 'first_operand'
+    - 'inner_idx'
+    - 'is_copied'
+    - 'maps_array'
+    - 'op1'
+    - 'op2'
+    - 'second_operand'
+    - 'yes_set'
+    - 'yielded_size'
+Style/DocumentDynamicEvalDefinition:
+  Enabled: false
+Layout/EmptyLinesAfterModuleInclusion:
+  Enabled: false
+Style/TopLevelMethodDefinition:
+  Exclude:
+    - 'Rakefile'
+    - 'benchmark/**/*'
+    - 'test/factbase/test_accum.rb'
+    - 'test/factbase/test_tee.rb'
+Elegant/ClassInModule:
+  Exclude:
+    - 'lib/**/*'
+    - '**/test_*.rb'
+    - '**/*Test.rb'
+Lint/NumberConversion:
+  Exclude:
+    - 'test/factbase/test_churn.rb'
+    - 'test/factbase/test_lazy_taped.rb'
+    - 'test/factbase/test_logged.rb'
+    - 'test/test_factbase.rb'
 Lint/Debugger:
   Enabled: true
   inherit_mode:

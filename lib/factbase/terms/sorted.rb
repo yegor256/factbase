@@ -27,9 +27,9 @@ class Factbase::Sorted < Factbase::TermBase
   def predict(maps, fb, params)
     assert_args(2)
     prop = @operands[0]
-    raise "A symbol is expected as first argument of 'sorted'" unless prop.is_a?(Symbol)
+    raise(ArgumentError, "A symbol is expected as first argument of 'sorted'") unless prop.is_a?(Symbol)
     term = @operands[1]
-    raise "A term is expected, but '#{term}' provided" unless term.is_a?(Factbase::Term)
+    raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
     fb.query(term, maps).each(fb, params).to_a
       .reject { |m| m[prop].nil? }
       .sort_by { |m| m[prop].first }

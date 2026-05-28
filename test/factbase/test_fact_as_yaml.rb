@@ -14,8 +14,7 @@ require_relative '../test__helper'
 # License:: MIT
 class TestFactAsYaml < Factbase::Test
   def test_prints_exactly
-    fb = Factbase.new
-    f = fb.insert
+    f = Factbase.new.insert
     f._id = 1
     f.foo = 42
     f.foo = 33
@@ -30,32 +29,26 @@ class TestFactAsYaml < Factbase::Test
   end
 
   def test_simple_rendering
-    fb = Factbase.new
-    f = fb.insert
+    f = Factbase.new.insert
     f._id = 1
     f.foo = 42
     f.bar = 'hello'
-    yaml_str = Factbase::FactAsYaml.new(f).to_s
-    yaml = YAML.load(yaml_str)
+    yaml = YAML.load(Factbase::FactAsYaml.new(f).to_s)
     assert_equal(1, yaml['_id'])
     assert_equal('hello', yaml['bar'])
     assert_equal(42, yaml['foo'])
   end
 
   def test_multiple_values
-    fb = Factbase.new
-    f = fb.insert
+    f = Factbase.new.insert
     f.foo = 42
     f.foo = 256
     f.foo = 512
-    yaml_str = Factbase::FactAsYaml.new(f).to_s
-    yaml = YAML.load(yaml_str)
-    assert_equal([42, 256, 512], yaml['foo'])
+    assert_equal([42, 256, 512], YAML.load(Factbase::FactAsYaml.new(f).to_s)['foo'])
   end
 
   def test_sorted_keys
-    fb = Factbase.new
-    f = fb.insert
+    f = Factbase.new.insert
     f.c = 3
     f.a = 1
     f.b = 2

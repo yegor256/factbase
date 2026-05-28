@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/term'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/term'
 
 # Term test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -13,8 +13,7 @@ require_relative '../../lib/factbase/term'
 # License:: MIT
 class TestTerm < Factbase::Test
   def test_false_matching
-    t = Factbase::Term.new(:never, [])
-    refute(t.evaluate(fact('foo' => [100]), [], Factbase.new))
+    refute(Factbase::Term.new(:never, []).evaluate(fact('foo' => [100]), [], Factbase.new))
   end
 
   def test_size_matching
@@ -77,9 +76,9 @@ class TestTerm < Factbase::Test
 
   def test_redresses_itself
     t = Factbase::Term.new(:something, [])
-    require_relative '../../lib/factbase/indexed/indexed_term'
+    require_relative('../../lib/factbase/indexed/indexed_term')
     t.redress!(Factbase::IndexedTerm)
-    require_relative '../../lib/factbase/cached/cached_term'
+    require_relative('../../lib/factbase/cached/cached_term')
     t.redress!(Factbase::CachedTerm)
     assert_kind_of(Factbase::CachedTerm, t)
     refute_kind_of(Factbase::CachedTerm, Factbase::Term.new(:something, []))

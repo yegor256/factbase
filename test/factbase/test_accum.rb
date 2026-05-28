@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/accum'
+require_relative '../../lib/factbase/fact'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/accum'
-require_relative '../../lib/factbase/fact'
 
 def global_function_for_this_test_only(foo)
-  raise foo
+  raise(foo)
 end
 
 # Accum test.
@@ -18,8 +18,7 @@ end
 # License:: MIT
 class TestAccum < Factbase::Test
   def test_holds_props
-    map = {}
-    f = Factbase::Fact.new(map)
+    f = Factbase::Fact.new({})
     props = {}
     a = Factbase::Accum.new(f, props, false)
     a.foo = 42
@@ -29,16 +28,17 @@ class TestAccum < Factbase::Test
   end
 
   def test_fetches_without_conflict_with_global_name
-    t = Factbase::Accum.new(
-      Factbase::Fact.new({ 'global_function_for_this_test_only' => [2] }),
-      {}, true
+    assert_equal(
+      2,
+      Factbase::Accum.new(
+        Factbase::Fact.new({ 'global_function_for_this_test_only' => [2] }), {},
+        true
+      ).global_function_for_this_test_only
     )
-    assert_equal(2, t.global_function_for_this_test_only)
   end
 
   def test_passes_props
-    map = {}
-    f = Factbase::Fact.new(map)
+    f = Factbase::Fact.new({})
     props = {}
     a = Factbase::Accum.new(f, props, true)
     a.foo = 42
@@ -48,27 +48,20 @@ class TestAccum < Factbase::Test
   end
 
   def test_appends_props
-    map = {}
-    f = Factbase::Fact.new(map)
+    f = Factbase::Fact.new({})
     f.foo = 42
-    props = {}
-    a = Factbase::Accum.new(f, props, false)
+    a = Factbase::Accum.new(f, {}, false)
     a.foo = 55
     assert_equal(2, a['foo'].size)
   end
 
   def test_empties
-    f = Factbase::Fact.new({})
-    a = Factbase::Accum.new(f, {}, false)
-    assert_nil(a['foo'])
+    assert_nil(Factbase::Accum.new(Factbase::Fact.new({}), {}, false)['foo'])
   end
 
   def test_prints_to_string
-    map = {}
-    f = Factbase::Fact.new(map)
-    props = {}
-    a = Factbase::Accum.new(f, props, true)
-    a.foo = 42
+    f = Factbase::Fact.new({})
+    Factbase::Accum.new(f, {}, true).foo = 42
     assert_equal('[ foo: [42] ]', f.to_s)
   end
 

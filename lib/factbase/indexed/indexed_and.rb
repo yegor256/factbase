@@ -11,12 +11,12 @@ class Factbase::IndexedAnd
   end
 
   def predict(maps, fb, params)
-    return nil if @idx.nil?
+    return if @idx.nil?
     key = [maps.object_id, @term.operands.first, @term.op]
     r = nil
     if @term.operands.all? { |o| o.op == :eq } && @term.operands.size > 1 \
       && @term.operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
-      props = @term.operands.map { |o| o.operands.first }.sort
+      props = @term.operands.map { |o| o.operands.first }.sort!
       key = [maps.object_id, props, :multi_and_eq]
       entry = @idx[key]
       maps_array = maps.to_a
@@ -50,13 +50,13 @@ class Factbase::IndexedAnd
         break if n.nil?
         if r.nil?
           r = n
-        elsif n.size < r.size * 8 # to skip some obvious matchings
+        elsif n.size < r.size * 8
           small, large = n.size < r.size ? [n.to_a, r.to_a] : [r.to_a, n.to_a]
           ids = Set.new(small.map(&:object_id))
           r = large.select { |f| ids.include?(f.object_id) }
         end
-        break if r.size < maps.size / 32 # it's already small enough
-        break if r.size < 128 # it's obviously already small enough
+        break if r.size < maps.size / 32
+        break if r.size < 128
       end
     end
     r
@@ -69,9 +69,8 @@ class Factbase::IndexedAnd
   end
 
   def _all_tuples(fact, props)
-    prop = props.first.to_s
     tuples = []
-    tuples += (fact[prop] || []).zip
+    tuples += (fact[props.first.to_s] || []).zip
     if props.size > 1
       tails = _all_tuples(fact, props[1..])
       ext = []

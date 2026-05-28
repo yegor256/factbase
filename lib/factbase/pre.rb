@@ -3,8 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'loog'
 require 'decoor'
+require 'loog'
 require_relative '../factbase'
 
 # A decorator of a +Factbase+, that runs a provided block on every +insert+.
@@ -26,7 +26,7 @@ class Factbase::Pre
   decoor(:fb)
 
   def initialize(fb, &block)
-    raise 'The "fb" is nil' if fb.nil?
+    raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @fb = fb
     @block = block
   end
@@ -39,7 +39,7 @@ class Factbase::Pre
 
   def txn
     @fb.txn do |fbt|
-      yield Factbase::Pre.new(fbt, &@block)
+      yield(Factbase::Pre.new(fbt, &@block))
     end
   end
 end

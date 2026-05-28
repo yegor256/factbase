@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
+require 'benchmark'
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/impatient'
+require_relative '../../lib/factbase/query'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/query'
-require_relative '../../lib/factbase/impatient'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -16,7 +17,7 @@ class TestImpatient < Factbase::Test
   class SlowFactbase < Factbase
     class SlowQuery < Factbase::Query
       def one(fb = @fb, params = {})
-        sleep 0.2
+        sleep(0.2)
         super
       end
     end
@@ -31,7 +32,7 @@ class TestImpatient < Factbase::Test
   class SlowDeleteFactbase < Factbase
     class SlowQuery < Factbase::Query
       def delete!(fb = @fb)
-        sleep 0.2
+        sleep(0.2)
         super
       end
     end
@@ -46,7 +47,7 @@ class TestImpatient < Factbase::Test
   class SlowEnoughFactbase < Factbase
     class SlowQuery < Factbase::Query
       def one(fb = @fb, params = {})
-        sleep 1.5
+        sleep(1.5)
         super
       end
     end
@@ -87,11 +88,11 @@ class TestImpatient < Factbase::Test
       slow.insert.value = rand(1000)
     end
     fb = Factbase::Impatient.new(slow, timeout: 0.01)
-    ex =
+    assert_includes(
       assert_raises(StandardError) do
         fb.query('(agg (min value))').one
-      end
-    assert_includes(ex.message, 'timed out after')
+      end.message, 'timed out after'
+    )
   end
 
   def test_delete_timeout
@@ -100,11 +101,11 @@ class TestImpatient < Factbase::Test
       slow.insert.value = i
     end
     fb = Factbase::Impatient.new(slow, timeout: 0.01)
-    ex =
+    assert_includes(
       assert_raises(StandardError) do
         fb.query('(gt value 500)').delete!
-      end
-    assert_includes(ex.message, 'timed out after')
+      end.message, 'timed out after'
+    )
   end
 
   def test_with_txn
@@ -125,14 +126,12 @@ class TestImpatient < Factbase::Test
   end
 
   def test_returns_int_when_empty
-    fb = Factbase.new
-    assert_equal(0, Factbase::Impatient.new(fb).query('(always)').each(&:to_s))
+    assert_equal(0, Factbase::Impatient.new(Factbase.new).query('(always)').each(&:to_s))
   end
 
   def test_returns_to_s_correctly
-    fb = Factbase.new
     q = '(always)'
-    assert_equal(q, fb.query(q).to_s)
+    assert_equal(q, Factbase.new.query(q).to_s)
   end
 
   def test_enumerator_support
@@ -158,19 +157,19 @@ class TestImpatient < Factbase::Test
   def test_custom_timeout
     slow = SlowEnoughFactbase.new
     slow.insert.value = 42
-    fb = Factbase::Impatient.new(slow, timeout: 2)
-    start = Time.now
-    result = fb.query('(agg (eq value 42) (first value))').one
-    elapsed = Time.now - start
-    assert_operator(elapsed, :>=, 1.5)
-    assert_equal([42], result)
+    assert_operator(
+      Benchmark.realtime do
+        assert_equal([42], Factbase::Impatient.new(slow, timeout: 2).query('(agg (eq value 42) (first value))').one)
+      end, :>=, 1.5
+    )
   end
 
   def test_nil_factbase_raises
-    ex =
+    assert_equal(
+      'The "fb" is nil',
       assert_raises(StandardError) do
         Factbase::Impatient.new(nil)
-      end
-    assert_equal('The "fb" is nil', ex.message)
+      end.message
+    )
   end
 end

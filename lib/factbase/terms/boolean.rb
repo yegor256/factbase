@@ -23,6 +23,6 @@ class Factbase::Boolean
     val = val[0] if val.respond_to?(:each)
     return false if val.nil?
     return val if val.is_a?(TrueClass) || val.is_a?(FalseClass)
-    raise "Boolean is expected, while #{val.class} received from #{@from}"
+    raise(ArgumentError, "Boolean is expected, while #{val.class} received from #{@from}")
   end
 end

@@ -23,7 +23,7 @@ class Factbase::Sum < Factbase::TermBase
   # @return [Integer] The sum of values for the specified key across all maps
   def evaluate(_fact, maps, _fb)
     k = @operands[0]
-    raise "A symbol is expected, but '#{k}' provided" unless k.is_a?(Symbol)
+    raise(ArgumentError, "A symbol is expected, but '#{k}' provided") unless k.is_a?(Symbol)
     sum = 0
     maps.each do |m|
       vv = m[k.to_s]

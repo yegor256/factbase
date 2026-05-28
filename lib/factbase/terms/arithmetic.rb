@@ -24,16 +24,16 @@ class Factbase::Arithmetic < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(2)
     lefts = _values(0, fact, maps, fb)
-    return nil if lefts.nil?
-    raise 'Too many values at first position, one expected' unless lefts.size == 1
+    return if lefts.nil?
+    raise(ArgumentError, 'Too many values at first position, one expected') unless lefts.size == 1
     rights = _values(1, fact, maps, fb)
-    return nil if rights.nil?
-    raise 'Too many values at second position, one expected' unless rights.size == 1
+    return if rights.nil?
+    raise(ArgumentError, 'Too many values at second position, one expected') unless rights.size == 1
     v = lefts[0]
     r = rights[0]
     if v.is_a?(Time) && r.is_a?(String)
       (num, units) = r.split
-      num = num.to_i
+      num = Integer(num, 10)
       r =
         case units
         when 'seconds', 'second'
@@ -47,9 +47,9 @@ class Factbase::Arithmetic < Factbase::TermBase
         when 'weeks', 'week'
           num * 60 * 60 * 24 * 7
         else
-          raise "Unknown time unit '#{units}' in '#{r}"
+          raise(ArgumentError, "Unknown time unit '#{units}' in '#{r}")
         end
     end
-    v.send(@op, r)
+    v.__send__(@op, r)
   end
 end

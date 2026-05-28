@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/traced'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/traced'
 
 # Test for traced term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -20,17 +20,22 @@ class TestTraced < Factbase::Test
   end
 
   def test_traced_raises
-    e = assert_raises(StandardError) { Factbase::Traced.new(['foo']).evaluate(fact, [], Factbase.new) }
-    assert_match(/A term is expected, but 'foo' provided/, e.message)
+    assert_match(
+      /A term is expected, but 'foo' provided/,
+      assert_raises(StandardError) do
+        Factbase::Traced.new(['foo']).evaluate(fact, [], Factbase.new)
+      end.message
+    )
   end
 
   def test_traced_raises_when_too_many_args
-    e =
+    assert_match(
+      /Too many \(\d+\) operands for 'traced' \(\d+ expected\)/,
       assert_raises(StandardError) do
         Factbase::Traced.new(
           [Factbase::Term.new(:defn, [:debug, 'self.to_s']), 'something']
         ).evaluate(fact, [], Factbase.new)
-      end
-    assert_match(/Too many \(\d+\) operands for 'traced' \(\d+ expected\)/, e.message)
+      end.message
+    )
   end
 end

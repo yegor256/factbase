@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
-#
-require_relative '../../test__helper'
 require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/terms/lt'
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+require_relative '../../test__helper'
 
 # Tests for the 'lt' term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -13,12 +12,10 @@ require_relative '../../../lib/factbase/terms/lt'
 # License:: MIT
 class TestLt < Factbase::Test
   def test_compares_less_than
-    t = Factbase::Lt.new([:number, 42])
-    assert(t.evaluate(fact('number' => 10), [], Factbase.new))
+    assert(Factbase::Lt.new([:number, 42]).evaluate(fact('number' => 10), [], Factbase.new))
   end
 
   def test_compares_not_less_than
-    t = Factbase::Lt.new([:number, 42])
-    refute(t.evaluate(fact('number' => 100), [], Factbase.new))
+    refute(Factbase::Lt.new([:number, 42]).evaluate(fact('number' => 100), [], Factbase.new))
   end
 end

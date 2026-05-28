@@ -65,7 +65,7 @@ class Factbase::LazyTaped
     end
 
     def method_missing(method, *, &)
-      current_map.send(method, *, &)
+      current_map.__send__(method, *, &)
     end
 
     def respond_to_missing?(method, include_private = false)

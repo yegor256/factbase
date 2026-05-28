@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: MIT
 
 require 'json'
-require 'time'
 require 'others'
+require 'time'
 require_relative '../factbase'
 
 # A single fact in a factbase.
@@ -37,7 +37,7 @@ class Factbase::Fact
   # Convert it to a string.
   # @return [String] String representation of it (in JSON)
   def to_s
-    "[ #{@map.map { |k, v| "#{k}: #{v}" }.sort.join(', ')} ]"
+    "[ #{@map.map { |k, v| "#{k}: #{v}" }.sort!.join(', ')} ]"
   end
 
   # Get a list of all props.
@@ -50,12 +50,15 @@ class Factbase::Fact
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
-      raise "Invalid prop name '#{kk}'" unless kk.match?(/^[a-z_][_a-zA-Z0-9]*$/)
-      raise "Prohibited prop name '#{kk}'" if methods.include?(kk.to_sym)
+      raise(ArgumentError, "Invalid prop name '#{kk}'") unless kk.match?(/^[a-z_][_a-zA-Z0-9]*$/)
+      raise(ArgumentError, "Prohibited prop name '#{kk}'") if methods.include?(kk.to_sym)
       v = args[1]
-      raise "The value of '#{kk}' can't be nil" if v.nil?
-      raise "The value of '#{kk}' can't be empty" if v == ''
-      raise "The type '#{v.class}' of '#{kk}' is not allowed" unless [String, Integer, Float, Time].include?(v.class)
+      raise(ArgumentError, "The value of '#{kk}' can't be nil") if v.nil?
+      raise(ArgumentError, "The value of '#{kk}' can't be empty") if v == ''
+      raise(ArgumentError, "The type '#{v.class}' of '#{kk}' is not allowed") unless [
+        String, Integer, Float,
+        Time
+      ].include?(v.class)
       v = v.utc if v.is_a?(Time)
       @map[kk] = [] if @map[kk].nil?
       @map[kk] << v
@@ -65,8 +68,8 @@ class Factbase::Fact
     else
       v = @map[k]
       if v.nil?
-        raise "Can't get '#{k}', the fact is empty" if @map.empty?
-        raise "Can't find '#{k}' attribute out of [#{@map.keys.join(', ')}]"
+        raise(ArgumentError, "Can't get '#{k}', the fact is empty") if @map.empty?
+        raise(ArgumentError, "Can't find '#{k}' attribute out of [#{@map.keys.join(', ')}]")
       end
       v[0]
     end

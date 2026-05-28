@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: MIT
 
 require 'loog'
-require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
-require_relative '../../../lib/factbase/logged'
 require_relative '../../../lib/factbase/cached/cached_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
+require_relative '../../../lib/factbase/logged'
 require_relative '../../../lib/factbase/sync/sync_factbase'
+require_relative '../../test__helper'
 
 # Query test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -42,8 +42,7 @@ class TestCachedQuery < Factbase::Test
       f.hello = 1
     end
     3.times do
-      q = fb.query('(eq foo (agg (exists hello) (min foo)))')
-      assert_equal(1, q.each.to_a.size)
+      assert_equal(1, fb.query('(eq foo (agg (exists hello) (min foo)))').each.to_a.size)
     end
   end
 

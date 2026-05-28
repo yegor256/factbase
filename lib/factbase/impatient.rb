@@ -18,9 +18,9 @@ class Factbase::Impatient
   # @param [Factbase] fb The factbase to decorate
   # @param [Integer] timeout Timeout in seconds
   def initialize(fb, timeout: 15)
-    raise 'The "fb" is nil' if fb.nil?
+    raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @origin = fb
-    @timeout = timeout.to_f
+    @timeout = Float(timeout)
   end
 
   decoor(:origin)
@@ -36,7 +36,7 @@ class Factbase::Impatient
 
   def txn
     @origin.txn do |fbt|
-      yield Factbase::Impatient.new(fbt, timeout: @timeout)
+      yield(Factbase::Impatient.new(fbt, timeout: @timeout))
     end
   end
 
@@ -63,7 +63,7 @@ class Factbase::Impatient
       return a unless block_given?
       yielded = 0
       a.each do |f|
-        yield f
+        yield(f)
         yielded += 1
       end
       yielded
@@ -86,7 +86,10 @@ class Factbase::Impatient
     def impatient(name, &)
       Timeout.timeout(@timeout, &)
     rescue Timeout::Error => e
-      raise "#{name}() timed out after #{@timeout.seconds} (#{e.message}), fb size is #{@fb.size}: #{@term}"
+      raise(
+        StandardError,
+        "#{name}() timed out after #{@timeout.seconds} (#{e.message}), fb size is #{@fb.size}: #{@term}"
+      )
     end
   end
 end

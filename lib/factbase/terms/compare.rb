@@ -31,7 +31,7 @@ class Factbase::Compare < Factbase::TermBase
       l = l.floor if l.is_a?(Time) && @op == :==
       rights.any? do |r|
         r = r.floor if r.is_a?(Time) && @op == :==
-        l.send(@op, r)
+        l.__send__(@op, r)
       end
     end
   end

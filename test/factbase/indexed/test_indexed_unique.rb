@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_term'
+require_relative '../../../lib/factbase/indexed/indexed_unique'
+require_relative '../../../lib/factbase/taped'
+require_relative '../../../lib/factbase/term'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/taped'
-require_relative '../../../lib/factbase/indexed/indexed_term'
-require_relative '../../../lib/factbase/indexed/indexed_unique'
 
 # Indexed term 'unique' test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -18,17 +18,10 @@ class TestIndexedUnique < Factbase::Test
   def test_predicts_on_unique
     skip('index not implemented')
     term = Factbase::Term.new(:unique, [:foo])
-    idx = {}
-    term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new(
-      [
-        { 'foo' => [42] },
-        { 'foo' => [42] },
-        { 'foo' => [7] },
-        { 'bar' => [100] }
-      ]
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    n = term.predict(
+      Factbase::Taped.new([{ 'foo' => [42] }, { 'foo' => [42] }, { 'foo' => [7] }, { 'bar' => [100] }]), nil, {}
     )
-    n = term.predict(maps, nil, {})
     assert_equal(2, n.size)
     assert_equal([{ 'foo' => [42] }, { 'foo' => [7] }], n.to_a)
   end
@@ -36,17 +29,17 @@ class TestIndexedUnique < Factbase::Test
   def test_predicts_on_unique_with_combinations
     skip('index not implemented')
     term = Factbase::Term.new(:unique, %i[foo bar])
-    idx = {}
-    term.redress!(Factbase::IndexedTerm, idx:)
-    maps = Factbase::Taped.new(
-      [
-        { 'foo' => [42], 'bar' => ['a'] },
-        { 'foo' => [7], 'baz' => ['a'] },
-        { 'foo' => [42], 'bar' => ['b'] },
-        { 'foo' => [52] }
-      ]
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    n = term.predict(
+      Factbase::Taped.new(
+        [
+          { 'foo' => [42], 'bar' => ['a'] },
+          { 'foo' => [7], 'baz' => ['a'] },
+          { 'foo' => [42], 'bar' => ['b'] },
+          { 'foo' => [52] }
+        ]
+      ), nil, {}
     )
-    n = term.predict(maps, nil, {})
     assert_equal(2, n.size)
     assert_equal([{ 'foo' => [42], 'bar' => ['a'] }, { 'foo' => [42], 'bar' => ['b'] }], n.to_a)
   end

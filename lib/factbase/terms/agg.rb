@@ -23,13 +23,12 @@ class Factbase::Agg < Factbase::TermBase
     assert_args(2)
     selector = @operands[0]
     unless selector.is_a?(Factbase::Term) || selector.is_a?(Factbase::TermBase)
-      raise "A term is expected, but '#{selector}' provided"
+      raise(ArgumentError, "A term is expected, but '#{selector}' provided")
     end
     term = @operands[1]
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
-      raise "A term is expected, but '#{term}' provided"
+      raise(ArgumentError, "A term is expected, but '#{term}' provided")
     end
-    subset = fb.query(selector, maps).each(fb, fact).to_a
-    term.evaluate(nil, subset, fb)
+    term.evaluate(nil, fb.query(selector, maps).each(fb, fact).to_a, fb)
   end
 end

@@ -22,9 +22,9 @@ class Factbase::First < Factbase::TermBase
   def evaluate(_fact, maps, _fb)
     assert_args(1)
     k = @operands[0]
-    raise "A symbol is expected, but #{k} provided" unless k.is_a?(Symbol)
+    raise(ArgumentError, "A symbol is expected, but #{k} provided") unless k.is_a?(Symbol)
     first = maps[0]
-    return nil if first.nil?
+    return if first.nil?
     first[k.to_s]
   end
 end

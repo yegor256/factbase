@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/best'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/best'
 
 # Test for the 'best' term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -13,26 +13,38 @@ require_relative '../../../lib/factbase/terms/best'
 # License:: MIT
 class TestBest < Factbase::Test
   def test_best_always_left
-    t = Factbase::Best.new { |a, _b| a }
-    best = t.evaluate(:age, [{ 'age' => [4, 3, 2] }, { 'age' => 25 }, { 'age' => 20 }])
-    assert_equal(20, best)
+    assert_equal(
+      20,
+      Factbase::Best.new do |a, _b|
+        a
+      end.evaluate(:age, [{ 'age' => [4, 3, 2] }, { 'age' => 25 }, { 'age' => 20 }])
+    )
   end
 
   def test_best_always_right
-    t = Factbase::Best.new { |_a, b| b }
-    best = t.evaluate(:age, [{ 'age' => [4, 3, 2] }, { 'age' => 25 }, { 'age' => 20 }])
-    assert_equal(20, best)
+    assert_equal(
+      20,
+      Factbase::Best.new do |_a, b|
+        b
+      end.evaluate(:age, [{ 'age' => [4, 3, 2] }, { 'age' => 25 }, { 'age' => 20 }])
+    )
   end
 
   def test_best_min
-    t = Factbase::Best.new { |a, b| a < b }
-    min = t.evaluate(:age, [{ 'age' => [4, 3, 2] }, { 'age' => 25 }, { 'age' => 20 }])
-    assert_equal(2, min)
+    assert_equal(
+      2,
+      Factbase::Best.new do |a, b|
+        a < b
+      end.evaluate(:age, [{ 'age' => [4, 3, 2] }, { 'age' => 25 }, { 'age' => 20 }])
+    )
   end
 
   def test_best_max
-    t = Factbase::Best.new { |a, b| a > b }
-    max = t.evaluate(:age, [{ 'age' => [4, 3, 2] }, { 'age' => 25 }, { 'age' => 20 }])
-    assert_equal(25, max)
+    assert_equal(
+      25,
+      Factbase::Best.new do |a, b|
+        a > b
+      end.evaluate(:age, [{ 'age' => [4, 3, 2] }, { 'age' => 25 }, { 'age' => 20 }])
+    )
   end
 end

@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_one'
+require_relative '../../../lib/factbase/indexed/indexed_term'
+require_relative '../../../lib/factbase/lazy_taped'
+require_relative '../../../lib/factbase/taped'
+require_relative '../../../lib/factbase/term'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/taped'
-require_relative '../../../lib/factbase/lazy_taped'
-require_relative '../../../lib/factbase/indexed/indexed_term'
-require_relative '../../../lib/factbase/indexed/indexed_one'
 
 # Indexed term 'one' test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -36,8 +36,7 @@ class TestIndexedOne < Factbase::Test
     ].each do |c|
       term = Factbase::Term.new(:one, [:foo])
       term.redress!(Factbase::IndexedTerm, idx: {})
-      n = term.predict(c[:input], nil, {})
-      assert_kind_of(c[:expected], n, "Failed persistence for #{c[:input].class}")
+      assert_kind_of(c[:expected], term.predict(c[:input], nil, {}), "Failed persistence for #{c[:input].class}")
     end
   end
 
@@ -50,12 +49,10 @@ class TestIndexedOne < Factbase::Test
       { input: [{ 'bar' => [1] }], expected: 0 },
       { input: [{ 'foo' => [1] }, { 'foo' => [1, 2] }, { 'foo' => [3] }], expected: 2 }
     ].each do |c|
-      idx = {}
       maps = yield(c[:input])
       term = Factbase::Term.new(:one, [:foo])
-      term.redress!(Factbase::IndexedTerm, idx: idx)
-      n = term.predict(maps, nil, {})
-      assert_equal(c[:expected], n.size, "Failed for #{maps.class} with #{c[:input]}")
+      term.redress!(Factbase::IndexedTerm, idx: {})
+      assert_equal(c[:expected], term.predict(maps, nil, {}).size, "Failed for #{maps.class} with #{c[:input]}")
     end
   end
 end

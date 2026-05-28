@@ -5,8 +5,8 @@
 
 require 'decoor'
 require 'others'
-require 'time'
 require 'tago'
+require 'time'
 require_relative 'syntax'
 
 # A decorator of a Factbase, that logs all operations.
@@ -21,10 +21,10 @@ class Factbase::Logged
   # @param [Integer] time_tolerate How many seconds are OK per request
   # @param [Print] tube The tube to use, if log is NIL
   def initialize(fb, log = nil, time_tolerate: 1, tube: nil)
-    raise 'The "fb" is nil' if fb.nil?
+    raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @origin = fb
     if log.nil?
-      raise 'Either "log" or "tube" must be non-NIL' if tube.nil?
+      raise(ArgumentError, 'Either "log" or "tube" must be non-NIL') if tube.nil?
       @tube = tube
     else
       @tube = Tube.new(log, time_tolerate:)
@@ -35,9 +35,8 @@ class Factbase::Logged
 
   def insert
     start = Time.now
-    f = @origin.insert
     @tube.say(start, "Inserted new fact ##{@origin.size} in #{start.ago}")
-    Fact.new(f, tube: @tube)
+    Fact.new(@origin.insert, tube: @tube)
   end
 
   def query(term, maps = nil)
@@ -52,10 +51,10 @@ class Factbase::Logged
     r =
       @origin.txn do |fbt|
         id = fbt.object_id
-        yield Factbase::Logged.new(fbt, tube: @tube)
+        yield(Factbase::Logged.new(fbt, tube: @tube))
       rescue Factbase::Rollback => e
         rollback = true
-        raise e
+        raise(e)
       end
     if rollback
       @tube.say(start, "Txn ##{id} rolled back in #{start.ago}")
@@ -78,7 +77,7 @@ class Factbase::Logged
         msg = "#{msg} (slow!)"
         m = :warn
       end
-      @log.send(m, msg)
+      @log.__send__(m, msg)
     end
   end
 
@@ -144,7 +143,9 @@ class Factbase::Logged
         Factbase::Logged.elapsed do
           r = qry.each(fb, params, &)
         end
-      raise ".query(#{@term.to_s.inspect}).each() of #{qry.class} returned #{r.class}" unless r.is_a?(Integer)
+      unless r.is_a?(Integer)
+        raise(StandardError, ".query(#{@term.to_s.inspect}).each() of #{qry.class} returned #{r.class}")
+      end
       q = Factbase::Syntax.new(@term).to_term.to_s
       q = "#{q} with {#{params.map { |k, v| "#{k}=#{v}" }.join(', ')}}" if params.is_a?(Hash) && !params.empty?
       if r.zero?
@@ -179,7 +180,7 @@ class Factbase::Logged
         Factbase::Logged.elapsed do
           r = @fb.query(@term, @maps).delete!(fb)
         end
-      raise ".delete! of #{@term.class} returned #{r.class}" unless r.is_a?(Integer)
+      raise(StandardError, ".delete! of #{@term.class} returned #{r.class}") unless r.is_a?(Integer)
       if before.zero?
         @tube.say(start, "There were no facts, nothing deleted by #{@term} #{tail}")
       elsif r.zero?
@@ -192,8 +193,7 @@ class Factbase::Logged
   end
 
   def self.elapsed
-    start = Time.now
     yield
-    "in #{start.ago}"
+    "in #{Time.now.ago}"
   end
 end

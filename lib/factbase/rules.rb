@@ -28,11 +28,11 @@ class Factbase::Rules
   decoor(:fb)
 
   def initialize(fb, rules, check = Check.new(rules), uid: nil)
-    raise 'The "fb" is nil' if fb.nil?
+    raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @fb = fb
-    raise 'The "rules" is nil' if rules.nil?
+    raise(ArgumentError, 'The "rules" is nil') if rules.nil?
     @rules = rules
-    raise 'The "check" is nil' if check.nil?
+    raise(ArgumentError, 'The "check" is nil') if check.nil?
     @check = check
     @uid = uid
   end
@@ -51,7 +51,7 @@ class Factbase::Rules
     @check = later
     @fb.txn do |fbt|
       churn = Factbase::Churn.new
-      yield Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn)
+      yield(Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn))
       @check = before
       unless churn.zero?
         fbt.query('(always)').each do |f|
@@ -107,7 +107,7 @@ class Factbase::Rules
     def each(fb = @fb, params = {})
       return to_enum(__method__, fb, params) unless block_given?
       @query.each(fb, params) do |f|
-        yield Fact.new(f, @check, fb)
+        yield(Fact.new(f, @check, fb))
       end
     end
   end
@@ -123,7 +123,7 @@ class Factbase::Rules
     def it(fact, fb)
       return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [], fb)
       e = "#{@expr[0..32]}..." if @expr.length > 32
-      raise "The fact doesn't match the #{e.inspect} rule: #{fact}"
+      raise(ArgumentError, "The fact doesn't match the #{e.inspect} rule: #{fact}")
     end
   end
 
@@ -140,7 +140,7 @@ class Factbase::Rules
       return if @uid.nil?
       a = fact[@uid]
       return if a.nil?
-      raise "More than one #{@uid.inspect} in the fact: #{a}" if a.size > 1
+      raise(ArgumentError, "More than one #{@uid.inspect} in the fact: #{a}") if a.size > 1
       @facts << a.first
     end
 
@@ -148,7 +148,7 @@ class Factbase::Rules
       return true if @uid.nil?
       a = fact[@uid]
       return true if a.nil?
-      raise "More than one #{@uid.inspect} in the fact: #{a}" if a.size > 1
+      raise(ArgumentError, "More than one #{@uid.inspect} in the fact: #{a}") if a.size > 1
       @facts.include?(a.first)
     end
   end

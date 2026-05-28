@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../factbase'
-require_relative 'taped'
 require_relative 'lazy_taped_hash'
+require_relative 'taped'
 
 # A lazy decorator of an Array with HashMaps that defers copying until modification.
 class Factbase::LazyTaped
@@ -22,7 +22,7 @@ class Factbase::LazyTaped
   # Returns the original map this copy was derived from.
   # Returns nil if the base hasn't been copied yet or if the fact is new.
   def source_of(copy)
-    return nil unless @copied
+    return unless @copied
     @copies.key(copy)
   end
 
@@ -76,21 +76,21 @@ class Factbase::LazyTaped
     is_copied = copied?
     unless is_copied
       @origin.each do |m|
-        yield _tape(m)
+        yield(_tape(m))
         yielded_size += 1
       end
     end
     staged = is_copied == copied? ? @staged : @staged[yielded_size..]
     staged&.each do |f|
       next if f.nil?
-      yield _tape(f)
+      yield(_tape(f))
     end
   end
 
   def delete_if
     ensure_copied!
     @staged.delete_if do |m|
-      r = yield m
+      r = yield(m)
       @deleted.append(source_of(m).object_id) if r
       r
     end
@@ -102,8 +102,7 @@ class Factbase::LazyTaped
 
   def repack(other)
     ensure_copied!
-    copied = other.map { |o| @copies[o] || o }
-    Factbase::Taped.new(copied, inserted: @inserted, deleted: @deleted, added: @added)
+    Factbase::Taped.new(other.map { |o| @copies[o] || o }, inserted: @inserted, deleted: @deleted, added: @added)
   end
 
   def &(other)
@@ -135,10 +134,9 @@ class Factbase::LazyTaped
 
   def _join(other)
     ensure_copied!
-    n = yield to_a, other.to_a
-    raise 'Cannot join with another Taped' if other.respond_to?(:inserted)
-    raise 'Can only join with array' unless other.is_a?(Array)
-    Factbase::Taped.new(n, inserted: @inserted, deleted: @deleted, added: @added)
+    raise(ArgumentError, 'Cannot join with another Taped') if other.respond_to?(:inserted)
+    raise(ArgumentError, 'Can only join with array') unless other.is_a?(Array)
+    Factbase::Taped.new(yield(to_a, other.to_a), inserted: @inserted, deleted: @deleted, added: @added)
   end
 
   def _track(copy, original)
@@ -147,7 +145,6 @@ class Factbase::LazyTaped
 
   def _tape(map)
     return LazyTapedHash.new(map, self, @added) unless copied?
-    copy = @copies[map] || map
-    Factbase::Taped::TapedHash.new(copy, @added)
+    Factbase::Taped::TapedHash.new(@copies[map] || map, @added)
   end
 end

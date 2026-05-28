@@ -22,7 +22,7 @@ class Factbase::ToInteger < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(1)
     vv = _values(0, fact, maps, fb)
-    return nil if vv.nil?
-    vv[0].to_i
+    return if vv.nil?
+    Integer(vv[0])
   end
 end

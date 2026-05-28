@@ -15,8 +15,8 @@ unless SimpleCov.running || ENV['PICKS'] || ARGV.include?('--no-cov')
       SimpleCov::Formatter::CoberturaFormatter
     ]
   )
-  SimpleCov.minimum_coverage 95
-  SimpleCov.minimum_coverage_by_file 90
+  SimpleCov.minimum_coverage(95)
+  SimpleCov.minimum_coverage_by_file(90)
   SimpleCov.start do
     add_filter 'Rakefile'
     add_filter 'test/'
@@ -29,15 +29,15 @@ end
 
 require 'minitest/autorun'
 require 'minitest/reporters'
-Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new]
-Minitest.load :minitest_reporter
+Minitest::Reporters.use!([Minitest::Reporters::SpecReporter.new])
+Minitest.load(:minitest_reporter)
 
 require_relative '../lib/factbase'
 
 # Default methods for all tests.
 class Factbase::Test < Minitest::Test
   def fact(map = {})
-    require_relative '../lib/factbase/fact'
+    require_relative('../lib/factbase/fact')
     Factbase::Fact.new(map)
   end
 end

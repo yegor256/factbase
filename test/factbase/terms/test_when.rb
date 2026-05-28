@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/when'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/when'
 
 # Test for the 'when' term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -20,9 +20,7 @@ class TestWhen < Factbase::Test
       [Factbase::Unique.new([:foo]), Factbase::Eq.new([:bar, 42]), 'unique foo then eq bar 42'],
       [Factbase::Eq.new([:bar, 52]), Factbase::Eq.new([:bar, 42]), 'eq bar 52 then eq bar 42']
     ].each do |first, second, msg|
-      f = fact({ 'foo' => 32, 'bar' => 42 })
-      t = Factbase::When.new([first, second])
-      assert(t.evaluate(f, [], Factbase.new), msg)
+      assert(Factbase::When.new([first, second]).evaluate(fact({ 'foo' => 32, 'bar' => 42 }), [], Factbase.new), msg)
     end
   end
 
@@ -32,9 +30,7 @@ class TestWhen < Factbase::Test
       [Factbase::Always.new, Factbase::Eq.new([:bar, 52]), 'always then eq bar 52'],
       [Factbase::Unique.new([:foo]), Factbase::Eq.new([:bar, 52]), 'unique foo then eq bar 52']
     ].each do |first, second, msg|
-      f = fact({ 'foo' => 22, 'bar' => 42 })
-      t = Factbase::When.new([first, second])
-      refute(t.evaluate(f, [], Factbase.new), msg)
+      refute(Factbase::When.new([first, second]).evaluate(fact({ 'foo' => 22, 'bar' => 42 }), [], Factbase.new), msg)
     end
   end
 end

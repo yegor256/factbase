@@ -22,9 +22,9 @@ class Factbase::CachedFactbase
   # @param [Factbase] origin Original factbase to decorate
   # @param [Hash] cache Cache to use
   def initialize(origin, cache = {})
-    raise 'Wrong type of original' unless origin.respond_to?(:query)
+    raise(ArgumentError, 'Wrong type of original') unless origin.respond_to?(:query)
     @origin = origin
-    raise 'Wrong type of cache' unless cache.is_a?(Hash)
+    raise(ArgumentError, 'Wrong type of cache') unless cache.is_a?(Hash)
     @cache = cache
   end
 
@@ -58,7 +58,7 @@ class Factbase::CachedFactbase
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
     @origin.txn do |fbt|
-      yield Factbase::CachedFactbase.new(fbt, @cache)
+      yield(Factbase::CachedFactbase.new(fbt, @cache))
     end
   end
 end

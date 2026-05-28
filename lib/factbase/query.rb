@@ -52,13 +52,12 @@ class Factbase::Query
       extras = {}
       f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
-      a = Factbase::Accum.new(f, extras, false)
-      r = @term.evaluate(a, @maps, fb)
+      r = @term.evaluate(Factbase::Accum.new(f, extras, false), @maps, fb)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
-        raise "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term.inspect}"
+        raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term.inspect}")
       end
       next unless r
-      yield Factbase::Accum.new(f, extras, true)
+      yield(Factbase::Accum.new(f, extras, true))
       yielded += 1
     end
     yielded
@@ -72,7 +71,7 @@ class Factbase::Query
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     r = @term.evaluate(Factbase::Tee.new(Factbase::Fact.new({}), params), @maps, fb)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
-      raise "Incorrect type #{r.class} returned by #{@term.inspect}"
+      raise(StandardError, "Incorrect type #{r.class} returned by #{@term.inspect}")
     end
     r
   end

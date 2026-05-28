@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/gte'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/gte'
 
 # Tests for the 'gte' term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -19,7 +19,6 @@ class TestGte < Factbase::Test
   end
 
   def test_compares_not_greater_than_or_equal
-    t = Factbase::Gte.new([:number, 42])
-    refute(t.evaluate(fact('number' => 41), [], Factbase.new))
+    refute(Factbase::Gte.new([:number, 42]).evaluate(fact('number' => 41), [], Factbase.new))
   end
 end

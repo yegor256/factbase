@@ -3,8 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'others'
 require 'decoor'
+require 'others'
 require_relative '../factbase'
 
 # A decorator of a Factbase, that checks invariants on every set.
@@ -40,7 +40,7 @@ class Factbase::Inv
 
   def txn
     @fb.txn do |fbt|
-      yield Factbase::Inv.new(fbt, &@block)
+      yield(Factbase::Inv.new(fbt, &@block))
     end
   end
 
@@ -89,7 +89,7 @@ class Factbase::Inv
     def each(fb = @fb, params = {})
       return to_enum(__method__, fb, params) unless block_given?
       @query.each(fb, params) do |f|
-        yield Fact.new(f, @block)
+        yield(Fact.new(f, @block))
       end
     end
   end

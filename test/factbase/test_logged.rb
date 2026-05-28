@@ -6,8 +6,8 @@
 require_relative '../test__helper'
 require 'loog'
 require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/logged'
 require_relative '../../lib/factbase/cached/cached_factbase'
+require_relative '../../lib/factbase/logged'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -64,14 +64,14 @@ class TestLogged < Factbase::Test
   def test_with_slow_txn
     log = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, log, time_tolerate: 0.1)
-    fb.txn { sleep 0.4 }
+    fb.txn { sleep(0.4) }
     assert_includes(log.to_s, '(slow!)', log)
   end
 
   def test_with_txn_rollback
     log = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, log)
-    assert_predicate(fb.txn { raise Factbase::Rollback }, :zero?)
+    assert_predicate(fb.txn { raise(Factbase::Rollback) }, :zero?)
     assert_equal(0, fb.size)
     assert_includes(log.to_s, 'rolled back', log)
     refute_includes(log.to_s, 'didn\'t touch', log)
@@ -101,14 +101,12 @@ class TestLogged < Factbase::Test
   end
 
   def test_returns_int_when_empty
-    fb = Factbase.new
-    assert_equal(0, Factbase::Logged.new(fb, Loog::NULL).query('(always)').each(&:to_s))
+    assert_equal(0, Factbase::Logged.new(Factbase.new, Loog::NULL).query('(always)').each(&:to_s))
   end
 
   def test_returns_to_s_correctly
-    fb = Factbase.new
     q = '(always)'
-    assert_equal(q, fb.query(q).to_s)
+    assert_equal(q, Factbase.new.query(q).to_s)
   end
 
   def test_logs_when_enumerator

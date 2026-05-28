@@ -24,9 +24,9 @@ class Factbase::Undef < Factbase::TermBase
   def evaluate(_fact, _maps, _fb)
     assert_args(1)
     fn = @operands[0]
-    raise "A symbol expected as first argument of 'undef'" unless fn.is_a?(Symbol)
+    raise(ArgumentError, "A symbol expected as first argument of 'undef'") unless fn.is_a?(Symbol)
     if Factbase::Term.private_method_defined?(fn, false)
-      Factbase::Term.class_eval("undef :#{fn}", __FILE__, __LINE__ - 1) # undef :foo
+      Factbase::Term.class_eval("undef :#{fn}", __FILE__, __LINE__ - 1)
     end
     true
   end

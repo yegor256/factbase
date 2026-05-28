@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: MIT
 
 require 'threads'
-require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/sync/sync_factbase'
+require_relative '../../test__helper'
 
 # Sync factbase test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)

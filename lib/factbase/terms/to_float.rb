@@ -22,7 +22,7 @@ class Factbase::ToFloat < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(1)
     vv = _values(0, fact, maps, fb)
-    return nil if vv.nil?
-    vv[0].to_f
+    return if vv.nil?
+    Float(vv[0])
   end
 end

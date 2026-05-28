@@ -18,7 +18,7 @@ class Factbase::Tallied
   attr_reader :churn
 
   def initialize(fb, churn = Factbase::Churn.new)
-    raise 'The "fb" is nil' if fb.nil?
+    raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @fb = fb
     @churn = churn
   end
@@ -26,9 +26,8 @@ class Factbase::Tallied
   decoor(:fb)
 
   def insert
-    f = Fact.new(@fb.insert, @churn)
     @churn.append(1, 0, 0)
-    f
+    Fact.new(@fb.insert, @churn)
   end
 
   def query(query, maps = nil)
@@ -39,13 +38,13 @@ class Factbase::Tallied
     before = @churn.dup
     commit = false
     @fb.txn do |fbt|
-      catch :rollback do
-        yield Factbase::Tallied.new(fbt, @churn)
+      catch(:rollback) do
+        yield(Factbase::Tallied.new(fbt, @churn))
         commit = true
       end
     rescue Factbase::Rollback => e
       @churn = before
-      raise e
+      raise(e)
     ensure
       @churn = before unless commit
     end
@@ -96,7 +95,7 @@ class Factbase::Tallied
     def each(fb = @fb, params = {}, &)
       return to_enum(__method__, fb, params) unless block_given?
       @query.each(fb, params) do |f|
-        yield Fact.new(f, @churn)
+        yield(Fact.new(f, @churn))
       end
     end
 

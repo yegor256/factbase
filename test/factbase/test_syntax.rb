@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase/syntax'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase/syntax'
 
 # Syntax test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -78,11 +78,7 @@ class TestSyntax < Factbase::Test
   end
 
   def test_simple_matching
-    m = {
-      'foo' => ['Hello, world!'],
-      'bar' => [42],
-      'z' => [1, 2, 3, 4]
-    }
+    m = { 'foo' => ['Hello, world!'], 'bar' => [42], 'z' => [1, 2, 3, 4] }
     {
       '(eq z 1)' => true,
       '(or (eq bar 888) (eq z 1))' => true,

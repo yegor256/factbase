@@ -63,7 +63,7 @@ end
 desc 'Benchmark them all'
 task :benchmark, [:name, :cycles] do |_t, args|
   bname = args[:name] || 'essential'
-  cycles = (args[:cycles] || 5).to_i
+  cycles = Integer(args[:cycles] || 5)
   require_relative 'lib/factbase'
   require_relative 'lib/factbase/cached/cached_factbase'
   require_relative 'lib/factbase/indexed/indexed_factbase'
@@ -84,16 +84,11 @@ task :benchmark, [:name, :cycles] do |_t, args|
       fb = Factbase.new
       fb = Factbase::IndexedFactbase.new(fb)
       fb = Factbase::CachedFactbase.new(fb)
-      Kernel.send(File.basename(f).gsub(/\.rb$/, '').to_sym, b, fb, cycles)
+      Kernel.__send__(File.basename(f).gsub(/\.rb$/, '').to_sym, b, fb, cycles)
     end
   end
 end
 
-# Run profiling on a benchmark and generate a flamegraph.
-# To run this task, you need to have stackprof installed.
-# https://github.com/tmm1/stackprof
-# To run profiling for a specific benchmark you can run:
-#   bundle exec rake flamegraph\[bench_slow_query\]
 desc 'Profile a benchmark (e.g., flamegraph[bench_slow_query])'
 task :flamegraph, [:name] do |_t, args|
   require 'stackprof'

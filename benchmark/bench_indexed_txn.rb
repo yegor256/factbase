@@ -15,7 +15,6 @@ def bench_indexed_txn(bmk, _fb, cycles)
   total = 100_000
   [total].each do |n|
     p_total = "#{n / 1_000}k"
-
     fb_ins = Factbase::IndexedFactbase.new(Factbase.new)
     n.times do |i|
       f = fb_ins.insert
@@ -33,7 +32,6 @@ def bench_indexed_txn(bmk, _fb, cycles)
         fb_ins.query("(and (eq type 'issue') (eq status 'open'))").each.size
       end
     end
-
     fb_del = Factbase::IndexedFactbase.new(Factbase.new)
     n.times do |i|
       f = fb_del.insert

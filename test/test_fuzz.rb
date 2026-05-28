@@ -13,14 +13,12 @@ require_relative 'test__helper'
 # License:: MIT
 class TestIndexedAnd < Factbase::Test
   def test_make_generates_default_size
-    fb = Factbase::Fuzz.make
-    assert_equal(1000, fb.query('(always)').to_a.size)
+    assert_equal(1000, Factbase::Fuzz.make.query('(always)').to_a.size)
   end
 
   def test_make_with_custom_size
     [0, 150].each do |count|
-      fb = Factbase::Fuzz.make(count)
-      assert_equal(count, fb.query('(always)').to_a.size)
+      assert_equal(count, Factbase::Fuzz.make(count).query('(always)').to_a.size)
     end
   end
 
@@ -36,10 +34,8 @@ class TestIndexedAnd < Factbase::Test
   end
 
   def test_contains_all_required_fields
-    fb = Factbase::Fuzz.make(100)
-    found_empty = false
-    found_filled = false
-    fb.query('(always)').each do |fact|
+    facts = Factbase::Fuzz.make(100).query('(always)').each.to_a
+    facts.each do |fact|
       assert_kind_of(Integer, fact.number)
       assert_kind_of(Integer, fact.cost)
       assert_kind_of(Integer, fact.diff_size)
@@ -50,10 +46,8 @@ class TestIndexedAnd < Factbase::Test
       assert_kind_of(String, fact.title)
       assert_kind_of(Float, fact.test_coverage)
       assert_kind_of(Time, fact.created_at)
-      found_empty = true if fact['comments'].nil?
-      found_filled = true unless fact['comments'].nil?
     end
-    assert(found_empty, 'Should find at least one fact without comments')
-    assert(found_filled, 'Should find at least one fact with comments')
+    assert(facts.any? { |fact| fact['comments'].nil? }, 'Should find at least one fact without comments')
+    assert(facts.any? { |fact| !fact['comments'].nil? }, 'Should find at least one fact with comments')
   end
 end

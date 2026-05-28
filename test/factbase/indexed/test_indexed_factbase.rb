@@ -6,9 +6,9 @@
 require 'elapsed'
 require 'loog'
 require 'timeout'
-require_relative '../../test__helper'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
+require_relative '../../test__helper'
 
 # Factbase test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -80,7 +80,7 @@ class TestIndexedFactbase < Factbase::Test
         fbt.query(q).each do |f|
           f.foo = 43
         end
-        raise Factbase::Rollback
+        raise(Factbase::Rollback)
       end
       refute_empty(fb.query(q).each.to_a, q)
       fb.query(q).each do |f|
@@ -132,9 +132,8 @@ class TestIndexedFactbase < Factbase::Test
     fb1.insert.foo = 42
     fb1.insert.bar = 13
     assert_equal(1, fb1.query('(eq foo 42)').each.to_a.size)
-    data = fb1.export
     fb2 = Factbase::IndexedFactbase.new(Factbase.new)
-    fb2.import(data)
+    fb2.import(fb1.export)
     assert_equal(2, fb2.size)
     assert_equal(1, fb2.query('(eq foo 42)').each.to_a.size)
     assert_equal(1, fb2.query('(eq bar 13)').each.to_a.size)
@@ -168,8 +167,7 @@ class TestIndexedFactbase < Factbase::Test
     fb3 = Factbase::IndexedFactbase.new(Factbase.new)
     populate.call(fb3)
     data_without_index = fb3.export
-    unmarshalled_no_idx = Marshal.load(data_without_index)
-    assert_empty(unmarshalled_no_idx[:idx], 'Index should be empty without queries')
+    assert_empty(Marshal.load(data_without_index)[:idx], 'Index should be empty without queries')
     assert_operator(data_with_index.size, :>, data_without_index.size, 'Export with index should be larger')
   end
 
@@ -184,8 +182,7 @@ class TestIndexedFactbase < Factbase::Test
     fb2 = Factbase::IndexedFactbase.new(Factbase.new)
     fb2.import(data)
     fb2.insert.bar = 13
-    data2 = fb2.export
-    unmarshalled2 = Marshal.load(data2)
+    unmarshalled2 = Marshal.load(fb2.export)
     assert_kind_of(Hash, unmarshalled2[:idx], 'Index should remain a Hash after insert')
     refute_empty(unmarshalled2[:idx], 'Index should be preserved after insert (incremental indexing)')
   end
@@ -221,9 +218,8 @@ class TestIndexedFactbase < Factbase::Test
     fb1 = Factbase.new
     fb1.insert.foo = 42
     fb1.insert.bar = 13
-    old_format_data = fb1.export
     fb2 = Factbase::IndexedFactbase.new(Factbase.new)
-    fb2.import(old_format_data)
+    fb2.import(fb1.export)
     assert_equal(2, fb2.size)
     assert_equal(1, fb2.query('(eq foo 42)').each.to_a.size)
     assert_equal(1, fb2.query('(eq bar 13)').each.to_a.size)
@@ -245,10 +241,7 @@ class TestIndexedFactbase < Factbase::Test
         fbt.query('(exists foo)').each(&:foo)
       end
     end
-    assert_operator(
-      idx.size, :<, 10,
-      'Index must not accumulate stale entries across transactions'
-    )
+    assert_operator(idx.size, :<, 10, 'Index must not accumulate stale entries across transactions')
   end
 
   def test_multiple_import_accumulates
@@ -464,7 +457,6 @@ class TestIndexedFactbase < Factbase::Test
       f.foo = (i <= 50 ? 1 : 2)
       f.bar = 3
     end
-    found = fb.query('(and (eq foo 2) (unique bar))').each.to_a
-    assert_equal([51], found.map(&:id))
+    assert_equal([51], fb.query('(and (eq foo 2) (unique bar))').each.to_a.map(&:id))
   end
 end

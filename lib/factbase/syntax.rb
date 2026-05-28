@@ -43,7 +43,7 @@ class Factbase::Syntax
   rescue StandardError => e
     err = "#{e.message} (#{Backtrace.new(e)}) in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
-    raise Broken, err
+    raise(Broken, err)
   end
 
   private
@@ -52,12 +52,12 @@ class Factbase::Syntax
   # @return [Term] The term detected
   def build
     @tokens ||= to_tokens
-    raise 'No tokens' if @tokens.empty?
+    raise(StandardError, 'No tokens') if @tokens.empty?
     @ast ||= to_ast(@tokens, 0)
-    raise "Too many terms (#{@ast[1]} != #{@tokens.size})" if @ast[1] != @tokens.size
+    raise(ArgumentError, "Too many terms (#{@ast[1]} != #{@tokens.size})") if @ast[1] != @tokens.size
     t = @ast[0]
-    raise 'No terms found in the AST' if t.nil?
-    raise "#{t.class.name} is not an instance of Term" unless t.is_a?(Factbase::Term)
+    raise(StandardError, 'No terms found in the AST') if t.nil?
+    raise(ArgumentError, "#{t.class.name} is not an instance of Term") unless t.is_a?(Factbase::Term)
     t
   end
 
@@ -73,25 +73,24 @@ class Factbase::Syntax
   # @param [Integer] at Position to start parsing from
   # @return [Array<Factbase::Term,Integer>] The term detected and ending position
   def to_ast(tokens, at)
-    raise "Closing too soon at ##{at}" if tokens[at] == :close
+    raise(StandardError, "Closing too soon at ##{at}") if tokens[at] == :close
     return [tokens[at], at + 1] unless tokens[at] == :open
     at += 1
     op = tokens[at]
-    raise 'No token found' if op == :close
+    raise(StandardError, 'No token found') if op == :close
     operands = []
     at += 1
     loop do
-      raise "End of token stream at ##{at}" if tokens[at].nil?
+      raise(StandardError, "End of token stream at ##{at}") if tokens[at].nil?
       break if tokens[at] == :close
       (operand, at1) = to_ast(tokens, at)
-      raise "Stuck at position ##{at}" if at == at1
-      raise "Jump back at position ##{at}" if at1 < at
+      raise(StandardError, "Stuck at position ##{at}") if at == at1
+      raise(StandardError, "Jump back at position ##{at}") if at1 < at
       at = at1
       operands << operand
       break if tokens[at] == :close
     end
-    t = Factbase::Term.new(op, operands)
-    [t, at + 1]
+    [Factbase::Term.new(op, operands), at + 1]
   end
 
   # Turns a query into an array of tokens.
@@ -128,26 +127,26 @@ class Factbase::Syntax
       when ')'
         list << :close
       when ' ', "\n", "\t", "\r"
-        # ignore it
+        next
       else
         acc += c
       end
     end
-    raise 'String not closed' if string
+    raise(StandardError, 'String not closed') if string
     list.map do |t|
       if t.is_a?(Symbol)
         t
       elsif t.start_with?('\'', '"')
-        raise 'String literal can\'t be empty' if t.length <= 2
+        raise(ArgumentError, 'String literal can\'t be empty') if t.length <= 2
         t[1..-2]
       elsif t.match?(/^(\+|-)?[0-9]+$/)
-        t.to_i
+        Integer(t, 10)
       elsif t.match?(/^(\+|-)?[0-9]+\.[0-9]+(e\+[0-9]+)?$/)
-        t.to_f
+        Float(t)
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/)
         Time.parse(t)
       else
-        raise "Wrong symbol format (#{t})" unless t.match?(/^([_a-z][a-zA-Z0-9_]*|\$[_a-z]+)$/)
+        raise(ArgumentError, "Wrong symbol format (#{t})") unless t.match?(/^([_a-z][a-zA-Z0-9_]*|\$[_a-z]+)$/)
         t.to_sym
       end
     end

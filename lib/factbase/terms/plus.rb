@@ -3,8 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require_relative 'base'
 require_relative 'arithmetic'
+require_relative 'base'
 
 # Represents a Plus term in the Factbase system.
 # This class is used to perform addition operations on operands.

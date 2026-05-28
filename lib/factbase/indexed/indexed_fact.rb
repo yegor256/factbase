@@ -26,11 +26,8 @@ class Factbase::IndexedFact
     @origin.to_s
   end
 
-  # When a method is missing, this method is called.
   others do |*args|
-    # Only clear index when modifying properties on existing (non-fresh) facts
-    # Fresh facts are not in the index yet, so modifications don't affect it
     @idx.clear if args[0].to_s.end_with?('=') && !@fresh.include?(object_id)
-    @origin.send(*args)
+    @origin.__send__(*args)
   end
 end

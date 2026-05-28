@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/first'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/first'
 
 # Test for 'first' term.
 # Author:: Vlodya Lombrozo (volodya.lombrozo@gmail.com)
@@ -13,14 +13,10 @@ require_relative '../../../lib/factbase/terms/first'
 # License:: MIT
 class TestFirst < Factbase::Test
   def test_first_several
-    t = Factbase::First.new([:first])
-    res = t.evaluate(fact, [{ 'first' => 1 }], Factbase.new)
-    assert_equal(1, res)
+    assert_equal(1, Factbase::First.new([:first]).evaluate(fact, [{ 'first' => 1 }], Factbase.new))
   end
 
   def test_first_absent
-    t = Factbase::First.new([:absent])
-    res = t.evaluate(fact, {}, Factbase.new)
-    assert_nil(res)
+    assert_nil(Factbase::First.new([:absent]).evaluate(fact, {}, Factbase.new))
   end
 end

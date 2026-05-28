@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_term'
+require_relative '../../../lib/factbase/lazy_taped'
+require_relative '../../../lib/factbase/taped'
+require_relative '../../../lib/factbase/term'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/taped'
-require_relative '../../../lib/factbase/lazy_taped'
-require_relative '../../../lib/factbase/indexed/indexed_term'
 
 # Indexed term 'absent' test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -35,8 +35,7 @@ class TestIndexedAbsent < Factbase::Test
       { input: Factbase::LazyTaped.new([{ 'bar' => 42 }]), expected: Factbase::Taped }
     ].each do |c|
       term = Factbase::Term.new(:absent, [:foo])
-      idx = {}
-      term.redress!(Factbase::IndexedTerm, idx:)
+      term.redress!(Factbase::IndexedTerm, idx: {})
       n = term.predict(c[:input], nil, {})
       assert_kind_of(c[:expected], n, "Expect #{c[:expected]}, but got #{n.class} for input #{c[:input].class}")
     end
@@ -50,12 +49,9 @@ class TestIndexedAbsent < Factbase::Test
       { input: [{ 'foo' => [42] }, { 'bar' => [42] }], expected: 1 },
       { input: [{ 'bar' => [42] }, { 'bar' => [42] }, { 'bar' => [1, 2] }], expected: 3 }
     ].each do |c|
-      maps = yield(c[:input])
-      idx = {}
       term = Factbase::Term.new(:absent, [:foo])
-      term.redress!(Factbase::IndexedTerm, idx:)
-      n = term.predict(maps, nil, {})
-      assert_equal(c[:expected], n.size, "Failed on Taped for #{c[:input]}")
+      term.redress!(Factbase::IndexedTerm, idx: {})
+      assert_equal(c[:expected], term.predict(yield(c[:input]), nil, {}).size, "Failed on Taped for #{c[:input]}")
     end
   end
 end
