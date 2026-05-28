@@ -24,6 +24,14 @@ class Factbase::Sprintf < Factbase::TermBase
   def evaluate(fact, maps, fb)
     fmt = _values(0, fact, maps, fb)[0]
     ops = (1..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first }
+    formatted(fmt, ops)
+  end
+
+  private
+
+  def formatted(fmt, ops)
     format(*([fmt] + ops))
+  rescue ArgumentError => e
+    raise "Cannot format #{ops.inspect} with '#{fmt}' in (sprintf ...): #{e.message}"
   end
 end
