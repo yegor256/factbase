@@ -14,6 +14,7 @@ class Factbase::Matches < Factbase::TermBase
   def initialize(operands)
     super()
     @operands = operands
+    @regexps = {}
   end
 
   # Evaluate term on a fact.
@@ -29,6 +30,15 @@ class Factbase::Matches < Factbase::TermBase
     re = _values(1, fact, maps, fb)
     raise 'Regexp is nil' if re.nil?
     raise 'Exactly one regexp is expected' unless re.size == 1
-    str[0].to_s.match?(re[0])
+    str[0].to_s.match?(regexp(re[0]))
+  end
+
+  private
+
+  def regexp(pattern)
+    key = pattern.to_s
+    @regexps[key] ||= Regexp.new(key)
+  rescue RegexpError => e
+    raise "Invalid regexp '#{key}': #{e.message}"
   end
 end
