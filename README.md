@@ -147,6 +147,7 @@ There are string manipulators:
 * `(matches v s)` — if any `v` matches the `s` regular expression
 * `(contains v s)` — if any value of `v` contains any value of `s` (substring match)
 * `(starts_with v s)` — if any `v` starts with `s`
+* `(ends_with v s)` — if any `v` ends with `s`
 
 There are a few terms that return non-boolean values:
 
