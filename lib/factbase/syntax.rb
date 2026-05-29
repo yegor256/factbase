@@ -141,7 +141,7 @@ class Factbase::Syntax
         t[1..-2]
       elsif t.match?(/^(\+|-)?[0-9]+$/)
         Integer(t, 10)
-      elsif t.match?(/^(\+|-)?[0-9]+\.[0-9]+(e\+[0-9]+)?$/)
+      elsif t.match?(/^(\+|-)?[0-9]+\.[0-9]+(e(\+|-)[0-9]+)?$/)
         Float(t)
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/)
         Time.parse(t)

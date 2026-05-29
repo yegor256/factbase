@@ -31,8 +31,23 @@ class Factbase::Compare < Factbase::TermBase
       l = l.floor if l.is_a?(Time) && @op == :==
       rights.any? do |r|
         r = r.floor if r.is_a?(Time) && @op == :==
-        l.__send__(@op, r)
+        _compare(l, r)
       end
     end
+  end
+
+  private
+
+  # Compare values with a contextual error if Ruby rejects the operands.
+  # @param [Object] left Left value
+  # @param [Object] right Right value
+  # @return [Boolean] The result of the comparison
+  def _compare(left, right)
+    left.send(@op, right)
+  rescue ArgumentError => e
+    raise(
+      "Cannot compare #{left.inspect} (#{left.class}) " \
+      "with #{right.inspect} (#{right.class}) using (compare #{@op}): #{e.message}"
+    )
   end
 end

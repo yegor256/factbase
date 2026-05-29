@@ -129,8 +129,7 @@ There are some boolean terms available in a query
 * `(not b)` is the inverse of `b`
 * `(or b1 b2 ...)` is `true` if at least one argument is `true`
 * `(and b1 b2 ...)` — if all arguments are `true`
-* `(when b1 b2)` — if `b1` is `true` and `b2` is `true`
-or `b1` is `false`
+* `(when b1 b2)` — true if `b1` is `false`, or if both `b1` and `b2` are `true`
 * `(exists p)` — if `p` property exists
 * `(absent p)` — if `p` property is absent
 * `(zero v)` — if any `v` equals to zero
@@ -145,6 +144,9 @@ There are string manipulators:
 * `(concat v1 v2 v3 ...)` — concatenates all `v`
 * `(sprintf v v1 v2 ...)` — creates a string by `v` format with params
 * `(matches v s)` — if any `v` matches the `s` regular expression
+* `(contains v s)` — if any value of `v` contains any value of `s` (substring match)
+* `(starts_with v s)` — if any `v` starts with `s`
+* `(ends_with v s)` — if any `v` ends with `s`
 
 There are a few terms that return non-boolean values:
 
@@ -290,7 +292,7 @@ Persistence uses Ruby's
   is Ruby-version-specific and not portable across major Ruby versions or
   platforms, unlike [JSON](https://www.json.org/json-en.html) or
   [Protocol Buffers](https://protobuf.dev/). Output-only decorators
-  `Factbase::ToJson`, `Factbase::ToXml`, and `Factbase::ToYaml` exist but
+  `Factbase::ToJSON`, `Factbase::ToXML`, and `Factbase::ToYAML` exist but
   do not support round-trip import.
 
 `Factbase::IndexedFactbase` lazily builds a hash-based inverted index for
@@ -324,24 +326,24 @@ This is the result of the benchmark:
 <!-- benchmark_begin -->
 ```text
                                                                    user
-void scan                                                      0.001102
-20k facts: export: 2991KB                                      0.854774
-20k facts: import: 2991KB                                      1.035671
-50k facts: read                                                0.000138
-50k facts: read in txn                                         0.002754
-50k facts: insert                                              0.000090
-50k facts: insert in txn                                       0.000243
-50k facts: modify                                              1.085214
-50k facts: modify in txn                                       2.480409
-12k facts: large query: match 3k                              14.187596
-12k facts: large query: match 3k in txn                       19.396334
-12k facts: large query: match zero                            15.139695
-12k facts: large query: match zero in txn                     21.046074
+void scan                                                      0.000998
+20k facts: export: 2974KB                                      0.747843
+20k facts: import: 2974KB                                      0.957279
+50k facts: read                                                0.000149
+50k facts: read in txn                                         0.002319
+50k facts: insert                                              0.000097
+50k facts: insert in txn                                       0.000226
+50k facts: modify                                              1.407145
+50k facts: modify in txn                                       2.728930
+12k facts: large query: match 3k                              13.291760
+12k facts: large query: match 3k in txn                       18.616868
+12k facts: large query: match zero                            14.056062
+12k facts: large query: match zero in txn                     19.285581
 ```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2026-04-16 at 17:08,
+on 2026-05-28 at 04:52,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/24523476155
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/26555356679
