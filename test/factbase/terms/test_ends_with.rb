@@ -1,14 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/ends_with'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-# Test for ends_with term.
-# License:: MIT
-
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/ends_with'
 
 class TestEndsWith < Factbase::Test
   def test_string_suffix_matches
@@ -28,7 +25,6 @@ class TestEndsWith < Factbase::Test
     f = fb.insert
     f.title = 'Object Thinking'
     f.title = 'Elegant Objects'
-    found = fb.query("(ends_with title 'Objects')").each.to_a
-    assert_equal(1, found.size)
+    assert_equal(1, fb.query("(ends_with title 'Objects')").each.to_a.size)
   end
 end

@@ -78,8 +78,7 @@ class TestSyntax < Factbase::Test
   end
 
   def test_parses_negative_exponent_float
-    term = Factbase::Syntax.new('(eq t 1.5e-10)').to_term
-    assert(term.evaluate({ 't' => 1.5e-10 }, [], Factbase.new))
+    assert(Factbase::Syntax.new('(eq t 1.5e-10)').to_term.evaluate({ 't' => 1.5e-10 }, [], Factbase.new))
   end
 
   def test_simple_matching

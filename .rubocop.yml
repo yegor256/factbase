@@ -60,6 +60,7 @@ Elegant/GoodMethodName:
     - '_assert_not'
     - '_assert_one'
     - '_by_symbol'
+    - '_compare'
     - '_feed'
     - '_init_indexes'
     - '_join'

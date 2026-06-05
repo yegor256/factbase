@@ -22,7 +22,7 @@ class Factbase::ToTime < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(1)
     vv = _values(0, fact, maps, fb)
-    return nil if vv.nil?
+    return if vv.nil?
     parse(vv[0])
   end
 
@@ -31,6 +31,6 @@ class Factbase::ToTime < Factbase::TermBase
   def parse(value)
     Time.parse(value.to_s)
   rescue ArgumentError => e
-    raise "Cannot parse '#{value}' as Time in (to_time ...): #{e.message}"
+    raise(RuntimeError, "Cannot parse '#{value}' as Time in (to_time ...): #{e.message}")
   end
 end

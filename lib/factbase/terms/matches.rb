@@ -26,10 +26,10 @@ class Factbase::Matches < Factbase::TermBase
     assert_args(2)
     str = _values(0, fact, maps, fb)
     return false if str.nil?
-    raise 'Exactly one string is expected' unless str.size == 1
+    raise(RuntimeError, 'Exactly one string is expected') unless str.size == 1
     re = _values(1, fact, maps, fb)
-    raise 'Regexp is nil' if re.nil?
-    raise 'Exactly one regexp is expected' unless re.size == 1
+    raise(RuntimeError, 'Regexp is nil') if re.nil?
+    raise(RuntimeError, 'Exactly one regexp is expected') unless re.size == 1
     str[0].to_s.match?(regexp(re[0]))
   end
 
@@ -39,6 +39,6 @@ class Factbase::Matches < Factbase::TermBase
     key = pattern.to_s
     @regexps[key] ||= Regexp.new(key)
   rescue RegexpError => e
-    raise "Invalid regexp '#{key}': #{e.message}"
+    raise(RuntimeError, "Invalid regexp '#{key}': #{e.message}")
   end
 end

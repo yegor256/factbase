@@ -7,60 +7,60 @@ require 'backtrace'
 require_relative '../factbase'
 require_relative 'fact'
 require_relative 'tee'
-require_relative 'terms/unique'
-require_relative 'terms/prev'
-require_relative 'terms/concat'
-require_relative 'terms/sprintf'
-require_relative 'terms/matches'
-require_relative 'terms/contains'
-require_relative 'terms/starts_with'
-require_relative 'terms/ends_with'
-require_relative 'terms/traced'
-require_relative 'terms/assert'
-require_relative 'terms/env'
-require_relative 'terms/defn'
-require_relative 'terms/undef'
-require_relative 'terms/as'
-require_relative 'terms/join'
-require_relative 'terms/exists'
 require_relative 'terms/absent'
-require_relative 'terms/size'
-require_relative 'terms/type'
-require_relative 'terms/nil'
-require_relative 'terms/many'
-require_relative 'terms/one'
-require_relative 'terms/to_string'
-require_relative 'terms/to_integer'
-require_relative 'terms/to_float'
-require_relative 'terms/to_time'
-require_relative 'terms/sorted'
-require_relative 'terms/inverted'
-require_relative 'terms/head'
-require_relative 'terms/plus'
-require_relative 'terms/minus'
-require_relative 'terms/times'
+require_relative 'terms/agg'
+require_relative 'terms/always'
+require_relative 'terms/and'
+require_relative 'terms/as'
+require_relative 'terms/assert'
+require_relative 'terms/concat'
+require_relative 'terms/contains'
+require_relative 'terms/count'
+require_relative 'terms/defn'
 require_relative 'terms/div'
-require_relative 'terms/zero'
+require_relative 'terms/either'
+require_relative 'terms/empty'
+require_relative 'terms/ends_with'
+require_relative 'terms/env'
 require_relative 'terms/eq'
-require_relative 'terms/lt'
-require_relative 'terms/lte'
+require_relative 'terms/exists'
+require_relative 'terms/first'
 require_relative 'terms/gt'
 require_relative 'terms/gte'
-require_relative 'terms/always'
-require_relative 'terms/never'
-require_relative 'terms/not'
-require_relative 'terms/or'
-require_relative 'terms/and'
-require_relative 'terms/when'
-require_relative 'terms/either'
-require_relative 'terms/count'
-require_relative 'terms/first'
-require_relative 'terms/nth'
-require_relative 'terms/sum'
-require_relative 'terms/agg'
-require_relative 'terms/empty'
-require_relative 'terms/min'
+require_relative 'terms/head'
+require_relative 'terms/inverted'
+require_relative 'terms/join'
+require_relative 'terms/lt'
+require_relative 'terms/lte'
+require_relative 'terms/many'
+require_relative 'terms/matches'
 require_relative 'terms/max'
+require_relative 'terms/min'
+require_relative 'terms/minus'
+require_relative 'terms/never'
+require_relative 'terms/nil'
+require_relative 'terms/not'
+require_relative 'terms/nth'
+require_relative 'terms/one'
+require_relative 'terms/or'
+require_relative 'terms/plus'
+require_relative 'terms/prev'
+require_relative 'terms/size'
+require_relative 'terms/sorted'
+require_relative 'terms/sprintf'
+require_relative 'terms/starts_with'
+require_relative 'terms/sum'
+require_relative 'terms/times'
+require_relative 'terms/to_float'
+require_relative 'terms/to_integer'
+require_relative 'terms/to_string'
+require_relative 'terms/to_time'
+require_relative 'terms/traced'
+require_relative 'terms/type'
+require_relative 'terms/undef'
+require_relative 'terms/unique'
+require_relative 'terms/when'
+require_relative 'terms/zero'
 
 # Term.
 #
@@ -90,13 +90,7 @@ require_relative 'terms/max'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Term < Factbase::TermBase
-  # The operator of this term
-  # @return [Symbol] The operator
-  attr_reader :op
-
-  # The operands of this term
-  # @return [Array] The operands
-  attr_reader :operands
+  attr_reader :op, :operands
 
   # Ctor.
   # @param [Symbol] operator Operator
@@ -167,9 +161,8 @@ class Factbase::Term < Factbase::TermBase
   # @param [Module] type The type to extend with
   # @param [Hash] args Attributes to set
   def redress!(type, **args)
-    extend type
-
-    args.each { |k, v| send(:instance_variable_set, :"@#{k}", v) }
+    extend(type)
+    args.each { |k, v| __send__(:instance_variable_set, :"@#{k}", v) }
     @operands.map do |op|
       if op.is_a?(Factbase::Term)
         op.redress!(type, **args)
@@ -195,7 +188,7 @@ class Factbase::Term < Factbase::TermBase
         maps
       end
     elsif respond_to?(m)
-      send(m, maps, fb, params)
+      __send__(m, maps, fb, params)
     else
       maps
     end
@@ -210,12 +203,12 @@ class Factbase::Term < Factbase::TermBase
     if @terms.key?(@op)
       @terms[@op].evaluate(fact, maps, fb)
     else
-      send(@op, fact, maps, fb)
+      __send__(@op, fact, maps, fb)
     end
   rescue NoMethodError => e
-    raise "Probably the term '#{@op}' is not defined at #{self}: #{e.message}"
+    raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
   rescue StandardError => e
-    raise "#{e.message.inspect} at #{self} at #{e.backtrace[0]}"
+    raise(RuntimeError, "#{e.message.inspect} at #{self} at #{e.backtrace[0]}")
   end
 
   # Simplify it if possible.
@@ -226,7 +219,7 @@ class Factbase::Term < Factbase::TermBase
     else
       m = "#{@op}_simplify"
       if respond_to?(m, true)
-        send(m)
+        __send__(m)
       else
         self
       end
@@ -262,11 +255,11 @@ class Factbase::Term < Factbase::TermBase
   def at(fact, maps, fb)
     assert_args(2)
     i = _values(0, fact, maps, fb)
-    raise "Too many values (#{i.size}) at first position, one expected" unless i.size == 1
+    raise(RuntimeError, "Too many values (#{i.size}) at first position, one expected") unless i.size == 1
     i = i[0]
-    return nil if i.nil?
+    return if i.nil?
     v = _values(1, fact, maps, fb)
-    return nil if v.nil?
+    return if v.nil?
     v[i]
   end
 end

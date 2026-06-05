@@ -43,9 +43,10 @@ class Factbase::Compare < Factbase::TermBase
   # @param [Object] right Right value
   # @return [Boolean] The result of the comparison
   def _compare(left, right)
-    left.send(@op, right)
+    left.__send__(@op, right)
   rescue ArgumentError => e
     raise(
+      RuntimeError,
       "Cannot compare #{left.inspect} (#{left.class}) " \
       "with #{right.inspect} (#{right.class}) using (compare #{@op}): #{e.message}"
     )

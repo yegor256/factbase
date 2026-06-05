@@ -30,10 +30,10 @@ class TestMatches < Factbase::Test
 
   def test_rejects_invalid_regexp
     t = Factbase::Matches.new([:foo, '[a-'])
-    e =
+    assert_includes(
       assert_raises(RuntimeError) do
         t.evaluate(fact('foo' => 'hello'), [], Factbase.new)
-      end
-    assert_includes(e.message, "Invalid regexp '[a-'")
+      end.message, "Invalid regexp '[a-'"
+    )
   end
 end

@@ -1,14 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/contains'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-# Test for contains term.
-# License:: MIT
-
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/contains'
 
 class TestContains < Factbase::Test
   def test_string_substring
@@ -28,7 +25,6 @@ class TestContains < Factbase::Test
     f = fb.insert
     f.title = 'Object Thinking'
     f.title = 'Elegant Objects'
-    found = fb.query("(contains title 'Elegant')").each.to_a
-    assert_equal(1, found.size)
+    assert_equal(1, fb.query("(contains title 'Elegant')").each.to_a.size)
   end
 end
