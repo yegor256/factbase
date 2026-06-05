@@ -233,6 +233,16 @@ class Factbase
   # This method supports both the original format (Array of maps) and
   # the IndexedFactbase format (Hash with :maps and :idx keys).
   #
+  # SECURITY: the input must come from a source you trust, because it is
+  # deserialized with +Marshal.load+. Loading a +Marshal+ stream crafted
+  # by an attacker can execute arbitrary code in the calling process,
+  # so never call +import+ on bytes received over the network, read from
+  # a user-supplied path, or pulled from any other untrusted channel
+  # without an out-of-band integrity check. See the official Ruby
+  # security notes for +Marshal.load+ at
+  # https://docs.ruby-lang.org/en/3.3/security_rdoc.html#label-Marshal.load
+  # for details.
+  #
   # @param [String] bytes Binary string to import
   def import(bytes)
     raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?

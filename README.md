@@ -294,7 +294,13 @@ Persistence uses Ruby's
   platforms, unlike [JSON](https://www.json.org/json-en.html) or
   [Protocol Buffers](https://protobuf.dev/). Output-only decorators
   `Factbase::ToJSON`, `Factbase::ToXML`, and `Factbase::ToYAML` exist but
-  do not support round-trip import.
+  do not support round-trip import. Because `import` calls `Marshal.load`
+  on the incoming bytes, the input must come from a source the caller
+  trusts; a `Marshal` stream crafted by an attacker can execute arbitrary
+  code in the calling process, so factbase blobs received over the
+  network or read from a user-supplied path should be authenticated
+  out-of-band before being imported, as described in the
+  [Ruby security notes](https://docs.ruby-lang.org/en/3.3/security_rdoc.html#label-Marshal.load).
 
 `Factbase::IndexedFactbase` lazily builds a hash-based inverted index for
   equality queries, keyed by array `object_id`, property name, and
