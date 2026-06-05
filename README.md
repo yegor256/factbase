@@ -19,7 +19,8 @@ The values are either atomic literals or non-empty sets of literals.
 It is possible to delete a fact, but impossible to delete a property
 from a fact.
 
-Here is how you use it (it's thread-safe, by the way):
+Here is how you use it (wrap it with `Factbase::SyncFactbase`
+for thread-safe access):
 
 ```ruby
 fb = Factbase.new
