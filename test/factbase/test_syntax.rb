@@ -57,6 +57,14 @@ class TestSyntax < Factbase::Test
     end
   end
 
+  def test_tokenizes_across_newline
+    assert_equal('(eq foo 1)', Factbase::Syntax.new("(eq foo\n1)").to_term.to_s)
+  end
+
+  def test_tokenizes_across_tab
+    assert_equal('(eq foo 1)', Factbase::Syntax.new("(eq\tfoo 1)").to_term.to_s)
+  end
+
   def test_exact_parsing
     [
       '(foo)',
