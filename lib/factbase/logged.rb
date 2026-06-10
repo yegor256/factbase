@@ -128,10 +128,11 @@ class Factbase::Logged
       @maps = maps
       @tube = tube
       @fb = fb
+      @term_s = term.is_a?(Factbase::Term) ? term.to_s : term
     end
 
     def to_s
-      @term.to_s
+      @term_s
     end
 
     def each(fb = @fb, params = {}, &)
@@ -144,10 +145,10 @@ class Factbase::Logged
           r = qry.each(fb, params, &)
         end
       unless r.is_a?(Integer)
-        raise(StandardError, ".query(#{@term.to_s.inspect}).each() of #{qry.class} returned #{r.class}")
+        raise(StandardError, ".query(#{@term_s.inspect}).each() of #{qry.class} returned #{r.class}")
       end
-      q = Factbase::Syntax.new(@term).to_term.to_s
-      q = "#{q} with {#{params.map { |k, v| "#{k}=#{v}" }.join(', ')}}" if params.is_a?(Hash) && !params.empty?
+      q = "#{@term_s} with {#{params.map { |k, v| "#{k}=#{v}" }.join(', ')}}" if params.is_a?(Hash) && !params.empty?
+      q ||= @term_s
       if r.zero?
         @tube.say(start, "Zero/#{@fb.size} facts found by #{q} #{tail}")
       else
@@ -158,16 +159,15 @@ class Factbase::Logged
 
     def one(fb = @fb, params = {})
       start = Time.now
-      q = Factbase::Syntax.new(@term).to_term.to_s
       r = nil
       tail =
         Factbase::Logged.elapsed do
           r = @fb.query(@term, @maps).one(fb, params)
         end
       if r.nil?
-        @tube.say(start, "Nothing found by '#{q}' #{tail}")
+        @tube.say(start, "Nothing found by '#{@term_s}' #{tail}")
       else
-        @tube.say(start, "Found #{r} (#{r.class}) by '#{q}' #{tail}")
+        @tube.say(start, "Found #{r} (#{r.class}) by '#{@term_s}' #{tail}")
       end
       r
     end
