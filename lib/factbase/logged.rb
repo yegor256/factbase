@@ -86,6 +86,7 @@ class Factbase::Logged
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Fact
+    # Maximum length of a value in log output before truncation.
     MAX_LENGTH = 64
 
     def initialize(fact, tube: nil, log: nil)
