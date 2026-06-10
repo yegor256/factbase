@@ -10,7 +10,9 @@ require_relative '../indexed/indexed_and'
 require_relative '../indexed/indexed_eq'
 require_relative '../indexed/indexed_exists'
 require_relative '../indexed/indexed_gt'
+require_relative '../indexed/indexed_gte'
 require_relative '../indexed/indexed_lt'
+require_relative '../indexed/indexed_lte'
 require_relative '../indexed/indexed_not'
 require_relative '../indexed/indexed_one'
 require_relative '../indexed/indexed_or'
@@ -46,7 +48,9 @@ module Factbase::IndexedTerm
     @indexes = {
       eq: Factbase::IndexedEq.new(self, @idx),
       lt: Factbase::IndexedLt.new(self, @idx),
+      lte: Factbase::IndexedLte.new(self, @idx),
       gt: Factbase::IndexedGt.new(self, @idx),
+      gte: Factbase::IndexedGte.new(self, @idx),
       one: Factbase::IndexedOne.new(self, @idx),
       exists: Factbase::IndexedExists.new(self, @idx),
       absent: Factbase::IndexedAbsent.new(self, @idx),
