@@ -11,7 +11,10 @@
 [![Yard Docs](https://img.shields.io/badge/yard-docs-blue.svg)](https://rubydoc.info/github/yegor256/factbase/master/frames)
 [![Hits-of-Code](https://hitsofcode.com/github/yegor256/factbase)](https://hitsofcode.com/view/github/yegor256/factbase)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/yegor256/factbase/blob/master/LICENSE.txt)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fyegor256%2Ffactbase.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fyegor256%2Ffactbase?ref=badge_shield&issueType=license)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fyegor256%2Ffactbase.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub%2Fyegor256%2Ffactbase?ref=badge_shield&issueType=license)
+
+> **WARNING:** `Factbase` is **NOT** thread-safe. Use `Factbase::SyncFactbase`
+> for concurrent access from multiple threads.
 
 This Ruby gem manages an in-memory database of facts.
 A fact is simply an associative array of properties and their values.
@@ -118,6 +121,25 @@ fb.query('(always)').to_a.each do |f|
   fb.query("(eq id #{f.id})").delete!
 end
 assert(0 == fb.size)
+```
+
+## Query Parameters
+
+You can use `$name` variables in queries and pass values at runtime:
+
+```ruby
+fb = Factbase.new
+fb.insert.foo = 42
+fb.insert.foo = 99
+fb.query('(eq foo $bar)').each(Factbase.new, bar: [42]).to_a
+# Returns the fact with foo = 42
+```
+
+Variables are passed as keyword arguments to `each` or `one`. The value must
+be an array (even for a single value). This works with any term:
+
+```ruby
+fb.query('(eq salary (agg (eq dept $dept) (avg salary)))').each(Factbase.new, dept: ['eng']).to_a
 ```
 
 ## Terms
