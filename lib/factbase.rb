@@ -98,6 +98,13 @@ class Factbase
     @maps.size
   end
 
+  # Iterate over all facts yielding plain hashes.
+  # @yieldparam [Hash] fact Each fact as a plain Hash
+  # @return [Integer, Enumerator] Total number of facts or Enumerator
+  def each(&)
+    @maps.each(&)
+  end
+
   # Insert a new fact and return it.
   #
   # A fact, when inserted, is empty. It doesn't contain any properties.

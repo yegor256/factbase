@@ -69,18 +69,8 @@ class Factbase::IndexedAnd
   end
 
   def _all_tuples(fact, props)
-    tuples = []
-    tuples += (fact[props.first.to_s] || []).zip
-    if props.size > 1
-      tails = _all_tuples(fact, props[1..])
-      ext = []
-      tuples.each do |t|
-        tails.each do |tail|
-          ext << (t + tail)
-        end
-      end
-      tuples = ext
-    end
-    tuples
+    values = props.map { |p| fact[p.to_s] || [] }
+    return [] if values.any?(&:empty?)
+    values[0].product(*values[1..])
   end
 end
