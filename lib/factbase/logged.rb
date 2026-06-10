@@ -128,11 +128,11 @@ class Factbase::Logged
       @maps = maps
       @tube = tube
       @fb = fb
-      @term_s = term.is_a?(Factbase::Term) ? term.to_s : term
+      @term_str = term.is_a?(Factbase::Term) ? term.to_s : term
     end
 
     def to_s
-      @term_s
+      @term_str
     end
 
     def each(fb = @fb, params = {}, &)
@@ -145,10 +145,10 @@ class Factbase::Logged
           r = qry.each(fb, params, &)
         end
       unless r.is_a?(Integer)
-        raise(StandardError, ".query(#{@term_s.inspect}).each() of #{qry.class} returned #{r.class}")
+        raise(StandardError, ".query(#{@term_str.inspect}).each() of #{qry.class} returned #{r.class}")
       end
-      q = "#{@term_s} with {#{params.map { |k, v| "#{k}=#{v}" }.join(', ')}}" if params.is_a?(Hash) && !params.empty?
-      q ||= @term_s
+      q = "#{@term_str} with {#{params.map { |k, v| "#{k}=#{v}" }.join(', ')}}" if params.is_a?(Hash) && !params.empty?
+      q ||= @term_str
       if r.zero?
         @tube.say(start, "Zero/#{@fb.size} facts found by #{q} #{tail}")
       else
@@ -165,9 +165,9 @@ class Factbase::Logged
           r = @fb.query(@term, @maps).one(fb, params)
         end
       if r.nil?
-        @tube.say(start, "Nothing found by '#{@term_s}' #{tail}")
+        @tube.say(start, "Nothing found by '#{@term_str}' #{tail}")
       else
-        @tube.say(start, "Found #{r} (#{r.class}) by '#{@term_s}' #{tail}")
+        @tube.say(start, "Found #{r} (#{r.class}) by '#{@term_str}' #{tail}")
       end
       r
     end
