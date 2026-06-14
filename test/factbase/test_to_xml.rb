@@ -82,6 +82,6 @@ class TestToXML < Factbase::Test
   def test_empty_factbase
     xml = Nokogiri::XML.parse(Factbase::ToXML.new(Factbase.new).xml)
     refute_empty(xml.xpath('/fb'))
-    assert_operator(xml.xpath('/fb/@size').first.value.to_i, :>=, 0)
+    assert_operator(Integer(xml.xpath('/fb/@size').first.value, 10), :>=, 0)
   end
 end
