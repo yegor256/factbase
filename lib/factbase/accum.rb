@@ -27,7 +27,7 @@ class Factbase::Accum
   end
 
   def all_properties
-    @fact.all_properties
+    @fact.all_properties | @props.keys
   end
 
   others do |*args|
