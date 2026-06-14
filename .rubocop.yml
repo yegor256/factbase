@@ -107,7 +107,6 @@ Elegant/GoodVariableName:
     - '@next_num'
     - '@taped_hash'
     - '@time_tolerate'
-    - '@term_str'
     - '@to_s'
     - '@to_term'
     - 'at1'
