@@ -201,6 +201,21 @@ class TestIndexedQuery < Factbase::Test
     end
   end
 
+  def test_materializes_before_iterating
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    3.times do |i|
+      f = fb.insert
+      f.kind = 'in'
+      f.id = i
+    end
+    created = 0
+    fb.query("(and (eq kind 'in') (empty (eq kind 'out')))").each do |_f|
+      fb.insert.then { |n| n.kind = 'out' }
+      created += 1
+    end
+    assert_equal(3, created)
+  end
+
   def test_deletes_too
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     fb.insert.foo = 1
