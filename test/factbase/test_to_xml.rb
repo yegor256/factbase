@@ -78,4 +78,10 @@ class TestToXML < Factbase::Test
       refute_empty(xml.xpath("/fb/f/#{e}[count(preceding-sibling::*) = #{i}]"), e)
     end
   end
+
+  def test_empty_factbase
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(Factbase.new).xml)
+    refute_empty(xml.xpath('/fb'))
+    assert_operator(Integer(xml.xpath('/fb/@size').first.value, 10), :>=, 0)
+  end
 end

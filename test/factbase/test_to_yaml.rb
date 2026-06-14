@@ -35,4 +35,20 @@ class TestToYAML < Factbase::Test
     yaml = Factbase::ToYAML.new(fb).yaml
     assert_includes(yaml, "a: 256\n  b: 42\n  c: 10", yaml)
   end
+
+  def test_empty_factbase
+    assert_equal("--- []\n", Factbase::ToYAML.new(Factbase.new).yaml)
+  end
+
+  def test_time_value
+    fb = Factbase.new
+    fb.insert.ts = Time.now
+    assert_kind_of(Time, YAML.safe_load(Factbase::ToYAML.new(fb).yaml, permitted_classes: [Time, Symbol])[0]['ts'])
+  end
+
+  def test_string_value
+    fb = Factbase.new
+    fb.insert.note = 'hello'
+    assert_equal('hello', YAML.load(Factbase::ToYAML.new(fb).yaml)[0]['note'])
+  end
 end

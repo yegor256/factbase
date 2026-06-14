@@ -58,4 +58,30 @@ class TestCachedFactbase < Factbase::Test
     f.bar = 42
     assert_nil(fb.query('(agg (not (exists bar)) (max value))').one)
   end
+
+  def test_insert_after_query_returns_new_facts
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 1
+    assert_equal(1, fb.query('(always)').each.to_a.size)
+    fb.insert.foo = 2
+    assert_equal(2, fb.query('(always)').each.to_a.size)
+  end
+
+  def test_insert_after_one_returns_new_value
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 10
+    assert_equal(10, fb.query('(agg (always) (max foo))').one)
+    fb.insert.foo = 20
+    assert_equal(20, fb.query('(agg (always) (max foo))').one)
+  end
+
+  def test_query_after_txn_sees_new_facts
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 1
+    assert_equal(1, fb.query('(always)').each.to_a.size)
+    fb.txn do |fbt|
+      fbt.insert.foo = 2
+    end
+    assert_equal(2, fb.query('(always)').each.to_a.size)
+  end
 end

@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+
 require_relative '../../lib/factbase/lazy_taped'
 require_relative '../../lib/factbase/lazy_taped_array'
 require_relative '../../lib/factbase/lazy_taped_hash'
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
 
@@ -76,6 +77,18 @@ class TestLazyTapedHash < Factbase::Test
 
   def test_delegates_size
     hash, origin, = wrap({ 'a' => 1, 'b' => 2 })
+    assert_read(hash, origin, 2, hash.size)
+  end
+
+  def test_method_missing_bang_triggers_copy
+    hash, origin = wrap({ 'a' => 1, 'b' => nil, 'c' => 3 })
+    hash.compact!
+    assert_copied(hash, origin)
+    assert_equal({ 'a' => 1, 'b' => nil, 'c' => 3 }, origin, 'Original should not be modified')
+  end
+
+  def test_method_missing_reader_does_not_copy
+    hash, origin = wrap({ 'a' => 1, 'b' => 2 })
     assert_read(hash, origin, 2, hash.size)
   end
 

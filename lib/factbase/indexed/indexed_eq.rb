@@ -3,7 +3,11 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-# Indexed term 'eq'.
+# Indexed term 'eq' that uses the hash-based inverted index for fast equality lookups.
+#
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
+# License:: MIT
 class Factbase::IndexedEq
   def initialize(term, idx)
     @term = term

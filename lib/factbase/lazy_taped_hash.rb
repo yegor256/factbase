@@ -65,6 +65,7 @@ class Factbase::LazyTaped
     end
 
     def method_missing(method, *, &)
+      ensure_copied_map if method.to_s.end_with?('=', '!')
       current_map.__send__(method, *, &)
     end
 

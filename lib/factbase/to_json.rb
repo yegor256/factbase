@@ -28,6 +28,6 @@ class Factbase::ToJSON
   # Convert the entire factbase into JSON.
   # @return [String] The factbase in JSON format
   def json
-    Factbase::Flatten.new(Marshal.load(@fb.export), @sorter).it.to_json
+    Factbase::Flatten.new(@fb.each.to_a, @sorter).it.to_json
   end
 end

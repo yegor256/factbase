@@ -45,9 +45,13 @@ class Factbase::IndexedAnd
       j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id)
       r = maps.respond_to?(:repack) ? maps.repack(j) : j
     else
+      fail = false
       @term.operands.each do |o|
         n = o.predict(maps, fb, params)
-        break if n.nil?
+        if n.nil?
+          fail = true
+          break
+        end
         if r.nil?
           r = n
         elsif n.size < r.size * 8
@@ -58,6 +62,7 @@ class Factbase::IndexedAnd
         break if r.size < maps.size / 32
         break if r.size < 128
       end
+      return if fail
     end
     r
   end
@@ -69,18 +74,8 @@ class Factbase::IndexedAnd
   end
 
   def _all_tuples(fact, props)
-    tuples = []
-    tuples += (fact[props.first.to_s] || []).zip
-    if props.size > 1
-      tails = _all_tuples(fact, props[1..])
-      ext = []
-      tuples.each do |t|
-        tails.each do |tail|
-          ext << (t + tail)
-        end
-      end
-      tuples = ext
-    end
-    tuples
+    values = props.map { |p| fact[p.to_s] || [] }
+    return [] if values.any?(&:empty?)
+    values[0].product(*values[1..])
   end
 end

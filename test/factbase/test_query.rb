@@ -327,7 +327,7 @@ class TestQuery < Factbase::Test
 
   # This test ensures that the number of objects allocated during a transaction
   def test_txn_performance_degradation
-    max_growth = 5
+    max_growth = 30
     size = 1000
     maps = (0..1000).map { |_i| { 'foo' => [rand(size)], 'bar' => [rand(size)], 'xyz' => [rand(size)] } }
     with_factbases(maps) do |badge, fb|

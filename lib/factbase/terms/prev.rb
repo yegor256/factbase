@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: MIT
 
 require_relative 'base'
-# The Factbase::Unique class provides functionality for evaluating the uniqueness
-# of terms based on provided operands and facts.
+# The Factbase::Prev class returns the previous value of a property
+# during iteration, enabling comparisons between consecutive facts.
 class Factbase::Prev < Factbase::TermBase
   # Constructor.
   # @param [Array] operands Operands

@@ -37,11 +37,12 @@ class Factbase::IndexedQuery
   # @return [Integer] Total number of facts yielded
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
-    a = @origin.each(fb, params).to_a
-    a.each do |f|
+    n = 0
+    @origin.each(fb, params) do |f|
       yield(Factbase::IndexedFact.new(f, @idx, @fresh))
+      n += 1
     end
-    a.size
+    n
   end
 
   # Read a single value.
