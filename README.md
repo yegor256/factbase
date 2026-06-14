@@ -139,7 +139,9 @@ Variables are passed as keyword arguments to `each` or `one`. The value must
 be an array (even for a single value). This works with any term:
 
 ```ruby
-fb.query('(eq salary (agg (eq dept $dept) (avg salary)))').each(Factbase.new, dept: ['eng']).to_a
+fb.query(
+  '(eq salary (agg (eq dept $dept) (avg salary)))'
+).each(Factbase.new, dept: ['eng']).to_a
 ```
 
 ## Terms
