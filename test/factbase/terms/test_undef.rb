@@ -19,4 +19,25 @@ class TestUndef < Factbase::Test
     t = Factbase::Undef.new([:hello])
     assert(t.evaluate(fact, [], Factbase.new))
   end
+
+  def test_undef_nonexistent
+    assert(Factbase::Undef.new([:_nonexistent]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_undef_non_symbol
+    assert_raises(ArgumentError) do
+      Factbase::Undef.new(['string']).evaluate(fact, [], Factbase.new)
+    end
+  end
+
+  def test_undef_defined_then_removed
+    fn = :_undef_query_fn
+    Factbase::Undef.new([fn]).evaluate(fact, [], Factbase.new)
+    Factbase::Defn.new([fn, 'true']).evaluate(fact, [], Factbase.new)
+    assert(Factbase::Term.new(fn, []).evaluate(fact, [], Factbase.new))
+    Factbase::Undef.new([fn]).evaluate(fact, [], Factbase.new)
+    assert_raises(RuntimeError) do
+      Factbase::Term.new(fn, []).evaluate(fact, [], Factbase.new)
+    end
+  end
 end
