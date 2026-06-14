@@ -51,12 +51,10 @@ class Factbase::IndexedAnd
         if r.nil?
           r = n
         elsif n.size < r.size * 8
-          # If one operand's result is at least 8x smaller, intersect via Set
           small, large = n.size < r.size ? [n.to_a, r.to_a] : [r.to_a, n.to_a]
           ids = Set.new(small.map(&:object_id))
           r = large.select { |f| ids.include?(f.object_id) }
         end
-        # Heuristic: if result is tiny, further AND won't reduce meaningfully
         break if r.size < maps.size / 32
         break if r.size < 128
       end
