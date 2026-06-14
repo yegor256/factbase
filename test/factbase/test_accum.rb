@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/accum'
 require_relative '../../lib/factbase/fact'
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
 
@@ -73,5 +74,14 @@ class TestAccum < Factbase::Test
     a.foo = 42
     a.foo = 42
     assert_equal([42, 41, 42, 42], f['foo'])
+  end
+
+  def test_all_properties_includes_accumulated
+    a = Factbase::Accum.new(Factbase::Fact.new({ 'x' => [1] }), {}, false)
+    a.y = 2
+    a.z = 3
+    assert_includes(a.all_properties, 'x')
+    assert_includes(a.all_properties, 'y')
+    assert_includes(a.all_properties, 'z')
   end
 end
