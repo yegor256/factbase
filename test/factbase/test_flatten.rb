@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/flatten'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/flatten'
 
 require_relative '../test__helper'
 
@@ -24,5 +25,12 @@ class TestFlatten < Factbase::Test
 
   def test_without_sorter
     assert_equal(33, Factbase::Flatten.new([{ 'b' => [42], 'i' => [44] }, { 'a' => 33 }], 'i').it[0]['a'])
+  end
+
+  def test_sorts_with_incompatible_types
+    assert_equal(
+      2,
+      Factbase::Flatten.new([{ 'foo' => [42], 'i' => 1 }, { 'foo' => ['hello'], 'i' => 0 }], 'foo').it.size
+    )
   end
 end
