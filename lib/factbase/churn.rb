@@ -22,16 +22,16 @@ class Factbase::Churn
     if zero?
       'nothing'
     else
-      "#{@inserted}i/#{@deleted}d/#{@added}a"
+      "#{inserted}i/#{deleted}d/#{added}a"
     end
   end
 
   def zero?
-    @inserted.zero? && @deleted.zero? && @added.zero?
+    inserted.zero? && deleted.zero? && added.zero?
   end
 
   def to_i
-    @inserted + @deleted + @added
+    inserted + deleted + added
   end
 
   def append(ins, del, add)
@@ -43,6 +43,6 @@ class Factbase::Churn
   end
 
   def +(other)
-    Factbase::Churn.new(@inserted + other.inserted, @deleted + other.deleted, @added + other.added)
+    Factbase::Churn.new(inserted + other.inserted, deleted + other.deleted, added + other.added)
   end
 end
