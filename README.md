@@ -333,24 +333,24 @@ This is the result of the benchmark:
 <!-- benchmark_begin -->
 ```text
                                                                    user
-void scan                                                      0.001020
-20k facts: export: 2968KB                                      0.854229
-20k facts: import: 2968KB                                      1.009691
-50k facts: read                                                0.000238
-50k facts: read in txn                                         0.002797
-50k facts: insert                                              0.000080
-50k facts: insert in txn                                       0.000224
-50k facts: modify                                              1.595870
-50k facts: modify in txn                                       3.139683
-12k facts: large query: match 3k                              13.374131
-12k facts: large query: match 3k in txn                       17.758557
-12k facts: large query: match zero                            13.973089
-12k facts: large query: match zero in txn                     18.552019
+void scan                                                      0.001150
+20k facts: export: 2978KB                                      0.867434
+20k facts: import: 2978KB                                      1.015185
+50k facts: read                                                0.000259
+50k facts: read in txn                                         0.003559
+50k facts: insert                                              0.000095
+50k facts: insert in txn                                       0.000218
+50k facts: modify                                              1.591823
+50k facts: modify in txn                                       3.148678
+12k facts: large query: match 3k                              13.011418
+12k facts: large query: match 3k in txn                       17.818629
+12k facts: large query: match zero                            13.467598
+12k facts: large query: match zero in txn                     18.674433
 ```
 
 The results were calculated in [this GHA job][benchmark-gha]
-on 2026-06-08 at 19:30,
+on 2026-06-11 at 21:12,
 on Linux with 4 CPUs.
 <!-- benchmark_end -->
 
-[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/27161687534
+[benchmark-gha]: https://github.com/yegor256/factbase/actions/runs/27377617171
