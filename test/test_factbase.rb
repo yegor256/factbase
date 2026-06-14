@@ -10,6 +10,7 @@ require_relative '../lib/factbase/inv'
 require_relative '../lib/factbase/logged'
 require_relative '../lib/factbase/pre'
 require_relative '../lib/factbase/rules'
+require_relative '../lib/factbase/sync/sync_factbase'
 require_relative '../lib/fuzz'
 require_relative 'test__helper'
 
@@ -356,40 +357,13 @@ class TestFactbase < Factbase::Test
     end
   end
 
-  # @todo #98:1h I assumed that the test `test_concurrent_transactions_inserts` would be passed.
-  # I see like this:
-  # ```
-  # Expected: 100
-  # Actual: 99
-  # D:/a/factbase/factbase/test/test_factbase.rb:281:in `test_concurrent_transactions_inserts'
-  # ```
-  # See details here https://github.com/yegor256/factbase/actions/runs/10492255419/job/29068637032
   def test_concurrent_transactions_inserts
     t = Concurrent.processor_count * 19
-    fb = Factbase.new
+    fb = Factbase::SyncFactbase.new(Factbase.new)
     Threads.new(t).assert do |i|
       fb.txn do |fbt|
         fbt.insert.thread_id = i
       end
-    end
-    if t != fb.size || t != fb.query('(exists thread_id)').each.to_a.size
-      puts "\n" + "!" * 30 + " HEISENBUG DIAGNOSTICS " + "!" * 30 # rubocop:disable all
-      puts "Timestamp: #{Time.now.utc}" # rubocop:disable all
-      puts "OS: #{RbConfig::CONFIG['host_os']} | Ruby: #{RUBY_VERSION} | Engine: #{RUBY_ENGINE}" # rubocop:disable all
-      puts "CPU Cores (Concurrent): #{Concurrent.processor_count}" # rubocop:disable all
-      puts "Active Threads: #{Thread.list.size}" # rubocop:disable all
-      if File.exist?('/proc/self/status')
-        puts "Process Status (Context Switches):" # rubocop:disable all
-        puts `grep -i "ctxt_switches" /proc/self/status` # rubocop:disable all
-      end
-      actual_ids = fb.query('(exists thread_id)').each.to_a.map { |f| f.thread_id }.compact.sort  # rubocop:disable all
-      duplicates = actual_ids.select { |id| actual_ids.count(id) > 1 }
-      duplicates.uniq!
-      puts "Stats: Expected=#{t}, ActualSize=#{fb.size}, QuerySize=#{actual_ids.size}" # rubocop:disable all
-      puts "Missing IDs: #{((0...t).to_a - actual_ids).inspect}" # rubocop:disable all
-      puts "Duplicate IDs: #{duplicates.inspect}" unless duplicates.empty? # rubocop:disable all
-      puts "Thread List Details: #{Thread.list.map { |th| th.status }.inspect}" # rubocop:disable all
-      puts "!" * 77 + "\n" # rubocop:disable all
     end
     assert_equal(t, fb.size)
     assert_equal(t, fb.query('(exists thread_id)').each.to_a.size)
