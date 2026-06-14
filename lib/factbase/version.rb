@@ -8,5 +8,5 @@
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase
-  VERSION = '0.0.0' unless const_defined?(:VERSION)
+  VERSION = '0.19.13' unless const_defined?(:VERSION)
 end
