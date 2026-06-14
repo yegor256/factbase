@@ -15,6 +15,8 @@ require_relative 'syntax'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Logged
+  MONO = Process::CLOCK_MONOTONIC
+
   # Ctor.
   # @param [Factbase] fb The factbase to decorate
   # @param [Object] log The logging facility
@@ -34,8 +36,7 @@ class Factbase::Logged
   decoor(:origin)
 
   def insert
-    start = Time.now
-    @tube.say(start, "Inserted new fact ##{@origin.size} in #{start.ago}")
+    @tube.say(Process.clock_gettime(MONO), "Inserted new fact ##{@origin.size} in #{Time.now.ago}")
     Fact.new(@origin.insert, tube: @tube)
   end
 
@@ -45,7 +46,7 @@ class Factbase::Logged
   end
 
   def txn
-    start = Time.now
+    mono = Process.clock_gettime(MONO)
     id = nil
     rollback = false
     r =
@@ -57,9 +58,9 @@ class Factbase::Logged
         raise(e)
       end
     if rollback
-      @tube.say(start, "Txn ##{id} rolled back in #{start.ago}")
+      @tube.say(mono, "Txn ##{id} rolled back in #{Time.now.ago}")
     else
-      @tube.say(start, "Txn ##{id} touched #{r} in #{start.ago}")
+      @tube.say(mono, "Txn ##{id} touched #{r} in #{Time.now.ago}")
     end
     r
   end
@@ -71,9 +72,9 @@ class Factbase::Logged
       @time_tolerate = time_tolerate
     end
 
-    def say(start, msg)
+    def say(start_mono, msg)
       m = :debug
-      if Time.now - start > @time_tolerate
+      if Process.clock_gettime(Factbase::Logged::MONO) - start_mono > @time_tolerate
         msg = "#{msg} (slow!)"
         m = :warn
       end
@@ -107,14 +108,16 @@ class Factbase::Logged
     end
 
     others do |*args|
-      start = Time.now
+      mono = Process.clock_gettime(Factbase::Logged::MONO) if args[0].to_s.end_with?('=')
       r = @fact.method_missing(*args)
       k = args[0].to_s
       v = args[1]
-      s = v.is_a?(Time) ? v.utc.iso8601 : v.to_s
-      s = v.to_s.inspect if v.is_a?(String)
-      s = "#{s[0..(MAX_LENGTH / 2)]}...#{s[(-MAX_LENGTH / 2)..]}" if s.length > MAX_LENGTH
-      @tube.say(start, "Set '#{k[0..-2]}' to #{s} (#{v.class})") if k.end_with?('=')
+      if k.end_with?('=')
+        s = v.is_a?(Time) ? v.utc.iso8601 : v.to_s
+        s = v.to_s.inspect if v.is_a?(String)
+        s = "#{s[0..(MAX_LENGTH / 2)]}...#{s[(-MAX_LENGTH / 2)..]}" if s.length > MAX_LENGTH
+        @tube.say(mono, "Set '#{k[0..-2]}' to #{s} (#{v.class})")
+      end
       r
     end
   end
@@ -136,7 +139,7 @@ class Factbase::Logged
 
     def each(fb = @fb, params = {}, &)
       return to_enum(__method__, fb, params) unless block_given?
-      start = Time.now
+      mono = Process.clock_gettime(Factbase::Logged::MONO)
       r = nil
       qry = @fb.query(@term, @maps)
       tail =
@@ -149,15 +152,15 @@ class Factbase::Logged
       q = Factbase::Syntax.new(@term).to_term.to_s
       q = "#{q} with {#{params.map { |k, v| "#{k}=#{v}" }.join(', ')}}" if params.is_a?(Hash) && !params.empty?
       if r.zero?
-        @tube.say(start, "Zero/#{@fb.size} facts found by #{q} #{tail}")
+        @tube.say(mono, "Zero/#{@fb.size} facts found by #{q} #{tail}")
       else
-        @tube.say(start, "Found #{r}/#{@fb.size} fact(s) by #{q} #{tail}")
+        @tube.say(mono, "Found #{r}/#{@fb.size} fact(s) by #{q} #{tail}")
       end
       r
     end
 
     def one(fb = @fb, params = {})
-      start = Time.now
+      mono = Process.clock_gettime(Factbase::Logged::MONO)
       q = Factbase::Syntax.new(@term).to_term.to_s
       r = nil
       tail =
@@ -165,16 +168,16 @@ class Factbase::Logged
           r = @fb.query(@term, @maps).one(fb, params)
         end
       if r.nil?
-        @tube.say(start, "Nothing found by '#{q}' #{tail}")
+        @tube.say(mono, "Nothing found by '#{q}' #{tail}")
       else
-        @tube.say(start, "Found #{r} (#{r.class}) by '#{q}' #{tail}")
+        @tube.say(mono, "Found #{r} (#{r.class}) by '#{q}' #{tail}")
       end
       r
     end
 
     def delete!(fb = @fb)
       r = nil
-      start = Time.now
+      mono = Process.clock_gettime(Factbase::Logged::MONO)
       before = @fb.size
       tail =
         Factbase::Logged.elapsed do
@@ -182,11 +185,11 @@ class Factbase::Logged
         end
       raise(StandardError, ".delete! of #{@term.class} returned #{r.class}") unless r.is_a?(Integer)
       if before.zero?
-        @tube.say(start, "There were no facts, nothing deleted by #{@term} #{tail}")
+        @tube.say(mono, "There were no facts, nothing deleted by #{@term} #{tail}")
       elsif r.zero?
-        @tube.say(start, "No facts out of #{before} deleted by #{@term} #{tail}")
+        @tube.say(mono, "No facts out of #{before} deleted by #{@term} #{tail}")
       else
-        @tube.say(start, "Deleted #{r} fact(s) out of #{before} by #{@term} #{tail}")
+        @tube.say(mono, "Deleted #{r} fact(s) out of #{before} by #{@term} #{tail}")
       end
       r
     end
