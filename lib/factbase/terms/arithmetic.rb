@@ -47,7 +47,7 @@ class Factbase::Arithmetic < Factbase::TermBase
         when 'weeks', 'week'
           num * 60 * 60 * 24 * 7
         else
-          raise(ArgumentError, "Unknown time unit '#{units}' in '#{r}")
+          raise(ArgumentError, "Unknown time unit '#{units}' in '#{r}'")
         end
     end
     v.__send__(@op, r)
