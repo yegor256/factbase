@@ -17,7 +17,7 @@ require 'yaml'
 #  f = fb.insert # new fact created
 #  f.name = 'Jeff Lebowski'
 #  f.age = 42
-#  found = f.query('(gt 20 age)').each.to_a[0]
+#  found = fb.query('(gt 20 age)').each.to_a[0]
 #  assert(found.age == 42)
 #
 # Every fact is a key-value hash map. Every value is a non-empty set of values.
