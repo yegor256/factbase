@@ -122,8 +122,10 @@ class Factbase::Rules
 
     def it(fact, fb)
       return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [], fb)
-      e = "#{@expr[0..32]}..." if @expr.length > 32
-      raise(ArgumentError, "The fact doesn't match the #{e.inspect} rule: #{fact}")
+      raise(
+        ArgumentError,
+        "The fact doesn't match the #{(@expr.length > 32 ? "#{@expr[0..31]}..." : @expr).inspect} rule: #{fact}"
+      )
     end
   end
 

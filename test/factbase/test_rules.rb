@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/pre'
 require_relative '../../lib/factbase/rules'
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
 
@@ -115,5 +116,26 @@ class TestRules < Factbase::Test
     end
     assert(ok)
     assert_equal(0, fb.query('(eq hello $v)').each(v: 42).to_a.size)
+  end
+
+  def test_error_message_includes_expression
+    f = Factbase::Rules.new(Factbase.new, '(exists foo)').insert
+    ex =
+      assert_raises(StandardError) do
+        f.bar = 42
+      end
+    assert_includes(ex.message, '(exists foo)', 'Error message should include the rule expression')
+    refute_includes(ex.message, 'nil', 'Error message should not contain "nil"')
+  end
+
+  def test_error_message_truncates_long_expression
+    rule = '(and (exists a) (exists b) (exists c) (exists d) (exists e))'
+    assert_operator(rule.length, :>, 32)
+    f = Factbase::Rules.new(Factbase.new, rule).insert
+    assert_includes(
+      assert_raises(StandardError) { f.bar = 42 }.message,
+      '...',
+      'Error message should truncate long expressions'
+    )
   end
 end
