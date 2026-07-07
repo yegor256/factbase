@@ -29,8 +29,8 @@ class Factbase::ToFloat < Factbase::TermBase
   private
 
   def to_float(value)
-    Float(value)
-  rescue ArgumentError => e
+    Float(value.to_s)
+  rescue ArgumentError, TypeError => e
     raise(RuntimeError, "Cannot convert '#{value}' to Float in (to_float ...): #{e.message}")
   end
 end

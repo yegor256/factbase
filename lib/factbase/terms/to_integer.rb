@@ -23,14 +23,14 @@ class Factbase::ToInteger < Factbase::TermBase
     assert_args(1)
     vv = _values(0, fact, maps, fb)
     return if vv.nil?
-    to_int(vv[0])
+    to_integer(vv[0])
   end
 
   private
 
-  def to_int(value)
-    Integer(value)
-  rescue ArgumentError => e
+  def to_integer(value)
+    Integer(value.to_s)
+  rescue ArgumentError, TypeError => e
     raise(RuntimeError, "Cannot convert '#{value}' to Integer in (to_integer ...): #{e.message}")
   end
 end
