@@ -7,14 +7,6 @@ require 'decoor'
 require 'others'
 require_relative '../factbase'
 
-# @todo #644:30min Add a test that validates YARD docstring examples
-#  match the actual API signatures. The docstring in this class was
-#  recently fixed because the block signature was documented as
-#  |f, fbt| but the actual implementation passes |property, value|.
-#  A general test that parses docstrings and checks their examples
-#  against the real method signatures would prevent this class of
-#  bugs from recurring across the codebase.
-#
 # A decorator of a Factbase, that checks invariants on every set.
 #
 # For example, you can use this decorator if you want to make sure that
