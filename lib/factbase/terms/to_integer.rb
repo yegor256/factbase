@@ -29,7 +29,7 @@ class Factbase::ToInteger < Factbase::TermBase
   private
 
   def to_integer(value)
-    Integer(value.to_s)
+    Integer(value)
   rescue ArgumentError, TypeError => e
     raise(RuntimeError, "Cannot convert '#{value}' to Integer in (to_integer ...): #{e.message}")
   end
