@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/env'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/env'
 
 require_relative '../../test__helper'
 
@@ -26,5 +27,15 @@ class TestEnv < Factbase::Test
     ENV.delete('FOO')
     t = Factbase::Env.new(['FOO'])
     assert_raises(StandardError) { t.evaluate(fact, [], Factbase.new) }
+  end
+
+  def test_missing_attr_returns_nil
+    ENV.delete('FOO')
+    assert_nil(Factbase::Env.new([:missing_attr, 'fallback']).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_missing_default_returns_nil
+    ENV.delete('FOO')
+    assert_nil(Factbase::Env.new(%i[missing_attr also_missing]).evaluate(fact, [], Factbase.new))
   end
 end

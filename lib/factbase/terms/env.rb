@@ -22,7 +22,12 @@ class Factbase::Env < Factbase::TermBase
   # @return [String] The value of the environment variable or the default
   def evaluate(fact, maps, fb)
     assert_args(2)
-    n = _values(0, fact, maps, fb)[0]
-    ENV.fetch(n.upcase) { _values(1, fact, maps, fb)[0] }
+    n = _values(0, fact, maps, fb)
+    return if n.nil?
+    ENV.fetch(n[0].upcase) do
+      d = _values(1, fact, maps, fb)
+      return if d.nil?
+      d[0]
+    end
   end
 end
