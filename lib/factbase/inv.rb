@@ -7,17 +7,25 @@ require 'decoor'
 require 'others'
 require_relative '../factbase'
 
+# @todo #644:30min Add a test that validates YARD docstring examples
+#  match the actual API signatures. The docstring in this class was
+#  recently fixed because the block signature was documented as
+#  |f, fbt| but the actual implementation passes |property, value|.
+#  A general test that parses docstrings and checks their examples
+#  against the real method signatures would prevent this class of
+#  bugs from recurring across the codebase.
+#
 # A decorator of a Factbase, that checks invariants on every set.
 #
-# For example, you can use this decorator if you want to check that every
-# fact has +when+:
+# For example, you can use this decorator if you want to make sure that
+# no property +b+ is set to a +String+ value:
 #
-#  fb = Factbase::Inv.new(Factbase.new) do |f, fbt|
-#    assert !f['when'].nil?
+#  fb = Factbase::Inv.new(Factbase.new) do |p, v|
+#    raise "b cannot be a string" if p == 'b' && v.is_a?(String)
 #  end
 #
-# The second argument passed to the block is the factbase, while the first
-# one is the fact just touched.
+# The first block argument is the property name (a +String+), the second
+# is the value being assigned.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
