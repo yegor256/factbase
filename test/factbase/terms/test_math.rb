@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase/term'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../../lib/factbase/term'
 
 require_relative '../../test__helper'
 
@@ -122,6 +123,14 @@ class TestMath < Factbase::Test
   # This test won't work on ruby versions prior to 3.4
   # You can read more about it here:
   # https://docs.ruby-lang.org/en/3.4/NEWS_md.html#label-Compatibility+issues
+  def test_minus_unknown_time_unit
+    t = Factbase::Term.new(:minus, [:foo, '3 fortnights'])
+    assert_includes(
+      assert_raises(StandardError) { t.evaluate(fact('foo' => Time.now), [], Factbase.new) }.message,
+      "Unknown time unit 'fortnights' in '3 fortnights'"
+    )
+  end
+
   def test_div_times_not_supported
     t = Factbase::Term.new(:div, [:birth, Time.new(2024, 1, 1)])
     assert_includes(
