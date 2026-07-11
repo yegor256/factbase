@@ -154,6 +154,12 @@ class TestImpatient < Factbase::Test
     assert_equal(100, count)
   end
 
+  def test_each_does_not_time_out_consumer
+    fb = Factbase::Impatient.new(Factbase.new, timeout: 0.01)
+    fb.insert
+    assert_equal(1, fb.query('(always)').each { sleep(0.02) })
+  end
+
   def test_custom_timeout
     slow = SlowEnoughFactbase.new
     slow.insert.value = 42
