@@ -57,9 +57,10 @@ class Factbase::Impatient
 
     def each(fb = @fb, params = {}, &)
       return to_enum(__method__, fb, params) unless block_given?
-      facts = impatient('each') do
-        @fb.query(@term, @maps).each(fb, params).to_a
-      end
+      facts =
+        impatient('each') do
+          @fb.query(@term, @maps).each(fb, params).to_a
+        end
       n = 0
       facts.each do |f|
         yield(f)
