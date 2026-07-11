@@ -25,6 +25,6 @@ class Factbase::Unique < Factbase::TermBase
     vv = (0..(@operands.size - 1)).map { |i| _values(i, fact, maps, fb) }
     return false if vv.any?(nil)
     tuples = Enumerator.product(*vv).to_a
-    tuples.none? { |t| @seen.include?(t) }.tap { tuples.each { |t| @seen << t } }
+    !@seen.intersect?(tuples).tap { tuples.each { |t| @seen << t } }
   end
 end
