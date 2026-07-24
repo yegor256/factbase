@@ -16,6 +16,26 @@ class TestDiv < Factbase::Test
     assert_equal(420, Factbase::Div.new([:balance, 100]).evaluate(fact('balance' => 42_000), [], Factbase.new))
   end
 
+  def test_div_by_integer_zero
+    t = Factbase::Div.new([:balance, 0])
+    assert_includes(
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('balance' => 42), [], Factbase.new)
+      end.message,
+      'Cannot divide by zero'
+    )
+  end
+
+  def test_div_by_float_zero
+    t = Factbase::Div.new([:balance, 0.0])
+    assert_includes(
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('balance' => 42.0), [], Factbase.new)
+      end.message,
+      'Cannot divide by zero'
+    )
+  end
+
   def test_div_times_not_supported
     t = Factbase::Div.new([:warranty, Time.new(2024, 1, 1)])
     assert_includes(

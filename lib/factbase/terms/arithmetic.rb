@@ -50,6 +50,7 @@ class Factbase::Arithmetic < Factbase::TermBase
           raise(ArgumentError, "Unknown time unit '#{units}' in '#{r}'")
         end
     end
+    raise(ArgumentError, 'Cannot divide by zero') if @op == :/ && r.is_a?(Numeric) && r.zero?
     v.__send__(@op, r)
   end
 end
