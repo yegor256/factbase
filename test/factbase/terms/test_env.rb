@@ -23,6 +23,11 @@ class TestEnv < Factbase::Test
     assert_equal('мой друг', Factbase::Env.new(['FOO', 'мой друг']).evaluate(fact, [], Factbase.new))
   end
 
+  def test_default_when_value_is_empty
+    ENV.store('FOO', '')
+    assert_equal('мой друг', Factbase::Env.new(['FOO', 'мой друг']).evaluate(fact, [], Factbase.new))
+  end
+
   def test_when_default_is_absent
     ENV.delete('FOO')
     t = Factbase::Env.new(['FOO'])
