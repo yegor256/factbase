@@ -22,6 +22,11 @@ class TestSprintf < Factbase::Test
     assert_includes(e.message, 'invalid value for Integer')
   end
 
+  def test_missing_format_property_returns_nil
+    fb = Factbase.new
+    assert_nil(Factbase::Sprintf.new([:missing_prop, 'x']).evaluate(fb.insert, [], fb))
+  end
+
   def test_rejects_missing_format_operand
     t = Factbase::Sprintf.new(['%s %s', 'hello'])
     e =
