@@ -46,6 +46,19 @@ class Factbase::Fact
     @map.keys
   end
 
+  # The map this fact stands for, told apart from every other map.
+  #
+  # A fact is a view of one map of the factbase, and two facts of equal
+  # content are still two different facts. This tells them apart, so that
+  # a caller who has the fact can find the very map it came from, which is
+  # what `Query#delete!` needs in order to delete what it yielded rather
+  # than to run the query a second time (#694).
+  #
+  # @return [Hash] That very map
+  def origin
+    @map
+  end
+
   others do |*args|
     k = args[0].to_s
     if k.end_with?('=')

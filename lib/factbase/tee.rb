@@ -26,6 +26,12 @@ class Factbase::Tee
     @fact.to_s
   end
 
+  # The map the decorated fact stands for.
+  # @return [Hash] That very map
+  def origin
+    @fact.origin
+  end
+
   def all_properties
     (@fact.is_a?(Hash) ? @fact.keys : @fact.all_properties) +
       (@upper.is_a?(Hash) ? @upper.keys : @upper.all_properties)

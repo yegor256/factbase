@@ -346,6 +346,27 @@ class TestQuery < Factbase::Test
     end
   end
 
+  def test_deletes_without_touching_survivors
+    fb = Factbase.new
+    %w[a b].each { |v| fb.insert.foo = v }
+    assert_equal(1, fb.query("(and (as marked 42) (eq foo 'a'))").delete!)
+    assert_equal([nil], fb.each.to_a.map { |f| f['marked'] })
+  end
+
+  def test_deletes_exactly_what_each_yields
+    fb = Factbase.new
+    %w[a a b].each { |v| fb.insert.foo = v }
+    assert_equal(2, fb.query('(unique foo)').delete!)
+    assert_equal([['a']], fb.each.to_a.map { |f| f['foo'] })
+  end
+
+  def test_deletes_facts_of_equal_content
+    fb = Factbase.new
+    2.times { fb.insert.foo = 7 }
+    assert_equal(2, fb.query('(eq foo 7)').delete!)
+    assert_equal(0, fb.size)
+  end
+
   private
 
   def with_factbases(maps = [], &)
