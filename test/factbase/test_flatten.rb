@@ -61,11 +61,6 @@ class TestFlatten < Factbase::Test
   end
 
   def test_sorts_values_of_mixed_kinds
-    assert_equal(
-      3,
-      Factbase::Flatten.new(
-        [{ 'x' => ['b'] }, { 'x' => [1] }, { 'x' => [Time.now] }], 'x'
-      ).it.size
-    )
+    assert_equal(3, Factbase::Flatten.new([{ 'x' => ['b'] }, { 'x' => [1] }, { 'x' => [Time.now] }], 'x').it.size)
   end
 end
