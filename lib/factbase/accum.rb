@@ -30,12 +30,6 @@ class Factbase::Accum
     @fact.all_properties | @props.keys
   end
 
-  # The map the decorated fact stands for.
-  # @return [Hash] That very map
-  def origin
-    @fact.origin
-  end
-
   others do |*args|
     k = args[0].to_s
     if k.end_with?('=')

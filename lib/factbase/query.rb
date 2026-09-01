@@ -78,22 +78,18 @@ class Factbase::Query
 
   # Delete all facts that match the query.
   #
-  # Exactly the facts that {#each} yields are deleted, and no fact is
-  # touched on the way: the term is evaluated once, so a term that writes,
-  # like `as`, writes only into the throw-away copies {#each} makes, and a
-  # term that remembers, like `unique`, is not asked the same question
-  # twice (#694).
+  # The term is asked about every fact exactly once, and it is asked
+  # through the same accumulator that {#each} uses, so a term that writes,
+  # like `as`, writes into a throw-away copy and leaves the surviving facts
+  # alone, while a term that remembers, like `unique`, is not asked the
+  # same question twice (#694).
   #
   # @param [Factbase] fb The factbase to delete from
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
-    doomed = {}.compare_by_identity
-    each(fb) do |f|
-      doomed[f.origin] = true
-    end
     deleted = 0
     @maps.delete_if do |m|
-      d = doomed.key?(m)
+      d = @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
       deleted += 1 if d
       d
     end
