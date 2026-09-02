@@ -22,8 +22,12 @@ class Factbase::Sprintf < Factbase::TermBase
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [String] The formatted string
   def evaluate(fact, maps, fb)
+    fmt = _values(0, fact, maps, fb)&.first
+    if fmt.nil?
+      raise(ArgumentError, "The format of 'sprintf' is #{@operands[0].inspect}, which the fact doesn't have")
+    end
     formatted(
-      _values(0, fact, maps, fb)[0],
+      fmt,
       (1..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first }
     )
   end
