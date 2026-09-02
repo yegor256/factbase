@@ -26,10 +26,7 @@ class Factbase::Sprintf < Factbase::TermBase
     if fmt.nil?
       raise(ArgumentError, "The format of 'sprintf' is #{@operands[0].inspect}, which the fact doesn't have")
     end
-    formatted(
-      fmt,
-      (1..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first }
-    )
+    formatted(fmt, (1..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first })
   end
 
   private
