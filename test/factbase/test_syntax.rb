@@ -144,7 +144,9 @@ class TestSyntax < Factbase::Test
     {
       '(foo)' => '(foo)',
       '(and (foo) (foo))' => '(foo)',
-      '(and (foo) (or (and (eq a 1))) (eq a 1) (foo))' => '(and (foo) (eq a 1))'
+      '(and (foo) (or (and (eq a 1))) (eq a 1) (foo))' => '(and (foo) (eq a 1))',
+      '(or foo (eq a 1))' => '(or foo (eq a 1))',
+      '(and (eq a 1) 5)' => '(and (eq a 1) 5)'
     }.each do |s, t|
       assert_equal(t, Factbase::Syntax.new(s).to_term.to_s)
     end
