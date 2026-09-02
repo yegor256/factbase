@@ -28,6 +28,7 @@ class Factbase::Head < Factbase::TermBase
     assert_args(2)
     max = @operands[0]
     raise(ArgumentError, "An integer is expected as first argument of '#{@op}'") unless max.is_a?(Integer)
+    raise(ArgumentError, "A non-negative count is expected by '#{@op}', but #{max} provided") if max.negative?
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
     fb.query(term, maps).each(fb, params).to_a
