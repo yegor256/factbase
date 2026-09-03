@@ -84,4 +84,16 @@ class TestCachedFactbase < Factbase::Test
     end
     assert_equal(2, fb.query('(always)').each.to_a.size)
   end
+
+  def test_query_after_rollback_forgets_the_facts
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 'kept'
+    fb.txn do |fbt|
+      fbt.insert.foo = 'ghost'
+      fbt.query('(exists foo)').each.to_a
+      raise(Factbase::Rollback)
+    end
+    assert_equal(1, fb.size)
+    assert_equal(['kept'], fb.query('(exists foo)').each.to_a.map(&:foo))
+  end
 end
