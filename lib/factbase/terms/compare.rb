@@ -28,9 +28,9 @@ class Factbase::Compare < Factbase::TermBase
     rights = _values(1, fact, maps, fb)
     return false if rights.nil?
     lefts.any? do |l|
-      l = l.floor if l.is_a?(Time) && @op == :==
+      l = l.floor if l.is_a?(Time)
       rights.any? do |r|
-        r = r.floor if r.is_a?(Time) && @op == :==
+        r = r.floor if r.is_a?(Time)
         _compare(l, r)
       end
     end
