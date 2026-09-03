@@ -51,8 +51,11 @@ class Factbase::Rules
     @check = later
     @fb.txn do |fbt|
       churn = Factbase::Churn.new
-      yield(Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn))
-      @check = before
+      begin
+        yield(Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn))
+      ensure
+        @check = before
+      end
       unless churn.zero?
         fbt.query('(always)').each do |f|
           next unless later.include?(f)
