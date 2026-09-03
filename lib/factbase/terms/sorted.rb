@@ -30,9 +30,8 @@ class Factbase::Sorted < Factbase::TermBase
     raise(ArgumentError, "A symbol is expected as first argument of 'sorted'") unless prop.is_a?(Symbol)
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
-    fb.query(term, maps).each(fb, params).to_a
-      .reject { |m| m[prop].nil? }
-      .sort_by { |m| m[prop].first }
+    blank, valued = fb.query(term, maps).each(fb, params).to_a.partition { |m| m[prop].nil? }
+    (valued.sort_by { |m| m[prop].first } + blank)
       .map { |m| m.all_properties.to_h { |k| [k, m[k]] } }
   end
 end

@@ -24,6 +24,16 @@ class TestSorted < Factbase::Test
     assert_equal('first second third', list.map { |m| m['y'].first }.join(' '))
   end
 
+  def test_keeps_facts_without_the_property
+    list = Factbase::Syntax.new('(sorted x (always))').to_term.predict(
+      [
+        { 'x' => [8], 'y' => ['third'] }, { 'y' => ['nothing'] },
+        { 'x' => [1], 'y' => ['first'] }
+      ], Factbase.new, {}
+    )
+    assert_equal('first third nothing', list.map { |m| m['y'].first }.join(' '))
+  end
+
   def test_join_and_sort
     ff = Factbase.new(
       [
