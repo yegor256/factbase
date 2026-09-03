@@ -20,4 +20,12 @@ class TestConcat < Factbase::Test
   def test_concat_empty
     assert_equal('', Factbase::Concat.new([]).evaluate(fact, [], Factbase.new))
   end
+
+  def test_concat_all_values_of_a_property
+    fb = Factbase.new
+    f = fb.insert
+    f.foo = 'a'
+    f.foo = 'b'
+    assert_equal('ab', fb.query('(as z (concat foo))').each.to_a.first['z'].first)
+  end
 end
