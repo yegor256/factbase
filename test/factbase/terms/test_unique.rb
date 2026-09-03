@@ -20,6 +20,14 @@ class TestUnique < Factbase::Test
     assert(t.evaluate(fact('foo' => 1), [], Factbase.new))
   end
 
+  def test_unique_when_one_value_is_new
+    t = Factbase::Unique.new([:foo])
+    assert(t.evaluate(fact('foo' => [1]), [], Factbase.new))
+    assert(t.evaluate(fact('foo' => [1, 2]), [], Factbase.new))
+    assert(t.evaluate(fact('foo' => [3]), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => [1, 2]), [], Factbase.new))
+  end
+
   def test_unique_with_multiple_arguments
     t = Factbase::Term.new(:unique, %i[foo bar])
     assert(t.evaluate(fact('foo' => 1, 'bar' => 'a'), [], Factbase.new))
