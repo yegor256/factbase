@@ -22,6 +22,15 @@ class TestNth < Factbase::Test
     )
   end
 
+  def test_refuses_a_negative_position
+    t = Factbase::Nth.new([-1, :letter])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact, [{ 'letter' => 'a' }, { 'letter' => 'b' }], Factbase.new)
+      end
+    assert_includes(e.message, 'A non-negative position is expected, but -1 provided', e.message)
+  end
+
   def test_nth_out_of_bounds
     assert_nil(
       Factbase::Nth.new([5, :letter]).evaluate(

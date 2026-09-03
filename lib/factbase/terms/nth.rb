@@ -24,6 +24,7 @@ class Factbase::Nth < Factbase::TermBase
     assert_args(2)
     pos = @operands[0]
     raise(ArgumentError, "An integer is expected, but #{pos} provided") unless pos.is_a?(Integer)
+    raise(ArgumentError, "A non-negative position is expected, but #{pos} provided") if pos.negative?
     k = @operands[1]
     raise(ArgumentError, "A symbol is expected, but #{k} provided") unless k.is_a?(Symbol)
     m = maps[pos]
