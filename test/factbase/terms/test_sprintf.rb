@@ -12,6 +12,15 @@ class TestSprintf < Factbase::Test
     assert_equal('hi, Jeff!', Factbase::Sprintf.new(['hi, %s!', 'Jeff']).evaluate(fact, [], Factbase.new))
   end
 
+  def test_rejects_a_format_the_fact_does_not_have
+    t = Factbase::Sprintf.new([:missing, 'Jeff'])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact, [], Factbase.new)
+      end
+    assert_includes(e.message, "The format of 'sprintf' is :missing, which the fact doesn't have", e.message)
+  end
+
   def test_rejects_invalid_format_operand
     t = Factbase::Sprintf.new(['%d', 'hello'])
     e =
