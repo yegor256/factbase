@@ -21,6 +21,14 @@ class TestToXML < Factbase::Test
     assert_match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/, xml.xpath('/fb/f/t/text()').text)
   end
 
+  def test_control_character_rendering
+    fb = Factbase.new
+    fb.insert.t = "a#{1.chr}b"
+    node = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml, &:strict).xpath('/fb/f/t').first
+    assert_equal('B', node['t'])
+    assert_equal("a#{1.chr}b", node.text.unpack1('m0'))
+  end
+
   def test_complex_rendering
     fb = Factbase.new
     fb.insert.t = "\uffff < > & ' \""
