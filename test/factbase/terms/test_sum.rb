@@ -28,4 +28,13 @@ class TestSum < Factbase::Test
       Factbase::Sum.new([:absent]).evaluate(fact, [{ 'value' => 40 }, {}, { 'value' => 50 }], Factbase.new)
     )
   end
+
+  def test_refuses_extra_operands
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Sum.new(%i[a b]).evaluate(fact, [{ 'a' => 1, 'b' => 10 }], Factbase.new)
+      end.message,
+      "Too many (2) operands for 'sum' (1 expected)"
+    )
+  end
 end

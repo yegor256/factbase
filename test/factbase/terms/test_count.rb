@@ -19,4 +19,13 @@ class TestCount < Factbase::Test
   def test_count_emptyseveral
     assert_equal(0, Factbase::Count.new([]).evaluate(fact, {}, Factbase.new))
   end
+
+  def test_refuses_operands
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Count.new(%i[a b c]).evaluate(fact, { 'a' => 1 }, Factbase.new)
+      end.message,
+      "Too many (3) operands for 'count' (0 expected)"
+    )
+  end
 end

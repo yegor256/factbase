@@ -20,6 +20,7 @@ class Factbase::Count < Factbase::TermBase
   # @param [Factbase] _fb Factbase to use for sub-queries
   # @return [Integer] The count of maps
   def evaluate(_fact, maps, _fb)
+    assert_args(0)
     maps.size
   end
 end
