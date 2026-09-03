@@ -52,10 +52,7 @@ class Factbase::IndexedFactbase
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
-    q = @origin.query(term, maps)
-    q = Factbase::IndexedQuery.new(q, @idx, self, @fresh)
-    @fresh.clear
-    q
+    Factbase::IndexedQuery.new(@origin.query(term, maps), @idx, self, @fresh)
   end
 
   # Run an ACID transaction.

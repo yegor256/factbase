@@ -51,6 +51,18 @@ class TestIncrementalIndexing < Factbase::Test
     assert_empty(fb.query('(eq foo 44)').each.to_a)
   end
 
+  def test_fact_stays_fresh_until_the_query_runs
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 1
+    fb.query('(exists bar)').then do |query|
+      fb.insert.then do |f|
+        query.each.to_a
+        f.bar = 2
+      end
+    end
+    assert_equal(1, fb.query('(exists bar)').each.to_a.size)
+  end
+
   def test_transaction_clears_index_on_delete
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
