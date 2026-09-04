@@ -32,6 +32,30 @@ class TestRules < Factbase::Test
     end
   end
 
+  def test_keeps_checking_after_a_rollback
+    fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
+    fb.txn do |fbt|
+      fbt.insert.foo = 42
+      raise(Factbase::Rollback)
+    end
+    assert_raises(StandardError) do
+      fb.insert.bar = 1
+    end
+  end
+
+  def test_keeps_checking_after_a_failed_transaction
+    fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
+    assert_raises(StandardError) do
+      fb.txn do |fbt|
+        fbt.insert.foo = 42
+        raise(StandardError, 'boom')
+      end
+    end
+    assert_raises(StandardError) do
+      fb.insert.bar = 1
+    end
+  end
+
   def test_to_string
     f = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))').insert
     f.foo = 42
