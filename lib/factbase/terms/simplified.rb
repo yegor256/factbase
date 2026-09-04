@@ -20,7 +20,7 @@ class Factbase::Simplified
     strs = []
     ops = []
     @operands.each do |o|
-      o = o.simplify
+      o = o.simplify if o.is_a?(Factbase::Term)
       s = o.to_s
       next if strs.include?(s)
       strs << s
