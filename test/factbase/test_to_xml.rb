@@ -44,6 +44,13 @@ class TestToXML < Factbase::Test
     xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     refute_empty(xml.xpath('/fb[@version]'))
     refute_empty(xml.xpath('/fb[@size]'))
+    assert_equal('1', xml.xpath('/fb/@size').text)
+  end
+
+  def test_size_counts_the_facts
+    fb = Factbase.new
+    3.times { |i| fb.insert.x = i }
+    assert_equal('3', Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml).xpath('/fb/@size').text)
   end
 
   def test_to_xml_with_short_names
