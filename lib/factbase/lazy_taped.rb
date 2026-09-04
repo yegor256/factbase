@@ -14,6 +14,7 @@ class Factbase::LazyTaped
     @staged = []
     @copied = false
     @copies = {}.compare_by_identity
+    @sources = {}.compare_by_identity
     @inserted = []
     @deleted = []
     @added = []
@@ -23,7 +24,7 @@ class Factbase::LazyTaped
   # Returns nil if the base hasn't been copied yet or if the fact is new.
   def source_of(copy)
     return unless @copied
-    @copies.key(copy)
+    @sources[copy]
   end
 
   def copied?
@@ -141,6 +142,7 @@ class Factbase::LazyTaped
 
   def _track(copy, original)
     @copies[original] = copy
+    @sources[copy] = original
   end
 
   def _tape(map)

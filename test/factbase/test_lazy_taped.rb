@@ -233,6 +233,30 @@ class TestLazyTaped < Factbase::Test
     assert_equal(2, fb.query('(always)').each.to_a.first.foo)
   end
 
+  def test_modifies_two_equal_facts_in_txn
+    fb = Factbase.new
+    fb.insert.foo = 1
+    fb.insert.foo = 1
+    fb.txn do |fbt|
+      fbt.query('(exists foo)').each { |f| f.bar = 2 }
+    end
+    assert_equal(2, fb.size)
+    assert_equal(2, fb.query('(exists bar)').each.to_a.size)
+  end
+
+  def test_deletes_two_equal_facts_in_txn
+    fb = Factbase.new
+    fb.insert.foo = 1
+    fb.insert.foo = 1
+    assert_equal(
+      2,
+      fb.txn do |fbt|
+        fbt.query('(exists foo)').delete!
+      end.to_i
+    )
+    assert_equal(0, fb.size)
+  end
+
   def test_rollback_does_not_modify
     fb = Factbase.new
     fb.insert.foo = 42
