@@ -22,6 +22,16 @@ class TestSyntax < Factbase::Test
     end
   end
 
+  def test_parses_empty_string_literal
+    assert_equal("(eq foo '')", Factbase::Syntax.new('(eq foo "")').to_term.to_s)
+  end
+
+  def test_matches_empty_string_literal
+    fb = Factbase.new
+    fb.insert.foo = 'hello'
+    assert_equal(0, fb.query('(eq foo "")').each.to_a.size)
+  end
+
   def test_makes_abstract_terms
     {
       '(foo $bar)' => true,
@@ -115,7 +125,6 @@ class TestSyntax < Factbase::Test
       '(bad-term-name 42)',
       '(foo x y (z t (f 42 ',
       ')foo ) y z)',
-      '(x "")',
       ")y 42 'Hey you)",
       ')',
       '"'
