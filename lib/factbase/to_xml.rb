@@ -16,10 +16,16 @@ require_relative '../factbase/flatten'
 #  fb = Factbase.new
 #  puts Factbase::ToXML.new(fb).xml
 #
+# A value holding a character that XML 1.0 cannot represent is printed
+# in Base64 and marked with t="B", since printing it verbatim would make
+# the document not well-formed.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::ToXML
+  BAD = /[^\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/
+
   # Constructor.
   def initialize(fb, sorter = '_id')
     @fb = fb
@@ -38,11 +44,11 @@ class Factbase::ToXML
               if vv.is_a?(Array)
                 xml.__send__(:"#{k}_") do
                   vv.each do |v|
-                    xml.__send__(:v, to_str(v), t: type_of(v))
+                    put(xml, :v, v)
                   end
                 end
               else
-                xml.__send__(:"#{k}_", to_str(vv), t: type_of(vv))
+                put(xml, :"#{k}_", vv)
               end
             end
           end
@@ -52,6 +58,18 @@ class Factbase::ToXML
   end
 
   private
+
+  # Put one value into the document, in Base64 if XML cannot hold it verbatim.
+  # @param [Nokogiri::XML::Builder] xml The builder
+  # @param [Symbol] name The name of the element
+  # @param [Object] val The value
+  def put(xml, name, val)
+    if val.is_a?(String) && val.match?(BAD)
+      xml.__send__(name, [val].pack('m0'), t: 'B')
+    else
+      xml.__send__(name, to_str(val), t: type_of(val))
+    end
+  end
 
   def to_str(val)
     if val.is_a?(Time)
