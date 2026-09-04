@@ -21,6 +21,6 @@ class Factbase::Concat < Factbase::TermBase
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [String] The concatenated string
   def evaluate(fact, maps, fb)
-    (0..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first }.join
+    (0..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.join }.join
   end
 end
