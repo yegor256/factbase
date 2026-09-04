@@ -18,7 +18,10 @@ class TestToXML < Factbase::Test
     fb.insert.t = Time.now
     xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     refute_empty(xml.xpath('/fb/f[t]'))
-    assert_match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/, xml.xpath('/fb/f/t/text()').text)
+    assert_match(
+      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}Z$/,
+      xml.xpath('/fb/f/t/text()').text
+    )
   end
 
   def test_control_character_rendering

@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'json'
+require 'time'
 require_relative '../factbase'
 require_relative '../factbase/flatten'
 
@@ -28,6 +29,17 @@ class Factbase::ToJSON
   # Convert the entire factbase into JSON.
   # @return [String] The factbase in JSON format
   def json
-    Factbase::Flatten.new(@fb.each.to_a, @sorter).it.to_json
+    Factbase::Flatten.new(@fb.each.to_a, @sorter).it.map do |m|
+      m.transform_values { |vv| vv.is_a?(Array) ? vv.map { |v| plain(v) } : plain(vv) }
+    end.to_json
+  end
+
+  private
+
+  # Render one value the way ToXML renders it.
+  # @param [Object] val The value
+  # @return [Object] The value, with a Time turned into ISO 8601
+  def plain(val)
+    val.is_a?(Time) ? val.utc.iso8601(6) : val
   end
 end
