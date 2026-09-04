@@ -22,6 +22,7 @@ class Factbase::Sum < Factbase::TermBase
   # @param [Factbase] _fb Factbase to use for sub-queries
   # @return [Integer] The sum of values for the specified key across all maps
   def evaluate(_fact, maps, _fb)
+    assert_args(1)
     k = @operands[0]
     raise(ArgumentError, "A symbol is expected, but '#{k}' provided") unless k.is_a?(Symbol)
     sum = 0
