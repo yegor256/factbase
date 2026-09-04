@@ -17,6 +17,16 @@ class TestCompare < Factbase::Test
     refute(Factbase::Compare.new(:<, [4, 2]).evaluate(fact, [], Factbase.new), 'Expected 2 < 4 to be true')
   end
 
+  def test_rounds_time_the_same_way_for_every_operator
+    t = Time.utc(2024, 1, 1, 0, 0, 0, 500_000)
+    whole = Time.utc(2024, 1, 1)
+    assert(Factbase::Compare.new(:==, [t, whole]).evaluate(fact, [], Factbase.new))
+    assert(Factbase::Compare.new(:<=, [t, whole]).evaluate(fact, [], Factbase.new))
+    assert(Factbase::Compare.new(:>=, [t, whole]).evaluate(fact, [], Factbase.new))
+    refute(Factbase::Compare.new(:<, [t, whole]).evaluate(fact, [], Factbase.new))
+    refute(Factbase::Compare.new(:>, [t, whole]).evaluate(fact, [], Factbase.new))
+  end
+
   def test_wraps_incompatible_type_comparison
     t = Factbase::Compare.new(:>, [42, 'hello'])
     e = assert_raises(RuntimeError) { t.evaluate(fact, [], Factbase.new) }
