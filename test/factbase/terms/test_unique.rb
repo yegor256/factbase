@@ -46,4 +46,13 @@ class TestUnique < Factbase::Test
     assert(t.evaluate(fact('foo' => 2, 'bar' => 'x', 'baz' => true), [], Factbase.new))
     refute(t.evaluate(fact('foo' => 1, 'bar' => 'x', 'baz' => true), [], Factbase.new))
   end
+
+  def test_repeats_on_the_second_run
+    fb = Factbase.new
+    fb.insert.name = 'alice'
+    fb.insert.name = 'bob'
+    q = fb.query('(unique name)')
+    assert_equal(2, q.each.to_a.size)
+    assert_equal(2, q.each.to_a.size)
+  end
 end

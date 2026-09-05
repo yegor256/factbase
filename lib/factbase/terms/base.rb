@@ -29,6 +29,12 @@ class Factbase::TermBase
       end
   end
 
+  # Forget what previous iterations of this term have seen.
+  # @return [Array, nil] The operands that were walked
+  def reset
+    @operands&.each { |o| o.reset if o.respond_to?(:reset) }
+  end
+
   private
 
   def assert_args(num)
