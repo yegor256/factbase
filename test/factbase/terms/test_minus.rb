@@ -35,4 +35,16 @@ class TestMinus < Factbase::Test
     )
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
+
+  def test_rejects_a_fractional_duration
+    fb = Factbase.new
+    fb.insert.when = Time.now
+    ['1.5 hours', 'abc hours'].each do |d|
+      assert_includes(
+        assert_raises(StandardError, d) do
+          fb.query("(gt when (minus (to_time '2026-09-04T07:40:32Z') '#{d}'))").each.to_a
+        end.message, 'must be a whole number', d
+      )
+    end
+  end
 end
