@@ -38,8 +38,11 @@ class TestWhen < Factbase::Test
     fb = Factbase.new
     fb.insert.foo = 42
     ['(when 42 (always))', '(when (always) 42)'].each do |q|
-      e = assert_raises(StandardError, q) { fb.query(q).each.to_a }
-      assert_includes(e.message, "A term is expected, but '42' provided", q)
+      assert_includes(
+        assert_raises(StandardError, q) do
+          fb.query(q).each.to_a
+        end.message, "A term is expected, but '42' provided", q
+      )
     end
   end
 end
