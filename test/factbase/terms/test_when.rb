@@ -33,4 +33,13 @@ class TestWhen < Factbase::Test
       refute(Factbase::When.new([first, second]).evaluate(fact({ 'foo' => 22, 'bar' => 42 }), [], Factbase.new), msg)
     end
   end
+
+  def test_rejects_a_non_term_operand
+    fb = Factbase.new
+    fb.insert.foo = 42
+    ['(when 42 (always))', '(when (always) 42)'].each do |q|
+      e = assert_raises(StandardError, q) { fb.query(q).each.to_a }
+      assert_includes(e.message, "A term is expected, but '42' provided", q)
+    end
+  end
 end

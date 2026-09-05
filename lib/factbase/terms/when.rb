@@ -22,6 +22,11 @@ class Factbase::When < Factbase::TermBase
   # @return [Boolean] True if first operand is false OR both are true
   def evaluate(fact, maps, fb)
     assert_args(2)
+    @operands.each do |o|
+      unless o.is_a?(Factbase::Term) || o.is_a?(Factbase::TermBase)
+        raise(ArgumentError, "A term is expected, but '#{o}' provided")
+      end
+    end
     return true unless @operands[0].evaluate(fact, maps, fb)
     @operands[1].evaluate(fact, maps, fb)
   end
