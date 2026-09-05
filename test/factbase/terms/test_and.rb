@@ -24,4 +24,13 @@ class TestAnd < Factbase::Test
   def test_parses_a_non_term_operand
     assert_equal(%((and (eq a 1) 5)), Factbase::Syntax.new(%((and (eq a 1) 5))).to_term.to_s)
   end
+
+  def test_reports_a_single_non_term_operand
+    fb = Factbase.new
+    fb.insert.name = 'alice'
+    ['(and 42)', '(or 42)'].each do |q|
+      e = assert_raises(StandardError, q) { fb.query(q).each.to_a }
+      assert_includes(e.message, 'Boolean is expected, while Integer received from 42', q)
+    end
+  end
 end
