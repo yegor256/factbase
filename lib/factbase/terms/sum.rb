@@ -31,6 +31,9 @@ class Factbase::Sum < Factbase::TermBase
       next if vv.nil?
       vv = [vv] unless vv.respond_to?(:to_a)
       vv.each do |v|
+        unless v.is_a?(Integer) || v.is_a?(Float)
+          raise(ArgumentError, "The value '#{v}' of the '#{k}' property is not a number, can't sum it up")
+        end
         sum += v
       end
     end
