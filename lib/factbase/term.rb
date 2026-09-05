@@ -172,6 +172,14 @@ class Factbase::Term < Factbase::TermBase
     end
   end
 
+  # Forget what previous iterations of this term have seen.
+  # @return [nil]
+  def reset
+    @terms[@op].reset if @terms.key?(@op) && @terms[@op].respond_to?(:reset)
+    @operands&.each { |o| o.reset if o.respond_to?(:reset) }
+    nil
+  end
+
   # Try to predict which facts from the provided list
   # should be evaluated. If no prediction can be made,
   # the same list is returned.
