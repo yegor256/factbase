@@ -41,7 +41,10 @@ class TestSum < Factbase::Test
   def test_names_the_property_and_the_value
     fb = Factbase.new
     fb.insert.name = 'alice'
-    e = assert_raises(StandardError) { fb.query('(gt (sum name) 0)').each.to_a }
-    assert_includes(e.message, "The value 'alice' of the 'name' property is not a number")
+    assert_includes(
+      assert_raises(StandardError) do
+        fb.query('(gt (sum name) 0)').each.to_a
+      end.message, "The value 'alice' of the 'name' property is not a number"
+    )
   end
 end
