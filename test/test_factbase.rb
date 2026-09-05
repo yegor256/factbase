@@ -480,4 +480,17 @@ class TestFactbase < Factbase::Test
       assert_equal("Can't find 'bar' attribute out of [foo]", assert_raises(StandardError) { f.bar }.message)
     end
   end
+
+  def test_import_of_corrupt_data
+    good = Factbase.new
+    good.insert.a = 1
+    data = good.export
+    ['this is not a factbase', data[0..(data.size / 2)]].each do |bytes|
+      assert_includes(
+        assert_raises(StandardError) do
+          Factbase.new.import(bytes)
+        end.message, 'The input is not a valid factbase'
+      )
+    end
+  end
 end
