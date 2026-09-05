@@ -37,4 +37,11 @@ class TestSum < Factbase::Test
       "Too many (2) operands for 'sum' (1 expected)"
     )
   end
+
+  def test_names_the_property_and_the_value
+    fb = Factbase.new
+    fb.insert.name = 'alice'
+    e = assert_raises(StandardError) { fb.query('(gt (sum name) 0)').each.to_a }
+    assert_includes(e.message, "The value 'alice' of the 'name' property is not a number")
+  end
 end
