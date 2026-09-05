@@ -29,8 +29,11 @@ class TestAnd < Factbase::Test
     fb = Factbase.new
     fb.insert.name = 'alice'
     ['(and 42)', '(or 42)'].each do |q|
-      e = assert_raises(StandardError, q) { fb.query(q).each.to_a }
-      assert_includes(e.message, 'Boolean is expected, while Integer received from 42', q)
+      assert_includes(
+        assert_raises(StandardError, q) do
+          fb.query(q).each.to_a
+        end.message, 'Boolean is expected, while Integer received from 42', q
+      )
     end
   end
 end
