@@ -201,8 +201,8 @@ It's possible to add and deduct string values to time values, like
 
 Types may be converted:
 
-* `(to_int v)` is an integer of `v`
-* `(to_str v)` is a string of `v`
+* `(to_integer v)` is an integer of `v`
+* `(to_string v)` is a string of `v`
 * `(to_float v)` is a float of `v`
 
 One term is for meta-programming:
