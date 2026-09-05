@@ -105,4 +105,16 @@ class TestFact < Factbase::Test
     f.foo = 42
     assert_includes(f.all_properties, 'foo')
   end
+
+  def test_stores_booleans
+    fb = Factbase.new
+    f = fb.insert
+    f.yes = true
+    f.no = false
+    assert_equal([true], f['yes'])
+    assert_equal([false], f['no'])
+    fresh = Factbase.new
+    fresh.import(fb.export)
+    assert_equal([true], fresh.query('(exists yes)').each.to_a.first['yes'])
+  end
 end
