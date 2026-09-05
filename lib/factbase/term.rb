@@ -173,11 +173,10 @@ class Factbase::Term < Factbase::TermBase
   end
 
   # Forget what previous iterations of this term have seen.
-  # @return [nil]
+  # @return [Array, nil] The operands that were walked
   def reset
     @terms[@op].reset if @terms.key?(@op) && @terms[@op].respond_to?(:reset)
     @operands&.each { |o| o.reset if o.respond_to?(:reset) }
-    nil
   end
 
   # Try to predict which facts from the provided list

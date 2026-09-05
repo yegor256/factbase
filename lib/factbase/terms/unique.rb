@@ -15,7 +15,7 @@ class Factbase::Unique < Factbase::TermBase
   end
 
   # Forget the tuples seen by the previous iteration.
-  # @return [nil]
+  # @return [Array, nil] The operands that were walked
   def reset
     @seen = nil
     super

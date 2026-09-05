@@ -30,10 +30,9 @@ class Factbase::TermBase
   end
 
   # Forget what previous iterations of this term have seen.
-  # @return [nil]
+  # @return [Array, nil] The operands that were walked
   def reset
     @operands&.each { |o| o.reset if o.respond_to?(:reset) }
-    nil
   end
 
   private
