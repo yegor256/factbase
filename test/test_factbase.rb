@@ -486,8 +486,11 @@ class TestFactbase < Factbase::Test
     good.insert.a = 1
     data = good.export
     ['this is not a factbase', data[0..(data.size / 2)]].each do |bytes|
-      e = assert_raises(StandardError) { Factbase.new.import(bytes) }
-      assert_includes(e.message, 'The input is not a valid factbase')
+      assert_includes(
+        assert_raises(StandardError) do
+          Factbase.new.import(bytes)
+        end.message, 'The input is not a valid factbase'
+      )
     end
   end
 end
