@@ -370,8 +370,11 @@ class TestQuery < Factbase::Test
   def test_error_names_the_term_not_the_object
     fb = Factbase.new
     fb.insert.what = 'issue'
-    e = assert_raises(StandardError) { fb.query('(eq what "issue")').one }
-    assert_equal("Incorrect type FalseClass returned by (eq what 'issue')", e.message)
+    assert_equal(
+      "Incorrect type FalseClass returned by (eq what 'issue')", assert_raises(StandardError) do
+                                                                   fb.query('(eq what "issue")').one
+                                                                 end.message
+    )
   end
 
   private
