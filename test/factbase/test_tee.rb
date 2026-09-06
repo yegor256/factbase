@@ -68,8 +68,7 @@ class TestTee < Factbase::Test
     prim = Factbase::Fact.new({})
     prim.foo = 42
     prim.bar = 13
-    t = Factbase::Tee.new(prim, { 'foo' => [9] })
-    assert_equal(%w[foo bar], t.all_properties)
+    assert_equal(%w[foo bar], Factbase::Tee.new(prim, { 'foo' => [9] }).all_properties)
   end
 
   def test_recursively
