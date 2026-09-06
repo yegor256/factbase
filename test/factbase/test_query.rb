@@ -315,10 +315,11 @@ class TestQuery < Factbase::Test
   end
 
   def test_with_a_digit_in_the_param_name
-    maps = [{ 'foo' => [42] }, { 'foo' => [17] }]
     assert_equal(
       1,
-      Factbase::Query.new(maps, '(eq foo $bar2)', Factbase.new).each(Factbase.new, bar2: [42]).to_a.size
+      Factbase::Query.new(
+        [{ 'foo' => [42] }, { 'foo' => [17] }], '(eq foo $bar2)', Factbase.new
+      ).each(Factbase.new, bar2: [42]).to_a.size
     )
   end
 
