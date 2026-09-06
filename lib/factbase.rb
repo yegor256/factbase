@@ -253,12 +253,12 @@ class Factbase
   # @param [String] bytes Binary string to import
   def import(bytes)
     raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?
-    data = Marshal.load(bytes)
-    @maps +=
-      if data.is_a?(Hash) && data.key?(:maps)
-        Marshal.load(data[:maps])
-      else
-        data
-      end
+    begin
+      data = Marshal.load(bytes)
+      data = Marshal.load(data[:maps]) if data.is_a?(Hash) && data.key?(:maps)
+    rescue TypeError, ArgumentError => e
+      raise(StandardError, "The input is not a valid factbase: #{e.message}")
+    end
+    @maps += data
   end
 end
