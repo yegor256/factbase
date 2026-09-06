@@ -38,4 +38,17 @@ class TestMax < Factbase::Test
       )
     )
   end
+
+  def test_reports_incomparable_values
+    fb = Factbase.new
+    fb.insert.v = 's'
+    fb.insert.v = 1
+    ['(gt (max v) 0)', '(gt (min v) 0)'].each do |q|
+      assert_includes(
+        assert_raises(StandardError, q) do
+          fb.query(q).each.to_a
+        end.message, "Can't compare '1' (Integer) with 's' (String) in the 'v' property", q
+      )
+    end
+  end
 end

@@ -17,7 +17,18 @@ class Factbase::Best
       next if vv.nil?
       vv = [vv] unless vv.respond_to?(:to_a)
       vv.each do |v|
-        best = v if best.nil? || @criteria.call(v, best)
+        if best.nil?
+          best = v
+          next
+        end
+        begin
+          best = v if @criteria.call(v, best)
+        rescue ArgumentError, TypeError
+          raise(
+            ArgumentError,
+            "Can't compare '#{v}' (#{v.class}) with '#{best}' (#{best.class}) in the '#{key}' property"
+          )
+        end
       end
     end
     best
