@@ -29,7 +29,7 @@ class Factbase::And < Factbase::TermBase
 
   def simplify
     unique = Factbase::Simplified.new(@operands).unique
-    return unique[0] if unique.size == 1
+    return unique[0] if unique.size == 1 && (unique[0].is_a?(Factbase::Term) || unique[0].is_a?(Factbase::TermBase))
     Factbase::Term.new(@op, unique)
   end
 end
