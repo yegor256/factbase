@@ -143,7 +143,7 @@ class Factbase::Syntax
         Integer(t, 10)
       elsif t.match?(/^(\+|-)?[0-9]+\.[0-9]+(e(\+|-)[0-9]+)?$/)
         Float(t)
-      elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/)
+      elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
         Time.parse(t)
       else
         raise(ArgumentError, "Wrong symbol format (#{t})") unless t.match?(/^([_a-z][a-zA-Z0-9_]*|\$[_a-z]+)$/)
