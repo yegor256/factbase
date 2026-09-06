@@ -64,6 +64,14 @@ class TestTee < Factbase::Test
     assert_includes(t.all_properties, 'bar')
   end
 
+  def test_all_properties_lists_a_shared_name_once
+    prim = Factbase::Fact.new({})
+    prim.foo = 42
+    prim.bar = 13
+    t = Factbase::Tee.new(prim, { 'foo' => [9] })
+    assert_equal(%w[foo bar], t.all_properties)
+  end
+
   def test_recursively
     prim = Factbase::Fact.new({})
     prim.foo = 42
