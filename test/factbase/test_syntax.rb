@@ -110,10 +110,7 @@ class TestSyntax < Factbase::Test
 
   def test_parses_floats_the_way_ruby_writes_them
     ['1.5e10', '1.5E10', '1e10', '1E+10', '1.5e+10', '2e-3'].each do |n|
-      assert(
-        Factbase::Syntax.new("(eq t #{n})").to_term.evaluate({ 't' => Float(n) }, [], Factbase.new),
-        n
-      )
+      assert_equal(Float(n), Factbase::Syntax.new("(eq t #{n})").to_term.operands[1], n)
     end
   end
 
