@@ -28,6 +28,7 @@ class Factbase::Defn < Factbase::TermBase
     raise(ArgumentError, "A symbol expected as first argument of 'defn'") unless fn.is_a?(Symbol)
     raise(ArgumentError, "Can't use '#{fn}' name as a term") if Factbase::Term.method_defined?(fn)
     raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term.private_method_defined?(fn, false)
+    raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term::TERMS.key?(fn)
     raise(ArgumentError, "The '#{fn}' is a bad name for a term") unless fn.match?(/^[a-z_]+$/)
     # rubocop:disable Security/Eval
     eval(
