@@ -33,7 +33,11 @@ class Factbase::Arithmetic < Factbase::TermBase
     r = rights[0]
     if v.is_a?(Time) && r.is_a?(String)
       (num, units) = r.split
-      num = Integer(num, 10)
+      begin
+        num = Integer(num, 10)
+      rescue ArgumentError, TypeError
+        raise(ArgumentError, "Amount '#{num}' in '#{r}' must be a whole number")
+      end
       r =
         case units
         when 'seconds', 'second'
