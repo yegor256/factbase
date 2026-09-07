@@ -16,6 +16,7 @@ class Factbase::IndexedLte
     prop = op1.to_s
     target = op2.is_a?(Symbol) ? params[op2.to_s]&.first : op2
     return maps || [] if target.nil?
+    return unless sortable?(maps, prop)
     key = [maps.object_id, prop, :facts]
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
@@ -39,6 +40,13 @@ class Factbase::IndexedLte
     end
     entry[:facts].sort_by! { |pair| pair[0] }
     entry[:count] = facts.size
+  end
+
+  def sortable?(maps, prop)
+    maps.to_a.flat_map { |fact| fact[prop] || [] }.sort
+    true
+  rescue ArgumentError
+    false
   end
 
   def _search(entry, target)

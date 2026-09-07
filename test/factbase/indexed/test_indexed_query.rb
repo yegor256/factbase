@@ -46,6 +46,19 @@ class TestIndexedQuery < Factbase::Test
     end
   end
 
+  def test_range_queries_with_mixed_types_match_plain_factbase_errors
+    maps = [{ 'n' => [5] }, { 'n' => ['oops'] }]
+    %w[gt gte lt lte].each do |operation|
+      plain = Factbase.new(Marshal.load(Marshal.dump(maps)))
+      indexed = Factbase::IndexedFactbase.new(Factbase.new(Marshal.load(Marshal.dump(maps))))
+      query = "(#{operation} n 0)"
+      assert_equal(
+        assert_raises(RuntimeError) { plain.query(query).each.to_a }.message,
+        assert_raises(RuntimeError) { indexed.query(query).each.to_a }.message
+      )
+    end
+  end
+
   def test_fills_up_the_index
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
