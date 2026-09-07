@@ -231,8 +231,9 @@ with the salary average in their departments
 There are also terms that match the entire factbase
 and must be used primarily inside the `(agg ..)` term:
 
-* `(nth v p)` returns the `p` property of the _v_-th fact (must be
-a positive integer)
+* `(nth v p)` returns the `p` property of the fact at position `v`, counting
+  from zero (must be a non-negative integer); `(nth 0 p)` is the same as
+  `(first p)`
 * `(first p)` returns the `p` property of the first fact
 * `(count)` returns the tally of facts
 * `(max p)` returns the maximum value of the `p` property in all facts
