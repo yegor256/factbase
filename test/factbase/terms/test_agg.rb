@@ -71,4 +71,20 @@ class TestAgg < Factbase::Test
       )
     )
   end
+
+  def test_passes_outer_query_params_to_selector
+    fb = Factbase.new
+    [['eng', 100], ['eng', 200], ['ops', 50]].each do |dept, salary|
+      fact = fb.insert
+      fact.dept = dept
+      fact.salary = salary
+    end
+    %w[dept d x].each do |param|
+      assert_equal(
+        [200],
+        fb.query("(eq salary (agg (eq dept $#{param}) (max salary)))").each(fb, param => ['eng']).map(&:salary),
+        "parameter $#{param} wasn't passed to agg"
+      )
+    end
+  end
 end

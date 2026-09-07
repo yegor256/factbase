@@ -29,6 +29,39 @@ class Factbase::Agg < Factbase::TermBase
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected, but '#{term}' provided")
     end
-    term.evaluate(nil, fb.query(selector, maps).each(fb, fact).to_a, fb)
+    term.evaluate(nil, fb.query(selector, maps).each(fb, params(fact)).to_a, fb)
+  end
+
+  private
+
+  # Extract the parameters made available to the outer query.
+  # @param [Factbase::Fact] fact The fact being evaluated
+  # @return [Hash] Parameters indexed by their names
+  def params(fact)
+    Context.new(fact, fact.all_properties.to_h { |name| [name, fact["$#{name}"]] }.compact)
+  end
+
+  # Values available to the selector of an aggregation.
+  class Context
+    # Ctor.
+    # @param [Factbase::Fact] fact The outer fact
+    # @param [Hash] params Parameters of the outer query
+    def initialize(fact, params)
+      @fact = fact
+      @params = params
+    end
+
+    # Get a parameter, or the property of the outer fact when it is not a parameter.
+    # @param [String] name Parameter or property name
+    # @return [Object] The value
+    def [](name)
+      @params.fetch(name) { @fact[name] }
+    end
+
+    # List all available names.
+    # @return [Array<String>] Names of the parameters and fact properties
+    def all_properties
+      @fact.all_properties | @params.keys
+    end
   end
 end
