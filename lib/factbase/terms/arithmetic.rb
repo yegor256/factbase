@@ -25,12 +25,10 @@ class Factbase::Arithmetic < Factbase::TermBase
     assert_args(2)
     lefts = _values(0, fact, maps, fb)
     return if lefts.nil?
-    raise(ArgumentError, 'Too many values at first position, one expected') unless lefts.size == 1
     rights = _values(1, fact, maps, fb)
     return if rights.nil?
-    raise(ArgumentError, 'Too many values at second position, one expected') unless rights.size == 1
-    v = lefts[0]
-    r = rights[0]
+    v = aggregate(lefts)
+    r = aggregate(rights)
     if v.is_a?(Time) && r.is_a?(String)
       (num, units) = r.split
       begin
@@ -56,5 +54,15 @@ class Factbase::Arithmetic < Factbase::TermBase
     end
     raise(ArgumentError, 'Cannot divide by zero') if @op == :/ && r.is_a?(Numeric) && r.zero?
     v.__send__(@op, r)
+  end
+
+  private
+
+  # Aggregate every value supplied for one arithmetic operand.
+  # @param [Array] values Values of one operand
+  # @return [Object] Sum or product of the values
+  def aggregate(values)
+    return values[0] if values.size == 1
+    values.reduce(@op == :+ || @op == :- ? :+ : :*)
   end
 end
