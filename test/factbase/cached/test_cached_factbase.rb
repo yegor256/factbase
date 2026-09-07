@@ -20,6 +20,14 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(1, fb.query('(and (eq foo_bar 1) (eq bar "test"))').each.to_a.size)
   end
 
+  def test_queries_after_update_through_a_parameterized_query
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.then { |f| f.foo = 1 }
+    assert_equal(0, fb.query('(gt foo 5)').each.to_a.size)
+    fb.query('(eq foo $x)').each(fb, x: [1]) { |f| f.foo = 9 }
+    assert_equal(1, fb.query('(gt foo 5)').each.to_a.size)
+  end
+
   def test_queries_after_update_in_txn
     origin = Factbase.new
     fb = Factbase::CachedFactbase.new(origin)
