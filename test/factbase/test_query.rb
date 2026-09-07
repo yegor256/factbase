@@ -161,6 +161,12 @@ class TestQuery < Factbase::Test
     assert_equal(1, maps.size)
   end
 
+  def test_deletes_only_the_head
+    maps = [{ 'foo' => [0] }, { 'foo' => [1] }, { 'foo' => [2] }, { 'foo' => [3] }, { 'foo' => [4] }]
+    assert_equal(2, Factbase::Query.new(maps, '(head 2 (exists foo))', Factbase.new).delete!)
+    assert_equal([[2], [3], [4]], maps.map { |m| m['foo'] })
+  end
+
   def test_delete_by_id
     maps = [
       { '_id' => [1], 'fruit' => ['orange'] },
