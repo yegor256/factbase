@@ -6,6 +6,7 @@
 require 'decoor'
 require 'others'
 require_relative '../factbase'
+require_relative '../factbase/accum'
 require_relative '../factbase/syntax'
 require_relative '../factbase/tallied'
 
@@ -84,10 +85,13 @@ class Factbase::Rules
     end
 
     others do |*args|
-      r = @fact.method_missing(*args)
       k = args.first.to_s
-      @check.it(@fact, @fb) if k.end_with?('=')
-      r
+      if k.end_with?('=')
+        probe = Factbase::Accum.new(@fact, {}, false)
+        probe.method_missing(*args)
+        @check.it(probe, @fb)
+      end
+      @fact.method_missing(*args)
     end
   end
 

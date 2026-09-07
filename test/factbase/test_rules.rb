@@ -152,6 +152,13 @@ class TestRules < Factbase::Test
     refute_includes(ex.message, 'nil', 'Error message should not contain "nil"')
   end
 
+  def test_does_not_write_a_value_rejected_by_a_rule
+    base = Factbase.new
+    fact = Factbase::Rules.new(base, '(exists foo)').insert
+    assert_raises(ArgumentError) { fact.bar = 42 }
+    assert_nil(base.query('(always)').each.to_a.first['bar'])
+  end
+
   def test_error_message_truncates_long_expression
     rule = '(and (exists a) (exists b) (exists c) (exists d) (exists e))'
     assert_operator(rule.length, :>, 32)
