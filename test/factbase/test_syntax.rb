@@ -99,6 +99,15 @@ class TestSyntax < Factbase::Test
     assert(Factbase::Syntax.new('(eq t 1.5e-10)').to_term.evaluate({ 't' => 1.5e-10 }, [], Factbase.new))
   end
 
+  def test_names_the_term_with_too_few_operands
+    %w[size contains gte plus].each do |name|
+      fb = Factbase.new
+      fb.insert.foo = 42
+      error = assert_raises(RuntimeError) { fb.query("(#{name})").each.to_a }
+      assert_includes(error.message, "for '#{name}'", error.message)
+    end
+  end
+
   def test_parses_a_time_with_fractional_seconds
     t = Time.parse('2026-09-05T07:00:00.123456Z')
     assert(
