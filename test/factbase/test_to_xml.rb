@@ -94,6 +94,19 @@ class TestToXML < Factbase::Test
     ].each { |x| refute_empty(xml.xpath(x), out) }
   end
 
+  def test_marks_booleans_differently_from_floats_and_times
+    fb = Factbase.new
+    f = fb.insert
+    f.truth = true
+    f.lie = false
+    f.float = 2.5
+    f.time = Time.now
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
+    %w[truth lie].each { |name| refute_empty(xml.xpath("/fb/f/#{name}[@t=\"L\"]")) }
+    refute_empty(xml.xpath('/fb/f/float[@t="F"]'))
+    refute_empty(xml.xpath('/fb/f/time[@t="T"]'))
+  end
+
   def test_sorts_keys
     fb = Factbase.new
     f = fb.insert
