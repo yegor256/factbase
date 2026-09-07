@@ -88,8 +88,11 @@ class Factbase::Query
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
     deleted = 0
+    maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
     @maps.delete_if do |m|
-      d = @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
+      pos = maybe.index(m)
+      d = !pos.nil? && @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
+      maybe.delete_at(pos) if d
       deleted += 1 if d
       d
     end
