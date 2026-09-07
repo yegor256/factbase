@@ -55,6 +55,15 @@ class TestToJSON < Factbase::Test
     assert_equal('hello', JSON.parse(Factbase::ToJSON.new(fb).json)[0]['text'])
   end
 
+  def test_names_the_property_that_is_not_valid_utf8
+    fb = Factbase.new
+    bad = +"bad\xFF"
+    bad.force_encoding('UTF-8')
+    fb.insert.text = bad
+    e = assert_raises(StandardError) { Factbase::ToJSON.new(fb).json }
+    assert_includes(e.message, "'text'", e.message)
+  end
+
   def test_custom_sort_key
     fb = Factbase.new
     fb.insert.prio = 2
