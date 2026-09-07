@@ -20,5 +20,7 @@ class TestType < Factbase::Test
     assert_equal('String', t.evaluate(fact('foo' => 'bar'), [], Factbase.new))
     assert_equal('Float', t.evaluate(fact('foo' => 2.1), [], Factbase.new))
     assert_equal('Time', t.evaluate(fact('foo' => Time.now), [], Factbase.new))
+    assert_equal('Boolean', t.evaluate(fact('foo' => true), [], Factbase.new))
+    assert_equal('Boolean', t.evaluate(fact('foo' => false), [], Factbase.new))
   end
 end

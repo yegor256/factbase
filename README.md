@@ -178,7 +178,7 @@ There are a few terms that return non-boolean values:
 * `(at i v)` is the `i`-th value of `v`
 * `(size v)` is the cardinality of `v` (zero if `v` is `nil`)
 * `(type v)` is the type of `v`
-(`"String"`, `"Integer"`, `"Float"`, `"Time"`, or `"Array"`)
+(`"String"`, `"Integer"`, `"Float"`, `"Time"`, `"Boolean"`, or `"Array"`)
 * `(either v1 v2)` is `v2` if `v1` is `nil`
 
 It's possible to modify the facts retrieved, on fly:
@@ -259,8 +259,8 @@ There are some system-level terms:
 
 The entire database is a single flat [Ruby](https://www.ruby-lang.org/en/)
   `Array` of `Hash` objects held in RAM (`Factbase#@maps`). There are no
-  tables, schemas, or type enforcement beyond four scalar types: `Integer`,
-  `Float`, `String`, and `Time`. This contrasts with
+  tables, schemas, or type enforcement beyond six scalar types: `Integer`,
+  `Float`, `String`, `Time`, `TrueClass`, and `FalseClass`. This contrasts with
   [SQLite](https://sqlite.org/) (fixed-column tables on disk) and
   [MongoDB](https://www.mongodb.com/) (typed document collections). New
   programmers must understand that all data vanishes on process exit unless
