@@ -52,7 +52,15 @@ class Factbase::Logged
     r =
       @origin.txn do |fbt|
         id = fbt.object_id
-        yield(Factbase::Logged.new(fbt, tube: @tube))
+        commit = false
+        catch(:rollback) do
+          yield(Factbase::Logged.new(fbt, tube: @tube))
+          commit = true
+        end
+        unless commit
+          rollback = true
+          throw(:rollback)
+        end
       rescue Factbase::Rollback => e
         rollback = true
         raise(e)

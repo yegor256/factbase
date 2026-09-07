@@ -77,6 +77,17 @@ class TestLogged < Factbase::Test
     refute_includes(log.to_s, 'didn\'t touch', log)
   end
 
+  def test_with_txn_thrown_rollback
+    log = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    fb.txn do |fbt|
+      fbt.insert.foo = 1
+      throw(:rollback)
+    end
+    assert_equal(0, fb.size)
+    assert_includes(log.to_s, 'rolled back', log)
+  end
+
   def test_with_modifying_txn
     log = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, log)
