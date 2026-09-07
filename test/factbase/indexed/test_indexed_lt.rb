@@ -16,6 +16,20 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestIndexedLt < Factbase::Test
+  def test_keeps_the_order_the_facts_were_inserted_in
+    term = Factbase::Term.new(:lt, [:num, 4])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    maps = Factbase::Taped.new(
+      [
+        { 'num' => [5], 'tag' => ['t0'] },
+        { 'num' => [1], 'tag' => ['t1'] },
+        { 'num' => [3], 'tag' => ['t2'] },
+        { 'num' => [2], 'tag' => ['t3'] }
+      ]
+    )
+    assert_equal(%w[t1 t2 t3], term.predict(maps, Factbase.new, {}).to_a.map { |m| m['tag'].first })
+  end
+
   def test_predicts_on_lt
     term = Factbase::Term.new(:lt, [:foo, 42])
     term.redress!(Factbase::IndexedTerm, idx: {})
