@@ -33,9 +33,9 @@ class Factbase::IndexedLt
 
   def _feed(facts, entry, prop)
     return unless entry[:count] < facts.size
-    facts[entry[:count]..].each do |fact|
+    facts[entry[:count]..].each_with_index do |fact, i|
       fact[prop]&.each do |v|
-        entry[:facts] << [v, fact]
+        entry[:facts] << [v, fact, entry[:count] + i]
       end
     end
     entry[:facts].sort_by! { |pair| pair[0] }
@@ -50,9 +50,9 @@ class Factbase::IndexedLt
   end
 
   def _search(entry, target)
-    idx = entry[:facts].bsearch_index { |v, _| v >= target }
+    idx = entry[:facts].bsearch_index { |pair| pair[0] >= target }
     res = idx.nil? ? entry[:facts] : entry[:facts][0...idx]
-    facts = res.map { |_, f| f }
+    facts = res.sort_by { |pair| pair[2] }.map { |pair| pair[1] }
     facts.uniq!(&:object_id)
     facts
   end
