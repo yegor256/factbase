@@ -87,4 +87,11 @@ class TestDefn < Factbase::Test
       Factbase::Defn.new(%w[string_name true]).evaluate(fact, [], Factbase.new)
     end
   end
+
+  def test_refuses_to_redefine_a_class_based_term
+    fb = Factbase.new
+    fb.insert.foo = 42
+    e = assert_raises(StandardError) { fb.query('(defn eq "false")').each.to_a }
+    assert_includes(e.message, "Term 'eq' is already defined", e.message)
+  end
 end

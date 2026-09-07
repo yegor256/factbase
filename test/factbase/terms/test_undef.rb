@@ -40,4 +40,12 @@ class TestUndef < Factbase::Test
       Factbase::Term.new(fn, []).evaluate(fact, [], Factbase.new)
     end
   end
+
+  def test_refuses_to_undefine_a_class_based_term
+    fb = Factbase.new
+    fb.insert.foo = 42
+    e = assert_raises(StandardError) { fb.query('(undef eq)').each.to_a }
+    assert_includes(e.message, "Term 'eq' is built-in and cannot be undefined", e.message)
+    assert_equal(1, fb.query('(eq foo 42)').each.to_a.size)
+  end
 end
