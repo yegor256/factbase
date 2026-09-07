@@ -314,6 +314,15 @@ class TestQuery < Factbase::Test
     assert_equal(0, Factbase::Query.new(maps, '(eq foo $bar)', Factbase.new).each(Factbase.new, bar: [555]).to_a.size)
   end
 
+  def test_with_a_digit_in_the_param_name
+    assert_equal(
+      1,
+      Factbase::Query.new(
+        [{ 'foo' => [42] }, { 'foo' => [17] }], '(eq foo $bar2)', Factbase.new
+      ).each(Factbase.new, bar2: [42]).to_a.size
+    )
+  end
+
   def test_with_nil_alias
     assert_nil(Factbase::Query.new([{ 'foo' => [42] }], '(as bar (plus xxx 3))', Factbase.new).each.to_a[0]['bar'])
   end
