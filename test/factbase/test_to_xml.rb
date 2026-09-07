@@ -32,6 +32,16 @@ class TestToXML < Factbase::Test
     assert_equal("a#{1.chr}b", node.text.unpack1('m0'))
   end
 
+  def test_broken_utf8_rendering
+    fb = Factbase.new
+    bad = +"bad\xFF"
+    bad.force_encoding('UTF-8')
+    fb.insert.t = bad
+    node = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml, &:strict).xpath('/fb/f/t').first
+    assert_equal('B', node['t'])
+    assert_equal(bad.b, node.text.unpack1('m0').b)
+  end
+
   def test_complex_rendering
     fb = Factbase.new
     fb.insert.t = "\uffff < > & ' \""

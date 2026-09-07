@@ -64,7 +64,7 @@ class Factbase::ToXML
   # @param [Symbol] name The name of the element
   # @param [Object] val The value
   def put(xml, name, val)
-    if val.is_a?(String) && val.match?(BAD)
+    if val.is_a?(String) && (!val.valid_encoding? || val.match?(BAD))
       xml.__send__(name, [val].pack('m0'), t: 'B')
     else
       xml.__send__(name, to_str(val), t: type_of(val))
