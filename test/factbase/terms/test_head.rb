@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../../../lib/factbase/syntax'
 require_relative '../../../lib/factbase/term'
 require_relative '../../../lib/factbase/terms/head'
 require_relative '../../test__helper'
@@ -18,6 +19,13 @@ class TestHead < Factbase::Test
       2,
       Factbase::Term.new(:head, [2, Factbase::Term.new(:always, [])]).predict(maps, Factbase.new(maps), {}).size
     )
+  end
+
+  def test_does_not_turn_a_param_into_a_property
+    list = Factbase::Syntax.new('(head 1 (eq y $who))').to_term.predict(
+      [{ 'y' => ['first'] }], Factbase.new, { 'who' => ['first'] }
+    )
+    list.each { |m| refute_includes(m.keys, 'who') }
   end
 
   def test_refuses_a_negative_count

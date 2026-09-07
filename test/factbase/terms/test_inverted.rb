@@ -19,4 +19,11 @@ class TestInverted < Factbase::Test
     )
     assert_equal('12 54 33', list.map { |m| m['x'].first }.join(' '))
   end
+
+  def test_does_not_turn_a_param_into_a_property
+    list = Factbase::Syntax.new('(inverted (eq y $who))').to_term.predict(
+      [{ 'y' => ['first'] }], Factbase.new, { 'who' => ['first'] }
+    )
+    list.each { |m| refute_includes(m.keys, 'who') }
+  end
 end

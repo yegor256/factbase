@@ -62,6 +62,7 @@ Elegant/GoodMethodName:
     - '_by_symbol'
     - '_compare'
     - '_feed'
+    - '_flatten'
     - '_init_indexes'
     - '_join'
     - '_resolve'

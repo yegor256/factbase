@@ -31,8 +31,6 @@ class Factbase::Head < Factbase::TermBase
     raise(ArgumentError, "A non-negative count is expected by '#{@op}', but #{max} provided") if max.negative?
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
-    fb.query(term, maps).each(fb, params).to_a
-      .take(max)
-      .map! { |m| m.all_properties.to_h { |k| [k, m[k]] } }
+    _flatten(fb.query(term, maps).each(fb, params).to_a.take(max))
   end
 end

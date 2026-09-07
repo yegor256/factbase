@@ -34,6 +34,14 @@ class TestSorted < Factbase::Test
     assert_equal('first third nothing', list.map { |m| m['y'].first }.join(' '))
   end
 
+  def test_does_not_turn_a_param_into_a_property
+    list = Factbase::Syntax.new('(sorted x (eq y $who))').to_term.predict(
+      [{ 'x' => [8], 'y' => ['first'] }, { 'x' => [1], 'y' => ['second'] }],
+      Factbase.new, { 'who' => %w[first second] }
+    )
+    list.each { |m| refute_includes(m.keys, 'who') }
+  end
+
   def test_join_and_sort
     ff = Factbase.new(
       [
