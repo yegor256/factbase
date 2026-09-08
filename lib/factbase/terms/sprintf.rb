@@ -33,7 +33,7 @@ class Factbase::Sprintf < Factbase::TermBase
 
   def formatted(fmt, ops)
     format(*([fmt] + ops))
-  rescue ArgumentError => e
+  rescue ArgumentError, TypeError => e
     raise(RuntimeError, "Cannot format #{ops.inspect} with '#{fmt}' in (sprintf ...): #{e.message}")
   end
 end
