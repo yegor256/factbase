@@ -37,21 +37,23 @@ class Factbase::TermBase
     raise(ArgumentError, "Too few (#{c}) operands for '#{@op}' (#{num} expected)") if c < num
   end
 
-  # Turns facts into plain maps, keeping only the properties they really carry.
+  # Turns facts back into the very maps they came from.
   #
-  # A fact coming out of a query is a +Factbase::Tee+, whose +all_properties+
-  # also lists the names of the query parameters. Reading such a name back gives
-  # NIL, which is not a value any property may have.
+  # The maps must be the originals, not copies of them. +Query#each+ wraps
+  # whatever +predict+ returns and hands it to the caller, so a copy would make
+  # the yielded fact detached: a write through it would be silently dropped
+  # instead of reaching the factbase.
   #
-  # @param [Array<Factbase::Fact>] facts The facts to turn into maps
-  # @return [Array<Hash>] The maps
-  def _flatten(facts)
-    facts.map do |f|
-      f.all_properties.each_with_object({}) do |k, h|
-        v = f[k]
-        h[k] = v unless v.nil?
-      end
-    end
+  # Returning the originals also keeps query parameters out of the result. A
+  # fact coming out of a query is a +Factbase::Tee+, whose +all_properties+ also
+  # lists the parameter names, and reading such a name back gives NIL, which is
+  # not a value any property may have. The map behind the fact never carried
+  # them in the first place.
+  #
+  # @param [Array<Factbase::Fact>] facts The facts to unwrap
+  # @return [Array<Hash>] The maps they came from
+  def _unwrap(facts)
+    facts.map(&:to_map)
   end
 
   def _by_symbol(pos, fact)

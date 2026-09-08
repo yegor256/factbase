@@ -26,4 +26,11 @@ class TestInverted < Factbase::Test
     )
     list.each { |m| refute_includes(m.keys, 'who') }
   end
+
+  def test_writes_reach_the_factbase
+    fb = Factbase.new
+    3.times { |i| fb.insert.then { |f| f.num = i } }
+    fb.query('(inverted (always))').each { |f| f.seen = 1 }
+    assert_equal(3, fb.query('(exists seen)').each.to_a.size)
+  end
 end
