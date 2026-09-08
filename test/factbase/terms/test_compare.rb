@@ -42,4 +42,12 @@ class TestCompare < Factbase::Test
     assert_includes(e.message, '"yesterday" (String)')
     assert_includes(e.message, 'comparison of Time with String failed')
   end
+
+  def test_wraps_a_missing_comparison_method
+    t = Factbase::Compare.new(:include?, [42, 7])
+    e = assert_raises(RuntimeError) { t.evaluate(fact, [], Factbase.new) }
+    assert_includes(e.message, 'Cannot compare 42 (Integer) with 7 (Integer)')
+    assert_includes(e.message, 'using (compare include?)')
+    assert_includes(e.message, "undefined method 'include?'")
+  end
 end
