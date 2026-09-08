@@ -270,6 +270,14 @@ class TestFactbase < Factbase::Test
     assert_equal(1, fb.query('(eq foo 1)').each.to_a.size)
   end
 
+  def test_keeps_order_when_modifying_a_fact_in_txn
+    fb = Factbase.new
+    3.times { |i| fb.insert.then { |f| f.num = i } }
+    fb.txn { |fbt| fbt.query('(eq num 0)').each { |f| f.tag = 'x' } }
+    assert_equal([0, 1, 2], fb.query('(always)').each.to_a.map(&:num))
+    assert_equal(1, fb.query('(exists tag)').each.to_a.size)
+  end
+
   def test_simple_concurrent_inserts
     fb = Factbase.new
     t = Concurrent.processor_count * 20

@@ -199,13 +199,25 @@ class Factbase
       @maps << b
       churn.append(1, 0, 0)
     end
+    positions = nil
     taped.added.each do |oid|
       b = taped.find_by_object_id(oid)
       next if b.nil?
       next if seen.key?(b)
       original = taped.source_of(b)
-      garbage[original] = true if original
-      @maps << b
+      positions ||=
+        begin
+          h = {}.compare_by_identity
+          @maps.each_with_index { |m, i| h[m] = i }
+          h
+        end
+      pos = original.nil? || garbage.key?(original) ? nil : positions[original]
+      if pos.nil?
+        garbage[original] = true if original
+        @maps << b
+      else
+        @maps[pos] = b
+      end
       churn.append(0, 0, 1)
     end
     @maps.delete_if { |m| garbage.key?(m) } unless garbage.empty?
