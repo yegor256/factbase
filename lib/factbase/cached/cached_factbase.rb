@@ -49,9 +49,7 @@ class Factbase::CachedFactbase
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
-    q = @origin.query(term, maps)
-    q = Factbase::CachedQuery.new(q, @cache, self) unless term.abstract?
-    q
+    Factbase::CachedQuery.new(@origin.query(term, maps), @cache, self, cacheable: !term.abstract?)
   end
 
   # Run an ACID transaction.
