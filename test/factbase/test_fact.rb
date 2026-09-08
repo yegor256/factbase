@@ -13,6 +13,13 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestFact < Factbase::Test
+  def test_refuses_a_float_that_is_not_a_number
+    f = Factbase::Fact.new({})
+    [Float::NAN, Float::INFINITY, -Float::INFINITY].each do |v|
+      assert_raises(StandardError) { f.value = v }
+    end
+  end
+
   def test_injects_data_correctly
     map = {}
     f = Factbase::Fact.new(map)
