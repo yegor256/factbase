@@ -35,7 +35,7 @@ class Factbase::TermBase
         items +=
           @operands.map do |o|
             if o.is_a?(String)
-              "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"')}'"
+              "'#{o.gsub('\\') { '\\\\' }.gsub("'", "\\\\'").gsub('"', '\\\\"')}'"
             elsif o.is_a?(Time)
               o.utc.iso8601(o.subsec.zero? ? 0 : 9)
             else
