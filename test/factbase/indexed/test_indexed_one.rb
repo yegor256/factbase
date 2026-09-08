@@ -40,6 +40,12 @@ class TestIndexedOne < Factbase::Test
     end
   end
 
+  def test_skips_a_subterm_operand
+    term = Factbase::Term.new(:one, [Factbase::Term.new(:eq, [:kind, 'a'])])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    assert_nil(term.predict([{ 'kind' => ['a'] }], nil, {}))
+  end
+
   private
 
   def _assert_one
