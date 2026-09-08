@@ -156,7 +156,7 @@ class Factbase::Term < Factbase::TermBase
     super()
     @op = operator
     @operands = operands
-    @terms = TERMS.transform_values { |c| c.new(operands) }
+    @term = nil
   end
 
   # Extend it with the module.
@@ -182,8 +182,8 @@ class Factbase::Term < Factbase::TermBase
   # @return [Array<Hash>] Records to iterate
   def predict(maps, fb, params)
     m = :"#{@op}_predict"
-    if @terms.key?(@op)
-      t = @terms[@op]
+    if TERMS.key?(@op)
+      t = term
       if t.respond_to?(:predict)
         t.predict(maps, fb, params)
       else
@@ -202,8 +202,8 @@ class Factbase::Term < Factbase::TermBase
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Object] The result of evaluation
   def evaluate(fact, maps, fb)
-    if @terms.key?(@op)
-      @terms[@op].evaluate(fact, maps, fb)
+    if TERMS.key?(@op)
+      term.evaluate(fact, maps, fb)
     else
       __send__(@op, fact, maps, fb)
     end
@@ -216,8 +216,8 @@ class Factbase::Term < Factbase::TermBase
   # Simplify it if possible.
   # @return [Factbase::Term] New term or itself
   def simplify
-    if @terms.key?(@op) && @terms[@op].respond_to?(:simplify)
-      @terms[@op].simplify
+    if TERMS.key?(@op) && term.respond_to?(:simplify)
+      term.simplify
     else
       m = "#{@op}_simplify"
       if respond_to?(m, true)
@@ -241,6 +241,13 @@ class Factbase::Term < Factbase::TermBase
       return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
     end
     true
+  end
+
+  # The term implementation for this operator, made on first use.
+  #
+  # @return [Factbase::TermBase] The term
+  def term
+    @term ||= TERMS[@op].new(@operands)
   end
 
   # Does it have any variables (+$foo+, for example) inside?
