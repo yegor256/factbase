@@ -31,6 +31,18 @@ class TestSprintf < Factbase::Test
     assert_includes(e.message, 'invalid value for Integer')
   end
 
+  def test_names_the_format_when_an_operand_is_absent
+    [['%d', :absent], ['%f', :absent]].each do |ops|
+      t = Factbase::Sprintf.new(ops)
+      e =
+        assert_raises(RuntimeError) do
+          t.evaluate(fact, [], Factbase.new)
+        end
+      assert_includes(e.message, "Cannot format [nil] with '#{ops[0]}' in (sprintf ...):")
+      assert_includes(e.message, 'nil')
+    end
+  end
+
   def test_rejects_missing_format_operand
     t = Factbase::Sprintf.new(['%s %s', 'hello'])
     e =
