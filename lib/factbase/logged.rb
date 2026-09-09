@@ -134,6 +134,8 @@ class Factbase::Logged
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   class Query
+    include Enumerable
+
     def initialize(term, maps, tube, fb)
       @term = term
       @maps = maps
