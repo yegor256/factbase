@@ -23,6 +23,10 @@ class Factbase::Light
     @fb.insert
   end
 
+  def each(&)
+    @fb.each(&)
+  end
+
   def to_term(query)
     @fb.to_term(query)
   end
