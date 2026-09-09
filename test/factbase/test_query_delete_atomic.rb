@@ -19,11 +19,10 @@ class TestQueryDeleteAtomic < Factbase::Test
       f.foo = i
       f.bar = "x#{i}"
     end
-    before = fb.size
     imp = Factbase::Impatient.new(fb, timeout: 0.05)
     assert_raises(StandardError) do
       imp.query('(and (exists foo) (matches bar "^x[0-9]*$"))').delete!
     end
-    assert_equal(before, fb.size)
+    assert_equal(20_000, fb.size)
   end
 end
