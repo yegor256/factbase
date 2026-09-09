@@ -16,8 +16,7 @@ class TestCachedScope < Factbase::Test
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.foo = 1
     fb.insert.foo = 2
-    sub = fb.each.to_a[0..0]
-    assert_equal(1, fb.query('(exists foo)', sub).each.to_a.size)
+    assert_equal(1, fb.query('(exists foo)', fb.each.to_a[0..0]).each.to_a.size)
     assert_equal(2, fb.query('(exists foo)').each.to_a.size)
   end
 end
