@@ -39,8 +39,13 @@ class Factbase::Tallied
     commit = false
     @fb.txn do |fbt|
       catch(:rollback) do
-        yield(Factbase::Tallied.new(fbt, @churn))
+        thrown = true
+        catch(:commit) do
+          yield(Factbase::Tallied.new(fbt, @churn))
+          thrown = false
+        end
         commit = true
+        throw(:commit) if thrown
       end
     rescue Factbase::Rollback => e
       @churn = before
