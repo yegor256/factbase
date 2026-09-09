@@ -16,7 +16,7 @@ class TestTalliedCommit < Factbase::Test
     fb = Factbase::Tallied.new(Factbase.new)
     fb.txn do |t|
       t.insert.foo = 1
-      throw :commit
+      throw(:commit)
     end
     assert_equal(1, fb.size)
     assert_equal(1, fb.churn.inserted)
