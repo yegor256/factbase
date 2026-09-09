@@ -8,6 +8,18 @@
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::TermBase
+  # Set the name the user used for this term and its implementation helpers.
+  # @param [Symbol] name Name of the term in the query
+  # rubocop:disable Elegant/GoodMethodName
+  def name=(name)
+    @name = name
+    instance_variables.each do |variable|
+      value = instance_variable_get(variable)
+      value.name = name if value.is_a?(Factbase::TermBase)
+    end
+  end
+  # rubocop:enable Elegant/GoodMethodName
+
   # Turns it into a string.
   # @return [String] The string of it
   def to_s
@@ -33,8 +45,9 @@ class Factbase::TermBase
 
   def assert_args(num)
     c = @operands.size
-    raise(ArgumentError, "Too many (#{c}) operands for '#{@op}' (#{num} expected)") if c > num
-    raise(ArgumentError, "Too few (#{c}) operands for '#{@op}' (#{num} expected)") if c < num
+    name = @name || @op
+    raise(ArgumentError, "Too many (#{c}) operands for '#{name}' (#{num} expected)") if c > num
+    raise(ArgumentError, "Too few (#{c}) operands for '#{name}' (#{num} expected)") if c < num
   end
 
   # Turns facts into plain maps, keeping only the properties they really carry.

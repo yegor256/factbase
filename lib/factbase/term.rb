@@ -156,7 +156,7 @@ class Factbase::Term < Factbase::TermBase
     super()
     @op = operator
     @operands = operands
-    @terms = TERMS.transform_values { |c| c.new(operands) }
+    @terms = TERMS.to_h { |name, klass| [name, klass.new(operands).tap { |term| term.name = name }] }
   end
 
   # Extend it with the module.
