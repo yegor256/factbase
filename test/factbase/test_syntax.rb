@@ -27,11 +27,10 @@ class TestSyntax < Factbase::Test
   end
 
   def test_queries_values_with_backslashes
-    ["a\\b", "a\\\\b", "a\\", "a\\'b", "a\\\"b"].each do |value|
+    ['a\\b', 'a\\\\b', 'a\\', "a\\'b", 'a\"b'].each do |value|
       fb = Factbase.new
       fb.insert.foo = value
-      escaped = value.gsub('\\') { '\\\\' }.gsub("'", "\\\\'").gsub('"', '\\\\"')
-      query = "(eq foo '#{escaped}')"
+      query = "(eq foo '#{value.gsub('\\') { '\\\\' }.gsub("'", "\\\\'").gsub('"', '\\\\"')}')"
       assert_equal(query, Factbase::Term.new(:eq, [:foo, value]).to_s, query)
       assert_equal(1, fb.query(query).each.to_a.size, query)
       assert_equal(query, Factbase::Syntax.new(query).to_term.to_s, query)
