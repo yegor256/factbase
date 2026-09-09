@@ -153,7 +153,10 @@ class Factbase::Logged
       qry = @fb.query(@term, @maps)
       tail =
         Factbase::Logged.elapsed do
-          r = qry.each(fb, params, &)
+          r =
+            qry.each(fb, params) do |f|
+              yield(Factbase::Logged::Fact.new(f, tube: @tube))
+            end
         end
       unless r.is_a?(Integer)
         raise(StandardError, ".query(#{@termtext.inspect}).each() of #{qry.class} returned #{r.class}")
