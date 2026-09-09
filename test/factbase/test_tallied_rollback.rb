@@ -17,7 +17,7 @@ class TestTalliedRollback < Factbase::Test
     fb.insert.foo = 1
     fb.txn do |t|
       t.insert.bar = 2
-      throw :rollback
+      throw(:rollback)
     end
     assert_equal(1, fb.size)
   end
