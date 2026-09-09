@@ -93,12 +93,13 @@ class Factbase::Query
   def delete!(fb = @fb)
     maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
     doomed = {}.compare_by_identity
-    @maps.each do |m|
+    @maps.delete_if do |m|
       pos = maybe.index(m)
-      next if pos.nil?
-      next unless @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
-      maybe.delete_at(pos)
-      doomed[m] = true
+      unless pos.nil? || !@term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
+        maybe.delete_at(pos)
+        doomed[m] = true
+      end
+      false
     end
     @maps.delete_if { |m| doomed.key?(m) }
     doomed.size
