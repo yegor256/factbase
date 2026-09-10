@@ -100,20 +100,22 @@ class Factbase::Syntax
     acc = ''
     quotes = ['\'', '"']
     spaces = [' ', ')', "\n", "\t", "\r"]
-    string = false
+    opener = nil
     comment = false
     @query.to_s.chars.each do |c|
-      comment = true if !string && c == '#'
+      comment = true if opener.nil? && c == '#'
       comment = false if comment && c == "\n"
       next if comment
       if quotes.include?(c)
-        if string && acc[-1] == '\\'
+        if !opener.nil? && acc[-1] == '\\'
           acc = acc[0..-2]
-        else
-          string = !string
+        elsif opener.nil?
+          opener = c
+        elsif opener == c
+          opener = nil
         end
       end
-      if string
+      if opener
         acc += c
         next
       end
@@ -132,7 +134,7 @@ class Factbase::Syntax
         acc += c
       end
     end
-    raise(StandardError, 'String not closed') if string
+    raise(StandardError, 'String not closed') unless opener.nil?
     list.map do |t|
       if t.is_a?(Symbol)
         t
