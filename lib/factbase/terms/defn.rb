@@ -30,12 +30,16 @@ class Factbase::Defn < Factbase::TermBase
     raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term.private_method_defined?(fn, false)
     raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term::TERMS.key?(fn)
     raise(ArgumentError, "The '#{fn}' is a bad name for a term") unless fn.match?(/^[a-z_]+$/)
-    # rubocop:disable Security/Eval
-    eval(
-      "class Factbase::Term\nprivate\ndef #{fn}(fact, maps, fb)\n#{@operands[1]}\nend\nend",
-      binding, __FILE__, __LINE__ - 1
-    )
-    # rubocop:enable Security/Eval
+    begin
+      # rubocop:disable Security/Eval
+      eval(
+        "class Factbase::Term\nprivate\ndef #{fn}(fact, maps, fb)\n#{@operands[1]}\nend\nend",
+        binding, __FILE__, __LINE__ - 1
+      )
+      # rubocop:enable Security/Eval
+    rescue SyntaxError => e
+      raise(ArgumentError, "Cannot define the term '#{fn}', its body is not valid Ruby: #{e.message}")
+    end
     true
   end
 end
