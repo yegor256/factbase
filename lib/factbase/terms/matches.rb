@@ -21,16 +21,16 @@ class Factbase::Matches < Factbase::TermBase
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @param [Factbase] fb Factbase to use for sub-queries
-  # @return [Boolean] True if the string matches the regexp, false otherwise
+  # @return [Boolean] True if any value matches the regexp, false otherwise
   def evaluate(fact, maps, fb)
     assert_args(2)
     str = _values(0, fact, maps, fb)
     return false if str.nil?
-    raise(RuntimeError, 'Exactly one string is expected') unless str.size == 1
     re = _values(1, fact, maps, fb)
     raise(RuntimeError, 'Regexp is nil') if re.nil?
     raise(RuntimeError, 'Exactly one regexp is expected') unless re.size == 1
-    str[0].to_s.match?(regexp(re[0]))
+    rx = regexp(re[0])
+    str.any? { |s| s.to_s.match?(rx) }
   end
 
   private
