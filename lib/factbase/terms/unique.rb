@@ -14,6 +14,13 @@ class Factbase::Unique < Factbase::TermBase
     @operands = operands
   end
 
+  # Forget the tuples seen by the previous iteration.
+  # @return [Array, nil] The operands that were walked
+  def reset
+    @seen = nil
+    super
+  end
+
   # Evaluate term on a fact.
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available

@@ -45,6 +45,7 @@ class Factbase::Query
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
     yielded = 0
+    @term.reset if @term.respond_to?(:reset)
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     maybe = @term.predict(@maps, fb, Factbase::Tee.new({}, params))
     maybe ||= @maps unless maybe.equal?(@maps)
