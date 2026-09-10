@@ -42,6 +42,7 @@ class Factbase::Tallied
         yield(Factbase::Tallied.new(fbt, @churn))
         commit = true
       end
+      throw(:rollback) unless commit
     rescue Factbase::Rollback => e
       @churn = before
       raise(e)
