@@ -35,6 +35,13 @@ class Factbase::CachedFactbase
     Factbase::CachedFact.new(@origin.insert, @cache, fresh: true)
   end
 
+  # Import facts from a binary buffer.
+  # @param [String] data The data to import
+  def import(data)
+    @cache.clear
+    @origin.import(data)
+  end
+
   # Convert a query to a term.
   # @param [String] query The query to convert
   # @return [Factbase::Term] The term
