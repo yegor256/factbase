@@ -46,6 +46,17 @@ class Factbase::Fact
     @map.keys
   end
 
+  # Get the map this fact reads from and writes to.
+  #
+  # Terms that reorder or cut a list of facts need the original maps rather than
+  # copies of them: a fact yielded by a query must be the fact, so that a write
+  # through it reaches the factbase.
+  #
+  # @return [Hash] The map behind this fact
+  def to_map
+    @map
+  end
+
   others do |*args|
     k = args[0].to_s
     if k.end_with?('=')

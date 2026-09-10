@@ -51,4 +51,11 @@ class TestSorted < Factbase::Test
     ).query('(join "f<=foo" (head 1 (sorted foo (eq foo $foo))))').each.to_a
     assert_equal('888 111 444', ff.map { |m| m['f'].first }.join(' '))
   end
+
+  def test_writes_reach_the_factbase
+    fb = Factbase.new
+    3.times { |i| fb.insert.then { |f| f.num = i } }
+    fb.query('(sorted num (always))').each { |f| f.seen = 1 }
+    assert_equal(3, fb.query('(exists seen)').each.to_a.size)
+  end
 end
