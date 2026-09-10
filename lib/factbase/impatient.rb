@@ -75,9 +75,9 @@ class Factbase::Impatient
       end
     end
 
-    def delete!(fb = @fb)
+    def delete!(fb = @fb, params = {})
       impatient('delete!') do
-        @fb.query(@term, @maps).delete!(fb)
+        @fb.query(@term, @maps).delete!(fb, params)
       end
     end
 

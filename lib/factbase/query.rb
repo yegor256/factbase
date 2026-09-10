@@ -85,13 +85,16 @@ class Factbase::Query
   # same question twice (#694).
   #
   # @param [Factbase] fb The factbase to delete from
+  # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return [Integer] Total number of facts deleted
-  def delete!(fb = @fb)
+  def delete!(fb = @fb, params = {})
     deleted = 0
-    maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
+    params = params.transform_keys(&:to_s) if params.is_a?(Hash)
+    maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, params)) || @maps).to_a.dup
     @maps.delete_if do |m|
       pos = maybe.index(m)
-      d = !pos.nil? && @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
+      f = Factbase::Tee.new(Factbase::Fact.new(m), params)
+      d = !pos.nil? && @term.evaluate(Factbase::Accum.new(f, {}, false), @maps, fb)
       maybe.delete_at(pos) if d
       deleted += 1 if d
       d

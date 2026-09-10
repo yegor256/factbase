@@ -99,8 +99,8 @@ class Factbase::Tallied
       end
     end
 
-    def delete!(fb = @fb)
-      c = @query.delete!(fb)
+    def delete!(fb = @fb, params = {})
+      c = @query.delete!(fb, params)
       @churn.append(0, c, 0)
       c
     end
