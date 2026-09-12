@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_not'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/lazy_taped'
@@ -45,6 +46,20 @@ class TestIndexedNot < Factbase::Test
       n = term.predict(c[:input], nil, {})
       assert_kind_of(c[:expected], n, "Expect #{c[:expected]}, but got #{n.class}")
     end
+  end
+
+  def test_answers_each_set_of_params_on_its_own
+    origin = Factbase.new
+    origin.insert.foo = 1
+    origin.insert.foo = 2
+    fb = Factbase::IndexedFactbase.new(origin)
+    query = fb.query('(not (eq foo $x))')
+    assert_equal([2], query.each(fb, { 'x' => 1 }).to_a.map { |f| f['foo'].first })
+    assert_equal(
+      [1], query.each(fb, { 'x' => 2 }).to_a.map { |f| f['foo'].first },
+      'the prediction of the first parameter must not be reused for the second one'
+    )
+    assert_equal([2], query.each(fb, { 'x' => 1 }).to_a.map { |f| f['foo'].first })
   end
 
   private
