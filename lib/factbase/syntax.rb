@@ -145,6 +145,10 @@ class Factbase::Syntax
         Float(t)
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
         Time.parse(t)
+      elsif t == 'true'
+        true
+      elsif t == 'false'
+        false
       else
         raise(ArgumentError, "Wrong symbol format (#{t})") unless t.match?(/^\$?[_a-z][a-zA-Z0-9_]*$/)
         t.to_sym
