@@ -101,19 +101,30 @@ class Factbase::Syntax
     quotes = ['\'', '"']
     spaces = [' ', ')', "\n", "\t", "\r"]
     string = false
+    escaped = false
     comment = false
     @query.to_s.chars.each do |c|
       comment = true if !string && c == '#'
       comment = false if comment && c == "\n"
       next if comment
-      if quotes.include?(c)
-        if string && acc[-1] == '\\'
-          acc = acc[0..-2]
-        else
-          string = !string
-        end
-      end
       if string
+        if escaped
+          acc = acc[0..-2] if c == '\\' || quotes.include?(c)
+          acc += c
+          escaped = false
+        elsif c == '\\'
+          acc += c
+          escaped = true
+        elsif quotes.include?(c)
+          string = false
+          acc += c
+        else
+          acc += c
+        end
+        next
+      end
+      if quotes.include?(c)
+        string = true
         acc += c
         next
       end
