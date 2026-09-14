@@ -31,6 +31,17 @@ class Factbase::Sorted < Factbase::TermBase
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
     blank, valued = fb.query(term, maps).each(fb, params).to_a.partition { |m| m[prop].nil? }
-    _flatten(valued.sort_by { |m| m[prop].first } + blank)
+    cmp =
+      lambda do |one, two|
+        result = one <=> two
+        if result.nil?
+          raise(
+            ArgumentError,
+            "Can't compare '#{one}' (#{one.class}) with '#{two}' (#{two.class}) in the '#{prop}' property"
+          )
+        end
+        result
+      end
+    _flatten(valued.sort { |one, two| cmp.call(one[prop].first, two[prop].first) } + blank)
   end
 end
