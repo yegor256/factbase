@@ -31,6 +31,27 @@ class Factbase::Sorted < Factbase::TermBase
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
     blank, valued = fb.query(term, maps).each(fb, params).to_a.partition { |m| m[prop].nil? }
-    _flatten(valued.sort_by.with_index { |m, i| [m[prop].first, i] } + blank)
+    _flatten(_ordered(valued, prop) + blank)
+  end
+
+  private
+
+  # Sort the facts by the property, keeping the order of the equal ones.
+  # @param [Array<Factbase::Fact>] valued Facts that have the property
+  # @param [Symbol] prop The property to sort by
+  # @return [Array<Factbase::Fact>] Sorted facts
+  def _ordered(valued, prop)
+    valued.each_with_index.sort do |(one, first), (two, second)|
+      left = one[prop].first
+      right = two[prop].first
+      answer = left <=> right
+      if answer.nil?
+        raise(
+          ArgumentError,
+          "Can't compare '#{left}' (#{left.class}) with '#{right}' (#{right.class}) in the '#{prop}' property"
+        )
+      end
+      answer.zero? ? first <=> second : answer
+    end.map!(&:first)
   end
 end
