@@ -38,7 +38,7 @@ class Factbase::IndexedEq
   def _feed(facts, entry, operand)
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |m|
-      m[operand]&.each do |v|
+      m[operand]&.uniq&.each do |v|
         entry[:facts][v] ||= []
         entry[:facts][v] << m
       end

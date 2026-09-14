@@ -2,6 +2,7 @@
 
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/indexed/indexed_eq'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/lazy_taped'
 require_relative '../../../lib/factbase/taped'
@@ -66,5 +67,14 @@ class TestIndexedEq < Factbase::Test
       n = term.predict(c[:input], nil, {})
       assert_kind_of(c[:expected], n, "Expect #{c[:expected]}, but got #{n.class} for input #{c[:input].class}")
     end
+  end
+
+  def test_yields_a_fact_with_repeated_values_once
+    maps = [{ 'a' => [2, 2] }, { 'a' => [1] }]
+    assert_equal(
+      Factbase.new(maps.map(&:dup)).query('(eq a 2)').each.to_a.size,
+      Factbase::IndexedFactbase.new(Factbase.new(maps.map(&:dup))).query('(eq a 2)').each.to_a.size,
+      'a fact that stores the same value twice must be returned once, as it is without the index'
+    )
   end
 end
