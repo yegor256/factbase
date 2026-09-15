@@ -58,4 +58,13 @@ class TestSorted < Factbase::Test
     fb.query('(sorted num (always))').each { |f| f.seen = 1 }
     assert_equal(3, fb.query('(exists seen)').each.to_a.size)
   end
+
+  def test_does_not_materialize_a_computed_property
+    fb = Factbase.new
+    3.times { |i| fb.insert.then { |f| f.num = i } }
+    found = fb.query('(sorted num (as computed (plus num 1)))').each.to_a
+    assert_equal(3, found.size, 'the inner term has to run, or this test proves nothing')
+    found.each { |f| assert_nil(f['computed']) }
+    assert_equal(0, fb.query('(exists computed)').each.to_a.size)
+  end
 end
