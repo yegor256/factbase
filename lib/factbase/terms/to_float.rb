@@ -23,6 +23,7 @@ class Factbase::ToFloat < Factbase::TermBase
     assert_args(1)
     vv = _values(0, fact, maps, fb)
     return if vv.nil?
+    raise(ArgumentError, 'Too many values at first position, one expected') unless vv.size == 1
     to_float(vv[0])
   end
 
