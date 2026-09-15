@@ -135,8 +135,12 @@ class Factbase::Taped
       @origin.to_a
     end
 
-    def any?(&)
-      @origin.any?(&)
+    def any?(pattern = nil, &)
+      if pattern.nil?
+        @origin.any?(&)
+      else
+        @origin.any?(pattern)
+      end
     end
 
     def <<(item)
