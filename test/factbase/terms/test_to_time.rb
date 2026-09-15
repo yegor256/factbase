@@ -13,7 +13,7 @@ require_relative '../../test__helper'
 # License:: MIT
 class TestToTime < Factbase::Test
   def test_to_time
-    assert_equal('Time', Factbase::ToTime.new([%w[2023-01-01 hello]]).evaluate(fact, [], Factbase.new).class.to_s)
+    assert_equal('Time', Factbase::ToTime.new(['2023-01-01']).evaluate(fact, [], Factbase.new).class.to_s)
   end
 
   def test_keeps_fraction_of_time_value
@@ -86,5 +86,14 @@ class TestToTime < Factbase::Test
       1, fb.query('(eq (to_time (to_float t)) t)').each.to_a.size,
       "time made into a float was not read back, seed #{seed}"
     )
+  end
+
+  def test_rejects_a_property_with_many_values
+    t = Factbase::ToTime.new([:foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => [1, 2]), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at first position, one expected', e.message)
   end
 end
