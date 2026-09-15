@@ -33,4 +33,14 @@ class TestJoin < Factbase::Test
       end
     end
   end
+
+  def test_rejects_mapping_with_extra_separator
+    term = Factbase::Syntax.new('(join "left<=right<=unexpected" (always))').to_term
+    assert_includes(
+      assert_raises(RuntimeError) do
+        term.evaluate(Factbase::Accum.new(fact({}), {}, false), [], Factbase.new)
+      end.message,
+      'left<=right<=unexpected'
+    )
+  end
 end
