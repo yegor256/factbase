@@ -37,7 +37,7 @@ class Factbase::Join < Factbase::TermBase
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected, but '#{term}' provided")
     end
-    subset = fb.query(term, maps).each(fb, fact).to_a
+    subset = fb.query(term, maps).each(fb, params(fact)).to_a
     subset.each do |s|
       jumps.each do |to, from|
         s[from]&.each do |v|
