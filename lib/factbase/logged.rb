@@ -36,12 +36,11 @@ class Factbase::Logged
   decoor(:origin)
 
   def insert
-    start = Time.now
-    mono = Process.clock_gettime(MONO)
-    pos = @origin.size
-    inserted = @origin.insert
-    @tube.say(mono, "Inserted new fact ##{pos} in #{start.ago}")
-    Fact.new(inserted, tube: @tube)
+    Time.now.then do |start|
+      Fact.new(@origin.insert, tube: @tube).tap do
+        @tube.say(Process.clock_gettime(MONO), "Inserted new fact ##{@origin.size - 1} in #{start.ago}")
+      end
+    end
   end
 
   def query(term, maps = nil)
@@ -213,8 +212,9 @@ class Factbase::Logged
   end
 
   def self.elapsed
-    start = Time.now
-    yield
-    "in #{start.ago}"
+    Time.now.then do |start|
+      yield
+      "in #{start.ago}"
+    end
   end
 end
