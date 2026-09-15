@@ -137,8 +137,12 @@ class Factbase
   # @param [String|Factbase::Term] term The query to use for selections
   # @param [Array<Hash>|nil] maps The subset of maps (if provided)
   def query(term, maps = nil)
-    maps ||= @maps
     term = to_term(term) if term.is_a?(String)
+    require_relative('factbase/term') unless defined?(Factbase::Term)
+    unless term.is_a?(Factbase::Term)
+      raise(ArgumentError, "A query must be a String or a Factbase::Term, while #{term.class} provided")
+    end
+    maps ||= @maps
     require_relative('factbase/query')
     Factbase::Query.new(maps, term, self)
   end
