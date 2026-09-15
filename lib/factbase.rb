@@ -91,6 +91,7 @@ class Factbase
   # @param [Array<Hash>] maps Array of facts to start with
   def initialize(maps = [])
     @maps = maps
+    @maps.each { |map| map.transform_keys!(&:to_s) } if @maps.is_a?(Array)
   end
 
   # Size, the total number of facts in the factbase.
@@ -288,6 +289,7 @@ class Factbase
     unless data.is_a?(Array) && data.all?(Hash)
       raise(StandardError, 'The input is not a valid factbase: expected an array of maps')
     end
+    data.each { |map| map.transform_keys!(&:to_s) }
     @maps += data
   end
 end

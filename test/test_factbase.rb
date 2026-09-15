@@ -55,6 +55,18 @@ class TestFactbase < Factbase::Test
     end
   end
 
+  def test_normalizes_symbol_keys_in_initial_maps
+    maps = [{ foo: [1] }]
+    assert_equal([1], Factbase.new(maps).query('(exists foo)').each.to_a.first[:foo])
+    assert_equal(['foo'], maps.first.keys)
+  end
+
+  def test_normalizes_symbol_keys_in_imported_maps
+    fb = Factbase.new
+    fb.import(Marshal.dump([{ foo: [7] }]))
+    assert_equal([7], fb.query('(exists foo)').each.to_a.first[:foo])
+  end
+
   def test_simple_setting
     fb = Factbase.new
     fb.insert
