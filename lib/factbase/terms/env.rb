@@ -24,7 +24,9 @@ class Factbase::Env < Factbase::TermBase
     assert_args(2)
     n = _values(0, fact, maps, fb)
     return if n.nil?
-    value = ENV.fetch(n[0].upcase, nil)
+    name = n[0]
+    raise(ArgumentError, "A string is expected as first argument of 'env'") unless name.is_a?(String)
+    value = ENV.fetch(name.upcase, nil)
     if value.nil? || value.empty?
       d = _values(1, fact, maps, fb)
       return if d.nil?
