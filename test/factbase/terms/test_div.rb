@@ -92,4 +92,44 @@ class TestDiv < Factbase::Test
       "big integer #{big} divided by one is not itself, seed #{seed}"
     )
   end
+
+  def test_refuses_a_string_operand
+    t = Factbase::Div.new([:foo, 3])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact('foo' => 'x'), [], Factbase.new)
+      end
+    assert_includes(e.message, 'using (arithmetic quo)', e.message)
+  end
+
+  def test_refuses_number_divided_by_string
+    t = Factbase::Div.new([3, :foo])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact('foo' => 'x'), [], Factbase.new)
+      end
+    assert_includes(e.message, 'only numbers and times can be used', e.message)
+  end
+
+  def test_refuses_two_strings
+    t = Factbase::Div.new(%i[foo bar])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact('foo' => 'x', 'bar' => 'y'), [], Factbase.new)
+      end
+    assert_includes(e.message, 'only numbers and times can be used', e.message)
+  end
+
+  def test_query_refuses_div_on_strings
+    fb = Factbase.new
+    f = fb.insert
+    f.a = 3
+    f.b = 'x'
+    e =
+      assert_raises(RuntimeError) do
+        fb.query('(eq a (div b a))').each.to_a
+      end
+    assert_includes(e.message, 'only numbers and times can be used')
+    refute_includes(e.message, "Probably the term 'div' is not defined")
+  end
 end

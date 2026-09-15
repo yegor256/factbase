@@ -107,4 +107,17 @@ class TestTerm < Factbase::Test
     Factbase::Term.new(:eq, [:when, t]).to_s
     assert_equal(3 * 60 * 60, t.utc_offset, 'the time of the term was moved to UTC')
   end
+
+  def test_term_message_for_arithmetic_with_string
+    fb = Factbase.new
+    f = fb.insert
+    f.a = 3
+    f.b = 'x'
+    e =
+      assert_raises(RuntimeError) do
+        fb.query('(eq a (minus b a))').each.to_a
+      end
+    assert_includes(e.message, 'only numbers and times can be used')
+    refute_includes(e.message, "Probably the term 'minus' is not defined")
+  end
 end
