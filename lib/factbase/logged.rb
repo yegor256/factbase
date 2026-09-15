@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'decoor'
+require 'ellipsized'
 require 'others'
 require 'tago'
 require 'time'
@@ -121,9 +122,15 @@ class Factbase::Logged
       k = args[0].to_s
       v = args[1]
       if k.end_with?('=')
-        s = v.is_a?(Time) ? v.utc.iso8601 : v.to_s
-        s = v.to_s.inspect if v.is_a?(String)
-        s = "#{s[0..(MAX_LENGTH / 2)]}...#{s[(-MAX_LENGTH / 2)..]}" if s.length > MAX_LENGTH
+        s =
+          if v.is_a?(Time)
+            v.utc.iso8601
+          elsif v.is_a?(String)
+            v.inspect
+          else
+            v.to_s
+          end
+        s = s.ellipsized(MAX_LENGTH)
         @tube.say(mono, "Set '#{k[0..-2]}' to #{s} (#{v.class})")
       end
       r
