@@ -169,4 +169,11 @@ class TestRules < Factbase::Test
       'Error message should truncate long expressions'
     )
   end
+
+  def test_checks_through_to_a_and_map_as_well
+    fb = Factbase::Rules.new(Factbase.new, '(when (exists first) (exists second))')
+    fb.insert.foo = 42
+    assert_raises(StandardError) { fb.query('(always)').to_a.first.first = 1 }
+    assert_raises(StandardError) { fb.query('(always)').map { |f| f.first = 1 } }
+  end
 end
