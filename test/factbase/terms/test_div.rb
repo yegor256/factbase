@@ -92,4 +92,13 @@ class TestDiv < Factbase::Test
       "big integer #{big} divided by one is not itself, seed #{seed}"
     )
   end
+
+  def test_refuses_a_string_operand
+    t = Factbase::Div.new([:foo, 3])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact('foo' => 'x'), [], Factbase.new)
+      end
+    assert_includes(e.message, 'using (arithmetic quo)', e.message)
+  end
 end
