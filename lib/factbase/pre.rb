@@ -25,21 +25,30 @@ require_relative '../factbase'
 class Factbase::Pre
   decoor(:fb)
 
-  def initialize(fb, &block)
+  def initialize(fb, inside: false, &block)
     raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @fb = fb
+    @inside = inside
     @block = block
   end
 
   def insert
-    f = @fb.insert
-    @block.call(f, self)
+    f = nil
+    if @inside
+      f = @fb.insert
+      @block.call(f, self)
+    else
+      @fb.txn do |fbt|
+        f = fbt.insert
+        @block.call(f, self)
+      end
+    end
     f
   end
 
   def txn
     @fb.txn do |fbt|
-      yield(Factbase::Pre.new(fbt, &@block))
+      yield(Factbase::Pre.new(fbt, inside: true, &@block))
     end
   end
 end
