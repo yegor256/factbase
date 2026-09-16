@@ -32,7 +32,7 @@ class Factbase::CachedFactbase
   # @return [Factbase::Fact] The fact just inserted
   def insert
     @cache[:__dirty__] = true
-    Factbase::CachedFact.new(@origin.insert, @cache, fresh: true)
+    Factbase::CachedFact.new(@origin.insert, @cache)
   end
 
   # Import facts from a binary buffer.
