@@ -30,14 +30,10 @@ class Factbase::IndexedLte
 
   # The form a value is compared in.
   #
-  # +Factbase::Compare+ floors a Time to whole seconds on both sides before it
-  # compares, so the index has to do the same, or it decides an order the term
-  # itself would not decide and drops a fact the term would have kept.
-  #
   # @param [Object] value The value, as the fact holds it
   # @return [Object] The value to compare with
   def _floored(value)
-    value.is_a?(Time) ? value.floor : value
+    value
   end
 
   # Picks the value of a parameter that decides the comparison.
