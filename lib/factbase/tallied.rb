@@ -35,18 +35,15 @@ class Factbase::Tallied
   end
 
   def txn
-    before = @churn.dup
+    scratch = Factbase::Churn.new
     commit = false
     @fb.txn do |fbt|
       catch(:rollback) do
-        yield(Factbase::Tallied.new(fbt, @churn))
+        yield(Factbase::Tallied.new(fbt, scratch))
         commit = true
       end
-    rescue Factbase::Rollback => e
-      @churn = before
-      raise(e)
     ensure
-      @churn = before unless commit
+      @churn.append(scratch.inserted, scratch.deleted, scratch.added) if commit
     end
   end
 
