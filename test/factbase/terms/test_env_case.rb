@@ -13,18 +13,23 @@ require_relative '../../test__helper'
 # License:: MIT
 class TestEnvCase < Factbase::Test
   def test_reads_a_lower_case_variable
-    ENV.store('myVar', 'mine')
-    ENV.delete('MYVAR')
-    assert_equal('mine', Factbase::Env.new(%w[myVar default]).evaluate(fact, [], Factbase.new))
-  ensure
-    ENV.delete('myVar')
+    skip('Windows environment variables are case-insensitive') if Gem.win_platform?
+    assert_equal('mine', with('myVar' => 'mine'))
   end
 
   def test_does_not_read_another_variable
+    skip('Windows environment variables are case-insensitive') if Gem.win_platform?
+    assert_equal('default', with('MYVAR' => 'other'))
+  end
+
+  private
+
+  def with(vars)
     ENV.delete('myVar')
-    ENV.store('MYVAR', 'other')
-    assert_equal('default', Factbase::Env.new(%w[myVar default]).evaluate(fact, [], Factbase.new))
-  ensure
     ENV.delete('MYVAR')
+    vars.each { |k, v| ENV.store(k, v) }
+    Factbase::Env.new(%w[myVar default]).evaluate(fact, [], Factbase.new)
+  ensure
+    vars.each_key { |k| ENV.delete(k) }
   end
 end
