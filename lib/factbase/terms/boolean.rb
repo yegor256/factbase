@@ -33,11 +33,12 @@ class Factbase::Boolean
 
   def bools
     list = @val.respond_to?(:each) ? @val.to_a : [@val]
-    list.compact.map do |v|
+    list.each_with_object([]) do |v, acc|
+      next if v.nil?
       unless v.is_a?(TrueClass) || v.is_a?(FalseClass)
         raise(ArgumentError, "Boolean is expected, while #{v.class} received from #{@from}")
       end
-      v
+      acc << v
     end
   end
 end
