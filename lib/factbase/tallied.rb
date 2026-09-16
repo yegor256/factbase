@@ -54,11 +54,7 @@ class Factbase::Tallied
   # the caller passed to the constructor sees the rollback too.
   # @param [Factbase::Churn] before The counter as it was before the transaction
   def revert(before)
-    @churn.append(
-      before.inserted - @churn.inserted,
-      before.deleted - @churn.deleted,
-      before.added - @churn.added
-    )
+    @churn.append(before.inserted - @churn.inserted, before.deleted - @churn.deleted, before.added - @churn.added)
   end
   private :revert
 
