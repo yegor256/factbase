@@ -302,4 +302,20 @@ class TestSyntax < Factbase::Test
     end
     assert_equal('(eq x 0.0)', Factbase::Syntax.new('(eq x 0.0e-9999)').to_term.to_s)
   end
+
+  def test_refuses_ordering_nested_in_logic
+    fb = Factbase.new
+    fb.insert.num = 1
+    outers = %w[or]
+    ['(head 1 (always))', '(sorted num (always))', '(inverted (always))'].each do |inner|
+      outers.each do |outer|
+        assert_includes(
+          assert_raises(Factbase::Syntax::Broken) { fb.query("(#{outer} #{inner} (always))") }.message,
+          'nested'
+        )
+      end
+      assert_raises(Factbase::Syntax::Broken) { fb.query("(not #{inner})") }
+      assert_equal(1, fb.query("(and #{inner})").each.to_a.size)
+    end
+  end
 end
