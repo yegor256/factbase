@@ -12,6 +12,8 @@ name: flamegraph
   pull_request:
     branches:
       - master
+permissions:
+  contents: read
 jobs:
   flamegraph:
     timeout-minutes: 15

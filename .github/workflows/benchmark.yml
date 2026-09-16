@@ -11,8 +11,13 @@ name: benchmark
 concurrency:
   group: benchmark-${{ github.ref }}
   cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
   benchmark:
+    permissions:
+      contents: write
+      pull-requests: write
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     steps:
