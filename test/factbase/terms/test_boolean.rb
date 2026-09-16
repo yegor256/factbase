@@ -11,12 +11,24 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestBoolean < Factbase::Test
-  def test_first_element
+  def test_any_element
     assert_predicate(Factbase::Boolean.new([true, false], 'test_source'), :bool?)
   end
 
-  def test_first_element_false
-    refute_predicate(Factbase::Boolean.new([false, true], 'test_source'), :bool?)
+  def test_any_element_when_true_is_not_first
+    assert_predicate(Factbase::Boolean.new([false, true], 'test_source'), :bool?)
+  end
+
+  def test_no_true_element
+    refute_predicate(Factbase::Boolean.new([false, false], 'test_source'), :bool?)
+  end
+
+  def test_every_element
+    assert_predicate(Factbase::Boolean.new([true, true], 'test_source'), :every?)
+  end
+
+  def test_not_every_element
+    refute_predicate(Factbase::Boolean.new([false, true], 'test_source'), :every?)
   end
 
   def test_direct_true

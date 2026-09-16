@@ -22,7 +22,7 @@ class Factbase::And < Factbase::TermBase
   # @return [Boolean] True if all operands evaluate to true, false otherwise
   def evaluate(fact, maps, fb)
     (0..(@operands.size - 1)).each do |i|
-      return false unless Factbase::Boolean.new(_values(i, fact, maps, fb), @operands[i]).bool?
+      return false unless Factbase::Boolean.new(_values(i, fact, maps, fb), @operands[i]).every?
     end
     true
   end
