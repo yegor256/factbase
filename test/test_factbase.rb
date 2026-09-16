@@ -112,6 +112,11 @@ class TestFactbase < Factbase::Test
     end
   end
 
+  def test_rejects_a_marshal_value_with_the_wrong_shape
+    error = assert_raises(StandardError) { Factbase.new.import(Marshal.dump(unexpected: true)) }
+    assert_includes(error.message, 'expected an array of fact maps')
+  end
+
   def test_empty_or_not
     fb = Factbase.new
     assert_equal(0, fb.size)
