@@ -44,33 +44,22 @@ class Factbase::Tallied
   end
 
   def txn
-    before = @churn.dup
+    scratch = Factbase::Churn.new
     commit = false
     @fb.txn do |fbt|
       catch(:rollback) do
         thrown = true
         catch(:commit) do
-          yield(Factbase::Tallied.new(fbt, @churn))
+          yield(Factbase::Tallied.new(fbt, scratch))
           thrown = false
         end
         commit = true
         throw(:commit) if thrown
       end
-    rescue Factbase::Rollback => e
-      revert(before)
-      raise(e)
     ensure
-      revert(before) unless commit
+      @churn.append(scratch.inserted, scratch.deleted, scratch.added) if commit
     end
   end
-
-  # Bring the counter back to where it was, in place, so that the object
-  # the caller passed to the constructor sees the rollback too.
-  # @param [Factbase::Churn] before The counter as it was before the transaction
-  def revert(before)
-    @churn.append(before.inserted - @churn.inserted, before.deleted - @churn.deleted, before.added - @churn.added)
-  end
-  private :revert
 
   # Fact decorator.
   #
