@@ -149,13 +149,22 @@ class Factbase::Term < Factbase::TermBase
     max: Factbase::Max
   }.freeze
 
+  ORDERING = %i[head sorted inverted].freeze
+
   # Ctor.
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
+  # @raise [ArgumentError] If one of the ORDERING terms, which only work at
+  #  the top of a query, is nested inside "and", "or" or "not", where its
+  #  result would be silently ignored
   def initialize(operator, operands)
     super()
     @op = operator
     @operands = operands
+    nested = operands.find { |o| o.is_a?(Factbase::Term) && ORDERING.include?(o.op) }
+    if !nested.nil? && (operator == :not || (%i[and or].include?(operator) && operands.size > 1))
+      raise(ArgumentError, "The '#{nested.op}' can't be nested inside '#{operator}', it would be silently ignored")
+    end
     @terms = TERMS.to_h { |name, klass| [name, klass.new(operands).tap { |term| term.name = name }] }
   end
 
