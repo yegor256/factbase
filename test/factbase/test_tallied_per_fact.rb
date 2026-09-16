@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/tallied'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/tallied'
 
 # Test of what Tallied counts as one change.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
