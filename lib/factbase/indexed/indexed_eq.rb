@@ -24,7 +24,7 @@ class Factbase::IndexedEq
     entry = @idx[key]
     _feed(maps.to_a, entry, first_operand)
     keys = _resolve(second_operand, params)
-    matches = keys.flat_map { |k| entry[:facts][k] || [] }
+    matches = keys.flat_map { |k| entry[:facts][_key(k)] || [] }
     matches = matches.uniq(&:object_id) if keys.size > 1
     maps.respond_to?(:repack) ? maps.repack(matches) : matches
   end
@@ -35,12 +35,28 @@ class Factbase::IndexedEq
     item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
   end
 
+  # The key a value is indexed by.
+  #
+  # A Hash tells its keys apart with +eql?+, which says that 1 and 1.0 are
+  # two different keys, while the plain +eq+ term compares with +==+, which
+  # says they are the same. A number is therefore kept as an exact Rational,
+  # so that both of them land on one key.
+  #
+  # @param [Object] value The value, as a fact holds it
+  # @return [Object] The key to put it in the index under
+  def _key(value)
+    return value unless value.is_a?(Integer) || value.is_a?(Float)
+    return value if value.is_a?(Float) && !value.finite?
+    Rational(value)
+  end
+
   def _feed(facts, entry, operand)
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |m|
       m[operand]&.uniq&.each do |v|
-        entry[:facts][v] ||= []
-        entry[:facts][v] << m
+        k = _key(v)
+        entry[:facts][k] ||= []
+        entry[:facts][k] << m
       end
     end
     entry[:count] = facts.size
