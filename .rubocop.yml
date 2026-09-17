@@ -65,6 +65,7 @@ Elegant/GoodMethodName:
     - '_flatten'
     - '_init_indexes'
     - '_join'
+    - '_ordered'
     - '_resolve'
     - '_scalar?'
     - '_search'
