@@ -257,6 +257,7 @@ class Factbase::Term < Factbase::TermBase
   def at(fact, maps, fb)
     assert_args(2)
     i = _values(0, fact, maps, fb)
+    return if i.nil?
     raise(RuntimeError, "Too many values (#{i.size}) at first position, one expected") unless i.size == 1
     i = i[0]
     return if i.nil?
