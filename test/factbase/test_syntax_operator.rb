@@ -19,9 +19,8 @@ class TestSyntaxOperator < Factbase::Test
 
   def test_names_the_nested_bracket
     assert_match(
-      /an opening bracket found/, assert_raises(Factbase::Syntax::Broken) do
-                                    Factbase::Syntax.new('((eq foo 1))').to_term
-                                  end.message
+      /an opening bracket found/,
+      assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new('((eq foo 1))').to_term }.message
     )
   end
 end
