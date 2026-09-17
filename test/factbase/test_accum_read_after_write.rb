@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
+require_relative '../../lib/factbase'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
-require_relative '../../lib/factbase'
 
 # Factbase test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
