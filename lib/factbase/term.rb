@@ -264,6 +264,17 @@ class Factbase::Term < Factbase::TermBase
     false
   end
 
+  # Does it read the environment (+env+), here or deeper inside?
+  #
+  # An +env+ term answers from outside the factbase, so its result may
+  # change while the factbase stays untouched.
+  #
+  # @return [Boolean] TRUE if +env+ is in there
+  def env?
+    return true if @op == :env
+    @operands.any? { |o| o.is_a?(Factbase::Term) && o.env? }
+  end
+
   private
 
   def at(fact, maps, fb)
