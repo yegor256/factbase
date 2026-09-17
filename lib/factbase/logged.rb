@@ -37,10 +37,8 @@ class Factbase::Logged
   decoor(:origin)
 
   def insert
-    mono = Process.clock_gettime(MONO)
-    fact = Fact.new(@origin.insert, tube: @tube)
-    @tube.say(mono, "Inserted new fact ##{@origin.size} in #{Time.now.ago}")
-    fact
+    @tube.say(Process.clock_gettime(MONO), "Inserted new fact ##{@origin.size} in #{Time.now.ago}")
+    Fact.new(@origin.insert, tube: @tube)
   end
 
   def query(term, maps = nil)

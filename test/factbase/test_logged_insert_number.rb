@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: MIT
 
 require 'loog'
-require_relative '../test__helper'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/logged'
+require_relative '../test__helper'
 
 # Factbase test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
