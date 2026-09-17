@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase'
-require_relative '../../../lib/factbase/indexed/indexed_factbase'
 
 # Factbase test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -19,7 +19,6 @@ class TestIndexedEqTime < Factbase::Test
     origin.insert.when = when_
     origin.insert.when = Time.parse('2025-01-01T00:00:00Z')
     query = "(eq when #{when_.utc.iso8601})"
-    fb = Factbase::IndexedFactbase.new(origin)
-    assert_equal(origin.query(query).each.to_a.size, fb.query(query).each.to_a.size)
+    assert_equal(origin.query(query).each.to_a.size, Factbase::IndexedFactbase.new(origin).query(query).each.to_a.size)
   end
 end
