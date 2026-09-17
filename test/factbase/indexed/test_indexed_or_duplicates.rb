@@ -16,6 +16,7 @@ class TestIndexedOrDuplicates < Factbase::Test
     origin = Factbase.new
     origin.insert.a = 1
     origin.insert.a = 1
+    100.times { origin.insert.a = 5 }
     fb = Factbase::IndexedFactbase.new(origin)
     query = '(or (eq a 1) (eq a 99))'
     assert_equal(origin.query(query).each.to_a.size, fb.query(query).each.to_a.size)
