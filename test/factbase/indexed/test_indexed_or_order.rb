@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
+require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
-require_relative '../../../lib/factbase'
-require_relative '../../../lib/factbase/indexed/indexed_factbase'
 
 # Factbase test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -22,10 +22,6 @@ class TestIndexedOrOrder < Factbase::Test
     second.b = 2
     100.times { origin.insert.c = 3 }
     query = '(or (eq b 2) (eq a 1))'
-    fb = Factbase::IndexedFactbase.new(origin)
-    assert_equal(
-      origin.query(query).each.to_a.map(&:label),
-      fb.query(query).each.to_a.map(&:label)
-    )
+    assert_equal(origin.query(query).each.to_a.map(&:label), Factbase::IndexedFactbase.new(origin).query(query).each.to_a.map(&:label))
   end
 end
