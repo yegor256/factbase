@@ -42,7 +42,8 @@ class Factbase::IndexedAnd
           end
         end
       )
-      j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id)
+      hits = tuples.flat_map { |t| entry[:index][t] || [] }.map(&:object_id).to_set
+      j = maps_array.select { |m| hits.include?(m.object_id) }
       r = maps.respond_to?(:repack) ? maps.repack(j) : j
     else
       fail = false
