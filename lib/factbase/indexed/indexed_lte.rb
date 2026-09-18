@@ -14,7 +14,7 @@ class Factbase::IndexedLte
     op1, op2 = @term.operands
     return unless op1.is_a?(Symbol) && _scalar?(op2)
     prop = op1.to_s
-    target = op2.is_a?(Symbol) ? params[op2.to_s]&.first : op2
+    target = op2.is_a?(Symbol) ? _loosest(params[op2.to_s]) : op2
     return maps || [] if target.nil?
     target = _floored(target)
     return unless sortable?(maps, prop)
@@ -38,6 +38,19 @@ class Factbase::IndexedLte
   # @return [Object] The value to compare with
   def _floored(value)
     value.is_a?(Time) ? value.floor : value
+  end
+
+  # The bound to search with, when the parameter holds several values.
+  #
+  # +Factbase::Compare+ keeps a fact when it compares well against any one of
+  # the values, so the index searches with the loosest of them.
+  #
+  # @param [Array, nil] values The values bound to the parameter
+  # @return [Object, nil] The bound, or NIL when there is none to take
+  def _loosest(values)
+    Array(values).max
+  rescue ArgumentError
+    nil
   end
 
   def _scalar?(item)
