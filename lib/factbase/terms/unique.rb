@@ -25,6 +25,23 @@ class Factbase::Unique < Factbase::TermBase
     vv = (0..(@operands.size - 1)).map { |i| _values(i, fact, maps, fb) }
     return false if vv.any?(nil)
     tuples = Enumerator.product(*vv).to_a
-    tuples.filter_map { |t| @seen.add?(t) }.any?
+    tuples.filter_map { |t| @seen.add?(t.map { |v| _key(v) }) }.any?
+  end
+
+  private
+
+  # The form a value is remembered in.
+  #
+  # A Set tells its members apart with +eql?+, which says that 1 and 1.0 are
+  # two values, while +eq+ compares with +==+, which says they are one. A
+  # number is therefore remembered as an exact rational, so that both of them
+  # count as the value already seen.
+  #
+  # @param [Object] value The value, as the fact holds it
+  # @return [Object] The form to remember it in
+  def _key(value)
+    return value unless value.is_a?(Integer) || value.is_a?(Float)
+    return value if value.is_a?(Float) && !value.finite?
+    Rational(value)
   end
 end
