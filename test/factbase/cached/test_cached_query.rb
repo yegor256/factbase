@@ -23,7 +23,7 @@ class TestCachedQuery < Factbase::Test
     second.insert.name = 'second'
     query = Factbase::CachedFactbase.new(first).query('(agg (exists name) (first name))')
     assert_equal(['first'], query.one)
-    assert_raises(ArgumentError) { query.one(second) }
+    assert_equal(['first'], query.one(second))
   end
 
   def test_queries_many_times

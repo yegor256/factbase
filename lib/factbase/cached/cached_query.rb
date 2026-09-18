@@ -52,7 +52,6 @@ class Factbase::CachedQuery
   # @param [Hash] params Optional params accessible in the query via the "$" symbol (unused)
   # @return The value evaluated
   def one(fb = @fb, params = {})
-    raise(ArgumentError, 'Cached queries only support their own factbase') unless fb.equal?(@fb)
     invalidate_if_dirty!
     return @origin.one(fb, params) unless @cacheable
     key = "one: #{fb.object_id} #{@origin} #{params}"
