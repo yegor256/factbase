@@ -17,9 +17,8 @@ class TestToTimeDateless < Factbase::Test
     f = fb.insert
     f.label = '10:30:00'
     assert_match(
-      /carries no date/, assert_raises(RuntimeError) do
-                           Factbase::Term.new(:to_time, [:label]).evaluate(f, [f], fb)
-                         end.message
+      /carries no date/,
+      assert_raises(RuntimeError) { Factbase::Term.new(:to_time, [:label]).evaluate(f, [f], fb) }.message
     )
   end
 
