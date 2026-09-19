@@ -46,6 +46,15 @@ class TestFactbase < Factbase::Test
     assert_equal('(eq foo 42)', Factbase.new.to_term('(eq foo 42)').to_s)
   end
 
+  def test_query_rejects_non_query_objects
+    [nil, 42].each do |invalid|
+      assert_includes(
+        assert_raises(ArgumentError) { Factbase.new.query(invalid) }.message,
+        "while #{invalid.class} provided"
+      )
+    end
+  end
+
   def test_simple_setting
     fb = Factbase.new
     fb.insert
