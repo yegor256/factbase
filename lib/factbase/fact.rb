@@ -50,7 +50,7 @@ class Factbase::Fact
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
-      raise(ArgumentError, "Invalid prop name '#{kk}'") unless kk.match?(/^[a-z_][_a-zA-Z0-9]*$/)
+      raise(ArgumentError, "Invalid prop name '#{kk}'") unless kk.match?(/\A[a-z_][_a-zA-Z0-9]*\z/)
       raise(ArgumentError, "Prohibited prop name '#{kk}'") if methods.include?(kk.to_sym)
       v = args[1]
       raise(ArgumentError, "The value of '#{kk}' can't be nil") if v.nil?
