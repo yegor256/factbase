@@ -93,4 +93,23 @@ class TestTallied < Factbase::Test
     assert_equal(t, fb.churn.deleted)
     assert_equal(t * 2, fb.churn.added)
   end
+
+  def test_leaves_the_callers_churn_alone_on_rollback
+    churn = Factbase::Churn.new
+    tallied = Factbase::Tallied.new(Factbase.new, churn)
+    tallied.txn do |fbt|
+      fbt.insert.a = 1
+      raise(Factbase::Rollback)
+    end
+    assert_predicate(churn, :zero?, churn.to_s)
+    assert_same(churn, tallied.churn)
+  end
+
+  def test_counts_into_the_callers_churn_on_commit
+    churn = Factbase::Churn.new
+    tallied = Factbase::Tallied.new(Factbase.new, churn)
+    tallied.txn { |fbt| fbt.insert.a = 1 }
+    assert_equal(1, churn.inserted, churn.to_s)
+    assert_same(churn, tallied.churn)
+  end
 end
