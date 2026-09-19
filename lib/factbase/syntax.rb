@@ -99,7 +99,7 @@ class Factbase::Syntax
     list = []
     acc = ''
     quotes = ['\'', '"']
-    spaces = [' ', ')', "\n", "\t", "\r"]
+    spaces = [' ', '(', ')', "\n", "\t", "\r"]
     opener = nil
     comment = false
     @query.to_s.chars.each do |c|
