@@ -29,7 +29,7 @@ class Factbase::Agg < Factbase::TermBase
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected, but '#{term}' provided")
     end
-    term.evaluate(nil, fb.query(selector, maps).each(fb, params(fact)).to_a, fb)
+    term.evaluate(fact, fb.query(selector, maps).each(fb, params(fact)).to_a, fb)
   end
 
   private
