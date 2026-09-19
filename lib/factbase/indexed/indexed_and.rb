@@ -21,11 +21,12 @@ class Factbase::IndexedAnd
       entry = @idx[key]
       maps_array = maps.to_a
       if entry.nil?
-        entry = { index: {}, indexed_count: 0 }
+        entry = { index: {}, indexed_count: 0, pos: {}.compare_by_identity }
         @idx[key] = entry
       end
       if entry[:indexed_count] < maps_array.size
-        maps_array[entry[:indexed_count]..].each do |m|
+        maps_array[entry[:indexed_count]..].each_with_index do |m, i|
+          entry[:pos][m] = entry[:indexed_count] + i
           _all_tuples(m, props).each do |t|
             entry[:index][t] ||= []
             entry[:index][t] << m
@@ -42,7 +43,7 @@ class Factbase::IndexedAnd
           end
         end
       )
-      j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id)
+      j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id).sort_by { |m| entry[:pos][m] }
       r = maps.respond_to?(:repack) ? maps.repack(j) : j
     else
       fail = false
