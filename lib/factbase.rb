@@ -264,6 +264,7 @@ class Factbase
   #
   # @param [String] bytes Binary string to import
   def import(bytes)
+    raise(StandardError, 'The input is nil, cannot load a factbase') if bytes.nil?
     raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?
     begin
       data = Marshal.load(bytes)

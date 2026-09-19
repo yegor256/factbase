@@ -112,6 +112,13 @@ class TestFactbase < Factbase::Test
     end
   end
 
+  def test_import_rejects_nil
+    assert_includes(
+      assert_raises(StandardError) { Factbase.new.import(nil) }.message,
+      'The input is nil, cannot load a factbase'
+    )
+  end
+
   def test_empty_or_not
     fb = Factbase.new
     assert_equal(0, fb.size)
