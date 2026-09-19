@@ -25,6 +25,14 @@ require_relative '../factbase/flatten'
 # License:: MIT
 class Factbase::ToXML
   BAD = /[^\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/
+  TYPES = {
+    'String' => 'S',
+    'Integer' => 'I',
+    'Float' => 'F',
+    'Time' => 'T',
+    'TrueClass' => 'L',
+    'FalseClass' => 'L'
+  }.freeze
 
   # Constructor.
   def initialize(fb, sorter = '_id')
@@ -80,6 +88,6 @@ class Factbase::ToXML
   end
 
   def type_of(val)
-    val.class.to_s[0]
+    TYPES.fetch(val.class.to_s) { raise(ArgumentError, "Can't put #{val.class} into XML") }
   end
 end
