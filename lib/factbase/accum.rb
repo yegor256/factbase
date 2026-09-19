@@ -12,6 +12,10 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Accum
+  # The types a property may hold, none of which is a list of values, even
+  # when it answers +to_a+ as +Time+ does.
+  SCALARS = [Float, Integer, String, Time, TrueClass, FalseClass].freeze
+
   # Ctor.
   # @param [Factbase::Fact] fact The fact to decorate
   # @param [Hash] props Hash of props that were set
@@ -46,6 +50,7 @@ class Factbase::Accum
           @props[kk].nil? ? [] : @props[kk]
         end
       vvv = @fact.method_missing(*args)
+      vvv = [vvv] if SCALARS.any? { |t| vvv.is_a?(t) }
       vvv = [vvv] unless vvv.nil? || vvv.respond_to?(:to_a)
       vv += vvv.to_a unless vvv.nil?
       if vv.empty?
