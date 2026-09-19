@@ -99,6 +99,11 @@ class TestSyntax < Factbase::Test
     assert(Factbase::Syntax.new('(eq t 1.5e-10)').to_term.evaluate({ 't' => 1.5e-10 }, [], Factbase.new))
   end
 
+  def test_parses_float_without_a_dot
+    assert(Factbase::Syntax.new('(eq t 1e10)').to_term.evaluate({ 't' => 1e10 }, [], Factbase.new))
+    assert(Factbase::Syntax.new('(eq t 2e-3)').to_term.evaluate({ 't' => 2e-3 }, [], Factbase.new))
+  end
+
   def test_names_the_term_with_too_few_operands
     %w[size contains gte plus].each do |name|
       fb = Factbase.new
