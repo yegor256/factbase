@@ -14,7 +14,7 @@ class Factbase::IndexedGte
     op1, op2 = @term.operands
     return unless op1.is_a?(Symbol) && _scalar?(op2)
     prop = op1.to_s
-    target = op2.is_a?(Symbol) ? params[op2.to_s]&.first : op2
+    target = op2.is_a?(Symbol) ? _loosest(params[op2.to_s]) : op2
     return maps || [] if target.nil?
     return unless sortable?(maps, prop)
     key = [maps.object_id, prop, :facts]
@@ -26,6 +26,19 @@ class Factbase::IndexedGte
   end
 
   private
+
+  # The bound to search with, when the parameter holds several values.
+  #
+  # +Factbase::Compare+ keeps a fact when it compares well against any one of
+  # the values, so the index searches with the loosest of them.
+  #
+  # @param [Array, nil] values The values bound to the parameter
+  # @return [Object, nil] The bound, or NIL when there is none to take
+  def _loosest(values)
+    Array(values).min
+  rescue ArgumentError
+    nil
+  end
 
   def _scalar?(item)
     item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
