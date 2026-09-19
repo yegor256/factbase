@@ -198,4 +198,20 @@ class TestSyntax < Factbase::Test
       @x = invalid
     end
   end
+
+  def test_refuses_ordering_nested_in_logic
+    fb = Factbase.new
+    fb.insert.num = 1
+    outers = %w[and or]
+    ['(head 1 (always))', '(sorted num (always))', '(inverted (always))'].each do |inner|
+      outers.each do |outer|
+        assert_includes(
+          assert_raises(Factbase::Syntax::Broken) { fb.query("(#{outer} #{inner} (always))") }.message,
+          'nested'
+        )
+      end
+      assert_raises(Factbase::Syntax::Broken) { fb.query("(not #{inner})") }
+      assert_equal(1, fb.query("(and #{inner})").each.to_a.size)
+    end
+  end
 end
