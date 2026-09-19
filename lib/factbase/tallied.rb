@@ -43,12 +43,20 @@ class Factbase::Tallied
         commit = true
       end
     rescue Factbase::Rollback => e
-      @churn = before
+      revert(before)
       raise(e)
     ensure
-      @churn = before unless commit
+      revert(before) unless commit
     end
   end
+
+  # Bring the counter back to where it was, in place, so that the object
+  # the caller passed to the constructor sees the rollback too.
+  # @param [Factbase::Churn] before The counter as it was before the transaction
+  def revert(before)
+    @churn.append(before.inserted - @churn.inserted, before.deleted - @churn.deleted, before.added - @churn.added)
+  end
+  private :revert
 
   # Fact decorator.
   #
