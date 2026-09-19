@@ -169,4 +169,15 @@ class TestRules < Factbase::Test
       'Error message should truncate long expressions'
     )
   end
+
+  def test_wraps_an_error_once_however_deep_it_sits
+    fb = Factbase.new
+    fb.insert.b = 'x'
+    messages =
+      ['(plus b 1)', '(nil (plus b 1))', '(not (nil (plus b 1)))'].map do |q|
+        assert_raises(RuntimeError) { fb.query("(and (always) (as z #{q}))").each.to_a }.message
+      end
+    assert_equal(1, messages.uniq.size, messages)
+    refute_includes(messages.first, '\"', messages.first)
+  end
 end
