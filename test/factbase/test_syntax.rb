@@ -117,6 +117,12 @@ class TestSyntax < Factbase::Test
     )
   end
 
+  def test_parses_floats_the_way_ruby_writes_them
+    ['1.5e10', '1.5E10', '1e10', '1E+10', '1.5e+10', '2e-3'].each do |n|
+      assert_equal(Float(n), Factbase::Syntax.new("(eq t #{n})").to_term.operands[1], n)
+    end
+  end
+
   def test_simple_matching
     m = { 'foo' => ['Hello, world!'], 'bar' => [42], 'z' => [1, 2, 3, 4] }
     {
