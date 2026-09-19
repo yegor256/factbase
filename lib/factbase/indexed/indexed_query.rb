@@ -35,6 +35,14 @@ class Factbase::IndexedQuery
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
+  # @todo #1017:60min Yield the facts one by one, the way the plain query does.
+  #  The facts are collected before any of them is yielded, so a caller that
+  #  breaks out of the loop still pays for every remaining fact, and a term
+  #  that raises on a later fact raises even though the caller never asked to
+  #  see it. Streaming here breaks test_materializes_before_iterating, which
+  #  relies on the snapshot to keep a nested sub-query stable while the block
+  #  inserts facts, so a way to keep that guarantee without collecting first
+  #  has to be found before this can change.
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
     n = 0
