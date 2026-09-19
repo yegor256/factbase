@@ -90,6 +90,11 @@ require_relative 'terms/zero'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Term < Factbase::TermBase
+  # An error that already names the term it happened in and the place
+  # in the code where it was raised. It is not decorated again by the
+  # enclosing terms, in order to keep the original message readable.
+  class Wrapped < RuntimeError; end
+
   attr_reader :op, :operands
 
   TERMS = {
@@ -207,10 +212,12 @@ class Factbase::Term < Factbase::TermBase
     else
       __send__(@op, fact, maps, fb)
     end
+  rescue Factbase::Term::Wrapped => e
+    raise(e)
   rescue NoMethodError => e
-    raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
+    raise(Factbase::Term::Wrapped, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
   rescue StandardError => e
-    raise(RuntimeError, "#{e.message.inspect} at #{self} at #{e.backtrace[0]}")
+    raise(Factbase::Term::Wrapped, "#{e.message.inspect} at #{self} at #{e.backtrace[0]}")
   end
 
   # Simplify it if possible.
