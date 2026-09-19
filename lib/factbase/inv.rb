@@ -74,6 +74,7 @@ class Factbase::Inv
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Query
+    include Enumerable
     decoor(:query)
 
     def initialize(query, block, fb)
