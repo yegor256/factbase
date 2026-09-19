@@ -32,6 +32,15 @@ class TestSyntax < Factbase::Test
     assert_equal(0, fb.query('(eq foo "")').each.to_a.size)
   end
 
+  def test_refuses_text_glued_to_a_closing_quote
+    e = assert_raises(StandardError) { Factbase::Syntax.new("(eq foo 'a'bar)").to_term }
+    assert_includes(e.message, 'glued', e.message)
+  end
+
+  def test_still_ends_a_literal_at_a_bracket
+    assert_equal("(eq foo 'a')", Factbase::Syntax.new("(eq foo 'a')").to_term.to_s)
+  end
+
   def test_makes_abstract_terms
     {
       '(foo $bar)' => true,
