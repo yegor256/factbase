@@ -128,11 +128,17 @@ class Factbase::Rules
     end
 
     def it(fact, fb)
-      return if Factbase::Syntax.new(@expr).to_term.evaluate(fact, [], fb)
-      raise(
-        ArgumentError,
-        "The fact doesn't match the #{(@expr.length > 32 ? "#{@expr[0..31]}..." : @expr).inspect} rule: #{fact}"
-      )
+      term = Factbase::Syntax.new(@expr).to_term
+      return if term.evaluate(fact, [], fb)
+      text = (@expr.length > 32 ? "#{@expr[0..31]}..." : @expr).inspect
+      failed = Check.failed(term, fact, fb)
+      text = "#{failed} of the #{text}" unless failed.nil? || failed.to_s == term.to_s
+      raise(ArgumentError, "The fact doesn't match the #{text} rule: #{fact}")
+    end
+
+    def self.failed(term, fact, fb)
+      return term unless term.op == :and
+      term.operands.find { |operand| !operand.evaluate(fact, [], fb) }
     end
   end
 
