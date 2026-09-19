@@ -54,7 +54,7 @@ class Factbase::CachedQuery
   def one(fb = @fb, params = {})
     invalidate_if_dirty!
     return @origin.one(fb, params) unless @cacheable
-    key = "one: #{@origin} #{params}"
+    key = "one: #{fb.object_id} #{@origin} #{params}"
     @cache[key] = @origin.one(fb, params) if @cache[key].nil?
     @cache[key]
   end
