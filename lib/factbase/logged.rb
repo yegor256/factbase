@@ -37,8 +37,11 @@ class Factbase::Logged
   decoor(:origin)
 
   def insert
-    @tube.say(Process.clock_gettime(MONO), "Inserted new fact ##{@origin.size} in #{Time.now.ago}")
-    Fact.new(@origin.insert, tube: @tube)
+    Time.now.then do |start|
+      Fact.new(@origin.insert, tube: @tube).tap do
+        @tube.say(Process.clock_gettime(MONO), "Inserted new fact ##{@origin.size - 1} in #{start.ago}")
+      end
+    end
   end
 
   def query(term, maps = nil)
@@ -47,6 +50,7 @@ class Factbase::Logged
   end
 
   def txn
+    start = Time.now
     mono = Process.clock_gettime(MONO)
     id = nil
     rollback = false
@@ -67,9 +71,9 @@ class Factbase::Logged
         raise(e)
       end
     if rollback
-      @tube.say(mono, "Txn ##{id} rolled back in #{Time.now.ago}")
+      @tube.say(mono, "Txn ##{id} rolled back in #{start.ago}")
     else
-      @tube.say(mono, "Txn ##{id} touched #{r} in #{Time.now.ago}")
+      @tube.say(mono, "Txn ##{id} touched #{r} in #{start.ago}")
     end
     r
   end
@@ -215,7 +219,9 @@ class Factbase::Logged
   end
 
   def self.elapsed
-    yield
-    "in #{Time.now.ago}"
+    Time.now.then do |start|
+      yield
+      "in #{start.ago}"
+    end
   end
 end
