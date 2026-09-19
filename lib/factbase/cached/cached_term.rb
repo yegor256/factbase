@@ -19,7 +19,7 @@ module Factbase::CachedTerm
     return super unless static? && !abstract?
     return super if %i[head unique].include?(@op)
     key = [maps.object_id, to_s]
-    @cache[key] = super if @cache[key].nil?
+    @cache[key] = super unless @cache.key?(key)
     @cache[key]
   end
 end
