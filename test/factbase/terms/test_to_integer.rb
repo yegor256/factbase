@@ -14,7 +14,7 @@ require_relative '../../test__helper'
 # License:: MIT
 class TestToInteger < Factbase::Test
   def test_to_integer
-    assert_equal('Integer', Factbase::ToInteger.new([[42, 'hello']]).evaluate(fact, [], Factbase.new).class.to_s)
+    assert_equal('Integer', Factbase::ToInteger.new([42]).evaluate(fact, [], Factbase.new).class.to_s)
   end
 
   def test_truncates_float
@@ -27,5 +27,14 @@ class TestToInteger < Factbase::Test
       assert_raises(RuntimeError) { t.evaluate(fact, [], Factbase.new) }.message,
       "Cannot convert 'abc' to Integer in (to_integer ...):"
     )
+  end
+
+  def test_rejects_a_property_with_many_values
+    t = Factbase::ToInteger.new([:foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => [1, 2]), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at first position, one expected', e.message)
   end
 end
