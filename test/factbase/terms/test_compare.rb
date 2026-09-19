@@ -18,7 +18,7 @@ class TestCompare < Factbase::Test
     second.tag = 42
     second.tag = 'hello world'
     [first, second].each do |f|
-      assert(Factbase::Term.new(:contains, [:tag, 'hello']).evaluate(f, [f], fb), f.to_s)
+      assert(Factbase::Term.new(:contains, [:tag, 'hello']).evaluate(f, [f], fb))
     end
   end
 
