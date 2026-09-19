@@ -154,6 +154,17 @@ class TestImpatient < Factbase::Test
     assert_equal(100, count)
   end
 
+  def test_each_stops_when_the_caller_breaks
+    fb = Factbase::Impatient.new(Factbase.new, timeout: 5)
+    [1, 2, 3, 0, 4].each { |v| fb.insert.foo = v }
+    seen = []
+    fb.query('(and (gt foo -100) (eq (div 6 foo) (div 6 foo)))').each do |f|
+      seen << f.foo
+      break if seen.size == 2
+    end
+    assert_equal([1, 2], seen)
+  end
+
   def test_each_does_not_time_out_consumer
     fb = Factbase::Impatient.new(Factbase.new, timeout: 0.01)
     fb.insert
