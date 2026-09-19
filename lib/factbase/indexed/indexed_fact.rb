@@ -5,6 +5,7 @@
 
 require 'others'
 require_relative '../../factbase'
+require_relative '../no_conversion'
 
 # A single fact in a factbase, which is sensitive to changes.
 #
@@ -30,4 +31,6 @@ class Factbase::IndexedFact
     @idx.clear if args[0].to_s.end_with?('=') && !@fresh.include?(object_id)
     @origin.__send__(*args)
   end
+
+  prepend Factbase::NoConversion
 end
