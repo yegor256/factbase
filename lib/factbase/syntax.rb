@@ -40,7 +40,7 @@ class Factbase::Syntax
         t = t.simplify if t.respond_to?(:simplify)
         t
       end
-  rescue StandardError => e
+  rescue StandardError, SystemStackError => e
     err = "#{e.message} (#{Backtrace.new(e)}) in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
     raise(Broken, err)
