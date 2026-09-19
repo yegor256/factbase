@@ -78,6 +78,10 @@ class Factbase::Query
 
   # Delete all facts that match the query.
   #
+  # The facts are picked first and removed afterwards, so a `delete!` that is
+  # interrupted in the middle, by a timeout for example, leaves the factbase
+  # untouched instead of destroying the part it has already visited.
+  #
   # The term is asked about every fact exactly once, and it is asked
   # through the same accumulator that {#each} uses, so a term that writes,
   # like `as`, writes into a throw-away copy and leaves the surviving facts
@@ -87,15 +91,17 @@ class Factbase::Query
   # @param [Factbase] fb The factbase to delete from
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
-    deleted = 0
     maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
+    doomed = {}.compare_by_identity
     @maps.delete_if do |m|
       pos = maybe.index(m)
-      d = !pos.nil? && @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
-      maybe.delete_at(pos) if d
-      deleted += 1 if d
-      d
+      unless pos.nil? || !@term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
+        maybe.delete_at(pos)
+        doomed[m] = true
+      end
+      false
     end
-    deleted
+    @maps.delete_if { |m| doomed.key?(m) }
+    doomed.size
   end
 end
