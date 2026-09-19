@@ -31,8 +31,17 @@ class Factbase::IndexedEq
 
   private
 
+  # Can the index resolve this operand on its own?
+  #
+  # A Symbol is a query parameter only when it starts with a dollar sign.
+  # Without one it names another property, which the index has no value for,
+  # so the full scan has to compare the two properties itself.
+  #
+  # @param [Object] item The second operand of the term
+  # @return [Boolean] TRUE if the index can take it
   def _scalar?(item)
-    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
+    return item.to_s.start_with?('$') if item.is_a?(Symbol)
+    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float)
   end
 
   def _feed(facts, entry, operand)
