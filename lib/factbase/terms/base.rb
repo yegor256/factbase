@@ -94,4 +94,36 @@ class Factbase::TermBase
     end
     v
   end
+
+  # Extract the parameters made available to an inner query: the parameters of
+  # the outer query first, then the properties of the outer fact.
+  # @param [Factbase::Fact] fact The fact being evaluated
+  # @return [Hash] Parameters indexed by their names
+  def params(fact)
+    Context.new(fact, fact.all_properties.to_h { |name| [name, fact["$#{name}"]] }.compact)
+  end
+
+  # Values available to the selector of an aggregation.
+  class Context
+    # Ctor.
+    # @param [Factbase::Fact] fact The outer fact
+    # @param [Hash] params Parameters of the outer query
+    def initialize(fact, params)
+      @fact = fact
+      @params = params
+    end
+
+    # Get a parameter, or the property of the outer fact when it is not a parameter.
+    # @param [String] name Parameter or property name
+    # @return [Object] The value
+    def [](name)
+      @params.fetch(name) { @fact[name] }
+    end
+
+    # List all available names.
+    # @return [Array<String>] Names of the parameters and fact properties
+    def all_properties
+      @fact.all_properties | @params.keys
+    end
+  end
 end

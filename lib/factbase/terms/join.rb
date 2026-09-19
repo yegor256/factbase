@@ -31,7 +31,7 @@ class Factbase::Join < Factbase::TermBase
         .map! { |j| j.size == 1 ? [j[0], j[0]] : j }
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
-    subset = fb.query(term, maps).each(fb, fact).to_a
+    subset = fb.query(term, maps).each(fb, params(fact)).to_a
     subset.each do |s|
       jumps.each do |to, from|
         s[from]&.each do |v|

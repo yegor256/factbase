@@ -57,4 +57,18 @@ class TestEmpty < Factbase::Test
       )
     )
   end
+
+  def test_sees_the_parameters_of_the_outer_query
+    fb = Factbase.new
+    fb.insert.then do |f|
+      f.k = 1
+      f.tag = 'x'
+    end
+    fb.insert.then do |f|
+      f.k = 2
+      f.tag = 'y'
+    end
+    assert_equal(2, fb.query("(not (empty (eq tag 'x')))").each.to_a.size)
+    assert_equal(2, fb.query('(not (empty (eq tag $t)))').each(fb, t: ['x']).to_a.size)
+  end
 end
