@@ -18,11 +18,13 @@ class Factbase::CachedQuery
   # @param [Factbase::Query] origin Original query
   # @param [Hash] cache The cache
   # @param [Factbase] fb The factbase
+  # @param [Array<Hash>] maps The subset of maps the query runs over, or NIL for all of them
   # @param [Boolean] cacheable Whether the result of the query may be cached
-  def initialize(origin, cache, fb, cacheable: true)
+  def initialize(origin, cache, fb, maps: nil, cacheable: true)
     @origin = origin
     @cache = cache
     @fb = fb
+    @maps = maps
     @cacheable = cacheable
   end
 
@@ -54,7 +56,7 @@ class Factbase::CachedQuery
   def one(fb = @fb, params = {})
     invalidate_if_dirty!
     return @origin.one(fb, params) unless @cacheable
-    key = "one: #{@origin} #{params}"
+    key = "one: #{@origin} #{params} #{scope}"
     @cache[key] = @origin.one(fb, params) if @cache[key].nil?
     @cache[key]
   end
@@ -74,9 +76,15 @@ class Factbase::CachedQuery
   # @return [Array<Factbase::Fact>] The facts
   def facts(fb, params)
     return @origin.each(fb, params).to_a unless @cacheable
-    key = "each #{@origin}"
+    key = "each #{@origin} #{params} #{scope}"
     @cache[key] = @origin.each(fb, params).to_a if @cache[key].nil?
     @cache[key]
+  end
+
+  # The part of the cache key that tells one subset of maps from another.
+  # @return [String] The scope of the query
+  def scope
+    @maps.nil? ? 'all' : @maps.object_id.to_s
   end
 
   # Clear cache if it was marked dirty by a fresh fact insertion.
