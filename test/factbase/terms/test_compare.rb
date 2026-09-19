@@ -17,14 +17,22 @@ class TestCompare < Factbase::Test
     refute(Factbase::Compare.new(:<, [4, 2]).evaluate(fact, [], Factbase.new), 'Expected 2 < 4 to be true')
   end
 
-  def test_rounds_time_the_same_way_for_every_operator
+  def test_compares_a_time_as_stored_for_every_operator
     t = Time.utc(2024, 1, 1, 0, 0, 0, 500_000)
     whole = Time.utc(2024, 1, 1)
-    assert(Factbase::Compare.new(:==, [t, whole]).evaluate(fact, [], Factbase.new))
-    assert(Factbase::Compare.new(:<=, [t, whole]).evaluate(fact, [], Factbase.new))
-    assert(Factbase::Compare.new(:>=, [t, whole]).evaluate(fact, [], Factbase.new))
+    refute(Factbase::Compare.new(:==, [t, whole]).evaluate(fact, [], Factbase.new))
     refute(Factbase::Compare.new(:<, [t, whole]).evaluate(fact, [], Factbase.new))
-    refute(Factbase::Compare.new(:>, [t, whole]).evaluate(fact, [], Factbase.new))
+    refute(Factbase::Compare.new(:<=, [t, whole]).evaluate(fact, [], Factbase.new))
+    assert(Factbase::Compare.new(:>, [t, whole]).evaluate(fact, [], Factbase.new))
+    assert(Factbase::Compare.new(:>=, [t, whole]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_sees_below_one_second
+    fb = Factbase.new
+    fb.insert.t = Time.parse('2024-01-01T10:00:00.900Z')
+    assert_equal(1, fb.query('(gt t 2024-01-01T10:00:00.500Z)').each.to_a.size)
+    assert_equal(0, fb.query('(lt t 2024-01-01T10:00:00.500Z)').each.to_a.size)
+    assert_equal(0, fb.query('(eq t 2024-01-01T10:00:00.100Z)').each.to_a.size)
   end
 
   def test_wraps_incompatible_type_comparison
