@@ -31,6 +31,6 @@ class Factbase::Sorted < Factbase::TermBase
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
     blank, valued = fb.query(term, maps).each(fb, params).to_a.partition { |m| m[prop].nil? }
-    _flatten(valued.sort_by { |m| m[prop].first } + blank)
+    _unwrap(valued.sort_by { |m| m[prop].first } + blank)
   end
 end

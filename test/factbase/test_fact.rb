@@ -124,4 +124,12 @@ class TestFact < Factbase::Test
     fresh.import(fb.export)
     assert_equal([true], fresh.query('(exists yes)').each.to_a.first['yes'])
   end
+
+  def test_exposes_the_map_it_writes_to
+    map = {}
+    f = Factbase::Fact.new(map)
+    f.foo = 42
+    assert_same(map, f.to_map)
+    assert_equal([42], f.to_map['foo'])
+  end
 end
