@@ -41,7 +41,7 @@ require 'yaml'
 #  }
 #
 # Value sets, as you can see, allow data of different types. However, there
-# are only four types are allowed: Integer, Float, String, and Time.
+# are six allowed types: Integer, Float, String, Time, TrueClass, and FalseClass.
 #
 # A factbase may be exported to a file and then imported back:
 #
