@@ -83,4 +83,9 @@ class TestTerm < Factbase::Test
     assert_kind_of(Factbase::CachedTerm, t)
     refute_kind_of(Factbase::CachedTerm, Factbase::Term.new(:something, []))
   end
+
+  def test_makes_the_term_only_when_it_is_used
+    Factbase::Term.new(:eq, [:foo, 42])
+    assert_operator(GC.stat(:total_allocated_objects) - GC.stat(:total_allocated_objects), :<, 60)
+  end
 end
