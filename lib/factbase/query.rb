@@ -70,7 +70,7 @@ class Factbase::Query
   def one(fb = @fb, params = {})
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     r = @term.evaluate(Factbase::Tee.new(Factbase::Fact.new({}), params), @maps, fb)
-    unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
+    unless %w[String Integer Float TrueClass FalseClass Time Array NilClass].include?(r.class.to_s)
       raise(StandardError, "Incorrect type #{r.class} returned by #{@term}")
     end
     r
