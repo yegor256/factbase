@@ -174,6 +174,12 @@ class Factbase::Term < Factbase::TermBase
     end
   end
 
+  # Forget what the previous run of the query left in this term and in its operands.
+  def reset
+    @terms[@op].reset if @terms.key?(@op)
+    @operands.each { |o| o.reset if o.is_a?(Factbase::TermBase) }
+  end
+
   # Try to predict which facts from the provided list
   # should be evaluated. If no prediction can be made,
   # the same list is returned.
