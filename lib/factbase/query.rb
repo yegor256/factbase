@@ -91,7 +91,16 @@ class Factbase::Query
     maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
     @maps.delete_if do |m|
       pos = maybe.index(m)
-      d = !pos.nil? && @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
+      d =
+        if pos.nil?
+          false
+        else
+          result = @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), @maps, fb)
+          unless result.is_a?(TrueClass) || result.is_a?(FalseClass)
+            raise(ArgumentError, "Unexpected evaluation result of type #{result.class}, must be Boolean at #{@term}")
+          end
+          result
+        end
       maybe.delete_at(pos) if d
       deleted += 1 if d
       d
