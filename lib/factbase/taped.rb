@@ -145,8 +145,9 @@ class Factbase::Taped
     end
 
     def uniq!
-      @added.append(@oid)
-      @origin.uniq!
+      changed = @origin.uniq!
+      @added.append(@oid) unless changed.nil?
+      changed
     end
   end
 
