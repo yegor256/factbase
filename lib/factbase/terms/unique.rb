@@ -12,6 +12,13 @@ class Factbase::Unique < Factbase::TermBase
   def initialize(operands)
     super()
     @operands = operands
+    @seen = Set.new
+  end
+
+  # Forget the tuples seen while earlier facts were evaluated.
+  # @return [Set] The tuples left, none of them
+  def forget
+    @seen.clear
   end
 
   # Evaluate term on a fact.
@@ -20,7 +27,6 @@ class Factbase::Unique < Factbase::TermBase
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Boolean] True if the value is unique, false otherwise
   def evaluate(fact, maps, fb)
-    @seen = Set.new if @seen.nil?
     raise(ArgumentError, "Too few operands for 'unique' (at least 1 expected)") if @operands.empty?
     vv = (0..(@operands.size - 1)).map { |i| _values(i, fact, maps, fb) }
     return false if vv.any?(nil)

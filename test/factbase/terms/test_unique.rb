@@ -20,6 +20,16 @@ class TestUnique < Factbase::Test
     assert(t.evaluate(fact('foo' => 1), [], Factbase.new))
   end
 
+  def test_forgets_seen_values
+    t = Factbase::Unique.new([:foo])
+    t.evaluate(fact('foo' => 'Привет'), [], Factbase.new)
+    t.forget
+    assert(
+      t.evaluate(fact('foo' => 'Привет'), [], Factbase.new),
+      'the value seen before forgetting is not unique any more'
+    )
+  end
+
   def test_unique_when_one_value_is_new
     t = Factbase::Unique.new([:foo])
     assert(t.evaluate(fact('foo' => [1]), [], Factbase.new))

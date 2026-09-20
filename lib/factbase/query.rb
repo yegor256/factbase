@@ -44,6 +44,7 @@ class Factbase::Query
   # @return [Integer] Total number of facts yielded (if block given), otherwise enumerator
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
+    @term.forget
     yielded = 0
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     maybe = @term.predict(@maps, fb, Factbase::Tee.new({}, params))
@@ -68,6 +69,7 @@ class Factbase::Query
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
   def one(fb = @fb, params = {})
+    @term.forget
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     r = @term.evaluate(Factbase::Tee.new(Factbase::Fact.new({}), params), @maps, fb)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
@@ -87,6 +89,7 @@ class Factbase::Query
   # @param [Factbase] fb The factbase to delete from
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
+    @term.forget
     deleted = 0
     maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
     @maps.delete_if do |m|
