@@ -8,7 +8,7 @@ require_relative 'base'
 # Factbase::Arithmetic is a class for performing arithmetic operations.
 class Factbase::Arithmetic < Factbase::TermBase
   # Constructor.
-  # @param [Symbol] operation The arithmetic operation (e.g., :+, :-, :*, :/)
+  # @param [Symbol] operation The arithmetic operation (e.g., :+, :-, :*, :fdiv)
   # @param [Array] operands Operands
   def initialize(operation, operands)
     super()
@@ -54,7 +54,7 @@ class Factbase::Arithmetic < Factbase::TermBase
           raise(ArgumentError, "Unknown time unit '#{units}' in '#{r}'")
         end
     end
-    raise(ArgumentError, 'Cannot divide by zero') if @op == :/ && r.is_a?(Numeric) && r.zero?
+    raise(ArgumentError, 'Cannot divide by zero') if @op == :fdiv && r.is_a?(Numeric) && r.zero?
     v.__send__(@op, r)
   end
 end
