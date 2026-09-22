@@ -21,6 +21,19 @@ class TestMatches < Factbase::Test
     refute(t.evaluate(fact('foo' => 'hello', 'pattern' => '42$'), [], Factbase.new))
   end
 
+  def test_anchors_whole_value
+    t = Factbase::Matches.new([:foo, '^OK$'])
+    assert(t.evaluate(fact('foo' => 'OK'), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "FAILED\nOK"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "OK\nFAILED"), [], Factbase.new))
+  end
+
+  def test_keeps_anchor_characters_inside_class_and_escape
+    t = Factbase::Matches.new([:foo, '^[^$]\\$$'])
+    assert(t.evaluate(fact('foo' => 'a$'), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => '$$'), [], Factbase.new))
+  end
+
   def test_reuses_compiled_regexp
     t = Factbase::Matches.new([:foo, '[a-z]+'])
     assert(t.evaluate(fact('foo' => 'hello'), [], Factbase.new))
