@@ -96,6 +96,17 @@ class TestRules < Factbase::Test
     assert_equal(0, fb.size)
   end
 
+  def test_checks_rules_when_txn_throws_commit
+    fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
+    assert_raises(ArgumentError) do
+      fb.txn do |fbt|
+        fbt.insert.bar = 1
+        throw(:commit)
+      end
+    end
+    assert_equal(0, fb.size)
+  end
+
   def test_defends_against_id_duplicates
     fb = Factbase::Rules.new(Factbase.new, '(always)', uid: 'id')
     assert_raises(StandardError) do
