@@ -24,4 +24,11 @@ class TestToFloat < Factbase::Test
       "Cannot convert 'abc' to Float in (to_float ...):"
     )
   end
+
+  def test_converts_time_to_epoch_seconds
+    assert_in_delta(
+      1_704_103_200.5,
+      Factbase::ToFloat.new([Time.utc(2024, 1, 1, 10, 0, 0, 500_000)]).evaluate(fact, [], Factbase.new)
+    )
+  end
 end
