@@ -236,6 +236,7 @@ class Factbase::Term < Factbase::TermBase
   # @return [Boolean] TRUE if static
   def static?
     return true if @op == :agg
+    return false if %i[join as].include?(@op)
     @operands.each do |o|
       return false if o.is_a?(Factbase::Term) && !o.static?
       return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
