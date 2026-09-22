@@ -382,6 +382,17 @@ class TestQuery < Factbase::Test
     assert_equal(0, fb.size)
   end
 
+  def test_deletes_by_agg_over_all_facts
+    fb = Factbase.new
+    [['trip', 20], ['food', 3], ['food', 3], ['food', 3]].each do |c, v|
+      f = fb.insert
+      f.cat = c
+      f.cost = v
+    end
+    assert_equal(1, fb.query('(gt (agg (eq cat $cat) (sum cost)) 10)').delete!)
+    assert_equal(3, fb.size)
+  end
+
   def test_error_names_the_term_not_the_object
     fb = Factbase.new
     fb.insert.what = 'issue'
