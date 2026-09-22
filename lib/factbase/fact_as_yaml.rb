@@ -38,7 +38,7 @@ class Factbase::FactAsYaml
       [
         k,
         ': ',
-        if vv.one?
+        if vv.size == 1
           v_to_s(vv.first)
         else
           [
