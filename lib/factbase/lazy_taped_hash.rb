@@ -61,6 +61,7 @@ class Factbase::LazyTaped
     private
 
     def current_map
+      ensure_copied_map if @lazy_taped.copied?
       @copied_map || @origin
     end
 
