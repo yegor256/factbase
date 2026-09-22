@@ -46,7 +46,9 @@ class Factbase::IndexedAnd
       r = maps.respond_to?(:repack) ? maps.repack(j) : j
     else
       fail = false
+      copying = %i[head sorted inverted]
       @term.operands.each do |o|
+        next if copying.include?(o.op)
         n = o.predict(maps, fb, params)
         if n.nil?
           fail = true
