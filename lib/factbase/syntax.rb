@@ -146,7 +146,9 @@ class Factbase::Syntax
       elsif t.match?(/^(\+|-)?[0-9]+(\.[0-9]+(e(\+|-)[0-9]+)?|e(\+|-)?[0-9]+)$/)
         Float(t)
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
-        Time.parse(t)
+        tm = Time.parse(t)
+        raise(ArgumentError, "Impossible time (#{t})") unless tm.strftime('%FT%T') == t[0, 19]
+        tm
       elsif t == 'true'
         true
       elsif t == 'false'
