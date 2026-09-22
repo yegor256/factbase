@@ -62,6 +62,15 @@ class TestIndexedNot < Factbase::Test
     assert_equal([2], query.each(fb, { 'x' => 1 }).to_a.map { |f| f['foo'].first })
   end
 
+  def test_reuses_index_entry_of_same_query
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb.insert.foo = 1
+    fb.insert.foo = 2
+    3.times { fb.query('(not (eq foo 1))').each.to_a }
+    assert_equal(1, idx.keys.count { |k| k[2] == :not }, 'each run of the same query must reuse one entry')
+  end
+
   private
 
   def _assert_not
