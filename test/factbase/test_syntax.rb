@@ -122,6 +122,13 @@ class TestSyntax < Factbase::Test
     )
   end
 
+  def test_prints_a_time_with_fractional_seconds
+    assert_equal(
+      '(eq t 2024-01-01T00:00:00.500000000Z)',
+      Factbase::Syntax.new('(eq t 2024-01-01T00:00:00.5Z)').to_term.to_s
+    )
+  end
+
   def test_simple_matching
     m = { 'foo' => ['Hello, world!'], 'bar' => [42], 'z' => [1, 2, 3, 4] }
     {
