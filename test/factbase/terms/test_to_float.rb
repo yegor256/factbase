@@ -31,4 +31,12 @@ class TestToFloat < Factbase::Test
       Factbase::ToFloat.new([Time.utc(2024, 1, 1, 10, 0, 0, 500_000)]).evaluate(fact, [], Factbase.new)
     )
   end
+
+  def test_rejects_infinite_value
+    t = Factbase::ToFloat.new(['1e400'])
+    assert_includes(
+      assert_raises(RuntimeError) { t.evaluate(fact, [], Factbase.new) }.message,
+      'Infinity is not a finite number'
+    )
+  end
 end
