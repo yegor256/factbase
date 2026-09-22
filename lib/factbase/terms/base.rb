@@ -32,7 +32,7 @@ class Factbase::TermBase
             if o.is_a?(String)
               "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"')}'"
             elsif o.is_a?(Time)
-              o.utc.iso8601
+              o.utc.iso8601(o.subsec.zero? ? 0 : 9)
             else
               o.to_s
             end
