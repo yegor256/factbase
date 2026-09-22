@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require 'English'
 require 'json'
 require 'yaml'
 
@@ -172,6 +173,7 @@ class Factbase
     taped = Factbase::LazyTaped.new(@maps)
     require_relative('factbase/churn')
     churn = Factbase::Churn.new
+    done = false
     catch(:commit) do
       require_relative('factbase/light')
       commit = false
@@ -179,10 +181,13 @@ class Factbase
         yield(Factbase::Light.new(Factbase.new(taped)))
         commit = true
       end
+      done = true
       return churn unless commit
     rescue Factbase::Rollback
+      done = true
       return churn
     end
+    done = true
     seen = {}.compare_by_identity
     garbage = {}.compare_by_identity
     taped.deleted.each do |oid|
@@ -222,6 +227,8 @@ class Factbase
     end
     @maps.delete_if { |m| garbage.key?(m) } unless garbage.empty?
     churn
+  ensure
+    raise(RuntimeError, 'The txn block was left by break or return, its changes are lost') unless done || $ERROR_INFO
   end
 
   # Export it into a chain of bytes.
