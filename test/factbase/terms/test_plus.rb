@@ -51,4 +51,13 @@ class TestPlus < Factbase::Test
     assert_equal(time + (3 * 60 * 60 * 24 * 7), t.evaluate(fact('foo' => time), [], Factbase.new))
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
+
+  def test_refuses_to_add_two_strings
+    t = Factbase::Plus.new(%i[foo bar])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact('foo' => 'x', 'bar' => 'y'), [], Factbase.new)
+      end
+    assert_includes(e.message, 'only numbers and times can be used', e.message)
+  end
 end

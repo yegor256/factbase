@@ -55,6 +55,25 @@ class Factbase::Arithmetic < Factbase::TermBase
         end
     end
     raise(ArgumentError, 'Cannot divide by zero') if @op == :/ && r.is_a?(Numeric) && r.zero?
-    v.__send__(@op, r)
+    _calculate(v, r)
+  end
+
+  private
+
+  # Apply the operation, refusing operands that are not numbers or times.
+  # @param [Object] left The left operand
+  # @param [Object] right The right operand
+  # @return [Object] The result of the operation
+  def _calculate(left, right)
+    [left, right].each do |o|
+      next if o.is_a?(Numeric) || o.is_a?(Time)
+      raise(
+        RuntimeError,
+        "Cannot calculate #{left.inspect} (#{left.class}) " \
+        "and #{right.inspect} (#{right.class}) using (arithmetic #{@op}): " \
+        'only numbers and times can be used'
+      )
+    end
+    left.__send__(@op, right)
   end
 end

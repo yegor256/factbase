@@ -45,4 +45,13 @@ class TestDiv < Factbase::Test
       'undefined method'
     )
   end
+
+  def test_refuses_a_string_operand
+    t = Factbase::Div.new([:foo, 3])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact('foo' => 'x'), [], Factbase.new)
+      end
+    assert_includes(e.message, 'using (arithmetic /)', e.message)
+  end
 end
