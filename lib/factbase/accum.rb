@@ -12,8 +12,6 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Accum
-  # The types a property may hold, none of which is a list of values, even
-  # when it answers +to_a+ as +Time+ does.
   SCALARS = [Float, Integer, String, Time, TrueClass, FalseClass].freeze
 
   # Ctor.
