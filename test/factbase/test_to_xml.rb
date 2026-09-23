@@ -45,14 +45,14 @@ class TestToXML < Factbase::Test
   def test_binary_and_latin1_rendering
     fb = Factbase.new
     f = fb.insert
-    f.a = "caf\xC3\xA9".b
+    f.a = "data\xC3\xA9".b
     f.b = "\xFF\xFE".b
-    f.c = (+"caf\xE9").force_encoding(Encoding::ISO_8859_1)
+    f.c = (+"data\xE9").force_encoding(Encoding::ISO_8859_1)
     xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml, &:strict)
-    assert_equal("caf\u00e9", xml.xpath('/fb/f/a').first.text)
+    assert_equal("data\u00e9", xml.xpath('/fb/f/a').first.text)
     assert_equal('B', xml.xpath('/fb/f/b').first['t'])
     assert_equal("\xFF\xFE".b, xml.xpath('/fb/f/b').first.text.unpack1('m0').b)
-    assert_equal("caf\u00e9", xml.xpath('/fb/f/c').first.text)
+    assert_equal("data\u00e9", xml.xpath('/fb/f/c').first.text)
   end
 
   def test_complex_rendering
