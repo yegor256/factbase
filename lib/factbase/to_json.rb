@@ -44,7 +44,7 @@ class Factbase::ToJSON
   # @param [Object] val The value
   # @return [Object] The value, with a Time turned into ISO 8601
   def plain(map, key, val)
-    if val.is_a?(String) && !val.valid_encoding?
+    if val.is_a?(String) && broken?(val)
       raise(
         ArgumentError,
         "The value #{val.inspect} of the '#{key}' property of the fact " \
@@ -52,5 +52,13 @@ class Factbase::ToJSON
       )
     end
     val.is_a?(Time) ? val.utc.iso8601(6) : val
+  end
+
+  # Check whether JSON cannot hold the string, reading a binary one as UTF-8.
+  # @param [String] val The string
+  # @return [Boolean] TRUE if the string is not valid UTF-8
+  def broken?(val)
+    return !val.dup.force_encoding(Encoding::UTF_8).valid_encoding? if val.encoding == Encoding::BINARY
+    !val.valid_encoding?
   end
 end
