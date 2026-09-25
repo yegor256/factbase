@@ -11,6 +11,8 @@ require_relative 'base'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Matches < Factbase::TermBase
+  ANCHORS = { '^' => '\\A', '$' => '\\z' }.freeze
+
   def initialize(operands)
     super()
     @operands = operands
@@ -37,8 +39,27 @@ class Factbase::Matches < Factbase::TermBase
 
   def regexp(pattern)
     key = pattern.to_s
-    @regexps[key] ||= Regexp.new(key)
+    @regexps[key] ||= Regexp.new(anchored(key))
   rescue RegexpError => e
     raise(RuntimeError, "Invalid regexp '#{key}': #{e.message}")
+  end
+
+  def anchored(source)
+    depth = 0
+    escaped = false
+    source.each_char.map do |c|
+      if escaped
+        escaped = false
+      elsif c == '\\'
+        escaped = true
+      elsif c == '['
+        depth += 1
+      elsif c == ']' && depth.positive?
+        depth -= 1
+      elsif depth.zero? && ANCHORS.key?(c)
+        next ANCHORS[c]
+      end
+      c
+    end.join
   end
 end
