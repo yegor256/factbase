@@ -271,6 +271,6 @@ class Factbase
     rescue TypeError, ArgumentError => e
       raise(StandardError, "The input is not a valid factbase: #{e.message}")
     end
-    @maps += data
+    @maps.concat(data)
   end
 end

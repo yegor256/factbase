@@ -501,4 +501,16 @@ class TestFactbase < Factbase::Test
       )
     end
   end
+
+  def test_import_is_visible_to_a_query_made_before_it
+    other = Factbase.new
+    other.insert.foo = 1
+    fb = Factbase.new
+    q = fb.query('(always)')
+    fb.insert.bar = 2
+    assert_equal(1, q.each.to_a.size)
+    fb.import(other.export)
+    assert_equal(2, q.each.to_a.size, 'a query built before import must see the imported facts, as it sees an insert')
+    assert_equal(2, fb.size)
+  end
 end
