@@ -26,7 +26,7 @@ class Factbase::Env < Factbase::TermBase
     return if n.nil?
     name = n[0]
     raise(ArgumentError, "A string is expected as first argument of 'env'") unless name.is_a?(String)
-    value = ENV.fetch(name.upcase, nil)
+    value = ENV.fetch(name, nil)
     if value.nil? || value.empty?
       d = _values(1, fact, maps, fb)
       return if d.nil?
