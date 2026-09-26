@@ -16,6 +16,7 @@ class Factbase::IndexedLt
     prop = op1.to_s
     target = op2.is_a?(Symbol) ? params[op2.to_s]&.first : op2
     return maps || [] if target.nil?
+    target = _floored(target)
     return unless sortable?(maps, prop)
     key = [maps.object_id, prop, :facts]
     @idx[key] ||= { facts: [], count: 0 }
@@ -27,6 +28,18 @@ class Factbase::IndexedLt
 
   private
 
+  # The form a value is compared in.
+  #
+  # +Factbase::Compare+ floors a Time to whole seconds on both sides before it
+  # compares, so the index has to do the same, or it decides an order the term
+  # itself would not decide and drops a fact the term would have kept.
+  #
+  # @param [Object] value The value, as the fact holds it
+  # @return [Object] The value to compare with
+  def _floored(value)
+    value.is_a?(Time) ? value.floor : value
+  end
+
   def _scalar?(item)
     item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
   end
@@ -35,7 +48,7 @@ class Factbase::IndexedLt
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each_with_index do |fact, i|
       fact[prop]&.each do |v|
-        entry[:facts] << [v, fact, entry[:count] + i]
+        entry[:facts] << [_floored(v), fact, entry[:count] + i]
       end
     end
     entry[:facts].sort_by! { |pair| pair[0] }
