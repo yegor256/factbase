@@ -271,6 +271,9 @@ class Factbase
     rescue TypeError, ArgumentError => e
       raise(StandardError, "The input is not a valid factbase: #{e.message}")
     end
+    unless data.is_a?(Array) && data.all?(Hash)
+      raise(StandardError, 'The input is not a valid factbase: expected an array of maps')
+    end
     @maps += data
   end
 end
