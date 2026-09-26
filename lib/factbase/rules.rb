@@ -53,7 +53,9 @@ class Factbase::Rules
     @fb.txn do |fbt|
       churn = Factbase::Churn.new
       begin
-        yield(Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn))
+        catch(:commit) do
+          yield(Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn))
+        end
       ensure
         @check = before
       end
