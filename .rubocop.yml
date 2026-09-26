@@ -72,6 +72,7 @@ Elegant/GoodMethodName:
     - '_init_indexes'
     - '_join'
     - '_loosest'
+    - '_operand'
     - '_resolve'
     - '_scalar?'
     - '_search'
