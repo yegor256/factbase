@@ -65,7 +65,7 @@ class Factbase::Fact
       @map[kk] << v
       nil
     elsif k == '[]'
-      @map[args[1].to_s]
+      @map[args[1].to_s]&.dup
     else
       v = @map[k]
       if v.nil?
