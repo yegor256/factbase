@@ -27,7 +27,8 @@ class Factbase::SyncFactbase
   # @return [Factbase::Fact] The fact just inserted
   def insert
     try_lock do
-      @origin.insert
+      require_relative('sync_fact')
+      Factbase::SyncFact.new(@origin.insert, @monitor)
     end
   end
 
