@@ -90,6 +90,10 @@ require_relative 'terms/zero'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Term < Factbase::TermBase
+  # An error raised by a term, already carrying the term and the place it failed;
+  # an enclosing term passes it through instead of wrapping it again.
+  class Wrapped < RuntimeError; end
+
   attr_reader :op, :operands
 
   TERMS = {
@@ -209,8 +213,10 @@ class Factbase::Term < Factbase::TermBase
     end
   rescue NoMethodError => e
     raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
+  rescue Wrapped
+    raise
   rescue StandardError => e
-    raise(RuntimeError, "#{e.message.inspect} at #{self} at #{e.backtrace[0]}")
+    raise(Wrapped, "#{e.message.inspect} at #{self} at #{e.backtrace[0]}")
   end
 
   # Simplify it if possible.
