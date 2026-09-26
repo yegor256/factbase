@@ -13,7 +13,7 @@ require_relative '../../test__helper'
 # License:: MIT
 class TestToTime < Factbase::Test
   def test_to_time
-    assert_equal('Time', Factbase::ToTime.new([%w[2023-01-01 hello]]).evaluate(fact, [], Factbase.new).class.to_s)
+    assert_equal('Time', Factbase::ToTime.new(['2023-01-01']).evaluate(fact, [], Factbase.new).class.to_s)
   end
 
   def test_rejects_unparsable_value
@@ -34,5 +34,14 @@ class TestToTime < Factbase::Test
       end
     assert_includes(e.message, "Cannot parse '2024-13-45' as Time in (to_time ...):")
     assert_includes(e.message, 'argument out of range')
+  end
+
+  def test_rejects_a_property_with_many_values
+    t = Factbase::ToTime.new([:foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => [1, 2]), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at first position, one expected', e.message)
   end
 end
