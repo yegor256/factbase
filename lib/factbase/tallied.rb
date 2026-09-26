@@ -57,6 +57,7 @@ class Factbase::Tallied
     def initialize(fact, churn)
       @fact = fact
       @churn = churn
+      @touched = false
     end
 
     def to_s
@@ -69,7 +70,10 @@ class Factbase::Tallied
 
     others do |*args|
       r = @fact.method_missing(*args)
-      @churn.append(0, 0, 1) if args[0].to_s.end_with?('=')
+      if args[0].to_s.end_with?('=') && !@touched
+        @touched = true
+        @churn.append(0, 0, 1)
+      end
       r
     end
   end
