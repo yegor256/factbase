@@ -41,6 +41,9 @@ class Factbase::TermBase
       end
   end
 
+  # Forget what the previous run of the query left in this term.
+  def reset; end
+
   private
 
   def assert_args(num)

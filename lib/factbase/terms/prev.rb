@@ -14,6 +14,11 @@ class Factbase::Prev < Factbase::TermBase
     @operands = operands
   end
 
+  # Forget the value left by the previous run of the query.
+  def reset
+    @prev = nil
+  end
+
   # Evaluate term on a fact.
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
