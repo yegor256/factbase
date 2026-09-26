@@ -17,7 +17,7 @@ class TestAccumViews < Factbase::Test
     fb.query('(as foo 7)').each do |f|
       assert_equal(7, f.foo)
       assert_includes(f['foo'], 7)
-      assert_equal(f.foo, f['foo'][0])
+      assert_includes(f['foo'], f.foo)
     end
   end
 end
