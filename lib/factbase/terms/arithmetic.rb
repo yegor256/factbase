@@ -32,7 +32,8 @@ class Factbase::Arithmetic < Factbase::TermBase
     v = lefts[0]
     r = rights[0]
     if v.is_a?(Time) && r.is_a?(String)
-      (num, units) = r.split
+      (num, units, *rest) = r.split
+      raise(ArgumentError, "Duration '#{r}' must be just a number and a unit") unless rest.empty?
       begin
         num = Integer(num, 10)
       rescue ArgumentError, TypeError
