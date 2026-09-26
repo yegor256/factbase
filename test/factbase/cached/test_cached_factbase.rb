@@ -104,4 +104,9 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(1, fb.size)
     assert_equal(['kept'], fb.query('(exists foo)').each.to_a.map(&:foo))
   end
+
+  def test_refuses_a_keyword_it_does_not_read
+    fb = Factbase.new
+    assert_raises(ArgumentError) { Factbase::CachedFact.new(fb.insert, {}, fresh: true) }
+  end
 end
