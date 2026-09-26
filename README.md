@@ -211,6 +211,11 @@ One term is for meta-programming:
 * `(undef f)` undefines a term (nothing happens if it's not defined yet),
 returns `true`
 
+Both of them change the `Factbase::Term` class itself, not the factbase the
+query was run against. A term defined through one factbase is visible in every
+other factbase in the same process, and any of them can undefine it. Don't use
+them from a library, where the caller has factbases of their own.
+
 There are terms that are history of search aware:
 
 * `(prev p)` returns the value of `p` property in the previously seen fact
