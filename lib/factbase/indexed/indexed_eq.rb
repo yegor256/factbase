@@ -47,7 +47,7 @@ class Factbase::IndexedEq
   end
 
   def _resolve(operand, params)
-    return Array(operand) unless operand.is_a?(Symbol)
+    return [operand] unless operand.is_a?(Symbol)
     params[operand.to_s] || []
   end
 end
