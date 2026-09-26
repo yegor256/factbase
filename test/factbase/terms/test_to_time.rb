@@ -16,6 +16,11 @@ class TestToTime < Factbase::Test
     assert_equal('Time', Factbase::ToTime.new([%w[2023-01-01 hello]]).evaluate(fact, [], Factbase.new).class.to_s)
   end
 
+  def test_keeps_fraction_of_time_value
+    t = Time.utc(2024, 1, 1, 10, 0, 0, 750_000)
+    assert_equal(t, Factbase::ToTime.new([t]).evaluate(fact, [], Factbase.new))
+  end
+
   def test_rejects_unparsable_value
     t = Factbase::ToTime.new(['hello'])
     e =
