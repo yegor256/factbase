@@ -22,6 +22,15 @@ class TestNth < Factbase::Test
     )
   end
 
+  def test_reads_facts_inside_txn
+    fb = Factbase.new
+    fb.insert.id = 1
+    fb.txn do |fbt|
+      fbt.insert.id = 2
+      assert_equal([[1], [2]], ['(eq id (first id))', '(eq id (nth 1 id))'].map { |q| fbt.query(q).each.map(&:id) })
+    end
+  end
+
   def test_refuses_a_negative_position
     t = Factbase::Nth.new([-1, :letter])
     e =

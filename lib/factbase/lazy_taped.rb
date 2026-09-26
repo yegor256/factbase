@@ -65,6 +65,12 @@ class Factbase::LazyTaped
     copied? ? @staged.empty? : (@origin.empty? && @staged.empty?)
   end
 
+  def [](pos)
+    return @staged[pos] if copied?
+    return @origin[pos] if pos < @origin.size
+    @staged[pos - @origin.size]
+  end
+
   def <<(map)
     @staged << map
     _track(map, map)
