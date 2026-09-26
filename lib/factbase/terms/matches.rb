@@ -32,10 +32,19 @@ class Factbase::Matches < Factbase::TermBase
     re = _values(1, fact, maps, fb)
     raise(RuntimeError, 'Regexp is nil') if re.nil?
     raise(RuntimeError, 'Exactly one regexp is expected') unless re.size == 1
-    str[0].to_s.match?(regexp(re[0]))
+    matched(str[0], regexp(re[0]))
   end
 
   private
+
+  def matched(value, rx)
+    value.match?(rx)
+  rescue NoMethodError => e
+    raise(
+      RuntimeError,
+      "Cannot match #{value.inspect} (#{value.class}) with #{rx.inspect} using (matches): #{e.message}"
+    )
+  end
 
   def regexp(pattern)
     key = pattern.to_s
