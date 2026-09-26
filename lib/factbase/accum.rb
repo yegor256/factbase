@@ -53,7 +53,7 @@ class Factbase::Accum
       else
         vv
       end
-    elsif @props[k].nil?
+    elsif @props[k].nil? || @fact.all_properties.include?(k)
       @fact.public_send(*args)
     else
       @props[k][0]
