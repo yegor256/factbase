@@ -71,6 +71,7 @@ Elegant/GoodMethodName:
     - '_floored'
     - '_init_indexes'
     - '_join'
+    - '_key'
     - '_loosest'
     - '_resolve'
     - '_scalar?'
