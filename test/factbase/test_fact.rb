@@ -101,6 +101,15 @@ class TestFact < Factbase::Test
     assert_equal(t.utc.to_s, f.foo.to_s)
   end
 
+  def test_keeps_the_given_time_untouched
+    f = Factbase::Fact.new({})
+    t = Time.new(2024, 1, 1, 12, 0, 0, '+03:00').freeze
+    f.foo = t
+    assert_equal(10_800, t.utc_offset)
+    assert_predicate(f.foo, :utc?)
+    assert_equal(t, f.foo)
+  end
+
   def test_some_names_are_prohibited
     f = Factbase::Fact.new({})
     assert_raises(StandardError) { f.to_s = 42 }
