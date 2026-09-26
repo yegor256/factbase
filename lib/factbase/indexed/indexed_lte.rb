@@ -32,6 +32,10 @@ class Factbase::IndexedLte
   end
 
   def _feed(facts, entry, prop)
+    if entry[:count] > facts.size
+      entry[:facts] = []
+      entry[:count] = 0
+    end
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each_with_index do |fact, i|
       fact[prop]&.each do |v|
