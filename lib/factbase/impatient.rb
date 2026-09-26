@@ -44,6 +44,8 @@ class Factbase::Impatient
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   class Query
+    include Enumerable
+
     def initialize(term, maps, timeout, fb)
       @term = term
       @maps = maps

@@ -78,6 +78,8 @@ class Factbase::Tallied
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   class Query
+    include Enumerable
+
     def initialize(query, churn, fb)
       @query = query
       @churn = churn
