@@ -382,13 +382,10 @@ class TestQuery < Factbase::Test
     assert_equal(0, fb.size)
   end
 
-  def test_error_names_the_term_not_the_object
+  def test_one_accepts_boolean_terms
     fb = Factbase.new
     fb.insert.what = 'issue'
-    assert_equal(
-      "Incorrect type FalseClass returned by (eq what 'issue')",
-      assert_raises(StandardError) { fb.query('(eq what "issue")').one }.message
-    )
+    refute(fb.query('(eq what "issue")').one)
   end
 
   private
