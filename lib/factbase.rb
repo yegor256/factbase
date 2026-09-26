@@ -89,6 +89,14 @@ class Factbase
   # Constructor.
   # @param [Array<Hash>] maps Array of facts to start with
   def initialize(maps = [])
+    unless maps.respond_to?(:each) && maps.respond_to?(:size) && !maps.is_a?(Hash)
+      raise(ArgumentError, "The maps must be a collection of fact maps, while #{maps.class} provided")
+    end
+    maps.each do |map|
+      unless map.respond_to?(:keys) && map.respond_to?(:[])
+        raise(ArgumentError, 'Every map must provide property keys and values')
+      end
+    end
     @maps = maps
   end
 
