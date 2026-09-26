@@ -204,8 +204,10 @@ class Factbase::Term < Factbase::TermBase
   def evaluate(fact, maps, fb)
     if @terms.key?(@op)
       @terms[@op].evaluate(fact, maps, fb)
-    else
+    elsif @op != :initialize && Factbase::Term.private_method_defined?(@op, false)
       __send__(@op, fact, maps, fb)
+    else
+      raise(NoMethodError, "There is no term '#{@op}'")
     end
   rescue NoMethodError => e
     raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
@@ -253,6 +255,8 @@ class Factbase::Term < Factbase::TermBase
     end
     false
   end
+
+  private
 
   def at(fact, maps, fb)
     assert_args(2)
