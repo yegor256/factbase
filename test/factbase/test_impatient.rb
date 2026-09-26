@@ -31,7 +31,7 @@ class TestImpatient < Factbase::Test
 
   class SlowDeleteFactbase < Factbase
     class SlowQuery < Factbase::Query
-      def delete!(fb = @fb)
+      def delete!(fb = @fb, params = {})
         sleep(0.2)
         super
       end
