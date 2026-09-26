@@ -8,6 +8,7 @@ require 'ellipsized'
 require 'others'
 require 'tago'
 require 'time'
+require_relative 'no_conversion'
 require_relative 'syntax'
 
 # A decorator of a Factbase, that logs all operations.
@@ -135,6 +136,8 @@ class Factbase::Logged
       end
       r
     end
+
+    prepend Factbase::NoConversion
   end
 
   # Query decorator.
