@@ -96,4 +96,49 @@ class TestCachedQuery < Factbase::Test
     fb.query('(eq foo 1)').delete!
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end
+
+  def test_yields_facts_of_the_param_given_to_each_call
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    first = rnd.rand(1_000)
+    second = first + rnd.rand(1..1_000)
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    [first, second].each { |v| fb.insert.value = v }
+    query = fb.query('(eq value $wanted)')
+    query.each(fb, wanted: [first]).to_a
+    assert_equal(
+      [[second]], query.each(fb, wanted: [second]).map { |f| f['value'] },
+      "a second param cannot get the facts cached for the first one, seed #{seed}"
+    )
+  end
+
+  def test_yields_facts_of_the_param_hidden_inside_an_aggregate
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    first = rnd.rand(1_000)
+    second = first + rnd.rand(1..1_000)
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    [first, second].each { |v| fb.insert.value = v }
+    query = fb.query('(eq value (agg (eq value $wanted) (max value)))')
+    query.each(fb, wanted: [first]).to_a
+    assert_equal(
+      [[second]], query.each(fb, wanted: [second]).map { |f| f['value'] },
+      "a param inside an aggregate cannot get the facts cached for another one, seed #{seed}"
+    )
+  end
+
+  def test_reads_one_value_of_the_param_given_to_each_call
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    first = rnd.rand(1_000)
+    second = first + rnd.rand(1..1_000)
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    [first, second].each { |v| fb.insert.value = v }
+    query = fb.query('(agg (eq value $wanted) (first value))')
+    query.one(fb, wanted: [first])
+    assert_equal(
+      [second], query.one(fb, wanted: [second]),
+      "a second param cannot get the value cached for the first one, seed #{seed}"
+    )
+  end
 end
