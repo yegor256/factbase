@@ -196,6 +196,13 @@ class Factbase::Term < Factbase::TermBase
     end
   end
 
+  # Forget what was remembered while earlier facts were evaluated.
+  # @return [Array] The operands
+  def forget
+    @terms[@op].forget if @terms.key?(@op)
+    @operands.each { |o| o.forget if o.is_a?(Factbase::TermBase) }
+  end
+
   # Evaluate term on a fact
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available

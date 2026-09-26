@@ -20,6 +20,11 @@ class Factbase::TermBase
   end
   # rubocop:enable Elegant/GoodMethodName
 
+  # Forget what was remembered while earlier facts were evaluated.
+  #
+  # A term that remembers nothing has nothing to forget.
+  def forget; end
+
   # Turns it into a string.
   # @return [String] The string of it
   def to_s

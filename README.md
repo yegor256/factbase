@@ -215,8 +215,8 @@ There are terms that are history of search aware:
 
 * `(prev p)` returns the value of `p` property in the previously seen fact
 * `(unique p1 p2 ...)` returns true if at least one property value
-hasn't been seen yet; returns false when all specified properties
-have duplicate values in this particular combination
+hasn't been seen yet in this search; returns false when all specified
+properties have duplicate values in this particular combination
 
 The `agg` term enables sub-queries by evaluating the first argument (term)
 over all available facts, passing the entire subset to the second argument,
