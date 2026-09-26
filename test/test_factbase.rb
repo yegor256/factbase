@@ -460,6 +460,16 @@ class TestFactbase < Factbase::Test
     end
   end
 
+  def test_complains_when_txn_is_left_by_break
+    fb = Factbase.new
+    assert_raises(RuntimeError) do
+      fb.txn do |fbt|
+        fbt.insert.foo = 1
+        break
+      end
+    end
+  end
+
   def test_commits_on_exit_by_throw
     fb = Factbase.new
     fb.txn do |fbt|
