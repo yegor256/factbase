@@ -67,7 +67,8 @@ class Factbase::CachedQuery
     return @origin.one(fb, params) unless @cacheable
     key = "one: #{@origin} #{params}"
     @cache[key] = @origin.one(fb, params) unless @cache.key?(key)
-    @cache[key]
+    v = @cache[key]
+    v.is_a?(Array) ? v.dup : v
   end
 
   # Delete all facts that match the query.
