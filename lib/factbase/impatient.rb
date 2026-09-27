@@ -59,13 +59,16 @@ class Factbase::Impatient
 
     def each(fb = @fb, params = {}, &)
       return to_enum(__method__, fb, params) unless block_given?
-      facts =
-        impatient('each') do
-          @fb.query(@term, @maps).each(fb, params).to_a
-        end
+      enum = @fb.query(@term, @maps).each(fb, params)
       n = 0
-      facts.each do |f|
-        yield(f)
+      left = @timeout
+      loop do
+        # rubocop:disable Elegant/NoRedundantVariable
+        started = Time.now
+        fact = impatient('each', left) { enum.next }
+        # rubocop:enable Elegant/NoRedundantVariable
+        left -= Time.now - started
+        yield(fact)
         n += 1
       end
       n
@@ -85,8 +88,9 @@ class Factbase::Impatient
 
     private
 
-    def impatient(name, &)
-      Timeout.timeout(@timeout, &)
+    def impatient(name, budget = @timeout, &)
+      raise(StandardError, "#{name}() ran out of time, fb size is #{@fb.size}: #{@term}") if budget <= 0
+      Timeout.timeout(budget, &)
     rescue Timeout::Error => e
       raise(
         StandardError,
