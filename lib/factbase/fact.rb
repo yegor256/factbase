@@ -42,9 +42,7 @@ class Factbase::Fact
   #
   # @param [String] _name The name of the parameter, with no "$" in front
   # @return [nil] Always NIL
-  def query_parameter(_name)
-    nil
-  end
+  def query_parameter(_name); end
 
   def to_s
     "[ #{@map.map { |k, v| "#{k}: #{v}" }.sort!.join(', ')} ]"
