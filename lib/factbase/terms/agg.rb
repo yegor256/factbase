@@ -38,7 +38,7 @@ class Factbase::Agg < Factbase::TermBase
   # @param [Factbase::Fact] fact The fact being evaluated
   # @return [Hash] Parameters indexed by their names
   def params(fact)
-    Context.new(fact, fact.all_properties.to_h { |name| [name, fact["$#{name}"]] }.compact)
+    Context.new(fact, fact.all_properties.to_h { |name| [name, fact.query_parameter(name)] }.compact)
   end
 
   # Values available to the selector of an aggregation.
@@ -56,6 +56,13 @@ class Factbase::Agg < Factbase::TermBase
     # @return [Object] The value
     def [](name)
       @params.fetch(name) { @fact[name] }
+    end
+
+    # The value of a parameter of the query, and nothing else.
+    # @param [String] name Parameter name
+    # @return [Object, nil] The value, or NIL if there is no such parameter
+    def query_parameter(name)
+      @params[name]
     end
 
     # List all available names.
