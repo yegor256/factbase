@@ -40,9 +40,7 @@ class Factbase::Fact
   #
   # @param [String] _name The name of the parameter, with no "$" in front
   # @return [nil] Always NIL
-  def query_parameter(_name)
-    nil
-  end
+  def query_parameter(_name); end
 
   # Convert it to a string.
   # @return [String] Short human-readable line with all properties, sorted by name
