@@ -92,6 +92,13 @@ class TestLazyTapedHash < Factbase::Test
     assert_read(hash, origin, 2, hash.size)
   end
 
+  def test_reads_what_another_handle_wrote
+    taped = Factbase::LazyTaped.new([{ 'id' => [1] }])
+    handles = Array.new(2) { taped.each.first }
+    handles.first['seen'] = [1]
+    assert_equal([1], handles.last['seen'].to_a)
+  end
+
   private
 
   def wrap(input)

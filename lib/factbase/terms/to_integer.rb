@@ -29,8 +29,9 @@ class Factbase::ToInteger < Factbase::TermBase
   private
 
   def to_integer(value)
+    return Integer(value, 10) if value.is_a?(String)
     Integer(value)
-  rescue ArgumentError, TypeError => e
+  rescue ArgumentError, TypeError, FloatDomainError => e
     raise(RuntimeError, "Cannot convert '#{value}' to Integer in (to_integer ...): #{e.message}")
   end
 end

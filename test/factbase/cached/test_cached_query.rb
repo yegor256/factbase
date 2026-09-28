@@ -16,6 +16,17 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestCachedQuery < Factbase::Test
+  def test_each_stops_when_the_caller_breaks
+    fb = Factbase::CachedFactbase.new(Factbase.new, {})
+    [1, 2, 3, 0, 4].each { |v| fb.insert.foo = v }
+    seen = []
+    fb.query('(and (gt foo -100) (eq (div 6 foo) (div 6 foo)))').each do |f|
+      seen << f.foo
+      break if seen.size == 2
+    end
+    assert_equal([1, 2], seen)
+  end
+
   def test_queries_many_times
     fb = Factbase::CachedFactbase.new(Factbase.new)
     total = 5
@@ -140,5 +151,45 @@ class TestCachedQuery < Factbase::Test
       [second], query.one(fb, wanted: [second]),
       "a second param cannot get the value cached for the first one, seed #{seed}"
     )
+  end
+
+  def test_keeps_nil_result_of_one
+    seed = Random.new_seed
+    origin = Factbase.new
+    query = Factbase::CachedFactbase.new(origin, {}).query('(agg (exists foo) (max foo))')
+    query.one(origin, {})
+    origin.insert.foo = "дубок #{Random.new(seed).rand(1_000_000)}"
+    assert_nil(query.one(origin, {}), "nil result of one is evaluated again instead of being cached, seed #{seed}")
+  end
+
+  def test_drops_nil_result_of_one_after_insert
+    seed = Random.new_seed
+    fb = Factbase::CachedFactbase.new(Factbase.new, {})
+    query = fb.query('(agg (exists foo) (max foo))')
+    query.one(fb, {})
+    value = "ёлка #{Random.new(seed).rand(1_000_000)}"
+    fb.insert.foo = value
+    assert_equal(value, query.one(fb, {}), "cached nil result of one survives an insert, seed #{seed}")
+  end
+
+  def test_drops_nil_result_of_one_after_property_change
+    seed = Random.new_seed
+    fb = Factbase::CachedFactbase.new(Factbase.new, {})
+    fb.insert
+    query = fb.query('(agg (exists bar) (max bar))')
+    query.one(fb, {})
+    value = "берёза #{Random.new(seed).rand(1_000_000)}"
+    fb.query('(always)').each.first.bar = value
+    assert_equal(value, query.one(fb, {}), "cached nil result of one survives a property change, seed #{seed}")
+  end
+
+  def test_drops_nil_result_of_one_after_txn
+    seed = Random.new_seed
+    fb = Factbase::CachedFactbase.new(Factbase.new, {})
+    query = fb.query('(agg (exists foo) (max foo))')
+    query.one(fb, {})
+    value = "сосна #{Random.new(seed).rand(1_000_000)}"
+    fb.txn { |fbt| fbt.insert.foo = value }
+    assert_equal(value, query.one(fb, {}), "cached nil result of one survives a transaction, seed #{seed}")
   end
 end

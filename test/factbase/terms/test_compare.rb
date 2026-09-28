@@ -9,6 +9,28 @@ require_relative '../../test__helper'
 
 # Test for the 'compare' term.
 class TestCompare < Factbase::Test
+  def test_does_not_depend_on_the_order_of_the_values
+    fb = Factbase.new
+    first = fb.insert
+    first.tag = 'hello world'
+    first.tag = 42
+    second = fb.insert
+    second.tag = 42
+    second.tag = 'hello world'
+    [first, second].each do |f|
+      assert(Factbase::Term.new(:contains, [:tag, 'hello']).evaluate(f, [f], fb))
+    end
+  end
+
+  def test_raises_when_no_pairing_is_comparable
+    fb = Factbase.new
+    f = fb.insert
+    f.tag = 42
+    assert_raises(StandardError) do
+      Factbase::Term.new(:contains, [:tag, 'hello']).evaluate(f, [f], fb)
+    end
+  end
+
   def test_evaluates_comparison
     assert(Factbase::Compare.new(:>, [4, 2]).evaluate(fact, [], Factbase.new), 'Expected 4 > 2 to be true')
   end

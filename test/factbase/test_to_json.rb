@@ -64,6 +64,13 @@ class TestToJSON < Factbase::Test
     assert_includes(e.message, "'text'", e.message)
   end
 
+  def test_names_the_property_with_raw_bytes
+    fb = Factbase.new
+    fb.insert.text = "\xFF\xFE".b
+    e = assert_raises(ArgumentError) { Factbase::ToJSON.new(fb).json }
+    assert_includes(e.message, "'text'", e.message)
+  end
+
   def test_custom_sort_key
     fb = Factbase.new
     fb.insert.prio = 2

@@ -94,4 +94,14 @@ class TestDefn < Factbase::Test
     e = assert_raises(StandardError) { fb.query('(defn eq "false")').each.to_a }
     assert_includes(e.message, "Term 'eq' is already defined", e.message)
   end
+
+  def test_defines_term_once_for_each_fact_in_a_query
+    n = :_defn_multiple_facts
+    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
+    fb = Factbase.new
+    fb.insert.id = 1
+    fb.insert.id = 2
+    assert_equal([1, 2], fb.query("(defn #{n} 'true')").each.map { |item| item['id'].first })
+    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
+  end
 end

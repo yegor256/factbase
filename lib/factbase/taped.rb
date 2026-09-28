@@ -140,13 +140,14 @@ class Factbase::Taped
     end
 
     def <<(item)
-      @added.append(@oid)
       @origin << item
+      @added.append(@oid)
     end
 
     def uniq!
-      @added.append(@oid)
-      @origin.uniq!
+      changed = @origin.uniq!
+      @added.append(@oid) unless changed.nil?
+      changed
     end
   end
 

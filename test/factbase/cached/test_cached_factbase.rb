@@ -20,6 +20,16 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(1, fb.query('(and (eq foo_bar 1) (eq bar "test"))').each.to_a.size)
   end
 
+  def test_joins_into_every_fact
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.name = 'a'
+    fb.insert.name = 'b'
+    assert_equal(
+      [%w[a b], %w[a b]],
+      fb.query('(and (exists name) (join "all<=name" (always)))').each.map { |f| f['all'] }
+    )
+  end
+
   def test_queries_after_update_through_a_parameterized_query
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.then { |f| f.foo = 1 }

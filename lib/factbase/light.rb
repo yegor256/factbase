@@ -23,6 +23,10 @@ class Factbase::Light
     @fb.insert
   end
 
+  def each(&)
+    @fb.each(&)
+  end
+
   def to_term(query)
     @fb.to_term(query)
   end
@@ -32,6 +36,20 @@ class Factbase::Light
   end
 
   def txn
-    raise(StandardError, 'You cannot start a transaction inside another transaction')
+    raise(StandardError, 'A transaction cannot be started inside a transaction')
+  end
+
+  def method_missing(method, ...)
+    if @fb.respond_to?(method)
+      raise(
+        StandardError,
+        "The '#{method}' operation is not available inside a transaction, use it on the factbase itself"
+      )
+    end
+    super
+  end
+
+  def respond_to_missing?(method, include_private = false)
+    @fb.respond_to?(method, include_private) || super
   end
 end
