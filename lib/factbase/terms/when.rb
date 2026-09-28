@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require_relative 'base'
+require_relative 'boolean'
 # The 'when' class represents a conditional term in the Factbase.
 # It evaluates the operands based on a logical "when" operation.
 class Factbase::When < Factbase::TermBase
@@ -27,7 +28,7 @@ class Factbase::When < Factbase::TermBase
         raise(ArgumentError, "A term is expected, but '#{o}' provided")
       end
     end
-    return true unless @operands[0].evaluate(fact, maps, fb)
-    @operands[1].evaluate(fact, maps, fb)
+    return true unless Factbase::Boolean.new(_values(0, fact, maps, fb), @operands[0]).bool?
+    Factbase::Boolean.new(_values(1, fact, maps, fb), @operands[1]).bool?
   end
 end

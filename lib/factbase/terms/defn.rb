@@ -15,18 +15,21 @@ class Factbase::Defn < Factbase::TermBase
   def initialize(operands)
     super()
     @operands = operands
+    @defined = nil
+    @factbase = nil
   end
 
   # Evaluate term on a fact.
   # @param [Factbase::Fact] _fact The fact
   # @param [Array<Factbase::Fact>] _maps All maps available
-  # @param [Factbase] _fb Factbase to use for sub-queries
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Object] Term definition result
-  def evaluate(_fact, _maps, _fb)
+  def evaluate(_fact, _maps, fb)
     assert_args(2)
     fn = @operands[0]
     raise(ArgumentError, "A symbol expected as first argument of 'defn'") unless fn.is_a?(Symbol)
     raise(ArgumentError, "Can't use '#{fn}' name as a term") if Factbase::Term.method_defined?(fn)
+    return true if @defined == fn && @factbase.equal?(fb)
     raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term.private_method_defined?(fn, false)
     raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term::TERMS.key?(fn)
     raise(ArgumentError, "The '#{fn}' is a bad name for a term") unless fn.match?(/^[a-z_]+$/)
@@ -36,6 +39,8 @@ class Factbase::Defn < Factbase::TermBase
         "class Factbase::Term\nprivate\ndef #{fn}(fact, maps, fb)\n#{@operands[1]}\nend\nend",
         binding, __FILE__, __LINE__ - 1
       )
+      @defined = fn
+      @factbase = fb
       # rubocop:enable Security/Eval
     rescue SyntaxError => e
       raise(ArgumentError, "Cannot define the term '#{fn}', its body is not valid Ruby: #{e.message}")

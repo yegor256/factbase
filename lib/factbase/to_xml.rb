@@ -25,6 +25,14 @@ require_relative '../factbase/flatten'
 # License:: MIT
 class Factbase::ToXML
   BAD = /[^\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/
+  TYPES = {
+    'String' => 'S',
+    'Integer' => 'I',
+    'Float' => 'F',
+    'Time' => 'T',
+    'TrueClass' => 'L',
+    'FalseClass' => 'L'
+  }.freeze
 
   # Constructor.
   def initialize(fb, sorter = '_id')
@@ -64,11 +72,22 @@ class Factbase::ToXML
   # @param [Symbol] name The name of the element
   # @param [Object] val The value
   def put(xml, name, val)
-    if val.is_a?(String) && (!val.valid_encoding? || val.match?(BAD))
-      xml.__send__(name, [val].pack('m0'), t: 'B')
+    txt = val.is_a?(String) ? unicode(val) : val
+    if txt.is_a?(String) && (!txt.valid_encoding? || txt.match?(BAD))
+      xml.__send__(name, [txt].pack('m0'), t: 'B')
     else
-      xml.__send__(name, to_str(val), t: type_of(val))
+      xml.__send__(name, to_str(txt), t: type_of(txt))
     end
+  end
+
+  # Convert a string to UTF-8, reading the bytes of a binary one as UTF-8.
+  # @param [String] val The string
+  # @return [String] The string in UTF-8, maybe with invalid bytes
+  def unicode(val)
+    return val.dup.force_encoding(Encoding::UTF_8) if val.encoding == Encoding::BINARY
+    val.encode(Encoding::UTF_8)
+  rescue EncodingError
+    val.dup.force_encoding(Encoding::UTF_8)
   end
 
   def to_str(val)
@@ -80,6 +99,6 @@ class Factbase::ToXML
   end
 
   def type_of(val)
-    val.class.to_s[0]
+    TYPES.fetch(val.class.to_s) { raise(ArgumentError, "Can't put #{val.class} into XML") }
   end
 end

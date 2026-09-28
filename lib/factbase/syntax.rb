@@ -40,7 +40,7 @@ class Factbase::Syntax
         t = t.simplify if t.respond_to?(:simplify)
         t
       end
-  rescue StandardError => e
+  rescue StandardError, SystemStackError => e
     err = "#{e.message} (#{Backtrace.new(e)}) in \"#{@query}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
     raise(Broken, err)
@@ -99,7 +99,7 @@ class Factbase::Syntax
     list = []
     acc = ''
     quotes = ['\'', '"']
-    spaces = [' ', ')', "\n", "\t", "\r"]
+    spaces = [' ', '(', ')', "\n", "\t", "\r"]
     opener = nil
     comment = false
     @query.to_s.chars.each do |c|
@@ -143,10 +143,14 @@ class Factbase::Syntax
         t[1..-2]
       elsif t.match?(/^(\+|-)?[0-9]+$/)
         Integer(t, 10)
-      elsif t.match?(/^(\+|-)?[0-9]+\.[0-9]+(e(\+|-)[0-9]+)?$/)
+      elsif t.match?(/^(\+|-)?[0-9]+(\.[0-9]+(e(\+|-)[0-9]+)?|e(\+|-)?[0-9]+)$/)
         Float(t)
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
         Time.parse(t)
+      elsif t == 'true'
+        true
+      elsif t == 'false'
+        false
       else
         raise(ArgumentError, "Wrong symbol format (#{t})") unless t.match?(/^\$?[_a-z][a-zA-Z0-9_]*$/)
         t.to_sym

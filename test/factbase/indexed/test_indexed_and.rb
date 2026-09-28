@@ -2,6 +2,7 @@
 
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/indexed/indexed_and'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/taped'
 require_relative '../../../lib/factbase/term'
@@ -37,6 +38,18 @@ class TestIndexedAnd < Factbase::Test
       1,
       term.predict(Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7], 'foo' => [4] }]), nil, {}).size
     )
+  end
+
+  def test_finds_facts_with_head_sorted_or_inverted_among_operands
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    200.times { fb.insert.a = 1 }
+    [
+      '(and (eq a 1) (inverted (always)))',
+      '(and (eq a 1) (head 5 (always)))',
+      '(and (exists a) (sorted a (always)))'
+    ].each do |q|
+      assert_equal(200, fb.query(q).each.to_a.size, q)
+    end
   end
 
   def test_predicts_on_and_returns_nil

@@ -66,6 +66,15 @@ class TestTerm < Factbase::Test
     assert_includes(msg, 'not defined at (something)', msg)
   end
 
+  def test_refuses_to_call_a_private_method
+    %i[p evaluate initialize].each do |op|
+      msg = assert_raises(RuntimeError) do
+        Factbase::Term.new(op, []).evaluate(fact, [], Factbase.new)
+      end.message
+      assert_includes(msg, "the term '#{op}' is not defined", msg)
+    end
+  end
+
   def test_report_other_error
     t = Factbase::Term.new(:at, [])
     msg = assert_raises(StandardError) do

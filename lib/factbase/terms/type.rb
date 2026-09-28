@@ -26,6 +26,7 @@ class Factbase::Type < Factbase::TermBase
     v = _by_symbol(0, fact)
     return 'nil' if v.nil?
     v = v[0] if v.respond_to?(:each) && v.size == 1
+    return 'Boolean' if v.is_a?(TrueClass) || v.is_a?(FalseClass)
     v.class.to_s
   end
 end
