@@ -88,9 +88,9 @@ class Factbase::LazyTaped
     def method_missing(method, *, &)
       mutating = method.to_s.end_with?('=', '!') || MUTATING_METHODS.include?(method)
       ensure_copied_map if mutating
-      result = current_map.__send__(method, *, &)
-      @added.append(@copied_map.object_id) if mutating
-      result
+      current_map.__send__(method, *, &).tap do
+        @added.append(@copied_map.object_id) if mutating
+      end
     end
 
     def respond_to_missing?(method, include_private = false)
