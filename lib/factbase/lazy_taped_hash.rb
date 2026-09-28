@@ -9,6 +9,26 @@ require_relative 'lazy_taped_array'
 class Factbase::LazyTaped
   # Decorator of Hash that triggers copy-on-write.
   class LazyTapedHash
+    MUTATING_METHODS = %i[
+      clear
+      compare_by_identity
+      delete
+      delete_if
+      filter!
+      keep_if
+      merge!
+      rehash
+      reject!
+      replace
+      select!
+      shift
+      store
+      transform_keys!
+      transform_values!
+      update
+    ].freeze
+    private_constant :MUTATING_METHODS
+
     # Creates a new LazyTapedHash decorator.
     # @param origin [Hash] The original hash being wrapped (not yet copied)
     # @param lazy_taped [Factbase::LazyTaped] The parent LazyTaped instance that manages copy-on-write
@@ -66,8 +86,11 @@ class Factbase::LazyTaped
     end
 
     def method_missing(method, *, &)
-      ensure_copied_map if method.to_s.end_with?('=', '!')
-      current_map.__send__(method, *, &)
+      mutating = method.to_s.end_with?('=', '!') || MUTATING_METHODS.include?(method)
+      ensure_copied_map if mutating
+      result = current_map.__send__(method, *, &)
+      @added.append(@copied_map.object_id) if mutating
+      result
     end
 
     def respond_to_missing?(method, include_private = false)

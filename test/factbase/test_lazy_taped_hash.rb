@@ -87,6 +87,25 @@ class TestLazyTapedHash < Factbase::Test
     assert_equal({ 'a' => 1, 'b' => nil, 'c' => 3 }, origin, 'Original should not be modified')
   end
 
+  def test_non_bang_mutators_trigger_copy
+    mutations = [
+      [->(hash) { hash.delete('a') }, { 'b' => 2 }],
+      [->(hash) { hash.store('c', 3) }, { 'a' => 1, 'b' => 2, 'c' => 3 }],
+      [->(hash) { hash.clear }, {}],
+      [->(hash) { hash.update('c' => 3) }, { 'a' => 1, 'b' => 2, 'c' => 3 }],
+      [->(hash) { hash.delete_if { |key, _value| key == 'a' } }, { 'b' => 2 }],
+      [->(hash) { hash.keep_if { |key, _value| key == 'b' } }, { 'b' => 2 }],
+    ]
+    mutations.each do |mutation, expected|
+      hash, origin, added = wrap({ 'a' => 1, 'b' => 2 })
+      mutation.call(hash)
+      assert_copied(hash, origin)
+      assert_equal(expected, hash.to_h)
+      assert_equal({ 'a' => 1, 'b' => 2 }, origin, 'Original should not be modified')
+      refute_empty(added, 'Modified map should be tracked')
+    end
+  end
+
   def test_method_missing_reader_does_not_copy
     hash, origin = wrap({ 'a' => 1, 'b' => 2 })
     assert_read(hash, origin, 2, hash.size)
