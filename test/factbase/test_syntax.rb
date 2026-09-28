@@ -113,12 +113,24 @@ class TestSyntax < Factbase::Test
     end
   end
 
+  def test_parses_boolean_literals
+    assert(Factbase::Syntax.new('(eq flag true)').to_term.evaluate({ 'flag' => [true] }, [], Factbase.new))
+    assert(Factbase::Syntax.new('(eq flag false)').to_term.evaluate({ 'flag' => [false] }, [], Factbase.new))
+  end
+
   def test_parses_a_time_with_fractional_seconds
     t = Time.parse('2026-09-05T07:00:00.123456Z')
     assert(
       Factbase::Syntax.new("(eq when #{t.utc.iso8601(6)})").to_term.evaluate(
         { 'when' => [t] }, [], Factbase.new
       )
+    )
+  end
+
+  def test_prints_a_time_with_fractional_seconds
+    assert_equal(
+      '(eq t 2024-01-01T00:00:00.500000000Z)',
+      Factbase::Syntax.new('(eq t 2024-01-01T00:00:00.5Z)').to_term.to_s
     )
   end
 

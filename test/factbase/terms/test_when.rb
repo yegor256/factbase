@@ -34,6 +34,22 @@ class TestWhen < Factbase::Test
     end
   end
 
+  def test_reads_a_boolean_wrapped_in_an_array
+    fb = Factbase.new
+    f = fb.insert
+    f.id = 1
+    f.active = false
+    f = fb.insert
+    f.id = 2
+    f.active = true
+    {
+      '(when (either active (never)) (never))' => [1],
+      '(when (always) (either active (never)))' => [2]
+    }.each do |q, ids|
+      assert_equal(ids, fb.query(q).each.map { |x| x['id'].first }, q)
+    end
+  end
+
   def test_rejects_a_non_term_operand
     fb = Factbase.new
     fb.insert.foo = 42

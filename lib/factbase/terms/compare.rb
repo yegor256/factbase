@@ -27,16 +27,36 @@ class Factbase::Compare < Factbase::TermBase
     return false if lefts.nil?
     rights = _values(1, fact, maps, fb)
     return false if rights.nil?
-    lefts.any? do |l|
-      l = l.floor if l.is_a?(Time)
-      rights.any? do |r|
-        r = r.floor if r.is_a?(Time)
-        _compare(l, r)
-      end
-    end
+    _search(lefts, rights)
   end
 
   private
+
+  # Look for a pairing that answers true, skipping the ones that cannot be
+  # compared at all. The failure is raised only when no pairing was comparable.
+  # @param [Array] lefts Left values
+  # @param [Array] rights Right values
+  # @return [Boolean] The result of the comparison
+  def _search(lefts, rights)
+    failure = nil
+    comparable = false
+    lefts.each do |l|
+      left = l.is_a?(Time) ? l.floor : l
+      rights.each do |r|
+        right = r.is_a?(Time) ? r.floor : r
+        begin
+          answer = _compare(left, right)
+        rescue RuntimeError => e
+          failure ||= e
+          next
+        end
+        comparable = true
+        return true if answer
+      end
+    end
+    raise(failure) unless comparable || failure.nil?
+    false
+  end
 
   # Compare values with a contextual error if Ruby rejects the operands.
   # @param [Object] left Left value
