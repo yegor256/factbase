@@ -93,7 +93,9 @@ class TestLazyTapedHash < Factbase::Test
       [:store, ['c', 3], nil, { 'a' => 1, 'b' => 2, 'c' => 3 }],
       [:clear, [], nil, {}],
       [:update, [{ 'c' => 3 }], nil, { 'a' => 1, 'b' => 2, 'c' => 3 }],
-      [:delete_if, [], ->(key, _value) { key == 'a' }, { 'b' => 2 }],
+      [
+        :delete_if, [], ->(key, _value) { key == 'a' }, { 'b' => 2 }
+      ],
       [:keep_if, [], ->(key, _value) { key == 'b' }, { 'b' => 2 }]
     ]
     mutations.each do |method, arguments, block, expected|
