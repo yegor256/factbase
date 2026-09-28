@@ -42,6 +42,19 @@ class TestToXML < Factbase::Test
     assert_equal(bad.b, node.text.unpack1('m0').b)
   end
 
+  def test_binary_and_latin1_rendering
+    fb = Factbase.new
+    f = fb.insert
+    f.a = "data\xC3\xA9".b
+    f.b = "\xFF\xFE".b
+    f.c = (+"data\xE9").force_encoding(Encoding::ISO_8859_1)
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml, &:strict)
+    assert_equal("data\u00e9", xml.xpath('/fb/f/a').first.text)
+    assert_equal('B', xml.xpath('/fb/f/b').first['t'])
+    assert_equal("\xFF\xFE".b, xml.xpath('/fb/f/b').first.text.unpack1('m0').b)
+    assert_equal("data\u00e9", xml.xpath('/fb/f/c').first.text)
+  end
+
   def test_complex_rendering
     fb = Factbase.new
     fb.insert.t = "\uffff < > & ' \""
@@ -92,6 +105,19 @@ class TestToXML < Factbase::Test
       '/fb/f/e/v[@t="S"]',
       '/fb/f/e/v[@t="I"]'
     ].each { |x| refute_empty(xml.xpath(x), out) }
+  end
+
+  def test_marks_booleans_differently_from_floats_and_times
+    fb = Factbase.new
+    f = fb.insert
+    f.truth = true
+    f.lie = false
+    f.float = 2.5
+    f.time = Time.now
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
+    %w[truth lie].each { |name| refute_empty(xml.xpath("/fb/f/#{name}[@t=\"L\"]")) }
+    refute_empty(xml.xpath('/fb/f/float[@t="F"]'))
+    refute_empty(xml.xpath('/fb/f/time[@t="T"]'))
   end
 
   def test_sorts_keys

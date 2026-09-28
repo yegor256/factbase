@@ -131,6 +131,16 @@ class TestMath < Factbase::Test
     )
   end
 
+  def test_refuses_extra_words_after_the_unit
+    ['1 day 12 hours', '2 days ago', '3 days and 4 hours'].each do |d|
+      assert_includes(
+        assert_raises(StandardError, d) do
+          Factbase::Term.new(:plus, [:foo, d]).evaluate(fact('foo' => Time.now), [], Factbase.new)
+        end.message, "Duration '#{d}' must be just a number and a unit", d
+      )
+    end
+  end
+
   def test_div_times_not_supported
     t = Factbase::Term.new(:div, [:birth, Time.new(2024, 1, 1)])
     assert_includes(

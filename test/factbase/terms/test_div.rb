@@ -16,6 +16,11 @@ class TestDiv < Factbase::Test
     assert_equal(420, Factbase::Div.new([:balance, 100]).evaluate(fact('balance' => 42_000), [], Factbase.new))
   end
 
+  def test_div_integers_without_flooring
+    assert_in_delta(3.5, Factbase::Div.new([:total, 2]).evaluate(fact('total' => 7), [], Factbase.new))
+    assert_in_delta(-3.5, Factbase::Div.new([:total, 2]).evaluate(fact('total' => -7), [], Factbase.new))
+  end
+
   def test_div_by_integer_zero
     t = Factbase::Div.new([:balance, 0])
     assert_includes(

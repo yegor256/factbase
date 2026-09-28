@@ -15,7 +15,8 @@ class Factbase::Prev < Factbase::TermBase
   end
 
   # Forget the value left by the previous run of the query.
-  def reset
+  # @return [NilClass] The value left, none
+  def forget
     @prev = nil
   end
 

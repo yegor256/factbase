@@ -12,7 +12,7 @@ class Factbase::IndexedNot
 
   def predict(maps, fb, params)
     sub = @term.operands.first
-    key = [maps.object_id, sub, @term.op, snapshot(params)]
+    key = [maps.object_id, sub.to_s, @term.op, snapshot(params)]
     @idx[key] ||= { facts: nil, count: 0, yes_set: nil }
     entry = @idx[key]
     _feed(maps.to_a, entry) do

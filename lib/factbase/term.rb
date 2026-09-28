@@ -174,12 +174,6 @@ class Factbase::Term < Factbase::TermBase
     end
   end
 
-  # Forget what the previous run of the query left in this term and in its operands.
-  def reset
-    @terms[@op].reset if @terms.key?(@op)
-    @operands.each { |o| o.reset if o.is_a?(Factbase::TermBase) }
-  end
-
   # Try to predict which facts from the provided list
   # should be evaluated. If no prediction can be made,
   # the same list is returned.
@@ -202,6 +196,13 @@ class Factbase::Term < Factbase::TermBase
     end
   end
 
+  # Forget what was remembered while earlier facts were evaluated.
+  # @return [Array] The operands
+  def forget
+    @terms[@op].forget if @terms.key?(@op)
+    @operands.each { |o| o.forget if o.is_a?(Factbase::TermBase) }
+  end
+
   # Evaluate term on a fact
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
@@ -210,8 +211,10 @@ class Factbase::Term < Factbase::TermBase
   def evaluate(fact, maps, fb)
     if @terms.key?(@op)
       @terms[@op].evaluate(fact, maps, fb)
-    else
+    elsif @op != :initialize && Factbase::Term.private_method_defined?(@op, false)
       __send__(@op, fact, maps, fb)
+    else
+      raise(NoMethodError, "There is no term '#{@op}'")
     end
   rescue NoMethodError => e
     raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
@@ -242,6 +245,7 @@ class Factbase::Term < Factbase::TermBase
   # @return [Boolean] TRUE if static
   def static?
     return true if @op == :agg
+    return false if %i[join as].include?(@op)
     @operands.each do |o|
       return false if o.is_a?(Factbase::Term) && !o.static?
       return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
@@ -259,6 +263,8 @@ class Factbase::Term < Factbase::TermBase
     end
     false
   end
+
+  private
 
   def at(fact, maps, fb)
     assert_args(2)
