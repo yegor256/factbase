@@ -88,19 +88,17 @@ class TestLazyTapedHash < Factbase::Test
   end
 
   def test_non_bang_mutators_trigger_copy
-    remove_a = ->(key, _value) { key == 'a' }
-    keep_b = ->(key, _value) { key == 'b' }
     mutations = [
       [:delete, ['a'], nil, { 'b' => 2 }],
       [:store, ['c', 3], nil, { 'a' => 1, 'b' => 2, 'c' => 3 }],
       [:clear, [], nil, {}],
       [:update, [{ 'c' => 3 }], nil, { 'a' => 1, 'b' => 2, 'c' => 3 }],
-      [:delete_if, [], remove_a, { 'b' => 2 }],
-      [:keep_if, [], keep_b, { 'b' => 2 }]
+      [:delete_if, [], 'a', { 'b' => 2 }],
+      [:keep_if, [], 'b', { 'b' => 2 }]
     ]
-    mutations.each do |method, arguments, block, expected|
+    mutations.each do |method, arguments, key, expected|
       hash, origin, added = wrap({ 'a' => 1, 'b' => 2 })
-      hash.public_send(method, *arguments, &block)
+      hash.public_send(method, *arguments) { |candidate, _value| candidate == key }
       assert_copied(hash, origin)
       assert_equal(expected, hash.to_h)
       assert_equal({ 'a' => 1, 'b' => 2 }, origin, 'Original should not be modified')
