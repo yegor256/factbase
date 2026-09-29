@@ -92,4 +92,13 @@ class TestTerm < Factbase::Test
     assert_kind_of(Factbase::CachedTerm, t)
     refute_kind_of(Factbase::CachedTerm, Factbase::Term.new(:something, []))
   end
+
+  def test_runs_example_from_class_docblock
+    assert(
+      File.readlines(File.join(__dir__, '../../lib/factbase/term.rb'))
+        .grep(/^# {2}\S/).map { |line| line.delete_prefix('#  ') }.join
+        .then { |code| instance_eval(code, __FILE__, __LINE__) },
+      'example in the docblock of Factbase::Term does not run'
+    )
+  end
 end
