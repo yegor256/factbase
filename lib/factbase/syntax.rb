@@ -135,6 +135,7 @@ class Factbase::Syntax
       end
     end
     raise(StandardError, 'String not closed') unless opener.nil?
+    list << acc unless acc.empty?
     list.map do |t|
       if t.is_a?(Symbol)
         t

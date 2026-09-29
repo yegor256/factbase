@@ -184,6 +184,50 @@ class TestSyntax < Factbase::Test
     end
   end
 
+  def test_cannot_parse_term_followed_by_word
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    q = "(eq x 1) #{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}"
+    assert_raises(Factbase::Syntax::Broken, "trailing word in #{q.inspect} was ignored, seed #{seed}") do
+      Factbase::Syntax.new(q).to_term
+    end
+  end
+
+  def test_cannot_parse_term_followed_by_glued_word
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    q = "(eq x 1)#{Array.new(rnd.rand(1..16)) { rnd.rand(0x430..0x44f).chr(Encoding::UTF_8) }.join}"
+    assert_raises(Factbase::Syntax::Broken, "glued word in #{q.inspect} was ignored, seed #{seed}") do
+      Factbase::Syntax.new(q).to_term
+    end
+  end
+
+  def test_cannot_parse_term_followed_by_number
+    seed = Random.new_seed
+    q = "(eq x 1) #{Random.new(seed).rand(-1_000_000..1_000_000)}"
+    assert_raises(Factbase::Syntax::Broken, "trailing number in #{q.inspect} was ignored, seed #{seed}") do
+      Factbase::Syntax.new(q).to_term
+    end
+  end
+
+  def test_cannot_query_with_trailing_word
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    fb.insert.x = 1
+    q = "(eq x 1) #{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}"
+    assert_raises(Factbase::Syntax::Broken, "query #{q.inspect} ran with its tail ignored, seed #{seed}") do
+      fb.query(q).each.to_a
+    end
+  end
+
+  def test_parses_term_followed_by_comment
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    q = "(eq x 1) # #{Array.new(rnd.rand(1..16)) { rnd.rand(0x430..0x44f).chr(Encoding::UTF_8) }.join}"
+    assert_equal('(eq x 1)', Factbase::Syntax.new(q).to_term.to_s, "comment in #{q.inspect} broke it, seed #{seed}")
+  end
+
   def test_simplification
     {
       '(foo)' => '(foo)',
