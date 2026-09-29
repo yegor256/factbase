@@ -199,4 +199,45 @@ class TestRules < Factbase::Test
     assert_includes(message, '(exists foo)', 'Error message should name the failed term')
     refute_includes(message, 'intentionally long enough', 'Error message should not name the header')
   end
+
+  def test_rejects_fact_breaking_rule_that_redefines_term
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "_rules_redefined_#{Array.new(12) { [*'a'..'z'].sample(random: rnd) }.join}"
+    Factbase::Undef.new([name.to_sym]).evaluate(fact, [], Factbase.new)
+    rule = "(and (undef #{name}) (defn #{name} 'return @operands[0].evaluate(fact, maps, fb)') (#{name} (never)))"
+    f = Factbase::Rules.new(Factbase.new, rule).insert
+    assert_raises(ArgumentError, "fact breaking #{rule} was not rejected by the rule, seed #{seed}") do
+      f.what = 'x'
+    end
+  end
+
+  def test_rejects_second_fact_breaking_rule_that_redefines_term
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "_rules_again_#{Array.new(12) { [*'a'..'z'].sample(random: rnd) }.join}"
+    Factbase::Undef.new([name.to_sym]).evaluate(fact, [], Factbase.new)
+    rule = "(and (undef #{name}) (defn #{name} 'return @operands[0].evaluate(fact, maps, fb)') (#{name} (never)))"
+    fb = Factbase::Rules.new(Factbase.new, rule)
+    begin
+      fb.insert.what = 'x'
+    rescue ArgumentError
+      nil
+    end
+    assert_raises(ArgumentError, "second fact breaking #{rule} was not rejected by the rule, seed #{seed}") do
+      fb.insert.what = 'y'
+    end
+  end
+
+  def test_rejects_fact_breaking_rule_that_defines_term
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "_rules_defined_#{Array.new(12) { [*'a'..'z'].sample(random: rnd) }.join}"
+    Factbase::Undef.new([name.to_sym]).evaluate(fact, [], Factbase.new)
+    rule = "(and (defn #{name} 'return @operands[0].evaluate(fact, maps, fb)') (#{name} (never)))"
+    f = Factbase::Rules.new(Factbase.new, rule).insert
+    assert_raises(ArgumentError, "fact breaking #{rule} was not rejected by the rule, seed #{seed}") do
+      f.what = 'x'
+    end
+  end
 end

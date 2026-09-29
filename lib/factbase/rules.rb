@@ -140,7 +140,8 @@ class Factbase::Rules
 
     def self.failed(term, fact, fb)
       return term unless term.op == :and
-      term.operands.find { |operand| !operand.evaluate(fact, [], fb) }
+      declarations = %i[defn undef]
+      term.operands.find { |operand| !declarations.include?(operand.op) && !operand.evaluate(fact, [], fb) }
     end
   end
 
