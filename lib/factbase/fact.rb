@@ -61,6 +61,7 @@ class Factbase::Fact
       ].include?(v.class)
       raise(ArgumentError, "The value of '#{kk}' can't be #{v}") if v.is_a?(Float) && !v.finite?
       v = v.getutc if v.is_a?(Time)
+      v = -v if v.is_a?(String)
       @map[kk] = [] if @map[kk].nil?
       @map[kk] << v
       nil
