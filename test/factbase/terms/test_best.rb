@@ -47,4 +47,46 @@ class TestBest < Factbase::Test
       end.evaluate(:age, [{ 'age' => [4, 3, 2] }, { 'age' => 25 }, { 'age' => 20 }])
     )
   end
+
+  def test_cannot_pick_max_of_booleans
+    seed = Random.new_seed
+    maps = [{ 'ok' => true }, { 'ok' => false }].shuffle(random: Random.new(seed))
+    assert_raises(ArgumentError, "max of booleans #{maps} was not refused, seed #{seed}") do
+      Factbase::Best.new { |a, b| a > b }.evaluate(:ok, maps)
+    end
+  end
+
+  def test_cannot_pick_min_of_booleans
+    seed = Random.new_seed
+    maps = [{ 'ok' => true }, { 'ok' => false }].shuffle(random: Random.new(seed))
+    assert_raises(ArgumentError, "min of booleans #{maps} was not refused, seed #{seed}") do
+      Factbase::Best.new { |a, b| a < b }.evaluate(:ok, maps)
+    end
+  end
+
+  def test_cannot_pick_max_of_boolean_after_number
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    maps = [{ 'v' => rnd.rand(-1000..1000) }, { 'v' => rnd.rand(2).zero? }]
+    assert_raises(ArgumentError, "boolean after number in #{maps} was not refused, seed #{seed}") do
+      Factbase::Best.new { |a, b| a > b }.evaluate(:v, maps)
+    end
+  end
+
+  def test_cannot_pick_min_of_boolean_after_number
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    maps = [{ 'v' => rnd.rand(-1000..1000) }, { 'v' => rnd.rand(2).zero? }]
+    assert_raises(ArgumentError, "boolean after number in #{maps} was not refused, seed #{seed}") do
+      Factbase::Best.new { |a, b| a < b }.evaluate(:v, maps)
+    end
+  end
+
+  def test_cannot_pick_max_of_booleans_in_one_property
+    seed = Random.new_seed
+    maps = [{ 'ok' => [true, false].shuffle(random: Random.new(seed)) }]
+    assert_raises(ArgumentError, "booleans of one property #{maps} were not refused, seed #{seed}") do
+      Factbase::Best.new { |a, b| a > b }.evaluate(:ok, maps)
+    end
+  end
 end

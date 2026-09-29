@@ -23,7 +23,7 @@ class Factbase::Best
         end
         begin
           best = v if @criteria.call(v, best)
-        rescue ArgumentError, TypeError
+        rescue ArgumentError, TypeError, NoMethodError
           raise(
             ArgumentError,
             "Can't compare '#{v}' (#{v.class}) with '#{best}' (#{best.class}) in the '#{key}' property"
