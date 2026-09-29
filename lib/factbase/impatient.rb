@@ -21,6 +21,7 @@ class Factbase::Impatient
     raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @origin = fb
     @timeout = Float(timeout)
+    raise(ArgumentError, "The \"timeout\" must be positive, while #{timeout} given") unless @timeout.positive?
   end
 
   decoor(:origin)
