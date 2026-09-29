@@ -460,14 +460,17 @@ class TestFactbase < Factbase::Test
     end
   end
 
-  def test_complains_when_txn_is_left_by_break
+  def test_commits_when_txn_is_left_by_break
     fb = Factbase.new
-    assert_raises(RuntimeError) do
-      fb.txn do |fbt|
-        fbt.insert.foo = 1
-        break
-      end
+    fb.txn do |fbt|
+      fbt.insert.foo = 1
+      break
     end
+    assert_equal(1, fb.size, 'fact inserted before break was lost')
+  end
+
+  def test_passes_foreign_throw_through_txn
+    assert_equal(42, catch(:stop) { Factbase.new.txn { throw(:stop, 42) } }, 'throw did not reach its catch')
   end
 
   def test_commits_on_exit_by_throw

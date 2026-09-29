@@ -66,6 +66,8 @@ class Factbase::IndexedFactbase
     @idx.clear if result.deleted.positive? || result.added.positive?
     @fresh.clear
     result
+  ensure
+    [@idx, @fresh].each(&:clear) unless result || $ERROR_INFO
   end
 
   # Export it into a chain of bytes, including both data and index.
