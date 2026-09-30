@@ -27,7 +27,7 @@ class Factbase::IndexedNot
   def snapshot(sub, params)
     return params.to_a.sort_by { |pair| pair[0].to_s } if params.is_a?(Hash)
     return params unless params.respond_to?(:all_properties)
-    sub.to_s.scan(/\$([a-z_][a-z0-9_]*)/i).flatten.uniq.sort.map { |k| [k, params["$#{k}"]] }
+    sub.to_s.scan(/\$([a-z_][a-z0-9_]*)/i).to_set.sort.map! { |(k)| [k, params["$#{k}"]] }
   end
 
   def _feed(facts, entry)
