@@ -12,7 +12,7 @@ class Factbase::IndexedNot
 
   def predict(maps, fb, params)
     sub = @term.operands.first
-    key = [maps.object_id, sub.to_s, @term.op, snapshot(params)]
+    key = [maps.object_id, sub.to_s, @term.op, snapshot(sub, params)]
     @idx[key] ||= { facts: nil, count: 0, yes_set: nil }
     entry = @idx[key]
     _feed(maps.to_a, entry) do
@@ -24,11 +24,10 @@ class Factbase::IndexedNot
 
   private
 
-  def snapshot(params)
+  def snapshot(sub, params)
     return params.to_a.sort_by { |pair| pair[0].to_s } if params.is_a?(Hash)
     return params unless params.respond_to?(:all_properties)
-    keys = params.all_properties.sort
-    keys.map { |k| [k, params["$#{k}"]] }
+    sub.to_s.scan(/\$([a-z_][a-z0-9_]*)/i).flatten.uniq.sort.map { |k| [k, params["$#{k}"]] }
   end
 
   def _feed(facts, entry)
