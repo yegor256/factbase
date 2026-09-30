@@ -59,16 +59,23 @@ class TestTee < Factbase::Test
     prim.foo = 42
     upper = Factbase::Fact.new({})
     upper.bar = 13
-    t = Factbase::Tee.new(prim, upper)
-    assert_includes(t.all_properties, 'foo')
-    assert_includes(t.all_properties, 'bar')
+    assert_equal(%w[foo], Factbase::Tee.new(prim, upper).all_properties)
+  end
+
+  def test_answers_every_property_it_lists
+    fb = Factbase.new
+    f = fb.insert
+    f.kind = 'bug'
+    f.who = 42
+    t = fb.query('(eq who $person)').each(fb, 'person' => 42).first
+    t.all_properties.each { |k| refute_nil(t[k], "#{k.inspect} is listed, but can't be read") }
   end
 
   def test_all_properties_lists_a_shared_name_once
     prim = Factbase::Fact.new({})
     prim.foo = 42
     prim.bar = 13
-    assert_equal(%w[foo bar], Factbase::Tee.new(prim, { 'foo' => [9] }).all_properties)
+    assert_equal(%w[foo bar], Factbase::Tee.new(prim, { 'foo' => [9], 'baz' => [1] }).all_properties)
   end
 
   def test_recursively
