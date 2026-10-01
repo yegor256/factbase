@@ -511,4 +511,51 @@ class TestFactbase < Factbase::Test
       )
     end
   end
+
+  def test_counts_facts_in_each
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    total = rnd.rand(1..50)
+    total.times { fb.insert.foo = rnd.rand(1000) }
+    assert_equal(total, fb.each { |m| m }, "each did not return the number of #{total} facts, seed #{seed}")
+  end
+
+  def test_counts_no_facts_in_each_of_empty_factbase
+    assert_equal(0, Factbase.new.each { |m| m }, 'each of an empty factbase did not return zero')
+  end
+
+  def test_counts_facts_in_each_inside_txn
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    total = rnd.rand(1..50)
+    total.times { fb.insert.foo = rnd.rand(1000) }
+    count = 0
+    fb.txn { |fbt| count = fbt.each { |m| m } }
+    assert_equal(total, count, "each inside txn did not return the number of #{total} facts, seed #{seed}")
+  end
+
+  def test_enumerates_facts_in_each_without_block
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    total = rnd.rand(1..50)
+    total.times { fb.insert.foo = rnd.rand(1000) }
+    assert_equal(total, fb.each.to_a.size, "each without block lost some of #{total} facts, seed #{seed}")
+  end
+
+  def test_counts_facts_left_after_delete_in_each_inside_txn
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    total = rnd.rand(2..50)
+    total.times { |i| fb.insert.foo = i }
+    count = 0
+    fb.txn do |fbt|
+      fbt.query("(eq foo #{rnd.rand(total)})").delete!
+      count = fbt.each { |m| m }
+    end
+    assert_equal(total - 1, count, "each inside txn counted a deleted fact among #{total}, seed #{seed}")
+  end
 end

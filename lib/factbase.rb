@@ -103,7 +103,9 @@ class Factbase
   # @yieldparam [Hash] fact Each fact as a plain Hash
   # @return [Integer, Enumerator] Total number of facts or Enumerator
   def each(&)
+    return to_enum(__method__) unless block_given?
     @maps.each(&)
+    @maps.size
   end
 
   # Insert a new fact and return it.
