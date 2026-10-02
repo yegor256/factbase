@@ -24,7 +24,8 @@ class TestIndexedAnd < Factbase::Test
 
   def test_refuses_negative_count_with_matching_message
     assert_includes(assert_raises(ArgumentError) { Factbase::Fuzz.make(-1) }.message, 'must not be negative')
-    assert_includes(assert_raises(ArgumentError) { Factbase::Fuzz.new.feed(Factbase.new, -1) }.message, 'must not be negative')
+    fb = Factbase.new
+    assert_includes(assert_raises(ArgumentError) { Factbase::Fuzz.new.feed(fb, -1) }.message, 'must not be negative')
   end
 
   def test_feed_accumulates_facts
