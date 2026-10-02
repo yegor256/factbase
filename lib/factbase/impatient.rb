@@ -22,6 +22,7 @@ class Factbase::Impatient
     @origin = fb
     @timeout = Float(timeout)
     raise(ArgumentError, "The \"timeout\" must be positive, while #{timeout} given") unless @timeout.positive?
+    raise(ArgumentError, "The \"timeout\" must be finite, while #{timeout} given") unless @timeout.finite?
   end
 
   decoor(:origin)
