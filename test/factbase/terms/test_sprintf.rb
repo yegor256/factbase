@@ -34,11 +34,10 @@ class TestSprintf < Factbase::Test
   def test_names_the_format_when_an_operand_is_absent
     [['%d', :absent], ['%f', :absent]].each do |ops|
       t = Factbase::Sprintf.new(ops)
-      e =
-        assert_raises(ArgumentError) do
-          t.evaluate(fact, [], Factbase.new)
-        end
-      assert_includes(e.message, "The operand :absent of 'sprintf' with '#{ops[0]}' is absent in the fact")
+      assert_includes(
+        assert_raises(ArgumentError) { t.evaluate(fact, [], Factbase.new) }.message,
+        "The operand :absent of 'sprintf' with '#{ops[0]}' is absent in the fact"
+      )
     end
   end
 
