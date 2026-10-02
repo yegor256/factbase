@@ -28,4 +28,14 @@ class TestConcat < Factbase::Test
     f.foo = 'b'
     assert_equal('ab', fb.query('(as z (concat foo))').each.to_a.first['z'].first)
   end
+
+  def test_concats_time_in_iso
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    t = Time.at(rnd.rand(0..2_000_000_000), rnd.rand(1..999_999), :usec, in: 'UTC')
+    assert_equal(
+      "at #{t.iso8601(9)}", Factbase::Concat.new(['at ', :t]).evaluate(fact('t' => t), [], Factbase.new),
+      "time #{t.inspect} was not concatenated in ISO 8601, seed #{seed}"
+    )
+  end
 end
