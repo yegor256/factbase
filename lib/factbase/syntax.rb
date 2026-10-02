@@ -148,7 +148,8 @@ class Factbase::Syntax
       elsif t.match?(/^(\+|-)?[0-9]+(\.[0-9]+(e(\+|-)[0-9]+)?|e(\+|-)?[0-9]+)$/)
         Float(t)
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
-        DateTime.iso8601(t).to_time
+        Date.iso8601(t)
+        Time.iso8601(t)
       elsif t == 'true'
         true
       elsif t == 'false'
