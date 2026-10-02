@@ -37,6 +37,17 @@ class TestLazyTapedArray < Factbase::Test
     assert_read(hash, false, arr.any?(/baz/))
   end
 
+  def test_does_not_expose_mutable_strings
+    arr, hash, added = wrap(['foo'.dup])
+    assert_raises(FrozenError) { arr[0] << 'bar' }
+    assert_raises(FrozenError) { arr.each { |item| item << 'bar' } }
+    assert_raises(FrozenError) { arr.to_a[0] << 'bar' }
+    assert_raises(FrozenError) { arr.any? { |item| item << 'bar' } }
+    assert_equal('foo', arr[0])
+    assert_empty(added)
+    refute_predicate(hash, :copied?)
+  end
+
   def test_uniq
     arr, hash, added = wrap([1, 1, 2])
     arr.uniq!
