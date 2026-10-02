@@ -468,4 +468,16 @@ class TestIndexedFactbase < Factbase::Test
     a.foo = 1
     assert_equal(1, fb.query('(exists foo)').each.to_a.size)
   end
+
+  def test_answers_with_its_own_index_for_a_term_built_by_another
+    first = Factbase::IndexedFactbase.new(Factbase.new)
+    first.insert.foo = 1
+    term = first.to_term('(eq foo $value)')
+    first.query(term).each(first, value: [1]).to_a
+    second = Factbase::IndexedFactbase.new(Factbase.new)
+    second.insert.foo = 1
+    second.query(term).each(second, value: [1]).to_a
+    second.query('(eq foo 1)').each { |f| f.foo = 2 }
+    assert_equal(1, second.query(term).each(second, value: [2]).to_a.size)
+  end
 end
