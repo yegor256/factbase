@@ -147,4 +147,11 @@ class TestCachedQuery < Factbase::Test
     fb.txn { |fbt| fbt.insert.foo = value }
     assert_equal(value, query.one(fb, {}), "cached nil result of one survives a transaction, seed #{seed}")
   end
+
+  def test_forgets_the_facts_collected_before_a_write_in_the_loop
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    3.times { |i| fb.insert.x = i }
+    fb.query('(absent done)').each { |f| f.done = true }
+    assert_equal(0, fb.query('(absent done)').each.to_a.size)
+  end
 end
