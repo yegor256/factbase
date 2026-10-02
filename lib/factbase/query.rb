@@ -26,10 +26,12 @@ class Factbase::Query
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [String|Factbase::Term] term The query term
   # @param [Factbase] fb The factbase
-  def initialize(maps, term, fb)
+  # @param [Boolean] subset TRUE if the maps are a subset given by the caller, not the factbase itself
+  def initialize(maps, term, fb, subset: false)
     @maps = maps
     @term = term.is_a?(String) ? Factbase::Syntax.new(term).to_term : term
     @fb = fb
+    @subset = subset
   end
 
   # Print it as a string.
@@ -90,6 +92,7 @@ class Factbase::Query
   # @param [Factbase] fb The factbase to delete from
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
+    raise(ArgumentError, "Can't delete! from a subset of maps, since it would empty the caller's array: #{@term}") if @subset
     @term.forget
     deleted = 0
     maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
