@@ -257,4 +257,13 @@ class TestRules < Factbase::Test
     assert_raises(StandardError) { fb.query('(always)').find { |f| f.first = 100 } }
     assert_raises(StandardError) { fb.query('(always)').detect { |f| f.first = 200 } }
   end
+
+  def test_checks_writes_through_a_query_made_while_txn_runs
+    fb = Factbase::Rules.new(Factbase.new, '(one x)')
+    fb.insert.x = 1
+    q = nil
+    fb.txn { |_t| q = fb.query('(eq x 1)') }
+    assert_raises(StandardError) { q.each { |f| f.x = 100 } }
+    assert_equal(['[ x: [1] ]'], fb.query('(always)').each.map(&:to_s))
+  end
 end
