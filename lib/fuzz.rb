@@ -40,14 +40,14 @@ class Factbase::Fuzz
   end
 
   def self.make(count = 1000)
-    raise(ArgumentError, "Count must be positive: #{count}") if count.negative?
+    raise(ArgumentError, "Count must not be negative: #{count}") if count.negative?
     fb = Factbase.new
     Factbase::Fuzz.new.feed(fb, count)
     fb
   end
 
   def feed(fb, count = 1)
-    raise(ArgumentError, "Count must be positive: #{count}") if count.negative?
+    raise(ArgumentError, "Count must not be negative: #{count}") if count.negative?
     count.times do
       pull_request(fb, @next_num += 1)
     end
