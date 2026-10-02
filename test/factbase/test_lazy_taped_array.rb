@@ -37,6 +37,13 @@ class TestLazyTapedArray < Factbase::Test
     assert_read(hash, false, arr.any?(/baz/))
   end
 
+  def test_any_with_a_false_pattern
+    arr, hash = wrap([false])
+    assert_read(hash, true, arr.any?(false))
+    arr, hash = wrap([true])
+    assert_read(hash, false, arr.any?(false))
+  end
+
   def test_uniq
     arr, hash, added = wrap([1, 1, 2])
     arr.uniq!
