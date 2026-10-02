@@ -104,7 +104,7 @@ class Factbase::Syntax
     comment = false
     @query.to_s.chars.each do |c|
       comment = true if opener.nil? && c == '#'
-      comment = false if comment && c == "\n"
+      comment = false if comment && ["\n", "\r"].include?(c)
       next if comment
       if quotes.include?(c)
         if !opener.nil? && acc[-1] == '\\'
