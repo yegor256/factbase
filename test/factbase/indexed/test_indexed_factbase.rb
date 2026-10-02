@@ -460,6 +460,7 @@ class TestIndexedFactbase < Factbase::Test
     end
     assert_equal([51], fb.query('(and (eq foo 2) (unique bar))').each.to_a.map(&:id))
   end
+
   def test_does_not_install_the_index_of_an_import
     fb1 = Factbase::IndexedFactbase.new(Factbase.new)
     fb1.insert.foo = 42
@@ -471,5 +472,4 @@ class TestIndexedFactbase < Factbase::Test
     fb2.query('(eq foo 42)').each { |f| f.bar = 13 }
     assert_equal(1, fb2.query('(exists bar)').each.to_a.size)
   end
-
 end
