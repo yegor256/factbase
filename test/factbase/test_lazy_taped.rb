@@ -302,4 +302,14 @@ class TestLazyTaped < Factbase::Test
       assert_equal(10, fbt.query('(eq id 99)').each.to_a.size)
     end
   end
+  def test_rolls_back_a_mutation_through_to_a
+    fb = Factbase.new
+    fb.insert.foo = 42
+    fb.txn do |fbt|
+      fbt.query('(always)').each { |f| f['foo'].to_a << 7 }
+      raise(Factbase::Rollback)
+    end
+    assert_equal([42], fb.query('(always)').each.to_a.first['foo'])
+  end
+
 end
