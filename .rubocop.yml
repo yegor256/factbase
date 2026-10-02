@@ -90,6 +90,7 @@ Elegant/GoodMethodName:
     - 'get_copied_map'
     - 'invalidate_if_dirty!'
     - 'method_missing'
+    - 'query_parameter'
     - 'pull_request'
     - 'respond_to_missing?'
     - 'source_of'
