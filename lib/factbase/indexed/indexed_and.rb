@@ -44,9 +44,10 @@ class Factbase::IndexedAnd
           end
         end
       )
-      j = tuples.flat_map do |t|
-        entry[:index][t.map { |value| _hash_key(value) }] || []
-      end.uniq(&:object_id).sort_by { |m| entry[:pos][m] }
+      j =
+        tuples.flat_map do |t|
+          entry[:index][t.map { |value| _hash_key(value) }] || []
+        end.uniq(&:object_id).sort_by { |m| entry[:pos][m] }
       r = maps.respond_to?(:repack) ? maps.repack(j) : j
     else
       fail = false
