@@ -92,8 +92,9 @@ class Factbase::IndexedFactbase
   #
   # The facts that existed in the factbase before importing will remain there.
   # The facts from the incoming byte stream will be added to them.
-  # If the byte stream doesn't contain an index (for backward compatibility),
-  # the index will be empty and will be built on first use.
+  # The index from the byte stream is not installed: its entries hold copies
+  # of the facts, not the facts the origin has just loaded, and its keys are
+  # object IDs of another process. The index is built again on first use.
   #
   # @param [String] bytes Binary string to import
   def import(bytes)
@@ -101,11 +102,10 @@ class Factbase::IndexedFactbase
     data = Marshal.load(bytes)
     if data.is_a?(Hash) && data.key?(:maps)
       @origin.import(data[:maps])
-      @idx.merge!(data[:idx]) if data[:idx].is_a?(Hash)
     else
       @origin.import(bytes)
-      @idx.clear
     end
+    @idx.clear
     @fresh.clear
   end
 
