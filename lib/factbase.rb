@@ -190,6 +190,13 @@ class Factbase
       return churn
     end
     done = true
+    merge(taped, churn)
+    churn
+  ensure
+    merge(taped, churn) unless done || $ERROR_INFO
+  end
+
+  def merge(taped, churn)
     seen = {}.compare_by_identity
     garbage = {}.compare_by_identity
     taped.deleted.each do |oid|
@@ -228,10 +235,8 @@ class Factbase
       churn.append(0, 0, 1)
     end
     @maps.delete_if { |m| garbage.key?(m) } unless garbage.empty?
-    churn
-  ensure
-    raise(RuntimeError, 'The txn block was left by break or return, its changes are lost') unless done || $ERROR_INFO
   end
+  private :merge
 
   # Export it into a chain of bytes.
   #
