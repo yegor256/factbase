@@ -19,7 +19,7 @@ class TestToXML < Factbase::Test
     xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     refute_empty(xml.xpath('/fb/f[t]'))
     assert_match(
-      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}Z$/,
+      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{9}Z$/,
       xml.xpath('/fb/f/t/text()').text
     )
   end
