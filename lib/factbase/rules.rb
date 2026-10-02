@@ -7,6 +7,7 @@ require 'decoor'
 require 'others'
 require_relative '../factbase'
 require_relative '../factbase/accum'
+require_relative '../factbase/no_conversion'
 require_relative '../factbase/syntax'
 require_relative '../factbase/tallied'
 
@@ -95,6 +96,8 @@ class Factbase::Rules
       end
       @fact.method_missing(*args)
     end
+
+    prepend Factbase::NoConversion
   end
 
   # Query decorator.

@@ -5,6 +5,7 @@
 
 require 'others'
 require_relative '../factbase'
+require_relative 'no_conversion'
 
 # Accumulator of props, a decorator of +Factbase::Fact+.
 #
@@ -58,4 +59,6 @@ class Factbase::Accum
       @props[k][0]
     end
   end
+
+  prepend Factbase::NoConversion
 end
