@@ -206,6 +206,6 @@ class TestRules < Factbase::Test
     q = nil
     fb.txn { |_t| q = fb.query('(eq x 1)') }
     assert_raises(StandardError) { q.each { |f| f.x = 100 } }
-    assert_equal(['[ x: [1] ]'], fb.query('(always)').each.map(&:to_s))
+    assert_equal([[1]], fb.query('(always)').each.map { |f| f['x'] })
   end
 end
