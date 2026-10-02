@@ -422,6 +422,16 @@ class TestQuery < Factbase::Test
     )
   end
 
+  def test_stops_after_the_facts_that_matched_when_it_started
+    [Factbase.new, Factbase::CachedFactbase.new(Factbase.new)].each do |fb|
+      fb.insert.kind = 'a'
+      Timeout.timeout(3) { fb.query('(eq kind "a")').each { fb.insert.kind = 'a' } }
+      assert_equal(2, fb.size, "#{fb.class} kept yielding the facts inserted during each")
+      Timeout.timeout(3) { fb.txn { |t| t.query('(eq kind "a")').each { t.insert.kind = 'a' } } }
+      assert_equal(4, fb.size, "#{fb.class} kept yielding the facts inserted during each in txn")
+    end
+  end
+
   private
 
   def with_factbases(maps = [], &)
@@ -526,15 +536,5 @@ class TestQuery < Factbase::Test
         ) { |_| true }
       )
     }.each(&)
-  end
-
-  def test_stops_after_the_facts_that_matched_when_it_started
-    [Factbase.new, Factbase::CachedFactbase.new(Factbase.new)].each do |fb|
-      fb.insert.kind = 'a'
-      Timeout.timeout(3) { fb.query('(eq kind "a")').each { fb.insert.kind = 'a' } }
-      assert_equal(2, fb.size, "#{fb.class} kept yielding the facts inserted during each")
-      Timeout.timeout(3) { fb.txn { |t| t.query('(eq kind "a")').each { t.insert.kind = 'a' } } }
-      assert_equal(4, fb.size, "#{fb.class} kept yielding the facts inserted during each in txn")
-    end
   end
 end
