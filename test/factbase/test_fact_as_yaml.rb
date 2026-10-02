@@ -80,4 +80,16 @@ class TestFactAsYaml < Factbase::Test
     assert_includes(yaml_str, '_id')
     assert_includes(yaml_str, 'name')
   end
+
+  def test_keeps_reserved_property_names_as_string_keys
+    fb = Factbase.new
+    f = fb.insert
+    f.yes = 1
+    f.null = 2
+    f.name = 3
+    assert_equal(
+      { 'name' => 3, 'null' => 2, 'yes' => 1 },
+      YAML.safe_load(Factbase::FactAsYaml.new(fb.query('(always)').each.to_a.first).to_s)
+    )
+  end
 end
