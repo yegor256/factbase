@@ -156,8 +156,13 @@ class TestCachedQuery < Factbase::Test
     one.insert
     two = Factbase.new
     2.times { two.insert }
-    query = Factbase::CachedQuery.new(base.query('(eq 1 (agg (always) (count)))'), {}, base)
-    assert_equal(1, query.each(one).to_a.size)
-    assert_equal(0, query.each(two).to_a.size)
+    Factbase::Term.new(:defn, [:context_is_single, 'fb.size == 1']).evaluate(nil, [], base)
+    begin
+      query = Factbase::CachedQuery.new(base.query('(context_is_single)'), {}, base)
+      assert_equal(1, query.each(one).to_a.size)
+      assert_equal(0, query.each(two).to_a.size)
+    ensure
+      Factbase::Term.new(:undef, [:context_is_single]).evaluate(nil, [], base)
+    end
   end
 end
