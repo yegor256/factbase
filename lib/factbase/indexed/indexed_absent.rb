@@ -22,6 +22,10 @@ class Factbase::IndexedAbsent
   private
 
   def _feed(facts, entry, prop)
+    if entry[:count] > facts.size
+      entry[:facts] = []
+      entry[:count] = 0
+    end
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |f|
       entry[:facts] << f if f[prop].nil?
