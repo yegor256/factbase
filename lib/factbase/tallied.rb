@@ -47,6 +47,7 @@ class Factbase::Tallied
         commit = true
         throw(:commit) if thrown
       end
+      throw(:rollback) unless commit
     rescue Factbase::Rollback => e
       @churn = before
       raise(e)
