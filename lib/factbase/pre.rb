@@ -6,6 +6,7 @@
 require 'decoor'
 require 'loog'
 require_relative '../factbase'
+require_relative 'enumerated'
 
 # A decorator of a +Factbase+, that runs a provided block on every +insert+.
 #
@@ -24,6 +25,7 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::Pre
   decoor(:fb)
+  include Factbase::Enumerated
 
   def initialize(fb, &block)
     raise(ArgumentError, 'The "fb" is nil') if fb.nil?

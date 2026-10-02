@@ -6,6 +6,7 @@
 require 'decoor'
 require 'monitor'
 require_relative '../../factbase'
+require_relative '../enumerated'
 
 # A synchronous thread-safe factbase.
 #
@@ -14,6 +15,7 @@ require_relative '../../factbase'
 # License:: MIT
 class Factbase::SyncFactbase
   decoor(:origin)
+  include Factbase::Enumerated
 
   # Constructor.
   # @param [Factbase] origin Original factbase to decorate

@@ -6,6 +6,7 @@
 require 'decoor'
 require 'tago'
 require 'timeout'
+require_relative 'enumerated'
 require_relative 'syntax'
 
 # A decorator of a Factbase, that terminates long-running queries.
@@ -25,6 +26,7 @@ class Factbase::Impatient
   end
 
   decoor(:origin)
+  include Factbase::Enumerated
 
   def insert
     @origin.insert
