@@ -127,6 +127,12 @@ class TestSyntax < Factbase::Test
     )
   end
 
+  def test_rejects_an_impossible_date_literal
+    assert_raises(Factbase::Syntax::Broken) do
+      Factbase::Syntax.new('(eq created 2012-02-30T00:00:00Z)').to_term
+    end
+  end
+
   def test_prints_a_time_with_fractional_seconds
     assert_equal(
       '(eq t 2024-01-01T00:00:00.500000000Z)',

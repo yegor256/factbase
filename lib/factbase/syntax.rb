@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'backtrace'
+require 'date'
 require 'time'
 require_relative '../factbase'
 require_relative 'fact'
@@ -147,7 +148,7 @@ class Factbase::Syntax
       elsif t.match?(/^(\+|-)?[0-9]+(\.[0-9]+(e(\+|-)[0-9]+)?|e(\+|-)?[0-9]+)$/)
         Float(t)
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
-        Time.parse(t)
+        DateTime.iso8601(t).to_time
       elsif t == 'true'
         true
       elsif t == 'false'
