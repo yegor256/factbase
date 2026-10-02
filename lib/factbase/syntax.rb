@@ -78,6 +78,12 @@ class Factbase::Syntax
     at += 1
     op = tokens[at]
     raise(StandardError, 'No token found') if op == :close
+    if op == :open || !op.is_a?(Symbol)
+      raise(
+        StandardError,
+        "A term name is expected at ##{at}, while #{op == :open ? 'an opening bracket' : op.inspect} found"
+      )
+    end
     operands = []
     at += 1
     loop do
