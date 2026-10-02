@@ -3,8 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require_relative 'base'
 require_relative '../flatten'
+require_relative 'base'
 # This class represents a 'sorted' term in the Factbase.
 # It evaluates whether the given facts satisfy the sorted condition.
 class Factbase::Sorted < Factbase::TermBase
