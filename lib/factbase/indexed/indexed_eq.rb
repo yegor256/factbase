@@ -24,7 +24,7 @@ class Factbase::IndexedEq
     entry = @idx[key]
     _feed(maps.to_a, entry, first_operand)
     keys = _resolve(second_operand, params)
-    matches = keys.flat_map { |k| entry[:facts][normalize_index_key(k)] || [] }
+    matches = keys.flat_map { |k| entry[:facts][normalize(k)] || [] }
     matches = matches.uniq(&:object_id) if keys.size > 1
     maps.respond_to?(:repack) ? maps.repack(matches) : matches
   end
@@ -48,7 +48,7 @@ class Factbase::IndexedEq
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |m|
       m[operand]&.uniq&.each do |v|
-        key = normalize_index_key(v)
+        key = normalize(v)
         entry[:facts][key] ||= []
         entry[:facts][key] << m
       end
@@ -61,7 +61,7 @@ class Factbase::IndexedEq
     params[operand.to_s] || []
   end
 
-  def normalize_index_key(value)
+  def normalize(value)
     return Rational(value) if value.is_a?(Integer) || (value.is_a?(Float) && value.finite?)
     value
   end
