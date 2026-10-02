@@ -114,7 +114,7 @@ class Factbase::Impatient
 
     # Run the block, interrupting it when the budget is over.
     def watch
-      @lock.synchronize { @since = Time.now }
+      @lock.synchronize { @since = now }
       owner = Thread.current
       dog = Thread.new { guard(owner) }
       begin
@@ -132,7 +132,7 @@ class Factbase::Impatient
     def pause
       Thread.handle_interrupt(Timeout::Error => :never) do
         @lock.synchronize do
-          @left -= Time.now - @since
+          @left -= now - @since
           @since = nil
         end
         Thread.handle_interrupt(Timeout::Error => :immediate) { Thread.pass } if Thread.pending_interrupt?
@@ -141,13 +141,17 @@ class Factbase::Impatient
         yield
       ensure
         @lock.synchronize do
-          @since = Time.now
+          @since = now
           @wake.signal
         end
       end
     end
 
     private
+
+    def now
+      Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    end
 
     def guard(owner)
       @lock.synchronize do
@@ -156,7 +160,7 @@ class Factbase::Impatient
             @wake.wait(@lock)
             next
           end
-          rest = @left - (Time.now - @since)
+          rest = @left - (now - @since)
           if rest <= 0
             owner.raise(Timeout::Error, 'execution expired')
             break
