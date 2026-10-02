@@ -95,4 +95,14 @@ class TestAccum < Factbase::Test
     assert_includes(a.all_properties, 'y')
     assert_includes(a.all_properties, 'z')
   end
+
+  def test_forgets_a_value_the_fact_rejected
+    fb = Factbase.new
+    fb.insert.foo = 1
+    result = fb.query('(exists foo)').each.first
+    assert_raises(ArgumentError) { result.foo = nil }
+    result.foo = 2
+    assert_equal(1, result.foo)
+    assert_equal([1, 2], result['foo'])
+  end
 end
