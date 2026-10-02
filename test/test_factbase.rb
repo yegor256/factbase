@@ -11,6 +11,7 @@ require_relative '../lib/factbase/logged'
 require_relative '../lib/factbase/pre'
 require_relative '../lib/factbase/rules'
 require_relative '../lib/factbase/sync/sync_factbase'
+require_relative '../lib/factbase/to_json'
 require_relative '../lib/fuzz'
 require_relative 'test__helper'
 
@@ -557,5 +558,21 @@ class TestFactbase < Factbase::Test
       count = fbt.each { |m| m }
     end
     assert_equal(total - 1, count, "each inside txn counted a deleted fact among #{total}, seed #{seed}")
+  end
+
+  def test_runs_the_examples_from_the_docstring
+    fb = Factbase.new
+    f = fb.insert
+    f.name = 'Jeff Lebowski'
+    f.age = 42
+    assert_equal(42, fb.query('(gt age 20)').each.to_a[0].age)
+    other = Factbase.new
+    g = other.insert
+    g.name = 'Jeff'
+    g.name = 'Walter'
+    g.age = 42
+    g.age = 'unknown'
+    g.place = 'LA'
+    assert_equal('[{"age":[42,"unknown"],"name":["Jeff","Walter"],"place":"LA"}]', Factbase::ToJSON.new(other).json)
   end
 end

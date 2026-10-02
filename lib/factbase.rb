@@ -18,7 +18,7 @@ require 'yaml'
 #  f = fb.insert # new fact created
 #  f.name = 'Jeff Lebowski'
 #  f.age = 42
-#  found = fb.query('(gt 20 age)').each.to_a[0]
+#  found = fb.query('(gt age 20)').each.to_a[0]
 #  assert(found.age == 42)
 #
 # Every fact is a key-value hash map. Every value is a non-empty set of values.
@@ -31,15 +31,12 @@ require 'yaml'
 #  f.age = 42
 #  f.age = 'unknown'
 #  f.place = 'LA'
-#  puts f.to_json
+#  require 'factbase/to_json'
+#  puts Factbase::ToJSON.new(fb).json
 #
 # This will print the following JSON:
 #
-#  {
-#    'name': ['Jeff', 'Walter'],
-#    'age': [42, 'unknown'],
-#    'place': 'LA'
-#  }
+#  [{"age":[42,"unknown"],"name":["Jeff","Walter"],"place":"LA"}]
 #
 # Value sets, as you can see, allow data of different types. However, there
 # are six allowed types: Integer, Float, String, Time, TrueClass, and FalseClass.
