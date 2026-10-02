@@ -459,4 +459,19 @@ class TestIndexedFactbase < Factbase::Test
     end
     assert_equal([51], fb.query('(and (eq foo 2) (unique bar))').each.to_a.map(&:id))
   end
+
+  def test_finds_by_a_parameter_in_the_first_operand
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    f = fb.insert
+    f.kind = 'bug'
+    f.size = 9
+    [
+      ["(eq $k 'bug')", { 'k' => 'bug' }],
+      ['(gt $n 5)', { 'n' => 9 }],
+      ['(lte $n 5)', { 'n' => 1 }],
+      ["(and (eq $k 'bug') (eq kind 'bug'))", { 'k' => 'bug' }]
+    ].each do |query, params|
+      assert_equal(1, fb.query(query).each(fb, params).to_a.size, query)
+    end
+  end
 end

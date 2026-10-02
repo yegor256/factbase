@@ -15,7 +15,7 @@ class Factbase::IndexedAnd
     key = [maps.object_id, @term.operands.first, @term.op]
     r = nil
     if @term.operands.all? { |o| o.op == :eq } && @term.operands.size > 1 \
-      && @term.operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
+      && @term.operands.all? { |o| _property?(o.operands.first) && _scalar?(o.operands[1]) }
       props = @term.operands.map { |o| o.operands.first }.sort!
       key = [maps.object_id, props, :multi_and_eq]
       entry = @idx[key]
@@ -71,6 +71,10 @@ class Factbase::IndexedAnd
   end
 
   private
+
+  def _property?(item)
+    item.is_a?(Symbol) && !item.start_with?('$')
+  end
 
   # Can the index resolve this operand on its own?
   #
