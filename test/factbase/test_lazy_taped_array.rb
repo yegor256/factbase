@@ -43,6 +43,13 @@ class TestLazyTapedArray < Factbase::Test
     assert_write(hash, added, [1, 2], arr.to_a)
   end
 
+  def test_uniq_of_unique_values_changes_nothing
+    arr, hash, added = wrap([1, 2])
+    assert_nil(arr.uniq!)
+    assert_empty(added)
+    refute_predicate(hash, :copied?)
+  end
+
   def test_append
     arr, hash, added = wrap([1])
     arr << 2
