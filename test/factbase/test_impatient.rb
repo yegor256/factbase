@@ -47,7 +47,11 @@ class TestImpatient < Factbase::Test
   class SlowStepsFactbase < Factbase
     class SlowQuery < Factbase::Query
       def each(fb = @fb, params = {})
-        super { |f| sleep(0.03) && nil || yield(f) }
+        return to_enum(__method__, fb, params) unless block_given?
+        super do |f|
+          sleep(0.03)
+          yield(f)
+        end
       end
     end
 
