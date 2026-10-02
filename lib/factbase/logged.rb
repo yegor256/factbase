@@ -8,8 +8,8 @@ require 'ellipsized'
 require 'others'
 require 'tago'
 require 'time'
-require_relative 'syntax'
 require_relative 'enumerated'
+require_relative 'syntax'
 
 # A decorator of a Factbase, that logs all operations.
 #

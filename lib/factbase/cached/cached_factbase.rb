@@ -6,10 +6,10 @@
 require 'decoor'
 require_relative '../../factbase'
 require_relative '../../factbase/syntax'
+require_relative '../enumerated'
 require_relative 'cached_fact'
 require_relative 'cached_query'
 require_relative 'cached_term'
-require_relative '../enumerated'
 
 # A factbase with a cache.
 #

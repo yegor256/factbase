@@ -6,10 +6,10 @@
 require 'decoor'
 require_relative '../../factbase'
 require_relative '../../factbase/syntax'
+require_relative '../enumerated'
 require_relative 'indexed_fact'
 require_relative 'indexed_query'
 require_relative 'indexed_term'
-require_relative '../enumerated'
 
 # A factbase with an index.
 #

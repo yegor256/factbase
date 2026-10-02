@@ -30,13 +30,13 @@ class TestEnumerated < Factbase::Test
       Factbase::Tallied.new(Factbase.new),
       Factbase::Impatient.new(Factbase.new),
       Factbase::Rules.new(Factbase.new, '(always)'),
-      Factbase::Inv.new(Factbase.new) { |_p, _v| nil },
-      Factbase::Pre.new(Factbase.new) { |_f, _fbt| nil }
+      Factbase::Inv.new(Factbase.new) { |_p, _v| true },
+      Factbase::Pre.new(Factbase.new) { |_f, _fbt| true }
     ].each do |fb|
       4.times { fb.insert.x = 1 }
       assert_kind_of(Enumerator, fb.each, "#{fb.class} didn't return an enumerator")
       assert_equal(4, fb.each.to_a.size, "#{fb.class} didn't enumerate all facts")
-      assert_equal(4, fb.each { |_f| nil }, "#{fb.class} didn't count the facts with a block")
+      assert_equal(4, fb.each { |_f| true }, "#{fb.class} didn't count the facts with a block")
     end
   end
 end

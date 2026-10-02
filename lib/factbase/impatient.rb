@@ -6,8 +6,8 @@
 require 'decoor'
 require 'tago'
 require 'timeout'
-require_relative 'syntax'
 require_relative 'enumerated'
+require_relative 'syntax'
 
 # A decorator of a Factbase, that terminates long-running queries.
 #
