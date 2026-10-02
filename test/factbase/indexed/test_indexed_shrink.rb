@@ -23,10 +23,8 @@ class TestIndexedShrink < Factbase::Test
           f.k = 1
         end
       end
-      mine = []
-      fb.each { |m| mine << m }
-      theirs = []
-      plain.each { |m| theirs << m }
+      mine = fb.to_enum(:each).to_a
+      theirs = plain.to_enum(:each).to_a
       fb.query(q, mine).each.to_a
       mine.pop(2)
       theirs.pop(2)
