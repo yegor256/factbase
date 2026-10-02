@@ -23,6 +23,20 @@ class TestIndexedTerm < Factbase::Test
     assert_includes(e.message, '(gt num 2)', e.message)
   end
 
+  def test_decorates_an_error_inside_head_once
+    ['(head 1 (eq (plus x "a") 1))', '(head 1 (never_defined x))'].each do |query|
+      plain = Factbase.new
+      plain.insert.x = 1
+      fb = Factbase::IndexedFactbase.new(Factbase.new)
+      fb.insert.x = 1
+      assert_equal(
+        assert_raises(StandardError) { plain.query(query).each.to_a }.message,
+        assert_raises(StandardError) { fb.query(query).each.to_a }.message,
+        "the indexed factbase decorated the error of #{query} differently"
+      )
+    end
+  end
+
   def test_predicts_on_others
     term = Factbase::Term.new(:boom, [])
     term.redress!(Factbase::IndexedTerm, idx: {})
