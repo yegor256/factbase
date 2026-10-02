@@ -26,10 +26,18 @@ class Factbase::Sprintf < Factbase::TermBase
     if fmt.nil?
       raise(ArgumentError, "The format of 'sprintf' is #{@operands[0].inspect}, which the fact doesn't have")
     end
-    formatted(fmt, (1..(@operands.length - 1)).map { |i| _values(i, fact, maps, fb)&.first })
+    formatted(fmt, (1..(@operands.length - 1)).map { |i| argument(i, fmt, fact, maps, fb) })
   end
 
   private
+
+  def argument(pos, fmt, fact, maps, fb)
+    value = _values(pos, fact, maps, fb)&.first
+    if value.nil?
+      raise(ArgumentError, "The operand #{@operands[pos].inspect} of 'sprintf' with '#{fmt}' is absent in the fact")
+    end
+    value
+  end
 
   def formatted(fmt, ops)
     format(*([fmt] + ops))
