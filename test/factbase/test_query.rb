@@ -6,6 +6,7 @@
 require_relative '../test__helper'
 require 'loog'
 require 'time'
+require 'timeout'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/cached/cached_factbase'
 require_relative '../../lib/factbase/impatient'
@@ -525,5 +526,16 @@ class TestQuery < Factbase::Test
         ) { |_| true }
       )
     }.each(&)
+  end
+
+  def test_stops_after_the_facts_that_matched_when_it_started
+    plain = Factbase.new
+    [plain, Factbase::CachedFactbase.new(plain)].each do |fb|
+      fb.insert.kind = 'a'
+      before = fb.size
+      Timeout.timeout(3) { fb.query('(eq kind "a")').each { fb.insert.kind = 'a' } }
+      assert_equal(before * 2, fb.size, "#{fb.class} kept yielding the facts inserted during each")
+    end
+    Timeout.timeout(3) { plain.txn { |t| t.query('(eq kind "a")').each { t.insert.kind = 'a' } } }
   end
 end
