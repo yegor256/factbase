@@ -24,7 +24,7 @@ class TestIndexedTerm < Factbase::Test
   end
 
   def test_decorates_an_error_inside_head_once
-    ['(head 1 (eq (plus x "a") 1))', '(head 1 (foo x))'].each do |query|
+    ['(head 1 (eq (plus x "a") 1))', '(head 1 (never_defined x))'].each do |query|
       plain = Factbase.new
       plain.insert.x = 1
       fb = Factbase::IndexedFactbase.new(Factbase.new)
