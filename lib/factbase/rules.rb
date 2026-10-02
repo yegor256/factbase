@@ -47,17 +47,11 @@ class Factbase::Rules
   end
 
   def txn
-    before = @check
     later = Later.new(@uid)
-    @check = later
     @fb.txn do |fbt|
       churn = Factbase::Churn.new
-      begin
-        catch(:commit) do
-          yield(Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn))
-        end
-      ensure
-        @check = before
+      catch(:commit) do
+        yield(Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, later, uid: @uid), churn))
       end
       unless churn.zero?
         fbt.query('(always)').each do |f|
