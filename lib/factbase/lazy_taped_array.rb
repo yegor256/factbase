@@ -33,8 +33,8 @@ class Factbase::LazyTaped
       current_array.map { |item| value(item) }
     end
 
-    def any?(pattern = nil)
-      return current_array.any? { |item| pattern.public_send(:===, value(item)) } if pattern
+    def any?(*pattern)
+      return current_array.any? { |item| pattern.first.public_send(:===, value(item)) } unless pattern.empty?
       return current_array.any? unless block_given?
       current_array.any? { |item| yield(value(item)) }
     end
