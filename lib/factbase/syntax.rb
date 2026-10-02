@@ -100,11 +100,12 @@ class Factbase::Syntax
     acc = ''
     quotes = ['\'', '"']
     spaces = [' ', '(', ')', "\n", "\t", "\r"]
+    breaks = ["\n", "\r"]
     opener = nil
     comment = false
     @query.to_s.chars.each do |c|
       comment = true if opener.nil? && c == '#'
-      comment = false if comment && (c == "\n" || c == "\r")
+      comment = false if comment && breaks.include?(c)
       next if comment
       if quotes.include?(c)
         if !opener.nil? && acc[-1] == '\\'
