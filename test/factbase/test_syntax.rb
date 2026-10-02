@@ -100,19 +100,11 @@ class TestSyntax < Factbase::Test
   end
 
   def test_parses_float_with_uppercase_exponent
-    assert(
-      Factbase::Syntax.new('(eq ratio 1.5E-10)').to_term.evaluate(
-        { 'ratio' => 1.5e-10 }, [], Factbase.new
-      )
-    )
+    assert(Factbase::Syntax.new('(eq ratio 1.5E-10)').to_term.evaluate({ 'ratio' => 1.5e-10 }, [], Factbase.new))
   end
 
   def test_parses_float_with_unsigned_exponent
-    assert(
-      Factbase::Syntax.new('(eq ratio 1.2e3)').to_term.evaluate(
-        { 'ratio' => 1200.0 }, [], Factbase.new
-      )
-    )
+    assert(Factbase::Syntax.new('(eq ratio 1.2e3)').to_term.evaluate({ 'ratio' => 1200.0 }, [], Factbase.new))
   end
 
   def test_parses_float_without_a_dot
