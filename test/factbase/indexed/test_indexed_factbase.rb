@@ -459,6 +459,7 @@ class TestIndexedFactbase < Factbase::Test
     end
     assert_equal([51], fb.query('(and (eq foo 2) (unique bar))').each.to_a.map(&:id))
   end
+
   def test_answers_with_its_own_index_for_a_term_built_by_another
     first = Factbase::IndexedFactbase.new(Factbase.new)
     first.insert.foo = 1
@@ -470,5 +471,4 @@ class TestIndexedFactbase < Factbase::Test
     second.query('(eq foo 1)').each { |f| f.foo = 2 }
     assert_equal(1, second.query(term).each(second, value: [2]).to_a.size)
   end
-
 end
