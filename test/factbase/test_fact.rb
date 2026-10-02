@@ -178,4 +178,13 @@ class TestFact < Factbase::Test
       fb.query('(always)').each { |f| f.foo << 'Q' }
     end
   end
+
+  def test_keeps_its_values_when_the_caller_changes_what_it_read
+    f = Factbase::Fact.new({})
+    f.foo = 42
+    f['foo'].clear
+    f['foo'] << 'boom'
+    assert_equal([42], f['foo'])
+    assert_equal(42, f.foo)
+  end
 end
