@@ -84,4 +84,55 @@ class TestTaped < Factbase::Test
     assert_equal(1, t.added.size)
     assert_equal(1, t.deleted.size)
   end
+
+  def test_dont_track_failed_append
+    seed = Random.new_seed
+    item = "ключ-#{Random.new(seed).rand(1_000)}"
+    t = Factbase::Taped.new([{ foo: ['', '❤'].freeze }])
+    t.each do |m|
+      m[:foo] << item
+    rescue FrozenError
+      nil
+    end
+    assert_empty(t.added, "churn is not empty after an append that failed, seed #{seed}")
+  end
+
+  def test_dont_track_failed_uniq
+    seed = Random.new_seed
+    t = Factbase::Taped.new([{ foo: ["däß-#{Random.new(seed).rand(1_000)}", ''].freeze }])
+    t.each do |m|
+      m[:foo].uniq!
+    rescue FrozenError
+      nil
+    end
+    assert_empty(t.added, "churn is not empty after a uniq that failed, seed #{seed}")
+  end
+
+  def test_tracks_array_append
+    h = { foo: %w[ü] }
+    t = Factbase::Taped.new([h])
+    t.each { |m| m[:foo] << 'ø' }
+    assert_equal([h.object_id], t.added, 'churn does not hold the fact whose array got an item')
+  end
+
+  def test_tracks_array_uniq
+    h = { foo: %w[я я] }
+    t = Factbase::Taped.new([h])
+    t.each { |m| m[:foo].uniq! }
+    assert_equal([h.object_id], t.added, 'churn does not hold the fact whose array lost a duplicate')
+  end
+
+  def test_returns_array_after_append
+    t = Factbase::Taped.new([{ foo: %w[ǝ] }])
+    result = nil
+    t.each { |m| result = m[:foo] << 'ß' }
+    assert_equal(%w[ǝ ß], result, 'appending an item does not return the array it went into')
+  end
+
+  def test_dont_return_array_after_useless_uniq
+    t = Factbase::Taped.new([{ foo: %w[ä ö] }])
+    result = false
+    t.each { |m| result = m[:foo].uniq! }
+    assert_nil(result, 'uniq of an array without duplicates does not return nil')
+  end
 end
