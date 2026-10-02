@@ -181,6 +181,13 @@ class TestImpatient < Factbase::Test
     )
   end
 
+  def test_refuses_an_infinite_timeout
+    assert_includes(
+      assert_raises(ArgumentError) { Factbase::Impatient.new(Factbase.new, timeout: Float::INFINITY) }.message,
+      'must be finite'
+    )
+  end
+
   def test_nil_factbase_raises
     assert_equal(
       'The "fb" is nil',
