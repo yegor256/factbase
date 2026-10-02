@@ -43,7 +43,7 @@ class Factbase::Rules
   end
 
   def query(term, maps = nil)
-    Query.new(@fb.query(term, maps), @check, self)
+    Query.new(@fb.query(term, maps), @check, @fb)
   end
 
   def txn
@@ -127,10 +127,11 @@ class Factbase::Rules
   class Check
     def initialize(expr)
       @expr = expr
+      @syntax = Factbase::Syntax.new(expr)
     end
 
     def it(fact, fb)
-      term = Factbase::Syntax.new(@expr).to_term
+      term = @syntax.to_term
       return if term.evaluate(fact, [], fb)
       text = (@expr.length > 32 ? "#{@expr[0..31]}..." : @expr).inspect
       failed = Check.failed(term, fact, fb)
