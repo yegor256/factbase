@@ -69,8 +69,6 @@ class Factbase::Rules
         end
       end
     end
-  ensure
-    @check = before
   end
 
   # Fact decorator.
