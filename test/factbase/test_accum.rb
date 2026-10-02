@@ -102,7 +102,7 @@ class TestAccum < Factbase::Test
     result = fb.query('(exists foo)').each.first
     assert_raises(ArgumentError) { result.foo = nil }
     result.foo = 2
-    assert_equal(1, result.foo)
+    assert_equal(2, result.foo)
     assert_equal([1, 2], result['foo'])
   end
 end
