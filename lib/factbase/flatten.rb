@@ -38,7 +38,7 @@ class Factbase::Flatten
     when Numeric
       [0, value, '']
     when Time
-      [1, Float(value), '']
+      [1, value.to_r, '']
     else
       [2, 0, value.to_s]
     end
