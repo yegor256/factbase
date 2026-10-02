@@ -49,7 +49,11 @@ class Factbase::Query
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     maybe = @term.predict(@maps, fb, Factbase::Tee.new({}, params))
     maybe ||= @maps unless maybe.equal?(@maps)
+    total = maybe.size
+    seen = 0
     maybe.each do |m|
+      break if seen == total
+      seen += 1
       extras = {}
       f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
