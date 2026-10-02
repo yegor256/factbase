@@ -18,12 +18,12 @@ class Factbase::Type < Factbase::TermBase
 
   # Evaluate term on a fact.
   # @param [Factbase::Fact] fact The fact
-  # @param [Array<Factbase::Fact>] _maps All maps available
-  # @param [Factbase] _fb Factbase to use for sub-queries
+  # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @return [String] Type of the operand
-  def evaluate(fact, _maps, _fb)
+  def evaluate(fact, maps, fb)
     assert_args(1)
-    v = _by_symbol(0, fact)
+    v = _operand(0, fact, maps, fb)
     return 'nil' if v.nil?
     v = v[0] if v.respond_to?(:each) && v.size == 1
     return 'Boolean' if v.is_a?(TrueClass) || v.is_a?(FalseClass)
