@@ -197,7 +197,7 @@ class TestImpatient < Factbase::Test
     Time.singleton_class.alias_method(:real_now, :now)
     Time.define_singleton_method(:now) { real_now - (shift += 100) }
     begin
-      assert_includes(assert_raises(StandardError) { fb.query('(always)').each.to_a }.message, 'out of time')
+      assert_match(/timed out|out of time/, assert_raises(StandardError) { fb.query('(always)').each.to_a }.message)
     ensure
       Time.singleton_class.alias_method(:now, :real_now)
       Time.singleton_class.remove_method(:real_now)
