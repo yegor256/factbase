@@ -9,6 +9,7 @@ require 'others'
 require 'tago'
 require 'time'
 require_relative 'syntax'
+require_relative 'enumerated'
 
 # A decorator of a Factbase, that logs all operations.
 #
@@ -35,6 +36,7 @@ class Factbase::Logged
   end
 
   decoor(:origin)
+  include Factbase::Enumerated
 
   def insert
     Process.clock_gettime(MONO).then do |mono|

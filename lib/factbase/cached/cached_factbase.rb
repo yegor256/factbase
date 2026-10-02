@@ -9,6 +9,7 @@ require_relative '../../factbase/syntax'
 require_relative 'cached_fact'
 require_relative 'cached_query'
 require_relative 'cached_term'
+require_relative '../enumerated'
 
 # A factbase with a cache.
 #
@@ -17,6 +18,7 @@ require_relative 'cached_term'
 # License:: MIT
 class Factbase::CachedFactbase
   decoor(:origin)
+  include Factbase::Enumerated
 
   # Constructor.
   # @param [Factbase] origin Original factbase to decorate
