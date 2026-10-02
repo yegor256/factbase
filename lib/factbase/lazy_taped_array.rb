@@ -33,8 +33,8 @@ class Factbase::LazyTaped
       current_array.to_a
     end
 
-    def any?(pattern = nil, &)
-      pattern ? current_array.any?(pattern) : current_array.any?(&)
+    def any?(*pattern, &)
+      current_array.any?(*pattern, &)
     end
 
     def <<(item)
