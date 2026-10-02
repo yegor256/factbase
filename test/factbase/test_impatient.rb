@@ -237,9 +237,9 @@ class TestImpatient < Factbase::Test
     assert_raises(StopIteration) do
       fb.query('(always)').each do |_f|
         seen += 1
-        raise(StopIteration)
+        raise(StopIteration) if seen == 2
       end
     end
-    assert_equal(1, seen)
+    assert_equal(2, seen)
   end
 end
