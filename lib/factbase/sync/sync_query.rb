@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../factbase'
+require_relative 'sync_fact'
 
 # Synchronized thread-safe query.
 #
@@ -34,7 +35,7 @@ class Factbase::SyncQuery
   def each(fb = @fb, params = {}, &)
     return to_enum(__method__, fb, params) unless block_given?
     facts = try_lock { @origin.each(fb, params).to_a }
-    facts.each(&)
+    facts.each { |f| yield(Factbase::SyncFact.new(f, @monitor)) }
     facts.size
   end
 
