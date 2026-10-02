@@ -100,8 +100,12 @@ class Factbase::IndexedFactbase
     raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?
     data = Marshal.load(bytes)
     if data.is_a?(Hash) && data.key?(:maps)
+      before = @origin.size
       @origin.import(data[:maps])
-      @idx.merge!(data[:idx]) if data[:idx].is_a?(Hash)
+      if data[:idx].is_a?(Hash)
+        maps = @origin.instance_variable_get(:@maps)
+        @idx.merge!(rebuild_index(data[:idx], maps.is_a?(Array) ? maps[before..] : [], maps))
+      end
     else
       @origin.import(bytes)
       @idx.clear
@@ -114,4 +118,53 @@ class Factbase::IndexedFactbase
   def size
     @origin.size
   end
+
+  private
+
+  # rubocop:disable Elegant/GoodMethodName
+  def rebuild_index(index, imported, maps)
+    return index unless maps.is_a?(Array)
+    facts = collect_facts(index)
+    replacements = {}.compare_by_identity
+    candidates = imported.group_by(&:hash)
+    facts.uniq(&:object_id).each do |fact|
+      candidate = candidates[fact.hash]&.find { |map| map == fact }
+      replacements[fact] = candidate unless candidate.nil?
+      candidates[fact.hash]&.delete(candidate)
+    end
+    source = index.keys.find { |key| key.is_a?(Array) && key.first.is_a?(Integer) }&.first
+    index.each_with_object({}) do |(key, value), repointed|
+      key = key.dup.tap { |copy| copy[0] = maps.object_id } if key.is_a?(Array) && key.first == source
+      repointed[key] = replace_value(value, replacements)
+    end
+  end
+
+  def collect_facts(object, facts = [])
+    case object
+    when Hash
+      if object.keys.all?(String) && object.values.all?(Array)
+        facts << object
+      else
+        object.each_value { |value| collect_facts(value, facts) }
+      end
+    when Array, Set
+      object.each { |value| collect_facts(value, facts) }
+    end
+    facts
+  end
+
+  def replace_value(object, replacements)
+    replacement = replacements[object]
+    return replacement unless replacement.nil?
+    case object
+    when Hash
+      object.each_key { |key| object[key] = replace_value(object[key], replacements) }
+    when Array
+      object.map! { |value| replace_value(value, replacements) }
+    when Set
+      object.replace(object.map { |value| replace_value(value, replacements) })
+    end
+    object
+  end
+  # rubocop:enable Elegant/GoodMethodName
 end
