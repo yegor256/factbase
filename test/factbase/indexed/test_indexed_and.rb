@@ -73,14 +73,13 @@ class TestIndexedAnd < Factbase::Test
     second = origin.insert
     second.amount = 2
     second.kind = 'selected'
-    indexed = Factbase::IndexedFactbase.new(origin)
     query = '(and (eq amount 1.0) (eq kind "selected"))'
     assert_equal(
       [1], origin.query(query).each.to_a.map(&:amount),
       'a plain factbase matches numerically equal Integer and Float values'
     )
     assert_equal(
-      [1], indexed.query(query).each.to_a.map(&:amount),
+      [1], Factbase::IndexedFactbase.new(origin).query(query).each.to_a.map(&:amount),
       'the multi-equality index must retain numerically equal Integer and Float values'
     )
   end

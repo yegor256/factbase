@@ -62,7 +62,7 @@ class Factbase::IndexedEq
   end
 
   def hash_key(value)
-    return value.to_r if value.is_a?(Integer) || (value.is_a?(Float) && value.finite?)
+    return Rational(value) if value.is_a?(Integer) || (value.is_a?(Float) && value.finite?)
     value
   end
 end
