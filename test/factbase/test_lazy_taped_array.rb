@@ -38,7 +38,7 @@ class TestLazyTapedArray < Factbase::Test
   end
 
   def test_does_not_expose_mutable_strings
-    arr, hash, added = wrap(['foo'.dup])
+    arr, hash, added = wrap([+'foo'])
     assert_raises(FrozenError) { arr[0] << 'bar' }
     assert_raises(FrozenError) { arr.each { |item| item << 'bar' } }
     assert_raises(FrozenError) { arr.to_a[0] << 'bar' }

@@ -157,7 +157,7 @@ class TestFact < Factbase::Test
 
   def test_does_not_expose_mutable_imported_strings
     fb = Factbase.new
-    fb.import(Marshal.dump([{ 'foo' => ['bar'.dup] }]))
+    fb.import(Marshal.dump([{ 'foo' => [+'bar'] }]))
     assert_raises(FrozenError) { fb.query('(always)').first.foo << 'baz' }
     assert_raises(FrozenError) do
       fb.txn do |tx|
