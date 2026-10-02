@@ -253,6 +253,7 @@ class Factbase::Term < Factbase::TermBase
   def static?
     return true if @op == :agg
     return false if %i[join as].include?(@op)
+    return false if custom?
     @operands.each do |o|
       return false if o.is_a?(Factbase::Term) && !o.static?
       return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
@@ -272,6 +273,14 @@ class Factbase::Term < Factbase::TermBase
   end
 
   private
+
+  # Is it a term made by +defn+? Its Ruby body may read the fact and the factbase,
+  # so its result can't be known from its operands alone.
+  def custom?
+    return false if TERMS.key?(@op)
+    return false unless Factbase::Term.private_method_defined?(@op, false)
+    Factbase::Term.instance_method(@op).source_location&.first != __FILE__
+  end
 
   def at(fact, maps, fb)
     assert_args(2)
