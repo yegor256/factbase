@@ -92,7 +92,7 @@ class Factbase::Query
   # @param [Factbase] fb The factbase to delete from
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
-    raise(ArgumentError, "Can't delete! from a subset of maps, since it would empty the caller's array: #{@term}") if @subset
+    raise(ArgumentError, "Can't delete! from a subset of maps, it would only empty that array: #{@term}") if @subset
     @term.forget
     deleted = 0
     maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
