@@ -140,10 +140,9 @@ class Factbase
   # @param [String|Factbase::Term] term The query to use for selections
   # @param [Array<Hash>|nil] maps The subset of maps (if provided)
   def query(term, maps = nil)
-    maps ||= @maps
     term = to_term(term) if term.is_a?(String)
     require_relative('factbase/query')
-    Factbase::Query.new(maps, term, self)
+    Factbase::Query.new(maps || @maps, term, self, subset: !(maps.nil? || maps.equal?(@maps)))
   end
 
   # Convert a query to a term.
