@@ -271,4 +271,14 @@ class TestSyntax < Factbase::Test
   def test_ends_a_comment_at_a_carriage_return
     assert_equal('(eq x 1)', Factbase::Syntax.new("# comment\r(eq x 1)").to_term.to_s)
   end
+
+  def test_refuses_float_literals_out_of_range
+    %w[1e9999 1e-9999 -2.5e-9999 1E9999].each do |t|
+      assert_includes(
+        assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new("(eq x #{t})").to_term }.message,
+        'out of range'
+      )
+    end
+    assert_equal('(eq x 0.0)', Factbase::Syntax.new('(eq x 0.0e-9999)').to_term.to_s)
+  end
 end
