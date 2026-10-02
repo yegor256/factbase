@@ -30,7 +30,7 @@ class Factbase::LazyTaped
     end
 
     def to_a
-      current_array.to_a
+      current_array.dup
     end
 
     def any?(pattern = nil, &)
