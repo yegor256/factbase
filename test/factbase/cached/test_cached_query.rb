@@ -6,6 +6,7 @@
 require 'loog'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/cached/cached_factbase'
+require_relative '../../../lib/factbase/cached/cached_query'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/logged'
 require_relative '../../../lib/factbase/sync/sync_factbase'
@@ -146,5 +147,17 @@ class TestCachedQuery < Factbase::Test
     value = "сосна #{Random.new(seed).rand(1_000_000)}"
     fb.txn { |fbt| fbt.insert.foo = value }
     assert_equal(value, query.one(fb, {}), "cached nil result of one survives a transaction, seed #{seed}")
+  end
+
+  def test_keeps_rows_apart_for_different_factbase_contexts
+    base = Factbase.new
+    base.insert.value = 7
+    one = Factbase.new
+    one.insert
+    two = Factbase.new
+    2.times { two.insert }
+    query = Factbase::CachedQuery.new(base.query('(eq 1 (agg (always) (count)))'), {}, base)
+    assert_equal(1, query.each(one).to_a.size)
+    assert_equal(0, query.each(two).to_a.size)
   end
 end

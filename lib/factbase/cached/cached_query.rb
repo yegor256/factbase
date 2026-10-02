@@ -40,7 +40,7 @@ class Factbase::CachedQuery
     return to_enum(__method__, fb, params) unless block_given?
     invalidate_if_dirty!
     c = 0
-    key = "each #{@origin}"
+    key = "each #{fb.object_id} #{@origin}"
     if @cacheable && !@cache[key].nil?
       @cache[key].each do |f|
         c += 1
