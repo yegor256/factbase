@@ -104,4 +104,10 @@ class TestDefn < Factbase::Test
     assert_equal([1, 2], fb.query("(defn #{n} 'true')").each.map { |item| item['id'].first })
     Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
   end
+
+  def test_defines_the_term_again_after_undef
+    fb = Factbase.new
+    3.times { |i| fb.insert.x = i }
+    assert_equal(3, fb.query('(and (undef foo) (defn foo "true") (foo))').each.to_a.size)
+  end
 end
