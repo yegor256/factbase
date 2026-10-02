@@ -65,10 +65,10 @@ class Factbase::Impatient
       left = @timeout
       loop do
         # rubocop:disable Elegant/NoRedundantVariable
-        started = Time.now
+        started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         fact = impatient('each', left) { enum.next }
         # rubocop:enable Elegant/NoRedundantVariable
-        left -= Time.now - started
+        left -= Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
         yield(fact)
         n += 1
       end
