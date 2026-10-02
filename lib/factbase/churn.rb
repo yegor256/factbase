@@ -9,8 +9,6 @@
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Churn
-  attr_reader :inserted, :deleted, :added
-
   def initialize(ins = 0, del = 0, add = 0)
     @mutex = Mutex.new
     @inserted = ins
@@ -18,20 +16,33 @@ class Factbase::Churn
     @added = add
   end
 
+  def inserted
+    counts[0]
+  end
+
+  def deleted
+    counts[1]
+  end
+
+  def added
+    counts[2]
+  end
+
   def to_s
-    if zero?
+    ins, del, add = counts
+    if [ins, del, add].all?(&:zero?)
       'nothing'
     else
-      "#{inserted}i/#{deleted}d/#{added}a"
+      "#{ins}i/#{del}d/#{add}a"
     end
   end
 
   def zero?
-    inserted.zero? && deleted.zero? && added.zero?
+    counts.all?(&:zero?)
   end
 
   def to_i
-    inserted + deleted + added
+    counts.sum
   end
 
   def append(ins, del, add)
@@ -43,6 +54,16 @@ class Factbase::Churn
   end
 
   def +(other)
-    Factbase::Churn.new(inserted + other.inserted, deleted + other.deleted, added + other.added)
+    mine = counts
+    theirs = other.counts
+    Factbase::Churn.new(mine[0] + theirs[0], mine[1] + theirs[1], mine[2] + theirs[2])
+  end
+
+  protected
+
+  # The three counters, read together under the same lock that +append+ takes.
+  # @return [Array<Integer>] Inserted, deleted and added
+  def counts
+    @mutex.synchronize { [@inserted, @deleted, @added] }
   end
 end
