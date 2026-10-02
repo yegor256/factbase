@@ -44,6 +44,21 @@ class TestImpatient < Factbase::Test
     end
   end
 
+  class SlowEachFactbase < Factbase
+    class SlowQuery < Factbase::Query
+      def each(fb = @fb, params = {})
+        sleep(0.2)
+        super
+      end
+    end
+
+    def query(term, maps = nil)
+      maps ||= @maps
+      term = to_term(term) if term.is_a?(String)
+      SlowQuery.new(maps, term, self)
+    end
+  end
+
   class SlowEnoughFactbase < Factbase
     class SlowQuery < Factbase::Query
       def one(fb = @fb, params = {})
@@ -169,6 +184,25 @@ class TestImpatient < Factbase::Test
     fb = Factbase::Impatient.new(Factbase.new, timeout: 0.01)
     fb.insert
     assert_equal(1, fb.query('(always)').each { sleep(0.02) })
+  end
+
+  def test_accepts_a_deeply_nested_query
+    q = '(eq x 1)'
+    200.times { q = "(not (not #{q}))" }
+    fb = Factbase.new
+    fb.insert.x = 1
+    assert_equal(1, Factbase::Impatient.new(fb).query(q).each.to_a.size)
+  end
+
+  def test_times_out_each_while_the_query_works
+    slow = SlowEachFactbase.new
+    slow.insert.x = 1
+    fb = Factbase::Impatient.new(slow, timeout: 0.05)
+    assert_includes(
+      assert_raises(StandardError) do
+        fb.query('(always)').each.to_a
+      end.message, 'timed out after'
+    )
   end
 
   def test_custom_timeout
