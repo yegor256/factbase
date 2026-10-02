@@ -259,4 +259,10 @@ class TestSyntax < Factbase::Test
       @x = invalid
     end
   end
+  def test_parses_a_string_that_ends_in_an_escaped_backslash
+    t = Factbase::Syntax.new(%q((eq x "tail\\\\"))).to_term
+    assert_equal('tail\\', t.operands[1])
+    assert_equal("x'y", Factbase::Syntax.new(%q((eq x 'x\\'y'))).to_term.operands[1])
+  end
+
 end

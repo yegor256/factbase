@@ -107,11 +107,13 @@ class Factbase::Syntax
       comment = false if comment && c == "\n"
       next if comment
       if quotes.include?(c)
-        if !opener.nil? && acc[-1] == '\\'
+        slashes = acc[/\\*\z/].length
+        if !opener.nil? && slashes.odd?
           acc = acc[0..-2]
         elsif opener.nil?
           opener = c
         elsif opener == c
+          acc = acc[0..-((slashes / 2) + 1)]
           opener = nil
         end
       end
