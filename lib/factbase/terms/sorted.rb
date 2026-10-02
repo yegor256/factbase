@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require_relative 'base'
+require_relative '../flatten'
 # This class represents a 'sorted' term in the Factbase.
 # It evaluates whether the given facts satisfy the sorted condition.
 class Factbase::Sorted < Factbase::TermBase
@@ -31,6 +32,6 @@ class Factbase::Sorted < Factbase::TermBase
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
     blank, valued = fb.query(term, maps).each(fb, params).to_a.partition { |m| m[prop].nil? }
-    _flatten(valued.sort_by.with_index { |m, i| [m[prop].first, i] } + blank)
+    _flatten(valued.sort_by.with_index { |m, i| [Factbase::Flatten.key(m[prop].first), i] } + blank)
   end
 end
