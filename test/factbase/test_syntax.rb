@@ -287,4 +287,9 @@ class TestSyntax < Factbase::Test
     end
     assert_equal('(eq x 0.0)', Factbase::Syntax.new('(eq x 0.0e-9999)').to_term.to_s)
   end
+
+  def test_parses_a_string_that_ends_in_an_escaped_backslash
+    assert_equal('tail\\', Factbase::Syntax.new('(eq x "tail\\\\")').to_term.operands[1])
+    assert_equal("x'y", Factbase::Syntax.new("(eq x 'x\\'y')").to_term.operands[1])
+  end
 end
