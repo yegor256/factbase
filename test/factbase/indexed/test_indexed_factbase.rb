@@ -26,6 +26,16 @@ class TestIndexedFactbase < Factbase::Test
     refute_empty(fb.query('(exists bar)').each.to_a)
   end
 
+  def test_bracket_mutations_do_not_bypass_the_index
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fact = fb.insert
+    fact.kind = 'old'
+    assert_equal(1, fb.query('(eq kind "old")').each.to_a.size)
+    fact[:kind] << 'new'
+    assert_empty(fb.query('(eq kind "new")').each.to_a)
+    assert_equal(1, fb.query('(eq kind "old")').each.to_a.size)
+  end
+
   def test_queries_after_update_in_txn
     [
       '(exists boom)',

@@ -40,6 +40,13 @@ class TestFact < Factbase::Test
     assert_equal([42, 256], f['foo'], f.to_s)
   end
 
+  def test_bracket_reads_do_not_expose_storage
+    f = Factbase::Fact.new({})
+    f.foo = 42
+    f['foo'] << 256
+    assert_equal([42], f['foo'])
+  end
+
   def test_keeps_values_unique
     map = {}
     f = Factbase::Fact.new(map)
