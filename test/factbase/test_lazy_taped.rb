@@ -326,7 +326,7 @@ class TestLazyTaped < Factbase::Test
     fb = Factbase.new
     fb.insert.foo = 42
     fb.txn do |fbt|
-      fbt.query('(always)').each { |f| f['foo'].to_a << 7 }
+      fbt.each { |m| m['foo'].to_a << 7 }
       raise(Factbase::Rollback)
     end
     assert_equal([42], fb.query('(always)').each.to_a.first['foo'])
