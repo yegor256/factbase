@@ -512,6 +512,15 @@ class TestFactbase < Factbase::Test
     end
   end
 
+  def test_import_rejects_a_valid_marshal_with_the_wrong_shape
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase.new.import(Marshal.dump({ unexpected: true }))
+      end.message,
+      'The input is not a valid factbase'
+    )
+  end
+
   def test_counts_facts_in_each
     seed = Random.new_seed
     rnd = Random.new(seed)
