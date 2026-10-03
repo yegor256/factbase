@@ -11,7 +11,7 @@ class Factbase::Div < Factbase::TermBase
   # @param [Array] operands Operands
   def initialize(operands)
     super()
-    @div = Factbase::Arithmetic.new(:/, operands)
+    @div = Factbase::Arithmetic.new(:fdiv, operands)
   end
 
   # Evaluate term on a fact.

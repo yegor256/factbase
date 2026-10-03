@@ -33,9 +33,9 @@ class Factbase::SyncQuery
   # @return [Integer] Total number of facts yielded
   def each(fb = @fb, params = {}, &)
     return to_enum(__method__, fb, params) unless block_given?
-    try_lock do
-      @origin.each(fb, params, &)
-    end
+    facts = try_lock { @origin.each(fb, params).to_a }
+    facts.each(&)
+    facts.size
   end
 
   # Read a single value.

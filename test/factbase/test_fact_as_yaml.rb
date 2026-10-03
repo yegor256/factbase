@@ -28,6 +28,18 @@ class TestFactAsYaml < Factbase::Test
     )
   end
 
+  def test_prints_false_values
+    f = Factbase.new.insert
+    f.flag = true
+    f.flag = false
+    f.solo = false
+    assert_equal(
+      "flag: [true, false]\n" \
+      'solo: false',
+      Factbase::FactAsYaml.new(f).to_s
+    )
+  end
+
   def test_simple_rendering
     f = Factbase.new.insert
     f._id = 1

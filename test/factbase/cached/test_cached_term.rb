@@ -41,4 +41,56 @@ class TestCachedTerm < Factbase::Test
     fb.query('(unique foo)').each.to_a
     assert_empty(cache.keys.grep(Array))
   end
+
+  def test_keeps_nil_result_of_aggregate_over_no_facts
+    seed = Random.new_seed
+    origin = Factbase.new
+    term = Factbase::CachedFactbase.new(origin, {}).to_term('(agg (exists hello) (min foo))')
+    maps = []
+    term.evaluate(fact({}), maps, origin)
+    maps << { 'hello' => ["привет #{seed}"], 'foo' => [Random.new(seed).rand(1_000_000)] }
+    assert_nil(
+      term.evaluate(fact({}), maps, origin),
+      "nil result of aggregate over no facts is evaluated again instead of being cached, seed #{seed}"
+    )
+  end
+
+  def test_keeps_nil_result_of_aggregate_over_facts_without_property
+    seed = Random.new_seed
+    origin = Factbase.new
+    term = Factbase::CachedFactbase.new(origin, {}).to_term('(agg (exists hello) (min foo))')
+    maps = [{ 'hello' => ["здравствуй #{seed}"] }, { 'hello' => [''] }]
+    term.evaluate(fact({}), maps, origin)
+    maps.first['foo'] = [Random.new(seed).rand(1_000_000)]
+    assert_nil(
+      term.evaluate(fact({}), maps, origin),
+      "nil result of aggregate over facts without property is evaluated again, seed #{seed}"
+    )
+  end
+
+  def test_drops_nil_result_of_aggregate_after_insert
+    seed = Random.new_seed
+    value = "ключ #{Random.new(seed).rand(1_000_000)}"
+    fb = Factbase::CachedFactbase.new(Factbase.new, {})
+    fb.insert.bar = value
+    fb.query('(eq bar (agg (exists foo) (min foo)))').each.to_a
+    fb.insert.foo = value
+    assert_equal(
+      1, fb.query('(eq bar (agg (exists foo) (min foo)))').each.to_a.size,
+      "cached nil result of aggregate survives an insert, seed #{seed}"
+    )
+  end
+
+  def test_drops_nil_result_of_aggregate_after_property_change
+    seed = Random.new_seed
+    value = "замок #{Random.new(seed).rand(1_000_000)}"
+    fb = Factbase::CachedFactbase.new(Factbase.new, {})
+    fb.insert.bar = value
+    fb.query('(eq bar (agg (exists bar) (min foo)))').each.to_a
+    fb.query('(always)').each.first.foo = value
+    assert_equal(
+      1, fb.query('(eq bar (agg (exists bar) (min foo)))').each.to_a.size,
+      "cached nil result of aggregate survives a property change, seed #{seed}"
+    )
+  end
 end

@@ -21,11 +21,12 @@ class Factbase::IndexedAnd
       entry = @idx[key]
       maps_array = maps.to_a
       if entry.nil?
-        entry = { index: {}, indexed_count: 0 }
+        entry = { index: {}, indexed_count: 0, pos: {}.compare_by_identity }
         @idx[key] = entry
       end
       if entry[:indexed_count] < maps_array.size
-        maps_array[entry[:indexed_count]..].each do |m|
+        maps_array[entry[:indexed_count]..].each_with_index do |m, i|
+          entry[:pos][m] = entry[:indexed_count] + i
           _all_tuples(m, props).each do |t|
             entry[:index][t] ||= []
             entry[:index][t] << m
@@ -42,11 +43,13 @@ class Factbase::IndexedAnd
           end
         end
       )
-      j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id)
+      j = tuples.flat_map { |t| entry[:index][t] || [] }.uniq(&:object_id).sort_by { |m| entry[:pos][m] }
       r = maps.respond_to?(:repack) ? maps.repack(j) : j
     else
       fail = false
+      copying = %i[head sorted inverted]
       @term.operands.each do |o|
+        next if copying.include?(o.op)
         n = o.predict(maps, fb, params)
         if n.nil?
           fail = true
@@ -69,8 +72,17 @@ class Factbase::IndexedAnd
 
   private
 
+  # Can the index resolve this operand on its own?
+  #
+  # A Symbol is a query parameter only when it starts with a dollar sign.
+  # Without one it names another property, which the index has no value for,
+  # so the full scan has to compare the two properties itself.
+  #
+  # @param [Object] item The second operand of the term
+  # @return [Boolean] TRUE if the index can take it
   def _scalar?(item)
-    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
+    return item.to_s.start_with?('$') if item.is_a?(Symbol)
+    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float)
   end
 
   def _all_tuples(fact, props)

@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'decoor'
+require 'ellipsized'
 require 'others'
 require 'tago'
 require 'time'
@@ -36,8 +37,11 @@ class Factbase::Logged
   decoor(:origin)
 
   def insert
-    @tube.say(Process.clock_gettime(MONO), "Inserted new fact ##{@origin.size} in #{Time.now.ago}")
-    Fact.new(@origin.insert, tube: @tube)
+    Process.clock_gettime(MONO).then do |mono|
+      Fact.new(@origin.insert, tube: @tube).tap do
+        @tube.say(mono, "Inserted new fact ##{@origin.size} in #{Time.now.ago}")
+      end
+    end
   end
 
   def query(term, maps = nil)
@@ -121,9 +125,15 @@ class Factbase::Logged
       k = args[0].to_s
       v = args[1]
       if k.end_with?('=')
-        s = v.is_a?(Time) ? v.utc.iso8601 : v.to_s
-        s = v.to_s.inspect if v.is_a?(String)
-        s = "#{s[0..(MAX_LENGTH / 2)]}...#{s[(-MAX_LENGTH / 2)..]}" if s.length > MAX_LENGTH
+        s =
+          if v.is_a?(Time)
+            v.utc.iso8601
+          elsif v.is_a?(String)
+            v.inspect
+          else
+            v.to_s
+          end
+        s = s.ellipsized(MAX_LENGTH)
         @tube.say(mono, "Set '#{k[0..-2]}' to #{s} (#{v.class})")
       end
       r
@@ -134,6 +144,8 @@ class Factbase::Logged
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   class Query
+    include Enumerable
+
     def initialize(term, maps, tube, fb)
       @term = term
       @maps = maps
@@ -153,7 +165,10 @@ class Factbase::Logged
       qry = @fb.query(@term, @maps)
       tail =
         Factbase::Logged.elapsed do
-          r = qry.each(fb, params, &)
+          r =
+            qry.each(fb, params) do |f|
+              yield(Factbase::Logged::Fact.new(f, tube: @tube))
+            end
         end
       unless r.is_a?(Integer)
         raise(StandardError, ".query(#{@termtext.inspect}).each() of #{qry.class} returned #{r.class}")

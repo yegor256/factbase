@@ -87,9 +87,35 @@ class TestLazyTapedHash < Factbase::Test
     assert_equal({ 'a' => 1, 'b' => nil, 'c' => 3 }, origin, 'Original should not be modified')
   end
 
+  def test_non_bang_mutators_trigger_copy
+    mutations = [
+      [:delete, ['a'], nil, { 'b' => 2 }],
+      [:store, ['c', 3], nil, { 'a' => 1, 'b' => 2, 'c' => 3 }],
+      [:clear, [], nil, {}],
+      [:update, [{ 'c' => 3 }], nil, { 'a' => 1, 'b' => 2, 'c' => 3 }],
+      [:delete_if, [], 'a', { 'b' => 2 }],
+      [:keep_if, [], 'b', { 'b' => 2 }]
+    ]
+    mutations.each do |method, arguments, key, expected|
+      hash, origin, added = wrap({ 'a' => 1, 'b' => 2 })
+      hash.public_send(method, *arguments) { |candidate, _value| candidate == key }
+      assert_copied(hash, origin)
+      assert_equal(expected, hash.to_h)
+      assert_equal({ 'a' => 1, 'b' => 2 }, origin, 'Original should not be modified')
+      refute_empty(added, 'Modified map should be tracked')
+    end
+  end
+
   def test_method_missing_reader_does_not_copy
     hash, origin = wrap({ 'a' => 1, 'b' => 2 })
     assert_read(hash, origin, 2, hash.size)
+  end
+
+  def test_reads_what_another_handle_wrote
+    taped = Factbase::LazyTaped.new([{ 'id' => [1] }])
+    handles = Array.new(2) { taped.each.first }
+    handles.first['seen'] = [1]
+    assert_equal([1], handles.last['seen'].to_a)
   end
 
   private

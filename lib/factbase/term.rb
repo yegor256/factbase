@@ -90,6 +90,11 @@ require_relative 'terms/zero'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Term < Factbase::TermBase
+  # An error that already names the term it happened in and the place
+  # in the code where it was raised. It is not decorated again by the
+  # enclosing terms, in order to keep the original message readable.
+  class Wrapped < RuntimeError; end
+
   attr_reader :op, :operands
 
   TERMS = {
@@ -196,6 +201,13 @@ class Factbase::Term < Factbase::TermBase
     end
   end
 
+  # Forget what was remembered while earlier facts were evaluated.
+  # @return [Array] The operands
+  def forget
+    @terms[@op].forget if @terms.key?(@op)
+    @operands.each { |o| o.forget if o.is_a?(Factbase::TermBase) }
+  end
+
   # Evaluate term on a fact
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
@@ -204,13 +216,17 @@ class Factbase::Term < Factbase::TermBase
   def evaluate(fact, maps, fb)
     if @terms.key?(@op)
       @terms[@op].evaluate(fact, maps, fb)
-    else
+    elsif @op != :initialize && Factbase::Term.private_method_defined?(@op, false)
       __send__(@op, fact, maps, fb)
+    else
+      raise(NoMethodError, "There is no term '#{@op}'")
     end
+  rescue Factbase::Term::Wrapped => e
+    raise(e)
   rescue NoMethodError => e
-    raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
+    raise(Factbase::Term::Wrapped, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
   rescue StandardError => e
-    raise(RuntimeError, "#{e.message.inspect} at #{self} at #{e.backtrace[0]}")
+    raise(Factbase::Term::Wrapped, "#{e.message.inspect} at #{self} at #{e.backtrace[0]}")
   end
 
   # Simplify it if possible.
@@ -236,6 +252,7 @@ class Factbase::Term < Factbase::TermBase
   # @return [Boolean] TRUE if static
   def static?
     return true if @op == :agg
+    return false if %i[join as].include?(@op)
     @operands.each do |o|
       return false if o.is_a?(Factbase::Term) && !o.static?
       return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
@@ -254,9 +271,12 @@ class Factbase::Term < Factbase::TermBase
     false
   end
 
+  private
+
   def at(fact, maps, fb)
     assert_args(2)
     i = _values(0, fact, maps, fb)
+    return if i.nil?
     raise(RuntimeError, "Too many values (#{i.size}) at first position, one expected") unless i.size == 1
     i = i[0]
     return if i.nil?
