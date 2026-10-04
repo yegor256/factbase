@@ -37,6 +37,13 @@ class Factbase::Pre
     f
   end
 
+  def import(bytes)
+    probe = Factbase.new
+    probe.import(bytes)
+    probe.query('(always)').each { |f| @block.call(f, self) }
+    @fb.import(probe.export)
+  end
+
   def txn
     @fb.txn do |fbt|
       yield(Factbase::Pre.new(fbt, &@block))
