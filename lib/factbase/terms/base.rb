@@ -10,15 +10,13 @@
 class Factbase::TermBase
   # Set the name the user used for this term and its implementation helpers.
   # @param [Symbol] name Name of the term in the query
-  # rubocop:disable Elegant/GoodMethodName
-  def name=(name)
+  def name=(name) # rubocop:disable Elegant/GoodMethodName
     @name = name
     instance_variables.each do |variable|
       value = instance_variable_get(variable)
       value.name = name if value.is_a?(Factbase::TermBase)
     end
   end
-  # rubocop:enable Elegant/GoodMethodName
 
   # Forget what was remembered while earlier facts were evaluated.
   #
