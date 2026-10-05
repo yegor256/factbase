@@ -99,6 +99,14 @@ class TestSyntax < Factbase::Test
     assert(Factbase::Syntax.new('(eq t 1.5e-10)').to_term.evaluate({ 't' => 1.5e-10 }, [], Factbase.new))
   end
 
+  def test_parses_float_with_uppercase_exponent
+    assert(Factbase::Syntax.new('(eq ratio 1.5E-10)').to_term.evaluate({ 'ratio' => 1.5e-10 }, [], Factbase.new))
+  end
+
+  def test_parses_float_with_unsigned_exponent
+    assert(Factbase::Syntax.new('(eq ratio 1.2e3)').to_term.evaluate({ 'ratio' => 1200.0 }, [], Factbase.new))
+  end
+
   def test_parses_float_without_a_dot
     assert(Factbase::Syntax.new('(eq t 1e10)').to_term.evaluate({ 't' => 1e10 }, [], Factbase.new))
     assert(Factbase::Syntax.new('(eq t 2e-3)').to_term.evaluate({ 't' => 2e-3 }, [], Factbase.new))
@@ -184,6 +192,50 @@ class TestSyntax < Factbase::Test
     end
   end
 
+  def test_cannot_parse_term_followed_by_word
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    q = "(eq x 1) #{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}"
+    assert_raises(Factbase::Syntax::Broken, "trailing word in #{q.inspect} was ignored, seed #{seed}") do
+      Factbase::Syntax.new(q).to_term
+    end
+  end
+
+  def test_cannot_parse_term_followed_by_glued_word
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    q = "(eq x 1)#{Array.new(rnd.rand(1..16)) { rnd.rand(0x430..0x44f).chr(Encoding::UTF_8) }.join}"
+    assert_raises(Factbase::Syntax::Broken, "glued word in #{q.inspect} was ignored, seed #{seed}") do
+      Factbase::Syntax.new(q).to_term
+    end
+  end
+
+  def test_cannot_parse_term_followed_by_number
+    seed = Random.new_seed
+    q = "(eq x 1) #{Random.new(seed).rand(-1_000_000..1_000_000)}"
+    assert_raises(Factbase::Syntax::Broken, "trailing number in #{q.inspect} was ignored, seed #{seed}") do
+      Factbase::Syntax.new(q).to_term
+    end
+  end
+
+  def test_cannot_query_with_trailing_word
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    fb.insert.x = 1
+    q = "(eq x 1) #{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}"
+    assert_raises(Factbase::Syntax::Broken, "query #{q.inspect} ran with its tail ignored, seed #{seed}") do
+      fb.query(q).each.to_a
+    end
+  end
+
+  def test_parses_term_followed_by_comment
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    q = "(eq x 1) # #{Array.new(rnd.rand(1..16)) { rnd.rand(0x430..0x44f).chr(Encoding::UTF_8) }.join}"
+    assert_equal('(eq x 1)', Factbase::Syntax.new(q).to_term.to_s, "comment in #{q.inspect} broke it, seed #{seed}")
+  end
+
   def test_simplification
     {
       '(foo)' => '(foo)',
@@ -214,5 +266,9 @@ class TestSyntax < Factbase::Test
       super
       @x = invalid
     end
+  end
+
+  def test_ends_a_comment_at_a_carriage_return
+    assert_equal('(eq x 1)', Factbase::Syntax.new("# comment\r(eq x 1)").to_term.to_s)
   end
 end
