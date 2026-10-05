@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/indexed/indexed_eq'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
@@ -7,8 +10,6 @@ require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/lazy_taped'
 require_relative '../../../lib/factbase/taped'
 require_relative '../../../lib/factbase/term'
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
 

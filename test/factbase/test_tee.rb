@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/accum'
 require_relative '../../lib/factbase/fact'
 require_relative '../../lib/factbase/tee'
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
 
