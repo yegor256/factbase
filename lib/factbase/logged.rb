@@ -127,7 +127,7 @@ class Factbase::Logged
       if k.end_with?('=')
         s =
           if v.is_a?(Time)
-            v.utc.iso8601
+            v.getutc.iso8601
           elsif v.is_a?(String)
             v.inspect
           else
