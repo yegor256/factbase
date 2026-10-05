@@ -92,4 +92,10 @@ class TestTerm < Factbase::Test
     assert_kind_of(Factbase::CachedTerm, t)
     refute_kind_of(Factbase::CachedTerm, Factbase::Term.new(:something, []))
   end
+
+  def test_keeps_the_offset_of_a_time_in_to_s
+    t = Time.new(2026, 10, 4, 12, 0, 0, '+03:00')
+    Factbase::Term.new(:eq, [:when, t]).to_s
+    assert_equal(3 * 60 * 60, t.utc_offset, 'the time of the term was moved to UTC')
+  end
 end
