@@ -50,6 +50,10 @@ class Factbase::SyncFactbase
   # Run an ACID transaction.
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   # @yield [Factbase] Block to execute in transaction
+  def import(bytes)
+    try_lock { @origin.import(bytes) }
+  end
+
   def txn
     try_lock do
       @origin.txn do |fbt|
