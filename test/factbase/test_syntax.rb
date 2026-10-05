@@ -267,4 +267,8 @@ class TestSyntax < Factbase::Test
       @x = invalid
     end
   end
+
+  def test_ends_a_comment_at_a_carriage_return
+    assert_equal('(eq x 1)', Factbase::Syntax.new("# comment\r(eq x 1)").to_term.to_s)
+  end
 end
