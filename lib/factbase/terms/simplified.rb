@@ -15,14 +15,15 @@ class Factbase::Simplified
     @operands = operands
   end
 
-  # Removes duplicate operands
+  # Removes duplicate operands, except the ones that write into the fact,
+  # such as +as+ and +join+, since each of them adds its value again
   def unique
     strs = []
     ops = []
     @operands.each do |o|
       o = o.simplify if o.is_a?(Factbase::Term)
       s = o.to_s
-      next if strs.include?(s)
+      next if strs.include?(s) && !(o.is_a?(Factbase::Term) && %i[as join].include?(o.op))
       strs << s
       ops << o
     end
