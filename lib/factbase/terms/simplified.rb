@@ -11,6 +11,8 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Simplified
+  WRITERS = %i[as join].freeze
+
   def initialize(operands)
     @operands = operands
   end
@@ -23,7 +25,7 @@ class Factbase::Simplified
     @operands.each do |o|
       o = o.simplify if o.is_a?(Factbase::Term)
       s = o.to_s
-      next if strs.include?(s) && !(o.is_a?(Factbase::Term) && %i[as join].include?(o.op))
+      next if strs.include?(s) && !(o.is_a?(Factbase::Term) && WRITERS.include?(o.op))
       strs << s
       ops << o
     end
