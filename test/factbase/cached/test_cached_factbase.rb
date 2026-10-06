@@ -114,4 +114,10 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(1, fb.size)
     assert_equal(['kept'], fb.query('(exists foo)').each.to_a.map(&:foo))
   end
+
+  def test_reads_a_property_named_like_a_kernel_method
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.rand = 'hello'
+    assert_equal('hello', fb.query('(always)').each.to_a.first.rand)
+  end
 end
