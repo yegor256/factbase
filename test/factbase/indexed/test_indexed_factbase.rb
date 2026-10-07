@@ -181,6 +181,7 @@ class TestIndexedFactbase < Factbase::Test
     refute_empty(unmarshalled[:idx], 'Index should not be empty after query')
     fb2 = Factbase::IndexedFactbase.new(Factbase.new)
     fb2.import(data)
+    fb2.query('(eq foo 42)').each.to_a
     fb2.insert.bar = 13
     unmarshalled2 = Marshal.load(fb2.export)
     assert_kind_of(Hash, unmarshalled2[:idx], 'Index should remain a Hash after insert')
@@ -458,5 +459,17 @@ class TestIndexedFactbase < Factbase::Test
       f.bar = 3
     end
     assert_equal([51], fb.query('(and (eq foo 2) (unique bar))').each.to_a.map(&:id))
+  end
+
+  def test_does_not_install_the_index_of_an_import
+    fb1 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb1.insert.foo = 42
+    fb1.query('(eq foo 42)').each.to_a
+    idx = {}
+    fb2 = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb2.import(fb1.export)
+    assert_empty(idx)
+    fb2.query('(eq foo 42)').each { |f| f.bar = 13 }
+    assert_equal(1, fb2.query('(exists bar)').each.to_a.size)
   end
 end
