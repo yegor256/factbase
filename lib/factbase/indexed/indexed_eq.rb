@@ -17,7 +17,7 @@ class Factbase::IndexedEq
   def predict(maps, _fb, params)
     first_operand = @term.operands[0]
     second_operand = @term.operands[1]
-    return unless first_operand.is_a?(Symbol) && _scalar?(second_operand)
+    return unless _property?(first_operand) && _scalar?(second_operand)
     first_operand = first_operand.to_s
     key = [maps.object_id, first_operand, @term.op]
     @idx[key] ||= { facts: {}, count: 0 }
@@ -30,6 +30,10 @@ class Factbase::IndexedEq
   end
 
   private
+
+  def _property?(item)
+    item.is_a?(Symbol) && !item.start_with?('$')
+  end
 
   # Can the index resolve this operand on its own?
   #

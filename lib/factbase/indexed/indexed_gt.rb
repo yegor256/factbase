@@ -12,7 +12,7 @@ class Factbase::IndexedGt
 
   def predict(maps, _fb, params)
     op1, op2 = @term.operands
-    return unless op1.is_a?(Symbol) && _scalar?(op2)
+    return unless _property?(op1) && _scalar?(op2)
     prop = op1.to_s
     target = op2.is_a?(Symbol) ? params[op2.to_s]&.first : op2
     return maps || [] if target.nil?
@@ -38,6 +38,10 @@ class Factbase::IndexedGt
   # @return [Object] The value to compare with
   def _floored(value)
     value.is_a?(Time) ? value.floor : value
+  end
+
+  def _property?(item)
+    item.is_a?(Symbol) && !item.start_with?('$')
   end
 
   def _scalar?(item)
