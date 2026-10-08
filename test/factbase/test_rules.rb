@@ -96,6 +96,25 @@ class TestRules < Factbase::Test
     assert_equal(0, fb.size)
   end
 
+  def test_rolls_back_fact_breaking_rule_by_throw
+    fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
+    fb.txn do |fbt|
+      fbt.insert.bar = 1
+      throw(:rollback)
+    end
+    assert_equal(0, fb.size, 'fact breaking the rule was not rolled back')
+  end
+
+  def test_checks_rules_when_txn_is_left_by_break
+    fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
+    assert_raises(ArgumentError, 'fact breaking the rule was committed by break') do
+      fb.txn do |fbt|
+        fbt.insert.bar = 1
+        break
+      end
+    end
+  end
+
   def test_checks_rules_when_txn_throws_commit
     fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
     assert_raises(ArgumentError) do
