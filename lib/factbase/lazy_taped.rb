@@ -87,7 +87,14 @@ class Factbase::LazyTaped
         yielded_size += 1
       end
     end
-    staged = is_copied == copied? ? @staged : @staged[yielded_size..]
+    staged =
+      if is_copied
+        @staged.dup
+      elsif copied?
+        @staged[yielded_size..]
+      else
+        @staged
+      end
     staged&.each do |f|
       next if f.nil?
       yield(_tape(f))
