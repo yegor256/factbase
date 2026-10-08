@@ -34,6 +34,12 @@ class TestFactbase < Factbase::Test
     assert_equal([2, 3], maps[1]['bar'])
   end
 
+  def test_rejects_invalid_initial_maps
+    [nil, 'str', { 'a' => 1 }, [1, 2]].each do |invalid|
+      assert_raises(ArgumentError) { Factbase.new(invalid) }
+    end
+  end
+
   def test_query_many_times
     total = 5
     fb = Factbase::Fuzz.make(total)
