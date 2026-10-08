@@ -44,7 +44,15 @@ class Factbase::IndexedEq
     item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float)
   end
 
+  # @todo #1213:60min Notice a fact replaced in the scoped array without a change of its size.
+  #  Every index, the range ones included, only compares the size of the array with the
+  #  count it has seen, so it rebuilds when the array shrinks but keeps answering with the
+  #  old fact when one element is swapped for another and the size stays the same.
   def _feed(facts, entry, operand)
+    if entry[:count] > facts.size
+      entry[:facts] = {}
+      entry[:count] = 0
+    end
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |m|
       m[operand]&.uniq&.each do |v|
