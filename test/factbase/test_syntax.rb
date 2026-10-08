@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/factbase/syntax'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../lib/factbase/syntax'
 
 require_relative '../test__helper'
 
