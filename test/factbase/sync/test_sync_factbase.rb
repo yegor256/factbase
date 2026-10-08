@@ -79,4 +79,20 @@ class TestSyncFactbase < Factbase::Test
       assert_equal(t, fs.first['foo'].size)
     end
   end
+
+  def test_waits_for_the_monitor_in_import
+    monitor = Monitor.new
+    fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
+    src = Factbase.new
+    src.insert.foo = 1
+    bytes = src.export
+    t = nil
+    monitor.synchronize do
+      t = Thread.new { fb.import(bytes) }
+      sleep(0.1)
+      assert_equal(0, fb.size, 'the import went in while the monitor was taken')
+    end
+    t.join
+    assert_equal(1, fb.size)
+  end
 end
