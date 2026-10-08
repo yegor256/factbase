@@ -34,6 +34,13 @@ class Factbase::Tallied
     Query.new(@fb.query(query, maps), @churn, @fb)
   end
 
+  def import(bytes)
+    probe = Factbase.new
+    probe.import(bytes)
+    @fb.import(bytes)
+    @churn.append(probe.size, 0, 0)
+  end
+
   def txn
     before = @churn.dup
     commit = false

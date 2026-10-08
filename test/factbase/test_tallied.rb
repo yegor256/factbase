@@ -93,4 +93,13 @@ class TestTallied < Factbase::Test
     assert_equal(t, fb.churn.deleted)
     assert_equal(t * 2, fb.churn.added)
   end
+
+  def test_counts_imported_facts
+    src = Factbase.new
+    3.times { |i| src.insert.foo = i }
+    fb = Factbase::Tallied.new(Factbase.new)
+    fb.import(src.export)
+    assert_equal(3, fb.size)
+    assert_equal(3, fb.churn.inserted, 'Imported facts must be counted as inserted')
+  end
 end
