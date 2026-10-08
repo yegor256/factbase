@@ -171,6 +171,19 @@ class TestImpatient < Factbase::Test
     assert_equal(1, fb.query('(always)').each { sleep(0.02) })
   end
 
+  def test_lets_stop_iteration_from_the_block_through
+    fb = Factbase::Impatient.new(Factbase.new)
+    3.times { fb.insert.x = 1 }
+    seen = 0
+    assert_raises(StopIteration) do
+      fb.query('(always)').each do |_f|
+        seen += 1
+        raise(StopIteration) if seen == 2
+      end
+    end
+    assert_equal(2, seen)
+  end
+
   def test_custom_timeout
     slow = SlowEnoughFactbase.new
     slow.insert.value = 42

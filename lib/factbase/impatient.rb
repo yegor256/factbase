@@ -63,15 +63,22 @@ class Factbase::Impatient
       enum = @fb.query(@term, @maps).each(fb, params)
       n = 0
       left = @timeout
+      stopped = nil
       loop do
         # rubocop:disable Elegant/NoRedundantVariable
         started = Time.now
         fact = impatient('each', left) { enum.next }
         # rubocop:enable Elegant/NoRedundantVariable
         left -= Time.now - started
-        yield(fact)
+        begin
+          yield(fact)
+        rescue StopIteration => e
+          stopped = e
+          break
+        end
         n += 1
       end
+      raise(stopped) if stopped
       n
     end
 
