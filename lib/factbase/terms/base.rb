@@ -48,6 +48,14 @@ class Factbase::TermBase
 
   private
 
+  # Turns a value into a string, printing a time in UTC ISO 8601.
+  # @param [Object] value The value
+  # @return [String] The value as a string
+  def text(value)
+    return value.to_s unless value.is_a?(Time)
+    value.utc.iso8601(value.subsec.zero? ? 0 : 9)
+  end
+
   def assert_args(num)
     c = @operands.size
     name = @name || @op
