@@ -67,6 +67,8 @@ class Factbase::LazyTaped
 
   def [](pos)
     return @staged[pos] if copied?
+    pos += size if pos.negative?
+    return if pos.negative?
     return @origin[pos] if pos < @origin.size
     @staged[pos - @origin.size]
   end
