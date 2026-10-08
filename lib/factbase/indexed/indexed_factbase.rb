@@ -68,7 +68,7 @@ class Factbase::IndexedFactbase
     result
   end
 
-  # Export it into a chain of bytes, including both data and index.
+  # Export it into a chain of bytes, with the facts only.
   #
   # Here is how you can export it to a file, for example:
   #
@@ -76,14 +76,15 @@ class Factbase::IndexedFactbase
   #  fb.insert.foo = 42
   #  File.binwrite("foo.fb", fb.export)
   #
-  # The data is binary, it's not a text!
+  # The data is binary, it's not a text! The index is not exported,
+  # since its keys are valid only in the process that made them.
   #
-  # @return [String] Binary string containing serialized data and index
+  # @return [String] Binary string containing serialized data
   def export
-    Marshal.dump({ maps: @origin.export, idx: @idx })
+    @origin.export
   end
 
-  # Import from a chain of bytes, including both data and index.
+  # Import from a chain of bytes.
   #
   # Here is how you can read it from a file, for example:
   #
@@ -92,20 +93,13 @@ class Factbase::IndexedFactbase
   #
   # The facts that existed in the factbase before importing will remain there.
   # The facts from the incoming byte stream will be added to them.
-  # If the byte stream doesn't contain an index (for backward compatibility),
-  # the index will be empty and will be built on first use.
+  # The index is emptied and will be built again on first use. An index
+  # found in the byte stream, written by an older version, is ignored.
   #
   # @param [String] bytes Binary string to import
   def import(bytes)
-    raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?
-    data = Marshal.load(bytes)
-    if data.is_a?(Hash) && data.key?(:maps)
-      @origin.import(data[:maps])
-      @idx.merge!(data[:idx]) if data[:idx].is_a?(Hash)
-    else
-      @origin.import(bytes)
-      @idx.clear
-    end
+    @origin.import(bytes)
+    @idx.clear
     @fresh.clear
   end
 
