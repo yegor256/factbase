@@ -102,6 +102,18 @@ class TestMath < Factbase::Test
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
 
+  def test_aggregates_multiple_values_before_arithmetic
+    values = fact('left' => [2, 3], 'right' => [7, 2])
+    {
+      plus: 14,
+      minus: -4,
+      times: 84,
+      div: 0
+    }.each do |operation, expected|
+      assert_equal(expected, Factbase::Term.new(operation, %i[left right]).evaluate(values, [], Factbase.new))
+    end
+  end
+
   def test_minus_time
     t = Factbase::Term.new(:minus, [:foo, '4 hours'])
     assert_equal(
