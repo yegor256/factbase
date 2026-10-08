@@ -271,4 +271,9 @@ class TestSyntax < Factbase::Test
   def test_ends_a_comment_at_a_carriage_return
     assert_equal('(eq x 1)', Factbase::Syntax.new("# comment\r(eq x 1)").to_term.to_s)
   end
+
+  def test_parses_a_string_that_ends_in_an_escaped_backslash
+    assert_equal('tail\\', Factbase::Syntax.new('(eq x "tail\\\\")').to_term.operands[1])
+    assert_equal("x'y", Factbase::Syntax.new("(eq x 'x\\'y')").to_term.operands[1])
+  end
 end
