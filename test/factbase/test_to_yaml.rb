@@ -42,8 +42,15 @@ class TestToYAML < Factbase::Test
 
   def test_time_value
     fb = Factbase.new
+    time = Time.now
+    fb.insert.ts = time
+    assert_equal(time.utc.iso8601(6), YAML.load(Factbase::ToYAML.new(fb).yaml)[0]['ts'])
+  end
+
+  def test_reads_its_own_output_back
+    fb = Factbase.new
     fb.insert.ts = Time.now
-    assert_kind_of(Time, YAML.safe_load(Factbase::ToYAML.new(fb).yaml, permitted_classes: [Time, Symbol])[0]['ts'])
+    assert_equal(1, YAML.load(Factbase::ToYAML.new(fb).yaml).size)
   end
 
   def test_string_value
