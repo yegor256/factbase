@@ -103,10 +103,17 @@ class Factbase::Syntax
     breaks = ["\n", "\r"]
     opener = nil
     comment = false
+    closed = false
     @query.to_s.chars.each do |c|
       comment = true if opener.nil? && c == '#'
       comment = false if comment && breaks.include?(c)
       next if comment
+      if closed
+        closed = false
+        unless spaces.include?(c) || c == '('
+          raise(ArgumentError, "Text is glued to a closing quote (#{list.last.inspect}#{c})")
+        end
+      end
       if quotes.include?(c)
         if !opener.nil? && acc[-1] == '\\'
           acc = acc[0..-2]
@@ -114,6 +121,10 @@ class Factbase::Syntax
           opener = c
         elsif opener == c
           opener = nil
+          list << (acc + c)
+          acc = ''
+          closed = true
+          next
         end
       end
       if opener
