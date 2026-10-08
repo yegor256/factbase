@@ -46,7 +46,13 @@ class Factbase::IndexedQuery
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
     n = 0
-    @origin.each(fb, params).to_a.tap { @fresh.clear }.each do |f|
+    found =
+      begin
+        @origin.each(fb, params).to_a
+      ensure
+        @fresh.clear
+      end
+    found.each do |f|
       yield(Factbase::IndexedFact.new(f, @idx, @fresh))
       n += 1
     end
