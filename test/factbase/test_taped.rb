@@ -84,4 +84,10 @@ class TestTaped < Factbase::Test
     assert_equal(1, t.added.size)
     assert_equal(1, t.deleted.size)
   end
+
+  def test_gives_a_copy_from_to_a_of_an_array
+    values = [20]
+    Factbase::Taped::TapedArray.new(values, 1, []).to_a << 30
+    assert_equal([20], values)
+  end
 end

@@ -134,7 +134,7 @@ class Factbase::Taped
     end
 
     def to_a
-      @origin.to_a
+      @origin.to_a.dup
     end
 
     def any?(pattern = nil, &)
