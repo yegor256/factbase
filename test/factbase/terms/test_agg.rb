@@ -87,4 +87,16 @@ class TestAgg < Factbase::Test
       )
     end
   end
+
+  def test_reads_the_inner_fact_in_a_nested_selector
+    fb = Factbase.new
+    [['a', 1], ['a', 5], ['b', 2], ['b', 9]].each do |g, v|
+      f = fb.insert
+      f.g = g
+      f.v = v
+    end
+    query = '(agg (eq v (agg (eq g $g) (max v))) (count))'
+    assert_equal(2, fb.query(query).one)
+    assert_equal([2, 2, 2, 2], fb.query("(as n #{query})").each.map { |f| f['n'].first })
+  end
 end
