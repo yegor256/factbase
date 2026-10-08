@@ -30,6 +30,14 @@ class TestCachedFactbase < Factbase::Test
     )
   end
 
+  def test_traces_every_fact
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    3.times { |i| fb.insert.x = i }
+    assert_output("(traced (always)) -> true\n" * 3) do
+      fb.query('(and (exists x) (traced (always)))').each.to_a
+    end
+  end
+
   def test_queries_after_update_through_a_parameterized_query
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.then { |f| f.foo = 1 }
