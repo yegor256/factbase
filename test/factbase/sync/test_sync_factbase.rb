@@ -79,4 +79,21 @@ class TestSyncFactbase < Factbase::Test
       assert_equal(t, fs.first['foo'].size)
     end
   end
+
+  def test_reads_and_writes_a_kept_fact_under_the_monitor
+    monitor = Monitor.new
+    fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
+    inserted = fb.insert
+    inserted.x = 1
+    found = fb.query('(exists x)').each.to_a.first
+    [-> { inserted.y = 2 }, -> { found['x'] }, -> { found.x }].each do |touch|
+      monitor.synchronize do
+        t = Thread.new { touch.call }
+        sleep(0.05)
+        assert_predicate(t, :alive?, 'a fact handle went around the monitor')
+        t.kill
+      end
+    end
+    assert_equal(1, found.x)
+  end
 end
