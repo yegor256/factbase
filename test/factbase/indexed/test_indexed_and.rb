@@ -64,4 +64,23 @@ class TestIndexedAnd < Factbase::Test
     term.redress!(Factbase::IndexedTerm, idx: {})
     assert_nil(term.predict(Factbase::Taped.new([{ 'foo' => [42] }, { 'bar' => [7] }]), nil, {}))
   end
+
+  def test_multi_equality_matches_integer_fact_when_query_uses_equal_float
+    origin = Factbase.new
+    first = origin.insert
+    first.amount = 1
+    first.kind = 'selected'
+    second = origin.insert
+    second.amount = 2
+    second.kind = 'selected'
+    query = '(and (eq amount 1.0) (eq kind "selected"))'
+    assert_equal(
+      [1], origin.query(query).each.to_a.map(&:amount),
+      'a plain factbase matches numerically equal Integer and Float values'
+    )
+    assert_equal(
+      [1], Factbase::IndexedFactbase.new(origin).query(query).each.to_a.map(&:amount),
+      'the multi-equality index must retain numerically equal Integer and Float values'
+    )
+  end
 end

@@ -77,4 +77,12 @@ class TestIndexedEq < Factbase::Test
       'a fact that stores the same value twice must be returned once, as it is without the index'
     )
   end
+
+  def test_matches_integer_fact_when_query_uses_equal_float
+    origin = Factbase.new
+    origin.insert.amount = 1
+    query = '(eq amount 1.0)'
+    assert_equal([1], origin.query(query).each.to_a.map(&:amount))
+    assert_equal([1], Factbase::IndexedFactbase.new(origin).query(query).each.to_a.map(&:amount))
+  end
 end
