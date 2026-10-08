@@ -17,4 +17,14 @@ class TestAtAbsent < Factbase::Test
       'an absent index must answer nothing, not raise'
     )
   end
+
+  def test_refuses_a_fractional_position
+    fb = Factbase.new
+    f = fb.insert
+    f.x = 10
+    f.x = 20
+    f.x = 30
+    e = assert_raises(StandardError) { fb.query('(eq (at 1.9 x) 20)').each.to_a }
+    assert_includes(e.message, 'An integer position is expected, but 1.9 provided', e.message)
+  end
 end

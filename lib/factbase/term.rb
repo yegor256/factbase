@@ -280,6 +280,7 @@ class Factbase::Term < Factbase::TermBase
     raise(RuntimeError, "Too many values (#{i.size}) at first position, one expected") unless i.size == 1
     i = i[0]
     return if i.nil?
+    raise(ArgumentError, "An integer position is expected, but #{i} provided") unless i.is_a?(Integer)
     raise(ArgumentError, "A non-negative position is expected, but #{i} provided") if i.negative?
     v = _values(1, fact, maps, fb)
     return if v.nil?
