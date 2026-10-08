@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require 'monitor'
 require 'threads'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/sync/sync_factbase'
@@ -78,5 +79,24 @@ class TestSyncFactbase < Factbase::Test
       assert_equal(1, fs.size)
       assert_equal(t, fs.first['foo'].size)
     end
+  end
+
+  def test_writes_to_a_new_fact_under_the_monitor
+    monitor = Monitor.new
+    fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
+    fact = fb.insert
+    done = Queue.new
+    writer = nil
+    monitor.synchronize do
+      writer =
+        Thread.new do
+          fact.foo = 42
+          done << :written
+        end
+      sleep(0.2)
+      assert_empty(done, 'a property of a new fact must not be written while another thread holds the monitor')
+    end
+    writer.join
+    assert_equal(42, fb.query('(exists foo)').each.to_a.first['foo'].first)
   end
 end
