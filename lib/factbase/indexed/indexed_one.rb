@@ -12,7 +12,7 @@ class Factbase::IndexedOne
 
   def predict(maps, _fb, _params)
     operand = @term.operands.first
-    return unless operand.is_a?(Symbol)
+    return unless operand.is_a?(Symbol) && !operand.to_s.start_with?('$')
     prop = operand.to_s
     key = [maps.object_id, prop, @term.op]
     @idx[key] ||= { facts: [], count: 0 }
