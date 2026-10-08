@@ -9,6 +9,7 @@ require_relative '../factbase'
 require_relative '../factbase/accum'
 require_relative '../factbase/syntax'
 require_relative '../factbase/tallied'
+require_relative 'enumerated'
 
 # A decorator of a Factbase, that checks rules on every set.
 #
@@ -27,6 +28,7 @@ require_relative '../factbase/tallied'
 # License:: MIT
 class Factbase::Rules
   decoor(:fb)
+  include Factbase::Enumerated
 
   def initialize(fb, rules, check = Check.new(rules), uid: nil)
     raise(ArgumentError, 'The "fb" is nil') if fb.nil?

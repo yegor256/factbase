@@ -6,6 +6,7 @@
 require 'decoor'
 require_relative '../../factbase'
 require_relative '../../factbase/syntax'
+require_relative '../enumerated'
 require_relative 'indexed_fact'
 require_relative 'indexed_query'
 require_relative 'indexed_term'
@@ -17,6 +18,7 @@ require_relative 'indexed_term'
 # License:: MIT
 class Factbase::IndexedFactbase
   decoor(:origin)
+  include Factbase::Enumerated
 
   # Constructor.
   # @param [Factbase] origin Original factbase to decorate
