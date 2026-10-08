@@ -199,4 +199,48 @@ class TestRules < Factbase::Test
     assert_includes(message, '(exists foo)', 'Error message should name the failed term')
     refute_includes(message, 'intentionally long enough', 'Error message should not name the header')
   end
+
+  def test_checks_second_write_with_rule_that_defines_term
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "_rules_twice_#{Array.new(12) { [*'a'..'z'].sample(random: rnd) }.join}"
+    Factbase::Undef.new([name.to_sym]).evaluate(fact, [], Factbase.new)
+    f = Factbase::Rules.new(Factbase.new, "(and (defn #{name} 'true') (#{name}))").insert
+    f.a = rnd.rand(1000)
+    f.b = rnd.rand(1000)
+    assert_equal(2, f.all_properties.size, "second write with defn in the rule was lost, seed #{seed}")
+  end
+
+  def test_checks_two_facts_with_rule_that_defines_term
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "_rules_facts_#{Array.new(12) { [*'a'..'z'].sample(random: rnd) }.join}"
+    Factbase::Undef.new([name.to_sym]).evaluate(fact, [], Factbase.new)
+    fb = Factbase::Rules.new(Factbase.new, "(and (defn #{name} 'true') (#{name}))")
+    fb.insert.a = rnd.rand(1000)
+    fb.insert.a = rnd.rand(1000)
+    assert_equal(2, fb.size, "second fact with defn in the rule was lost, seed #{seed}")
+  end
+
+  def test_checks_write_through_query_with_rule_that_defines_term
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "_rules_query_#{Array.new(12) { [*'a'..'z'].sample(random: rnd) }.join}"
+    Factbase::Undef.new([name.to_sym]).evaluate(fact, [], Factbase.new)
+    fb = Factbase::Rules.new(Factbase.new, "(and (defn #{name} 'true') (#{name}))")
+    fb.insert.a = rnd.rand(1000)
+    fb.query('(always)').each { |f| f.b = rnd.rand(1000) }
+    assert_equal(1, fb.query('(exists b)').each.to_a.size, "write through query was lost, seed #{seed}")
+  end
+
+  def test_commits_two_txns_with_rule_that_defines_term
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "_rules_txns_#{Array.new(12) { [*'a'..'z'].sample(random: rnd) }.join}"
+    Factbase::Undef.new([name.to_sym]).evaluate(fact, [], Factbase.new)
+    fb = Factbase::Rules.new(Factbase.new, "(and (defn #{name} 'true') (#{name}))")
+    fb.txn { |t| t.insert.a = rnd.rand(1000) }
+    fb.txn { |t| t.insert.a = rnd.rand(1000) }
+    assert_equal(2, fb.size, "second txn with defn in the rule was lost, seed #{seed}")
+  end
 end
