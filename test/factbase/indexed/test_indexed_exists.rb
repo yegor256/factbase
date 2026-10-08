@@ -67,4 +67,16 @@ class TestIndexedExists < Factbase::Test
       assert_kind_of(c[:expected], n, "Expect #{c[:expected]}, but got #{n.class} for input #{c[:input].class}")
     end
   end
+
+  def test_skips_a_subterm_operand
+    term = Factbase::Term.new(:exists, [Factbase::Term.new(:eq, [:kind, 'a'])])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    assert_nil(term.predict([{ 'kind' => ['a'] }], nil, {}))
+  end
+
+  def test_skips_a_literal_operand
+    term = Factbase::Term.new(:exists, [42])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    assert_nil(term.predict([{ 'kind' => ['a'] }], nil, {}))
+  end
 end
