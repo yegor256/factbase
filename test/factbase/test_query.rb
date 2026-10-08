@@ -421,6 +421,15 @@ class TestQuery < Factbase::Test
     )
   end
 
+  def test_deletes_the_fact_it_selects_when_another_differs_only_by_float
+    fb = Factbase.new
+    fb.insert.x = 1
+    fb.insert.x = 1.0
+    assert_equal([Float], fb.query('(head 1 (inverted (always)))').each.map { |f| f.x.class })
+    assert_equal(1, fb.query('(head 1 (inverted (always)))').delete!)
+    assert_equal([Integer], fb.query('(always)').each.map { |f| f.x.class }, 'the fact with 1 was deleted instead')
+  end
+
   private
 
   def with_factbases(maps = [], &)
