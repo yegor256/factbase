@@ -46,7 +46,13 @@ class TestToJSON < Factbase::Test
   def test_time_value_in_iso8601
     fb = Factbase.new
     fb.insert.when = Time.utc(2026, 9, 1, 10, 20, 30, 123_456)
-    assert_equal('2026-09-01T10:20:30.123456Z', JSON.parse(Factbase::ToJSON.new(fb).json)[0]['when'])
+    assert_equal('2026-09-01T10:20:30.123456000Z', JSON.parse(Factbase::ToJSON.new(fb).json)[0]['when'])
+  end
+
+  def test_keeps_nanoseconds_of_time
+    fb = Factbase.new
+    fb.insert.when = Time.utc(2026, 9, 30) + Rational(123_456_789, 1_000_000_000)
+    assert_equal('2026-09-30T00:00:00.123456789Z', JSON.parse(Factbase::ToJSON.new(fb).json)[0]['when'])
   end
 
   def test_string_value
