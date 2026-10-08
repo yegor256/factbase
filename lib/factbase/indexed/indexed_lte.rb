@@ -60,7 +60,7 @@ class Factbase::IndexedLte
   end
 
   def sortable?(maps, prop)
-    maps.to_a.flat_map { |fact| fact[prop] || [] }.sort
+    maps.to_a.flat_map { |fact| fact[prop] || [] }.sort!
     true
   rescue ArgumentError
     false
