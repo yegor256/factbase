@@ -73,7 +73,7 @@ require_relative 'terms/zero'
 #  require 'factbase/term'
 #  f = Factbase::Fact.new({ 'foo' => [42, 256, 'Hello, world!'] })
 #  t = Factbase::Term.new(:lt, [:foo, 50])
-#  assert(t.evaluate(f))
+#  assert(t.evaluate(f, [], Factbase.new))
 #
 # The design of this class may look ugly, since it has a large number of
 # methods, each of which corresponds to a different type of a +Term+. A much
