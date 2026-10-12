@@ -119,7 +119,7 @@ class TestFact < Factbase::Test
   def test_refuses_names_read_as_booleans
     f = Factbase::Fact.new({})
     %w[true false].each do |n|
-      assert_includes(assert_raises(StandardError, n) { f.send(:"#{n}=", 1) }.message, 'read as a boolean')
+      assert_includes(assert_raises(StandardError, n) { f.__send__(:"#{n}=", 1) }.message, 'read as a boolean')
     end
   end
 
