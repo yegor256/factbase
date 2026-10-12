@@ -39,7 +39,9 @@ class Factbase::Matches < Factbase::TermBase
 
   def regexp(pattern)
     key = pattern.to_s
-    @regexps[key] ||= Regexp.new(anchored(key))
+    rx = @regexps[key] || Regexp.new(anchored(key))
+    @regexps[key] = rx if @operands[1].is_a?(String)
+    rx
   rescue RegexpError => e
     raise(RuntimeError, "Invalid regexp '#{key}': #{e.message}")
   end
