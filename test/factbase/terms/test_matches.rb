@@ -21,6 +21,10 @@ class TestMatches < Factbase::Test
     refute(t.evaluate(fact('foo' => 'hello', 'pattern' => '42$'), [], Factbase.new))
   end
 
+  def test_gives_false_when_pattern_is_absent
+    refute(Factbase::Matches.new(%i[foo pattern]).evaluate(fact('foo' => 'hello'), [], Factbase.new))
+  end
+
   def test_anchors_whole_value
     t = Factbase::Matches.new([:foo, '^OK$'])
     assert(t.evaluate(fact('foo' => 'OK'), [], Factbase.new))
