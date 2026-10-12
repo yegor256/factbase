@@ -229,8 +229,7 @@ class TestIndexedFactbase < Factbase::Test
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
     100.times { |i| fb.insert.foo = i }
-    maps = []
-    fb.each { |m| maps << m }
+    maps = fb.each.to_a
     100.times { assert_equal(1, fb.query('(eq foo 1)', maps.dup).each.to_a.size) }
     assert_operator(idx.size, :<, 20, 'the index kept an entry for every array of maps')
   end
