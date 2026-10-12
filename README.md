@@ -75,10 +75,8 @@ f = fb.insert
 You can also count the amount of changes made to a factbase:
 
 ```ruby
-require 'loog'
 require 'factbase/tallied'
-log = Loog::VERBOSE
-fb = Factbase::Tallied.new(Factbase.new, log)
+fb = Factbase::Tallied.new(Factbase.new)
 f = fb.insert
 churn = fb.churn
 assert churn.inserted == 1
