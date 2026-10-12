@@ -8,6 +8,7 @@ require 'ellipsized'
 require 'others'
 require 'tago'
 require 'time'
+require_relative 'enumerated'
 require_relative 'syntax'
 
 # A decorator of a Factbase, that logs all operations.
@@ -35,10 +36,15 @@ class Factbase::Logged
   end
 
   decoor(:origin)
+  include Factbase::Enumerated
 
   def insert
-    @tube.say(Process.clock_gettime(MONO), "Inserted new fact ##{@origin.size} in #{Time.now.ago}")
-    Fact.new(@origin.insert, tube: @tube)
+    start = Time.now
+    Process.clock_gettime(MONO).then do |mono|
+      Fact.new(@origin.insert, tube: @tube).tap do
+        @tube.say(mono, "Inserted new fact ##{@origin.size} in #{start.ago}")
+      end
+    end
   end
 
   def query(term, maps = nil)
@@ -47,6 +53,7 @@ class Factbase::Logged
   end
 
   def txn
+    start = Time.now
     mono = Process.clock_gettime(MONO)
     id = nil
     rollback = false
@@ -67,9 +74,9 @@ class Factbase::Logged
         raise(e)
       end
     if rollback
-      @tube.say(mono, "Txn ##{id} rolled back in #{Time.now.ago}")
+      @tube.say(mono, "Txn ##{id} rolled back in #{start.ago}")
     else
-      @tube.say(mono, "Txn ##{id} touched #{r} in #{Time.now.ago}")
+      @tube.say(mono, "Txn ##{id} touched #{r} in #{start.ago}")
     end
     r
   end
@@ -124,7 +131,7 @@ class Factbase::Logged
       if k.end_with?('=')
         s =
           if v.is_a?(Time)
-            v.utc.iso8601
+            v.getutc.iso8601
           elsif v.is_a?(String)
             v.inspect
           else
@@ -220,7 +227,9 @@ class Factbase::Logged
   end
 
   def self.elapsed
-    yield
-    "in #{Time.now.ago}"
+    Time.now.then do |start|
+      yield
+      "in #{start.ago}"
+    end
   end
 end

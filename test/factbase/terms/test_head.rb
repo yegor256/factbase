@@ -21,6 +21,13 @@ class TestHead < Factbase::Test
     )
   end
 
+  def test_stops_evaluating_after_finding_enough_facts
+    fb = Factbase.new
+    fb.insert.foo = 1
+    fb.insert.foo = 'bad'
+    assert_equal(1, fb.query('(head 1 (gt foo 0))').each.to_a.size)
+  end
+
   def test_does_not_turn_a_param_into_a_property
     list = Factbase::Syntax.new('(head 1 (eq y $who))').to_term.predict(
       [{ 'y' => ['first'] }], Factbase.new, { 'who' => ['first'] }

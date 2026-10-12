@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'backtrace'
+require 'date'
 require 'time'
 require_relative '../factbase'
 require_relative 'fact'
@@ -100,11 +101,12 @@ class Factbase::Syntax
     acc = ''
     quotes = ['\'', '"']
     spaces = [' ', '(', ')', "\n", "\t", "\r"]
+    breaks = ["\n", "\r"]
     opener = nil
     comment = false
     @query.to_s.chars.each do |c|
       comment = true if opener.nil? && c == '#'
-      comment = false if comment && c == "\n"
+      comment = false if comment && breaks.include?(c)
       next if comment
       if quotes.include?(c)
         if !opener.nil? && acc[-1] == '\\'
@@ -135,6 +137,7 @@ class Factbase::Syntax
       end
     end
     raise(StandardError, 'String not closed') unless opener.nil?
+    list << acc unless acc.empty?
     list.map do |t|
       if t.is_a?(Symbol)
         t
@@ -143,10 +146,15 @@ class Factbase::Syntax
         t[1..-2]
       elsif t.match?(/^(\+|-)?[0-9]+$/)
         Integer(t, 10)
-      elsif t.match?(/^(\+|-)?[0-9]+(\.[0-9]+(e(\+|-)[0-9]+)?|e(\+|-)?[0-9]+)$/)
-        Float(t)
+      elsif t.match?(/^[+-]?[0-9]+(\.[0-9]+([eE][+-]?[0-9]+)?|[eE][+-]?[0-9]+)$/)
+        f = Float(t)
+        if f.infinite? || (f.zero? && t.split(/e/i).first.match?(/[1-9]/))
+          raise(ArgumentError, "The float literal #{t} is out of range")
+        end
+        f
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
-        Time.parse(t)
+        Date.iso8601(t)
+        Time.iso8601(t)
       elsif t == 'true'
         true
       elsif t == 'false'

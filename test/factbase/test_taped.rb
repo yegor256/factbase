@@ -135,4 +135,10 @@ class TestTaped < Factbase::Test
     t.each { |m| result = m[:foo].uniq! }
     assert_nil(result, 'uniq of an array without duplicates does not return nil')
   end
+
+  def test_gives_a_copy_from_to_a_of_an_array
+    values = [20]
+    Factbase::Taped::TapedArray.new(values, 1, []).to_a << 30
+    assert_equal([20], values)
+  end
 end

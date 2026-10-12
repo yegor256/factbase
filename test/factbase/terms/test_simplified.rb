@@ -30,4 +30,10 @@ class TestSimplified < Factbase::Test
       ).unique.size
     )
   end
+
+  def test_keeps_a_repeated_as
+    fb = Factbase.new
+    fb.insert.x = 1
+    assert_equal([[1, 1]], fb.query('(and (as y x) (as y x))').each.map { |f| f['y'] })
+  end
 end

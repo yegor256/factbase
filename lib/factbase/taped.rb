@@ -73,6 +73,7 @@ class Factbase::Taped
   end
 
   def &(other)
+    guard(other)
     if other == [] || @origin.empty?
       return Factbase::Taped.new([], inserted: @inserted, deleted: @deleted, added: @added)
     end
@@ -80,6 +81,7 @@ class Factbase::Taped
   end
 
   def |(other)
+    guard(other)
     return Factbase::Taped.new(to_a, inserted: @inserted, deleted: @deleted, added: @added) if other == []
     return Factbase::Taped.new(other, inserted: @inserted, deleted: @deleted, added: @added) if @origin.empty?
     join(other, &:|)
@@ -132,11 +134,15 @@ class Factbase::Taped
     end
 
     def to_a
-      @origin.to_a
+      @origin.to_a.dup
     end
 
-    def any?(&)
-      @origin.any?(&)
+    def any?(pattern = nil, &)
+      if pattern.nil?
+        @origin.any?(&)
+      else
+        @origin.any?(pattern)
+      end
     end
 
     def <<(item)
@@ -152,9 +158,13 @@ class Factbase::Taped
 
   private
 
-  def join(other)
+  def guard(other)
     raise(ArgumentError, 'Cannot join with another Taped') if other.respond_to?(:inserted)
     raise(ArgumentError, 'Can only join with array') unless other.is_a?(Array)
+  end
+
+  def join(other)
+    guard(other)
     Factbase::Taped.new(yield(@origin.to_a, other.to_a), inserted: @inserted, deleted: @deleted, added: @added)
   end
 end
