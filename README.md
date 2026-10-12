@@ -133,7 +133,8 @@ fb.query('(eq foo $bar)').each(Factbase.new, bar: [42]).to_a
 # Returns the fact with foo = 42
 ```
 
-Variables are passed as keyword arguments to `each` or `one`. The value must
+Variables are passed as a `Hash`, the second argument of `each` or `one`,
+right after the factbase. The value must
 be an array (even for a single value). This works with any term:
 
 ```ruby
