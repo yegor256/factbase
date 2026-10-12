@@ -20,7 +20,7 @@ class Factbase::IndexedAnd
       key = [maps.object_id, props, :multi_and_eq]
       entry = @idx[key]
       maps_array = maps.to_a
-      if entry.nil?
+      if entry.nil? || entry[:indexed_count] > maps_array.size
         entry = { index: {}, indexed_count: 0, pos: {}.compare_by_identity }
         @idx[key] = entry
       end
