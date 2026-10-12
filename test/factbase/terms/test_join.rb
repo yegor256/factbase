@@ -43,4 +43,13 @@ class TestJoin < Factbase::Test
       'left<=right<=unexpected'
     )
   end
+
+  def test_rejects_an_empty_mapping
+    fb = Factbase.new
+    fb.insert.x = 1
+    assert_includes(
+      assert_raises(RuntimeError) { fb.query('(join "y<=x,,z<=x" (always))').each.to_a }.message,
+      'An empty mapping is not allowed'
+    )
+  end
 end
