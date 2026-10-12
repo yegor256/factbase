@@ -44,6 +44,24 @@ class TestImpatient < Factbase::Test
     end
   end
 
+  class SlowStepsFactbase < Factbase
+    class SlowQuery < Factbase::Query
+      def each(fb = @fb, params = {})
+        return to_enum(__method__, fb, params) unless block_given?
+        super do |f|
+          sleep(0.03)
+          yield(f)
+        end
+      end
+    end
+
+    def query(term, maps = nil)
+      maps ||= @maps
+      term = to_term(term) if term.is_a?(String)
+      SlowQuery.new(maps, term, self)
+    end
+  end
+
   class SlowEnoughFactbase < Factbase
     class SlowQuery < Factbase::Query
       def one(fb = @fb, params = {})
@@ -169,6 +187,21 @@ class TestImpatient < Factbase::Test
     fb = Factbase::Impatient.new(Factbase.new, timeout: 0.01)
     fb.insert
     assert_equal(1, fb.query('(always)').each { sleep(0.02) })
+  end
+
+  def test_spends_the_budget_even_when_the_wall_clock_goes_back
+    slow = SlowStepsFactbase.new
+    5.times { slow.insert.x = 1 }
+    fb = Factbase::Impatient.new(slow, timeout: 0.05)
+    shift = 0
+    Time.singleton_class.alias_method(:real_now, :now)
+    Time.define_singleton_method(:now) { real_now - (shift += 100) }
+    begin
+      assert_match(/timed out|out of time/, assert_raises(StandardError) { fb.query('(always)').each.to_a }.message)
+    ensure
+      Time.singleton_class.alias_method(:now, :real_now)
+      Time.singleton_class.remove_method(:real_now)
+    end
   end
 
   def test_custom_timeout
