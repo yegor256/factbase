@@ -92,4 +92,12 @@ class TestFactAsYaml < Factbase::Test
       YAML.safe_load(Factbase::FactAsYaml.new(fb.query('(always)').each.to_a.first).to_s)
     )
   end
+
+  def test_keeps_the_zone_of_a_printed_time
+    fb = Factbase.new
+    fb.insert.id = 1
+    f = fb.query("(as t (to_time '2026-01-01T12:00:00+03:00'))").each.first
+    Factbase::FactAsYaml.new(f).to_s
+    assert_equal(10_800, f.t.utc_offset, 'printing a fact changed the zone of its time')
+  end
 end
