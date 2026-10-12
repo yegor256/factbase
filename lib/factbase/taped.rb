@@ -3,7 +3,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'decoor'
 require_relative '../factbase'
 
 # A decorator of an Array with HashMaps, that records facts that have been touched,
@@ -89,8 +88,6 @@ class Factbase::Taped
 
   # Decorator of Hash.
   class TapedHash
-    decoor(:origin)
-
     def initialize(origin, added)
       @origin = origin
       @added = added
@@ -113,6 +110,16 @@ class Factbase::Taped
     def []=(key, value)
       @origin[key] = value
       @added.append(@origin.object_id)
+    end
+
+    private
+
+    def method_missing(method, *, &)
+      @origin.__send__(method, *, &)
+    end
+
+    def respond_to_missing?(method, include_private = false)
+      @origin.respond_to?(method, include_private)
     end
   end
 
