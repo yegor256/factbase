@@ -94,5 +94,4 @@ class TestIndexedNot < Factbase::Test
       assert_equal(c[:expected], term.predict(maps, nil, {}).size, "Failed for #{maps.class}")
     end
   end
-
 end
