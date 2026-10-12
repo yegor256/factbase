@@ -35,7 +35,7 @@ class TestRakefile < Minitest::Test
     Dir.mktmpdir do |dir|
       FileUtils.mkdir_p(File.join(dir, 'coverage'))
       FileUtils.touch(File.join(dir, 'coverage/report.xml'))
-      Dir.chdir(dir) { load File.expand_path('../Rakefile', __dir__) }
+      Dir.chdir(dir) { load(File.expand_path('../Rakefile', __dir__)) }
       assert_path_exists(File.join(dir, 'coverage/report.xml'), 'the Rakefile deleted coverage when loaded')
     end
   end

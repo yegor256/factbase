@@ -33,14 +33,13 @@ end
 
 require 'rake/testtask'
 desc 'Run all unit tests'
-Rake::TestTask.new(:test) do |test|
+Rake::TestTask.new(test: :uncover) do |test|
   test.libs << 'lib' << 'test'
   test.pattern = 'test/**/test_*.rb'
   test.warning = true
   test.verbose = false
   test.options = tail
 end
-task test: :uncover
 
 desc 'Run them via Ruby, one by one'
 task :picks do
