@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'backtrace'
+require 'date'
 require 'time'
 require_relative '../factbase'
 require_relative 'fact'
@@ -146,9 +147,14 @@ class Factbase::Syntax
       elsif t.match?(/^(\+|-)?[0-9]+$/)
         Integer(t, 10)
       elsif t.match?(/^[+-]?[0-9]+(\.[0-9]+([eE][+-]?[0-9]+)?|[eE][+-]?[0-9]+)$/)
-        Float(t)
+        f = Float(t)
+        if f.infinite? || (f.zero? && t.split(/e/i).first.match?(/[1-9]/))
+          raise(ArgumentError, "The float literal #{t} is out of range")
+        end
+        f
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
-        Time.parse(t)
+        Date.iso8601(t)
+        Time.iso8601(t)
       elsif t == 'true'
         true
       elsif t == 'false'

@@ -30,6 +30,18 @@ class TestCachedFactbase < Factbase::Test
     )
   end
 
+  def test_evaluates_a_defn_term_for_every_fact
+    Factbase::Term.new(:defn, [:foo_is_bar, 'fact["foo"].first == "bar"']).evaluate(nil, [], Factbase.new)
+    begin
+      fb = Factbase::CachedFactbase.new(Factbase.new)
+      fb.insert.foo = 'bar'
+      fb.insert.foo = 'baz'
+      assert_equal(['bar'], fb.query('(foo_is_bar)').each.map { |f| f['foo'].first })
+    ensure
+      Factbase::Term.new(:undef, [:foo_is_bar]).evaluate(nil, [], Factbase.new)
+    end
+  end
+
   def test_queries_after_update_through_a_parameterized_query
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.then { |f| f.foo = 1 }
@@ -113,5 +125,11 @@ class TestCachedFactbase < Factbase::Test
     end
     assert_equal(1, fb.size)
     assert_equal(['kept'], fb.query('(exists foo)').each.to_a.map(&:foo))
+  end
+
+  def test_reads_a_property_named_like_a_kernel_method
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.rand = 'hello'
+    assert_equal('hello', fb.query('(always)').each.to_a.first.rand)
   end
 end

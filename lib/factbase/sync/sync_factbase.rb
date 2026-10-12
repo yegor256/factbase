@@ -6,6 +6,7 @@
 require 'decoor'
 require 'monitor'
 require_relative '../../factbase'
+require_relative '../enumerated'
 
 # A synchronous thread-safe factbase.
 #
@@ -14,6 +15,7 @@ require_relative '../../factbase'
 # License:: MIT
 class Factbase::SyncFactbase
   decoor(:origin)
+  include Factbase::Enumerated
 
   # Constructor.
   # @param [Factbase] origin Original factbase to decorate
@@ -29,6 +31,34 @@ class Factbase::SyncFactbase
     try_lock do
       @origin.insert
     end
+  end
+
+  # Iterate the maps, taken together under the monitor.
+  # @yield [Hash] Maps one by one
+  # @return [Integer] How many maps there were
+  def each(&)
+    return to_enum(__method__) unless block_given?
+    maps = try_lock { @origin.to_enum(:each).to_a }
+    maps.each(&)
+    maps.size
+  end
+
+  # Size of the factbase.
+  # @return [Integer] How many facts there are
+  def size
+    try_lock { @origin.size }
+  end
+
+  # Export it into a chain of bytes.
+  # @return [String] Binary string containing serialized data
+  def export
+    try_lock { @origin.export }
+  end
+
+  # Import from a chain of bytes.
+  # @param [String] bytes Binary string to import
+  def import(bytes)
+    try_lock { @origin.import(bytes) }
   end
 
   # Convert a query to a term.

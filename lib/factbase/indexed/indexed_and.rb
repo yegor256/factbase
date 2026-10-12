@@ -20,7 +20,7 @@ class Factbase::IndexedAnd
       key = [maps.object_id, props, :multi_and_eq]
       entry = @idx[key]
       maps_array = maps.to_a
-      if entry.nil?
+      if entry.nil? || entry[:indexed_count] > maps_array.size
         entry = { index: {}, indexed_count: 0, pos: {}.compare_by_identity }
         @idx[key] = entry
       end
@@ -28,8 +28,9 @@ class Factbase::IndexedAnd
         maps_array[entry[:indexed_count]..].each_with_index do |m, i|
           entry[:pos][m] = entry[:indexed_count] + i
           _all_tuples(m, props).each do |t|
-            entry[:index][t] ||= []
-            entry[:index][t] << m
+            key = t.map { |value| normalize(value) }
+            entry[:index][key] ||= []
+            entry[:index][key] << m
           end
         end
         entry[:indexed_count] = maps_array.size
@@ -43,7 +44,7 @@ class Factbase::IndexedAnd
           end
         end
       )
-      j = tuples.flat_map { |t| entry[:index][t] || [] }
+      j = tuples.flat_map { |t| entry[:index][t.map { |value| normalize(value) }] || [] }
       j.uniq!(&:object_id)
       j.sort_by! { |m| entry[:pos][m] }
       r = maps.respond_to?(:repack) ? maps.repack(j) : j
@@ -91,5 +92,10 @@ class Factbase::IndexedAnd
     values = props.map { |p| fact[p.to_s] || [] }
     return [] if values.any?(&:empty?)
     values[0].product(*values[1..])
+  end
+
+  def normalize(value)
+    return Rational(value) if value.is_a?(Integer) || (value.is_a?(Float) && value.finite?)
+    value
   end
 end

@@ -66,14 +66,16 @@ class Factbase::Fact
       @map[kk] << v
       nil
     elsif k == '[]'
-      @map[args[1].to_s]
+      vv = @map[args[1].to_s]
+      vv.is_a?(Array) ? vv.dup : vv
     else
       v = @map[k]
       if v.nil?
         raise(ArgumentError, "Can't get '#{k}', the fact is empty") if @map.empty?
         raise(ArgumentError, "Can't find '#{k}' attribute out of [#{@map.keys.join(', ')}]")
       end
-      v[0]
+      value = v[0]
+      value.is_a?(String) ? -value : value
     end
   end
 end

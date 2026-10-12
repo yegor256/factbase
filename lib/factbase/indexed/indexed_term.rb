@@ -40,6 +40,8 @@ module Factbase::IndexedTerm
     return __send__(m, maps, fb, params) if respond_to?(m)
     _init_indexes unless @indexes
     @indexes[@op].predict(maps, fb, params) if @indexes.key?(@op)
+  rescue Factbase::Term::Wrapped => e
+    raise(e)
   rescue NoMethodError => e
     raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
   rescue StandardError => e

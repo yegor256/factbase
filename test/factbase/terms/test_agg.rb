@@ -87,4 +87,13 @@ class TestAgg < Factbase::Test
       )
     end
   end
+
+  def test_names_the_term_that_needs_a_fact_in_an_aggregate
+    fb = Factbase.new
+    fb.insert.x = 1
+    { '(exists x)' => 'exists', '(eq x 1)' => 'eq', '(plus x 1)' => 'plus' }.each do |inner, name|
+      e = assert_raises(StandardError) { fb.query("(agg (always) #{inner})").one }
+      assert_includes(e.message, "The '#{name}' term needs a fact", e.message)
+    end
+  end
 end

@@ -30,6 +30,7 @@ class Factbase::ToTime < Factbase::TermBase
 
   def parse(value)
     return value if value.is_a?(Time)
+    return Time.at(value).utc if value.is_a?(Integer) || value.is_a?(Float)
     Time.parse(value.to_s)
   rescue ArgumentError => e
     raise(RuntimeError, "Cannot parse '#{value}' as Time in (to_time ...): #{e.message}")

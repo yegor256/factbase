@@ -28,6 +28,6 @@ class Factbase::IndexedFact
 
   others do |*args|
     @idx.clear if args[0].to_s.end_with?('=') && !@fresh.include?(object_id)
-    @origin.__send__(*args)
+    @origin.public_send(*args)
   end
 end

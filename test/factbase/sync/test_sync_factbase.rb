@@ -79,4 +79,19 @@ class TestSyncFactbase < Factbase::Test
       assert_equal(t, fs.first['foo'].size)
     end
   end
+
+  def test_reads_directly_under_the_monitor
+    monitor = Monitor.new
+    fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
+    fb.insert.x = 1
+    [-> { fb.each { |_m| true } }, -> { fb.size }, -> { fb.export }].each do |read|
+      monitor.synchronize do
+        t = Thread.new { read.call }
+        sleep(0.05)
+        assert_predicate(t, :alive?, 'a direct read went around the monitor')
+        t.kill
+      end
+    end
+    assert_equal(1, fb.each { |_m| true })
+  end
 end
