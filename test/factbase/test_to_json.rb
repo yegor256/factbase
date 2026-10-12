@@ -87,4 +87,13 @@ class TestToJSON < Factbase::Test
     assert_equal(2, json[1]['prio'])
     assert_equal(3, json[2]['prio'])
   end
+
+  def test_prints_inside_txn_after_a_write
+    fb = Factbase.new
+    fb.insert._id = 1
+    fb.txn do |fbt|
+      fbt.query('(eq _id 1)').each { |f| f.bar = 2 }
+      assert_equal([{ '_id' => 1, 'bar' => 2 }], JSON.parse(Factbase::ToJSON.new(fbt).json))
+    end
+  end
 end
