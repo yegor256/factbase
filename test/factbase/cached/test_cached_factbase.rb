@@ -30,6 +30,18 @@ class TestCachedFactbase < Factbase::Test
     )
   end
 
+  def test_evaluates_a_defn_term_for_every_fact
+    Factbase::Term.new(:defn, [:foo_is_bar, 'fact["foo"].first == "bar"']).evaluate(nil, [], Factbase.new)
+    begin
+      fb = Factbase::CachedFactbase.new(Factbase.new)
+      fb.insert.foo = 'bar'
+      fb.insert.foo = 'baz'
+      assert_equal(['bar'], fb.query('(foo_is_bar)').each.map { |f| f['foo'].first })
+    ensure
+      Factbase::Term.new(:undef, [:foo_is_bar]).evaluate(nil, [], Factbase.new)
+    end
+  end
+
   def test_queries_after_update_through_a_parameterized_query
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.then { |f| f.foo = 1 }

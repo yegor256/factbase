@@ -44,8 +44,8 @@ class TestSyntax < Factbase::Test
 
   def test_makes_static_terms
     {
-      '(foo bar)' => false,
-      '(foo "bar")' => true,
+      '(never_defined bar)' => false,
+      '(never_defined "bar")' => true,
       '(agg (always) (max id))' => true
     }.each do |q, a|
       assert_equal(a, Factbase::Syntax.new(q).to_term.static?)
