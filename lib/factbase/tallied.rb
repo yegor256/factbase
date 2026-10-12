@@ -7,6 +7,7 @@ require 'decoor'
 require 'others'
 require_relative '../factbase'
 require_relative 'churn'
+require_relative 'enumerated'
 
 # A decorator of a Factbase, that counts all operations and then returns
 # an instance of Factbase::Churn.
@@ -24,6 +25,7 @@ class Factbase::Tallied
   end
 
   decoor(:fb)
+  include Factbase::Enumerated
 
   def insert
     @churn.append(1, 0, 0)

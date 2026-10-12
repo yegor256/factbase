@@ -6,6 +6,7 @@
 require 'decoor'
 require 'others'
 require_relative '../factbase'
+require_relative 'enumerated'
 
 # A decorator of a Factbase, that checks invariants on every set.
 #
@@ -24,6 +25,7 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::Inv
   decoor(:fb)
+  include Factbase::Enumerated
 
   def initialize(fb, &block)
     @fb = fb
