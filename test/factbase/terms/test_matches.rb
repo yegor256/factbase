@@ -87,6 +87,22 @@ class TestMatches < Factbase::Test
     assert_empty(t.instance_variable_get(:@regexps), 'a pattern read from a property was cached')
   end
 
+  def test_keeps_a_literal_bracket_at_the_start_of_a_class
+    [
+      ['[]^]', '^', true],
+      ['[]^]', 'A', false],
+      ['[]$]', '$', true],
+      ['[]$]', 'z', false],
+      ['[^]^]', 'A', true],
+      ['[^]^]', '^', false]
+    ].each do |pattern, text, expected|
+      assert_equal(
+        expected, Factbase::Matches.new([:foo, pattern]).evaluate(fact('foo' => text), [], Factbase.new),
+        "#{pattern} on #{text}"
+      )
+    end
+  end
+
   def test_rejects_invalid_regexp
     t = Factbase::Matches.new([:foo, '[a-'])
     assert_includes(

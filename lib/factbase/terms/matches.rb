@@ -50,7 +50,10 @@ class Factbase::Matches < Factbase::TermBase
     depth = 0
     escaped = false
     property = false
+    lead = nil
     source.each_char.map do |c|
+      first = lead
+      lead = nil
       if property
         property = c != '}'
       elsif escaped
@@ -58,8 +61,13 @@ class Factbase::Matches < Factbase::TermBase
         property = c.casecmp?('p')
       elsif c == '\\'
         escaped = true
+      elsif first == :open && c == '^'
+        lead = :caret
+      elsif first && c == ']'
+        next c
       elsif c == '['
         depth += 1
+        lead = :open
       elsif c == ']' && depth.positive?
         depth -= 1
       elsif depth.zero? && ANCHORS.key?(c)
