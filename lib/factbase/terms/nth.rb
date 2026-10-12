@@ -25,9 +25,8 @@ class Factbase::Nth < Factbase::TermBase
     pos = @operands[0]
     raise(ArgumentError, "An integer is expected, but #{pos} provided") unless pos.is_a?(Integer)
     raise(ArgumentError, "A non-negative position is expected, but #{pos} provided") if pos.negative?
-    k = _property(1)
     m = maps[pos]
     return if m.nil?
-    m[k.to_s]
+    m[property(1).to_s]
   end
 end

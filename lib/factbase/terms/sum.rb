@@ -23,7 +23,7 @@ class Factbase::Sum < Factbase::TermBase
   # @return [Integer] The sum of values for the specified key across all maps
   def evaluate(_fact, maps, _fb)
     assert_args(1)
-    k = _property(0)
+    k = property(0)
     sum = 0
     maps.each do |m|
       vv = m[k.to_s]

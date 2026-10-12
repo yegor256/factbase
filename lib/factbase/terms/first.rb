@@ -21,9 +21,8 @@ class Factbase::First < Factbase::TermBase
   # @return [Object] The value of the specified key from the first map
   def evaluate(_fact, maps, _fb)
     assert_args(1)
-    k = _property(0)
     first = maps[0]
     return if first.nil?
-    first[k.to_s]
+    first[property(0).to_s]
   end
 end

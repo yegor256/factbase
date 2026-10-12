@@ -101,8 +101,11 @@ class TestAgg < Factbase::Test
     fb = Factbase.new
     fb.insert.w = 5
     ['(sum $w)', '(max $w)', '(min $w)', '(first $w)', '(nth 0 $w)'].each do |inner|
-      e = assert_raises(StandardError, inner) { fb.query("(agg (always) #{inner})").one(fb, w: [7]) }
-      assert_includes(e.message, "'$w' is a parameter", inner)
+      assert_includes(
+        assert_raises(StandardError, inner) { fb.query("(agg (always) #{inner})").one(fb, w: [7]) }.message,
+        "'$w' is a parameter",
+        inner
+      )
     end
   end
 end

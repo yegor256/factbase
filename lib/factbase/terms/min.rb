@@ -27,6 +27,6 @@ class Factbase::Min < Factbase::TermBase
   # @return [Object] The minimum value among the evaluated operands
   def evaluate(_fact, maps, _fb)
     assert_args(1)
-    MIN.evaluate(_property(0), maps)
+    MIN.evaluate(property(0), maps)
   end
 end

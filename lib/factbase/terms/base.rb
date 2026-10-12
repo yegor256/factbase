@@ -97,7 +97,7 @@ class Factbase::TermBase
   # Read the operand at the given position as the name of a property.
   # @param [Integer] pos The position of the operand
   # @return [Symbol] The name of the property
-  def _property(pos)
+  def property(pos)
     k = @operands[pos]
     raise(ArgumentError, "A symbol is expected, but '#{k}' provided") unless k.is_a?(Symbol)
     raise(ArgumentError, "A property is expected, but '#{k}' is a parameter") if k.start_with?('$')
