@@ -22,6 +22,7 @@ class Factbase::Sprintf < Factbase::TermBase
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [String] The formatted string
   def evaluate(fact, maps, fb)
+    raise(ArgumentError, "Too few operands for 'sprintf' (at least 1 expected)") if @operands.empty?
     fmt = _values(0, fact, maps, fb)&.first
     if fmt.nil?
       raise(ArgumentError, "The format of 'sprintf' is #{@operands[0].inspect}, which the fact doesn't have")
