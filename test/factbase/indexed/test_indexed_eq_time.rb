@@ -21,4 +21,17 @@ class TestIndexedEqTime < Factbase::Test
     query = "(eq when #{when_.utc.iso8601})"
     assert_equal(origin.query(query).each.to_a.size, Factbase::IndexedFactbase.new(origin).query(query).each.to_a.size)
   end
+
+  def test_compares_times_by_whole_seconds
+    origin = Factbase.new
+    origin.insert.when = Time.utc(2026, 10, 11, 9, 30, 0) + 0.5
+    origin.insert.when = Time.utc(2026, 10, 11, 9, 30, 1) + 0.5
+    ['(eq when 2026-10-11T09:30:00Z)', '(and (eq when 2026-10-11T09:30:00Z) (exists when))'].each do |query|
+      assert_equal(
+        origin.query(query).each.to_a.size,
+        Factbase::IndexedFactbase.new(origin).query(query).each.to_a.size,
+        query
+      )
+    end
+  end
 end

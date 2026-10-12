@@ -71,6 +71,7 @@ class Factbase::IndexedEq
 
   def normalize(value)
     return Rational(value) if value.is_a?(Integer) || (value.is_a?(Float) && value.finite?)
+    return value.floor if value.is_a?(Time)
     value
   end
 end
