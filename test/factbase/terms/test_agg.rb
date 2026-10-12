@@ -96,4 +96,13 @@ class TestAgg < Factbase::Test
       assert_includes(e.message, "The '#{name}' term needs a fact", e.message)
     end
   end
+
+  def test_refuses_a_parameter_where_a_property_is_expected
+    fb = Factbase.new
+    fb.insert.w = 5
+    ['(sum $w)', '(max $w)', '(min $w)', '(first $w)', '(nth 0 $w)'].each do |inner|
+      e = assert_raises(StandardError, inner) { fb.query("(agg (always) #{inner})").one(fb, w: [7]) }
+      assert_includes(e.message, "'$w' is a parameter", inner)
+    end
+  end
 end
