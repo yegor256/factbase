@@ -43,4 +43,52 @@ class TestJoin < Factbase::Test
       'left<=right<=unexpected'
     )
   end
+
+  def test_cannot_join_with_doubled_comma
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    names = Array.new(2) { "p#{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}" }
+    mapping = "#{names[0]}<=#{names[1]},,#{names[1]}"
+    assert_raises(ArgumentError, "join accepted an empty mapping in #{mapping.inspect}, seed #{seed}") do
+      Factbase::Join.new([mapping, Factbase::Syntax.new('(always)').to_term]).evaluate(
+        Factbase::Accum.new(fact({}), {}, false), [{ names[1] => [rnd.rand(1..1000)] }], Factbase.new
+      )
+    end
+  end
+
+  def test_cannot_join_with_leading_comma
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    names = Array.new(2) { "p#{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}" }
+    mapping = ",#{names[0]}<=#{names[1]}"
+    assert_raises(ArgumentError, "join accepted an empty mapping in #{mapping.inspect}, seed #{seed}") do
+      Factbase::Join.new([mapping, Factbase::Syntax.new('(always)').to_term]).evaluate(
+        Factbase::Accum.new(fact({}), {}, false), [{ names[1] => [rnd.rand(1..1000)] }], Factbase.new
+      )
+    end
+  end
+
+  def test_cannot_join_with_blank_mapping
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    names = Array.new(2) { "p#{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}" }
+    mapping = "#{names[0]}<=#{names[1]},#{' ' * rnd.rand(1..8)},#{names[1]}"
+    assert_raises(ArgumentError, "join accepted a blank mapping in #{mapping.inspect}, seed #{seed}") do
+      Factbase::Join.new([mapping, Factbase::Syntax.new('(always)').to_term]).evaluate(
+        Factbase::Accum.new(fact({}), {}, false), [{ names[1] => [rnd.rand(1..1000)] }], Factbase.new
+      )
+    end
+  end
+
+  def test_joins_with_trailing_comma
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    names = Array.new(2) { "p#{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}" }
+    fb = Factbase.new
+    fb.insert.__send__(:"#{names[1]}=", rnd.rand(1..1000))
+    assert_equal(
+      1, fb.query("(and (join '#{names[0]}<=#{names[1]},' (always)) (exists #{names[0]}))").each.to_a.size,
+      "join refused a trailing comma after #{names.inspect}, seed #{seed}"
+    )
+  end
 end
