@@ -41,6 +41,12 @@ class TestMatches < Factbase::Test
     assert_equal(['[a-z]+'], t.instance_variable_get(:@regexps).keys)
   end
 
+  def test_does_not_cache_a_pattern_read_from_a_property
+    t = Factbase::Matches.new(%i[foo pattern])
+    10.times { |i| t.evaluate(fact('foo' => "v#{i}", 'pattern' => "^v#{i}$"), [], Factbase.new) }
+    assert_empty(t.instance_variable_get(:@regexps), 'a pattern read from a property was cached')
+  end
+
   def test_rejects_invalid_regexp
     t = Factbase::Matches.new([:foo, '[a-'])
     assert_includes(
