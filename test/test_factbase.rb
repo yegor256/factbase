@@ -489,7 +489,7 @@ class TestFactbase < Factbase::Test
   def test_complains_when_txn_is_left_by_break_inside_rescue
     fb = Factbase.new
     begin
-      raise('unrelated')
+      raise(RuntimeError, 'unrelated')
     rescue StandardError
       assert_raises(RuntimeError) do
         fb.txn do |fbt|
