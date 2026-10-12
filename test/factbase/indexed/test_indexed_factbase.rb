@@ -232,6 +232,13 @@ class TestIndexedFactbase < Factbase::Test
     end
   end
 
+  def test_import_explains_a_broken_input
+    assert_includes(
+      assert_raises(StandardError) { Factbase::IndexedFactbase.new(Factbase.new).import("\x04\x08junk") }.message,
+      'The input is not a valid factbase'
+    )
+  end
+
   def test_index_does_not_grow_unbounded_during_transactions
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
