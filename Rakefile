@@ -26,16 +26,21 @@ def tail(args = ARGV)
   args[i..].join(' ')
 end
 
+desc 'Delete the coverage report of the previous run'
+task :uncover do
+  Rake::Cleaner.cleanup_files(['coverage'])
+end
+
 require 'rake/testtask'
 desc 'Run all unit tests'
 Rake::TestTask.new(:test) do |test|
-  Rake::Cleaner.cleanup_files(['coverage'])
   test.libs << 'lib' << 'test'
   test.pattern = 'test/**/test_*.rb'
   test.warning = true
   test.verbose = false
   test.options = tail
 end
+task test: :uncover
 
 desc 'Run them via Ruby, one by one'
 task :picks do
