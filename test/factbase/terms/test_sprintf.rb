@@ -34,13 +34,18 @@ class TestSprintf < Factbase::Test
   def test_names_the_format_when_an_operand_is_absent
     [['%d', :absent], ['%f', :absent]].each do |ops|
       t = Factbase::Sprintf.new(ops)
-      e =
-        assert_raises(RuntimeError) do
-          t.evaluate(fact, [], Factbase.new)
-        end
-      assert_includes(e.message, "Cannot format [nil] with '#{ops[0]}' in (sprintf ...):")
-      assert_includes(e.message, 'nil')
+      assert_includes(
+        assert_raises(ArgumentError) { t.evaluate(fact, [], Factbase.new) }.message,
+        "The operand :absent of 'sprintf' with '#{ops[0]}' is absent in the fact"
+      )
     end
+  end
+
+  def test_refuses_an_absent_operand_instead_of_printing_it_empty
+    fb = Factbase.new
+    fb.insert.x = 10
+    e = assert_raises(StandardError) { fb.query('(eq (sprintf "%s-%s" x nope) "10-")').each.to_a }
+    assert_includes(e.message, "The operand :nope of 'sprintf' with '%s-%s' is absent in the fact", e.message)
   end
 
   def test_rejects_missing_format_operand
