@@ -20,12 +20,12 @@ class Factbase::IndexedEq
     return unless first_operand.is_a?(Symbol) && _scalar?(second_operand)
     first_operand = first_operand.to_s
     key = [maps.object_id, first_operand, @term.op]
-    @idx[key] ||= { facts: {}, count: 0 }
+    @idx[key] ||= { facts: {}, count: 0, pos: {}.compare_by_identity }
     entry = @idx[key]
     _feed(maps.to_a, entry, first_operand)
     keys = _resolve(second_operand, params)
     matches = keys.flat_map { |k| entry[:facts][normalize(k)] || [] }
-    matches = matches.uniq(&:object_id) if keys.size > 1
+    matches = matches.uniq(&:object_id).sort_by { |m| entry[:pos][m] } if keys.size > 1
     maps.respond_to?(:repack) ? maps.repack(matches) : matches
   end
 
@@ -51,10 +51,13 @@ class Factbase::IndexedEq
   def _feed(facts, entry, operand)
     if entry[:count] > facts.size
       entry[:facts] = {}
+      entry[:pos] = {}.compare_by_identity
       entry[:count] = 0
     end
     return unless entry[:count] < facts.size
-    facts[entry[:count]..].each do |m|
+    from = entry[:count]
+    facts[from..].each_with_index do |m, i|
+      entry[:pos][m] = from + i
       m[operand]&.uniq&.each do |v|
         key = normalize(v)
         entry[:facts][key] ||= []
