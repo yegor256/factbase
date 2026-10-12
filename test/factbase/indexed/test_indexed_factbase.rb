@@ -468,4 +468,40 @@ class TestIndexedFactbase < Factbase::Test
     a.foo = 1
     assert_equal(1, fb.query('(exists foo)').each.to_a.size)
   end
+
+  def test_explains_junk_input
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    bytes = "\x04\x08#{%w[j k n p q r s t v w x y z].sample(random: rnd)}#{rnd.bytes(rnd.rand(0..16))}"
+    assert_instance_of(
+      StandardError,
+      assert_raises(StandardError) { Factbase::IndexedFactbase.new(Factbase.new).import(bytes) },
+      "junk input #{bytes.inspect} leaked a raw error, seed #{seed}"
+    )
+  end
+
+  def test_explains_input_of_incompatible_format
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    bytes = "#{rnd.rand(0..3).chr}#{rnd.bytes(rnd.rand(1..16))}"
+    assert_instance_of(
+      StandardError,
+      assert_raises(StandardError) { Factbase::IndexedFactbase.new(Factbase.new).import(bytes) },
+      "input #{bytes.inspect} of incompatible format leaked a raw error, seed #{seed}"
+    )
+  end
+
+  def test_explains_truncated_input
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    rnd.rand(1..8).times { fb.insert.foo = rnd.rand(0x430..0x44f).chr(Encoding::UTF_8) }
+    bytes = fb.export
+    bytes = bytes[0, rnd.rand(2...bytes.size)]
+    assert_instance_of(
+      StandardError,
+      assert_raises(StandardError) { Factbase::IndexedFactbase.new(Factbase.new).import(bytes) },
+      "truncated input leaked a raw error, seed #{seed}"
+    )
+  end
 end
