@@ -72,6 +72,21 @@ class Factbase::TermBase
     end
   end
 
+  # Read an operand that may be either a property name or a nested term.
+  # @param [Integer] pos The position of the operand
+  # @param [Factbase::Fact] fact The fact
+  # @param [Array<Hash>] maps All maps available
+  # @param [Factbase] fb Factbase to use for sub-queries
+  # @return [Object|nil] The value of the property, or of the nested term
+  def _operand(pos, fact, maps, fb)
+    o = @operands[pos]
+    if o.is_a?(Factbase::Term) || o.is_a?(Factbase::TermBase)
+      _values(pos, fact, maps, fb)
+    else
+      _by_symbol(pos, fact)
+    end
+  end
+
   def _by_symbol(pos, fact)
     o = @operands[pos]
     raise(ArgumentError, "A symbol expected at ##{pos}, but '#{o}' (#{o.class}) provided") unless o.is_a?(Symbol)
