@@ -41,6 +41,6 @@ class TestEnv < Factbase::Test
 
   def test_missing_default_returns_nil
     ENV.delete('FOO')
-    assert_nil(Factbase::Env.new(%i[missing_attr also_missing]).evaluate(fact, [], Factbase.new))
+    assert_nil(Factbase::Env.new(['FOO', :also_missing]).evaluate(fact, [], Factbase.new))
   end
 end
