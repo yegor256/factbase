@@ -243,4 +243,16 @@ class TestRules < Factbase::Test
     fb.txn { |t| t.insert.a = rnd.rand(1000) }
     assert_equal(2, fb.size, "second txn with defn in the rule was lost, seed #{seed}")
   end
+
+  def test_refuses_to_import_a_fact_that_breaks_the_rule
+    source = Factbase.new
+    source.insert.bar = 1
+    fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
+    assert_raises(ArgumentError) { fb.import(source.export) }
+    assert_equal(0, fb.size)
+    good = Factbase.new
+    good.insert.foo = 1
+    fb.import(good.export)
+    assert_equal(1, fb.size)
+  end
 end

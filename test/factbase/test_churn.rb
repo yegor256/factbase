@@ -39,4 +39,17 @@ class TestChurn < Factbase::Test
     c2.append(3, 2, 46)
     assert_equal('4i/8d/49a', (c1 + c2).to_s)
   end
+
+  def test_reads_the_counters_under_the_lock_of_append
+    churn = Factbase::Churn.new
+    churn.append(1, 1, 1)
+    %i[inserted deleted added to_i to_s zero?].each do |reader|
+      churn.instance_variable_get(:@mutex).synchronize do
+        t = Thread.new { churn.public_send(reader) }
+        sleep(0.05)
+        assert_predicate(t, :alive?, "#{reader} read the counters without the lock")
+        t.kill
+      end
+    end
+  end
 end

@@ -7,6 +7,7 @@ require 'decoor'
 require 'others'
 require_relative '../factbase'
 require_relative 'churn'
+require_relative 'enumerated'
 
 # A decorator of a Factbase, that counts all operations and then returns
 # an instance of Factbase::Churn.
@@ -24,6 +25,7 @@ class Factbase::Tallied
   end
 
   decoor(:fb)
+  include Factbase::Enumerated
 
   def insert
     @churn.append(1, 0, 0)
@@ -32,6 +34,13 @@ class Factbase::Tallied
 
   def query(query, maps = nil)
     Query.new(@fb.query(query, maps), @churn, @fb)
+  end
+
+  def import(bytes)
+    probe = Factbase.new
+    probe.import(bytes)
+    @fb.import(bytes)
+    @churn.append(probe.size, 0, 0)
   end
 
   def txn
@@ -48,12 +57,20 @@ class Factbase::Tallied
         throw(:commit) if thrown
       end
     rescue Factbase::Rollback => e
-      @churn = before
+      revert(before)
       raise(e)
     ensure
-      @churn = before unless commit
+      revert(before) unless commit
     end
   end
+
+  # Bring the counter back to where it was, in place, so that the object
+  # the caller passed to the constructor sees the rollback too.
+  # @param [Factbase::Churn] before The counter as it was before the transaction
+  def revert(before)
+    @churn.append(before.inserted - @churn.inserted, before.deleted - @churn.deleted, before.added - @churn.added)
+  end
+  private :revert
 
   # Fact decorator.
   #

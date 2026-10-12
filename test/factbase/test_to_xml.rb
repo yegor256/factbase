@@ -19,7 +19,7 @@ class TestToXML < Factbase::Test
     xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     refute_empty(xml.xpath('/fb/f[t]'))
     assert_match(
-      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}Z$/,
+      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{9}Z$/,
       xml.xpath('/fb/f/t/text()').text
     )
   end
@@ -131,6 +131,12 @@ class TestToXML < Factbase::Test
     %w[a c t x].each_with_index do |e, i|
       refute_empty(xml.xpath("/fb/f/#{e}[count(preceding-sibling::*) = #{i}]"), e)
     end
+  end
+
+  def test_keeps_nanoseconds_of_time
+    fb = Factbase.new
+    fb.insert.when = Time.utc(2026, 9, 30) + Rational(123_456_789, 1_000_000_000)
+    assert_includes(Factbase::ToXML.new(fb).xml, '2026-09-30T00:00:00.123456789Z')
   end
 
   def test_empty_factbase

@@ -6,6 +6,7 @@
 require 'decoor'
 require 'tago'
 require 'timeout'
+require_relative 'enumerated'
 require_relative 'syntax'
 
 # A decorator of a Factbase, that terminates long-running queries.
@@ -22,9 +23,11 @@ class Factbase::Impatient
     @origin = fb
     @timeout = Float(timeout)
     raise(ArgumentError, "The \"timeout\" must be positive, while #{timeout} given") unless @timeout.positive?
+    raise(ArgumentError, "The \"timeout\" must be finite, while #{timeout} given") unless @timeout.finite?
   end
 
   decoor(:origin)
+  include Factbase::Enumerated
 
   def insert
     @origin.insert
@@ -65,10 +68,10 @@ class Factbase::Impatient
       left = @timeout
       loop do
         # rubocop:disable Elegant/NoRedundantVariable
-        started = Time.now
+        started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         fact = impatient('each', left) { enum.next }
         # rubocop:enable Elegant/NoRedundantVariable
-        left -= Time.now - started
+        left -= Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
         yield(fact)
         n += 1
       end
