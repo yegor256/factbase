@@ -20,21 +20,23 @@ class Factbase::LazyTaped
       @added = added
     end
 
-    def each(&)
+    def each
       return to_enum(__method__) unless block_given?
-      current_array.each(&)
+      current_array.each { |item| yield(value(item)) }
     end
 
     def [](idx)
-      current_array[idx]
+      value(current_array[idx])
     end
 
     def to_a
-      current_array.to_a
+      current_array.map { |item| value(item) }
     end
 
-    def any?(pattern = nil, &)
-      pattern ? current_array.any?(pattern) : current_array.any?(&)
+    def any?(pattern = nil)
+      return current_array.any? { |item| pattern.public_send(:===, value(item)) } if pattern
+      return current_array.any? unless block_given?
+      current_array.any? { |item| yield(value(item)) }
     end
 
     def <<(item)
@@ -53,6 +55,10 @@ class Factbase::LazyTaped
 
     def current_array
       @taped_hash.copied? ? @taped_hash.get_copied_array(@key) : @origin
+    end
+
+    def value(item)
+      item.is_a?(String) ? -item : item
     end
   end
 end

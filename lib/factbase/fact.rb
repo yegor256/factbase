@@ -73,7 +73,8 @@ class Factbase::Fact
         raise(ArgumentError, "Can't get '#{k}', the fact is empty") if @map.empty?
         raise(ArgumentError, "Can't find '#{k}' attribute out of [#{@map.keys.join(', ')}]")
       end
-      v[0]
+      value = v[0]
+      value.is_a?(String) ? -value : value
     end
   end
 end
