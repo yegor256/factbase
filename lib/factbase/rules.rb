@@ -46,6 +46,13 @@ class Factbase::Rules
     Query.new(@fb.query(term, maps), @check, self)
   end
 
+  def import(bytes)
+    probe = Factbase.new
+    probe.import(bytes)
+    probe.query('(always)').each { |f| @check.it(f, @fb) }
+    @fb.import(bytes)
+  end
+
   def txn
     before = @check
     later = Later.new(@uid)
