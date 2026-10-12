@@ -27,6 +27,9 @@ class Factbase::Undef < Factbase::TermBase
     raise(ArgumentError, "A symbol expected as first argument of 'undef'") unless fn.is_a?(Symbol)
     raise(ArgumentError, "Term '#{fn}' is built-in and cannot be undefined") if Factbase::Term::TERMS.key?(fn)
     if Factbase::Term.private_method_defined?(fn, false)
+      unless Factbase::Term.instance_method(fn).source_location&.first == File.expand_path('defn.rb', __dir__)
+        raise(ArgumentError, "Term '#{fn}' was not made by 'defn' and cannot be undefined")
+      end
       Factbase::Term.class_eval("undef :#{fn}", __FILE__, __LINE__ - 1)
     end
     true
