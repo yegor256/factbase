@@ -32,4 +32,14 @@ class TestPre < Factbase::Test
     assert_equal(1, arr[0].total)
     assert_equal(2, arr[1].total)
   end
+
+  def test_runs_block_on_imported_facts
+    src = Factbase.new
+    src.insert.foo = 1
+    fb = Factbase::Pre.new(Factbase.new) { |f| f._id = 42 }
+    fb.import(src.export)
+    f = fb.query('(always)').each.to_a.first
+    assert_equal(42, f._id, 'The block must run on an imported fact')
+    assert_equal(1, f.foo)
+  end
 end

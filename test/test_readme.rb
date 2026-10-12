@@ -24,4 +24,14 @@ class TestReadme < Factbase::Test
       )
     end
   end
+
+  def test_counts_insert_in_tallied_example
+    assert_equal(
+      1,
+      File.read(File.join(__dir__, '../README.md')).scan(/^```ruby\n(.*?)^```/m).flatten
+        .find { |b| b.include?('Factbase::Tallied') }
+        .then { |code| instance_eval("#{code}\nchurn.inserted", __FILE__, __LINE__) },
+      'insert in the Tallied example of README.md is not counted'
+    )
+  end
 end

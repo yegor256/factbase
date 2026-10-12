@@ -27,6 +27,10 @@ class Factbase::IndexedExists
   private
 
   def _feed(facts, entry, operand)
+    if entry[:count] > facts.size
+      entry[:facts] = []
+      entry[:count] = 0
+    end
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |m|
       entry[:facts] << m unless m[operand].nil?
