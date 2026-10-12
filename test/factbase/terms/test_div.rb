@@ -50,4 +50,46 @@ class TestDiv < Factbase::Test
       'undefined method'
     )
   end
+
+  def test_divides_big_integer_exactly
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    big = rnd.rand((2**60)..(2**70))
+    k = rnd.rand(2..1000)
+    assert_equal(
+      big, Factbase::Div.new([:total, k]).evaluate(fact('total' => big * k), [], Factbase.new),
+      "quotient of #{big * k} by #{k} lost precision, seed #{seed}"
+    )
+  end
+
+  def test_keeps_integer_for_whole_quotient
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    n = rnd.rand(-1000..1000)
+    k = rnd.rand(1..1000)
+    assert_instance_of(
+      Integer, Factbase::Div.new([:total, k]).evaluate(fact('total' => n * k), [], Factbase.new),
+      "quotient of #{n * k} by #{k} is not an integer, seed #{seed}"
+    )
+  end
+
+  def test_keeps_float_for_float_operand
+    seed = Random.new_seed
+    k = Random.new(seed).rand(1..1000)
+    assert_instance_of(
+      Float, Factbase::Div.new([:total, k]).evaluate(fact('total' => k * 2.0), [], Factbase.new),
+      "quotient of float #{k * 2.0} by #{k} is not a float, seed #{seed}"
+    )
+  end
+
+  def test_finds_big_integer_divided_by_one
+    seed = Random.new_seed
+    big = Random.new(seed).rand((2**60)..(2**70))
+    fb = Factbase.new
+    fb.insert.id = big
+    assert_equal(
+      1, fb.query("(eq (div id 1) #{big})").each.to_a.size,
+      "big integer #{big} divided by one is not itself, seed #{seed}"
+    )
+  end
 end
