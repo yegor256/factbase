@@ -38,6 +38,17 @@ class Factbase::Inv
     Query.new(@fb.query(query, maps), @block, self)
   end
 
+  def import(bytes)
+    probe = Factbase.new
+    probe.import(bytes)
+    probe.query('(always)').each do |f|
+      f.all_properties.each do |p|
+        f[p].each { |v| @block.call(p, v) }
+      end
+    end
+    @fb.import(bytes)
+  end
+
   def txn
     @fb.txn do |fbt|
       yield(Factbase::Inv.new(fbt, &@block))
