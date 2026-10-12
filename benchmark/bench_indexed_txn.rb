@@ -40,11 +40,9 @@ def bench_indexed_txn(bmk, _fb, cycles)
       f.status = 'open'
     end
     bmk.report("#{p_total} facts: query after delete txn") do
-      cycles.times do
+      cycles.times do |c|
         fb_del.txn do |fbt|
-          f = fbt.insert
-          f.type = 'tmp'
-          f.status = 'tmp'
+          fbt.query("(eq id #{c})").delete!
         end
         fb_del.query("(and (eq type 'issue') (eq status 'open'))").each.size
       end
