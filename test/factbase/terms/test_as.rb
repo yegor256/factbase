@@ -33,4 +33,13 @@ class TestAs < Factbase::Test
       end
     end
   end
+
+  def test_refuses_a_parameter_as_target
+    fb = Factbase.new
+    fb.insert.foo = 42
+    assert_includes(
+      assert_raises(StandardError) { fb.query('(as $bar 42)').each(fb, bar: [99]).to_a }.message,
+      "'$bar' is a parameter"
+    )
+  end
 end
