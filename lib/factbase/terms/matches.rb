@@ -47,9 +47,13 @@ class Factbase::Matches < Factbase::TermBase
   def anchored(source)
     depth = 0
     escaped = false
+    property = false
     source.each_char.map do |c|
-      if escaped
+      if property
+        property = c != '}'
+      elsif escaped
         escaped = false
+        property = c.casecmp?('p')
       elsif c == '\\'
         escaped = true
       elsif c == '['
