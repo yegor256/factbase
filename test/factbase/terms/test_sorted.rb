@@ -41,6 +41,13 @@ class TestSorted < Factbase::Test
     assert_equal([*0.step(16, 2), *1.step(15, 2)], list.map { |m| m['id'].first })
   end
 
+  def test_sorts_values_of_different_types
+    list = Factbase::Syntax.new('(sorted score (always))').to_term.predict(
+      [{ 'score' => ['two'] }, { 'score' => [1] }], Factbase.new, {}
+    )
+    assert_equal([1, 'two'], list.map { |m| m['score'].first })
+  end
+
   def test_does_not_turn_a_param_into_a_property
     list = Factbase::Syntax.new('(sorted x (eq y $who))').to_term.predict(
       [{ 'x' => [8], 'y' => ['first'] }, { 'x' => [1], 'y' => ['second'] }],
