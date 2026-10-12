@@ -25,7 +25,7 @@ class Factbase::As < Factbase::TermBase
     a = @operands[0]
     raise(ArgumentError, "A symbol is expected as first argument of 'as'") unless a.is_a?(Symbol)
     vv = _values(1, fact, maps, fb)
-    vv&.each { |v| fact.__send__(:"#{a}=", v) }
+    vv&.each { |v| fact.__send__(:"#{a}=", v) unless v == '' }
     true
   end
 end
