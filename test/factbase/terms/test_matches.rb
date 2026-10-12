@@ -49,4 +49,45 @@ class TestMatches < Factbase::Test
       end.message, "Invalid regexp '[a-'"
     )
   end
+
+  def test_dont_match_when_pattern_property_is_absent
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    text = Array.new(rnd.rand(1..32)) { rnd.rand(0x430..0x44f).chr(Encoding::UTF_8) }.join
+    refute(
+      Factbase::Matches.new(%i[foo pattern]).evaluate(fact('foo' => text), [], Factbase.new),
+      "matches found a pattern in an absent property for #{text.inspect}, seed #{seed}"
+    )
+  end
+
+  def test_dont_match_when_both_operands_are_absent
+    seed = Random.new_seed
+    refute(
+      Factbase::Matches.new(%i[foo pattern]).evaluate(fact('bar' => Random.new(seed).rand(1..1000)), [], Factbase.new),
+      "matches found something in absent operands, seed #{seed}"
+    )
+  end
+
+  def test_skips_facts_without_pattern_property
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    text = Array.new(rnd.rand(1..32)) { rnd.rand(0x430..0x44f).chr(Encoding::UTF_8) }.join
+    f = fb.insert
+    f.name = text
+    f.pat = "^#{text[0]}"
+    fb.insert.name = text
+    assert_equal(
+      1, fb.query('(matches name pat)').each.to_a.size,
+      "facts for #{text.inspect} were not skipped, seed #{seed}"
+    )
+  end
+
+  def test_dont_match_when_pattern_parameter_is_absent
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    fb.insert.name = Array.new(rnd.rand(1..32)) { rnd.rand(0x430..0x44f).chr(Encoding::UTF_8) }.join
+    assert_empty(fb.query('(matches name $p)').each(fb, {}).to_a, "an absent parameter matched, seed #{seed}")
+  end
 end
