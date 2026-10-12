@@ -36,7 +36,7 @@ class Factbase::FactAsYaml
     end
     hash.sort.to_h.map do |k, vv|
       [
-        k,
+        key(k),
         ': ',
         if vv.size == 1
           v_to_s(vv.first)
@@ -52,6 +52,11 @@ class Factbase::FactAsYaml
   end
 
   private
+
+  # A property name YAML would read as a boolean or null, like +yes+ or +null+, gets quoted.
+  def key(name)
+    YAML.safe_load(name).is_a?(String) ? name : "'#{name}'"
+  end
 
   def v_to_s(val)
     s = val

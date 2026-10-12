@@ -45,8 +45,8 @@ class TestSyntax < Factbase::Test
 
   def test_makes_static_terms
     {
-      '(foo bar)' => false,
-      '(foo "bar")' => true,
+      '(never_defined bar)' => false,
+      '(never_defined "bar")' => true,
       '(agg (always) (max id))' => true
     }.each do |q, a|
       assert_equal(a, Factbase::Syntax.new(q).to_term.static?)
@@ -134,6 +134,12 @@ class TestSyntax < Factbase::Test
         { 'when' => [t] }, [], Factbase.new
       )
     )
+  end
+
+  def test_rejects_an_impossible_date_literal
+    assert_raises(Factbase::Syntax::Broken) do
+      Factbase::Syntax.new('(eq created 2012-02-30T00:00:00Z)').to_term
+    end
   end
 
   def test_prints_a_time_with_fractional_seconds
@@ -271,5 +277,15 @@ class TestSyntax < Factbase::Test
 
   def test_ends_a_comment_at_a_carriage_return
     assert_equal('(eq x 1)', Factbase::Syntax.new("# comment\r(eq x 1)").to_term.to_s)
+  end
+
+  def test_refuses_float_literals_out_of_range
+    %w[1e9999 1e-9999 -2.5e-9999 1E9999].each do |t|
+      assert_includes(
+        assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new("(eq x #{t})").to_term }.message,
+        'out of range'
+      )
+    end
+    assert_equal('(eq x 0.0)', Factbase::Syntax.new('(eq x 0.0e-9999)').to_term.to_s)
   end
 end

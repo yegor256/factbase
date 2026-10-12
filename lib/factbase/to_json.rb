@@ -51,7 +51,7 @@ class Factbase::ToJSON
         "##{map['_id']} is not valid UTF-8 and JSON cannot hold it"
       )
     end
-    val.is_a?(Time) ? val.utc.iso8601(6) : val
+    val.is_a?(Time) ? val.utc.iso8601(9) : val
   end
 
   # Check whether JSON cannot hold the string, reading a binary one as UTF-8.

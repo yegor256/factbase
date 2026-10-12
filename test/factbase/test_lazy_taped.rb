@@ -302,4 +302,16 @@ class TestLazyTaped < Factbase::Test
       assert_equal(10, fbt.query('(eq id 99)').each.to_a.size)
     end
   end
+
+  def test_deletes_every_fact_while_walking_a_copied_txn
+    fb = Factbase.new
+    4.times { |i| fb.insert.id = i + 1 }
+    churn =
+      fb.txn do |fbt|
+        fbt.query('(eq id 1)').each { |f| f.changed = true }
+        fbt.each { |f| fbt.query("(eq id #{f['id'][0]})").delete! }
+      end
+    assert_equal(4, churn.deleted, churn.to_s)
+    assert_equal(0, fb.size)
+  end
 end

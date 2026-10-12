@@ -46,6 +46,15 @@ class TestFactbase < Factbase::Test
     assert_equal('(eq foo 42)', Factbase.new.to_term('(eq foo 42)').to_s)
   end
 
+  def test_query_rejects_non_query_objects
+    [nil, 42].each do |invalid|
+      assert_includes(
+        assert_raises(ArgumentError) { Factbase.new.query(invalid) }.message,
+        "while #{invalid.class} provided"
+      )
+    end
+  end
+
   def test_simple_setting
     fb = Factbase.new
     fb.insert
@@ -110,6 +119,13 @@ class TestFactbase < Factbase::Test
         end.message, 'cannot load a factbase'
       )
     end
+  end
+
+  def test_import_rejects_nil
+    assert_includes(
+      assert_raises(StandardError) { Factbase.new.import(nil) }.message,
+      'The input is nil, cannot load a factbase'
+    )
   end
 
   def test_empty_or_not
@@ -510,6 +526,15 @@ class TestFactbase < Factbase::Test
         end.message, 'The input is not a valid factbase'
       )
     end
+  end
+
+  def test_import_rejects_a_valid_marshal_with_the_wrong_shape
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase.new.import(Marshal.dump({ unexpected: true }))
+      end.message,
+      'The input is not a valid factbase'
+    )
   end
 
   def test_counts_facts_in_each

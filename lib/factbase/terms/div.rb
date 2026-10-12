@@ -11,7 +11,7 @@ class Factbase::Div < Factbase::TermBase
   # @param [Array] operands Operands
   def initialize(operands)
     super()
-    @div = Factbase::Arithmetic.new(:fdiv, operands)
+    @div = Factbase::Arithmetic.new(:quo, operands)
   end
 
   # Evaluate term on a fact.
@@ -20,6 +20,8 @@ class Factbase::Div < Factbase::TermBase
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Object] Result of the division
   def evaluate(fact, maps, fb)
-    @div.evaluate(fact, maps, fb)
+    quotient = @div.evaluate(fact, maps, fb)
+    return quotient unless quotient.is_a?(Rational)
+    quotient.denominator == 1 ? quotient.numerator : Float(quotient)
   end
 end
