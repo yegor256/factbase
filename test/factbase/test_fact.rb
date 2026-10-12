@@ -133,4 +133,70 @@ class TestFact < Factbase::Test
     fresh.import(fb.export)
     assert_equal([true], fresh.query('(exists yes)').each.to_a.first['yes'])
   end
+
+  def test_keeps_value_when_caller_changes_string
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    text = Array.new(rnd.rand(1..64)) { rnd.rand(0x400..0x4ff).chr(Encoding::UTF_8) }.join
+    s = text.dup
+    f = Factbase::Fact.new({})
+    f.foo = s
+    s << rnd.rand(0x3b1..0x3c9).chr(Encoding::UTF_8)
+    assert_equal(text, f.foo, "fact follows the change of the given string, seed #{seed}")
+  end
+
+  def test_cannot_change_string_read_from_fact
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    f = Factbase::Fact.new({})
+    f.foo = Array.new(rnd.rand(1..64)) { rnd.rand(0x400..0x4ff).chr(Encoding::UTF_8) }.join
+    assert_raises(FrozenError, "string read from fact can be changed in place, seed #{seed}") do
+      f.foo << 'Q'
+    end
+  end
+
+  def test_does_not_expose_mutable_imported_strings
+    fb = Factbase.new
+    fb.import(Marshal.dump([{ 'foo' => [+'bar'] }]))
+    assert_raises(FrozenError) { fb.query('(always)').first.foo << 'baz' }
+    assert_raises(FrozenError) do
+      fb.txn do |tx|
+        tx.query('(always)').each { |fact| fact['foo'][0] << 'baz' }
+      end
+    end
+    assert_equal('bar', fb.query('(always)').first.foo)
+  end
+
+  def test_keeps_value_of_string_changed_in_rolled_back_txn
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    text = Array.new(rnd.rand(1..64)) { rnd.rand(0x400..0x4ff).chr(Encoding::UTF_8) }.join
+    s = text.dup
+    fb = Factbase.new
+    fb.insert.foo = s
+    fb.txn do
+      s << 'Q'
+      raise(Factbase::Rollback)
+    end
+    assert_equal([text], fb.query('(always)').each.map(&:foo), "rolled back change survived, seed #{seed}")
+  end
+
+  def test_cannot_change_string_of_fact_found_by_query
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    fb.insert.foo = Array.new(rnd.rand(1..64)) { rnd.rand(0x400..0x4ff).chr(Encoding::UTF_8) }.join
+    assert_raises(FrozenError, "string of fact found by query can be changed in place, seed #{seed}") do
+      fb.query('(always)').each { |f| f.foo << 'Q' }
+    end
+  end
+
+  def test_keeps_its_values_when_the_caller_changes_what_it_read
+    f = Factbase::Fact.new({})
+    f.foo = 42
+    f['foo'].clear
+    f['foo'] << 'boom'
+    assert_equal([42], f['foo'])
+    assert_equal(42, f.foo)
+  end
 end

@@ -103,7 +103,9 @@ class Factbase
   # @yieldparam [Hash] fact Each fact as a plain Hash
   # @return [Integer, Enumerator] Total number of facts or Enumerator
   def each(&)
+    return to_enum(__method__) unless block_given?
     @maps.each(&)
+    @maps.size
   end
 
   # Insert a new fact and return it.
@@ -138,8 +140,12 @@ class Factbase
   # @param [String|Factbase::Term] term The query to use for selections
   # @param [Array<Hash>|nil] maps The subset of maps (if provided)
   def query(term, maps = nil)
-    maps ||= @maps
     term = to_term(term) if term.is_a?(String)
+    require_relative('factbase/term') unless defined?(Factbase::Term)
+    unless term.is_a?(Factbase::Term)
+      raise(ArgumentError, "A query must be a String or a Factbase::Term, while #{term.class} provided")
+    end
+    maps ||= @maps
     require_relative('factbase/query')
     Factbase::Query.new(maps, term, self)
   end
@@ -276,12 +282,16 @@ class Factbase
   #
   # @param [String] bytes Binary string to import
   def import(bytes)
+    raise(StandardError, 'The input is nil, cannot load a factbase') if bytes.nil?
     raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?
     begin
       data = Marshal.load(bytes)
       data = Marshal.load(data[:maps]) if data.is_a?(Hash) && data.key?(:maps)
     rescue TypeError, ArgumentError => e
       raise(StandardError, "The input is not a valid factbase: #{e.message}")
+    end
+    unless data.is_a?(Array) && data.all?(Hash)
+      raise(StandardError, 'The input is not a valid factbase: expected an array of maps')
     end
     @maps += data
   end

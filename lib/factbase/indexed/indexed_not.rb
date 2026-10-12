@@ -32,7 +32,7 @@ class Factbase::IndexedNot
   end
 
   def _feed(facts, entry)
-    return unless entry[:count] < facts.size
+    return if entry[:count] == facts.size
     yes = yield
     if yes.nil?
       entry[:facts] = nil
