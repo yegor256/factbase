@@ -27,6 +27,6 @@ class Factbase::Max < Factbase::TermBase
   # @return [Object] The max value among the evaluated operands
   def evaluate(_fact, maps, _fb)
     assert_args(1)
-    MAX.evaluate(@operands[0], maps)
+    MAX.evaluate(_property(0), maps)
   end
 end

@@ -94,6 +94,16 @@ class Factbase::TermBase
     fact[o.to_s]
   end
 
+  # Read the operand at the given position as the name of a property.
+  # @param [Integer] pos The position of the operand
+  # @return [Symbol] The name of the property
+  def _property(pos)
+    k = @operands[pos]
+    raise(ArgumentError, "A symbol is expected, but '#{k}' provided") unless k.is_a?(Symbol)
+    raise(ArgumentError, "A property is expected, but '#{k}' is a parameter") if k.start_with?('$')
+    k
+  end
+
   # @return [Array|nil] Either array of values or NIL
   def _values(pos, fact, maps, fb)
     v = @operands[pos]

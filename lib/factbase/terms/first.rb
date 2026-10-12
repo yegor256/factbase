@@ -21,8 +21,7 @@ class Factbase::First < Factbase::TermBase
   # @return [Object] The value of the specified key from the first map
   def evaluate(_fact, maps, _fb)
     assert_args(1)
-    k = @operands[0]
-    raise(ArgumentError, "A symbol is expected, but #{k} provided") unless k.is_a?(Symbol)
+    k = _property(0)
     first = maps[0]
     return if first.nil?
     first[k.to_s]
