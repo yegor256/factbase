@@ -97,5 +97,5 @@ task :flamegraph, [:name] do |_t, args|
   StackProf.run(mode: :cpu, out: 'stackprof-cpu-myapp.dump', raw: true) do
     Rake::Task['benchmark'].invoke(bname)
   end
-  `stackprof --d3-flamegraph stackprof-cpu-myapp.dump > flamegraph.html`
+  sh 'stackprof --d3-flamegraph stackprof-cpu-myapp.dump > flamegraph.html'
 end

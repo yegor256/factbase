@@ -27,7 +27,7 @@ jobs:
       - run: bundle exec rake 'flamegraph[bench_slow_query]'
       - name: Verify flamegraph.html was generated
         run: |
-          if [ ! -f flamegraph.html ]; then
+          if [ ! -s flamegraph.html ]; then
             echo "Error: flamegraph.html was not created by the profiler."
             exit 1
           fi
