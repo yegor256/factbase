@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'minitest/autorun'
+require 'tmpdir'
 
 class TestRakefile < Minitest::Test
   load File.expand_path('../Rakefile', __dir__)
@@ -27,6 +28,15 @@ class TestRakefile < Minitest::Test
       { input: %w[test --no-cov], expected: '' }
     ].each do |c|
       assert_equal(c[:expected], tail(c[:input]), c[:input])
+    end
+  end
+
+  def test_keeps_coverage_when_loaded
+    Dir.mktmpdir do |dir|
+      FileUtils.mkdir_p(File.join(dir, 'coverage'))
+      FileUtils.touch(File.join(dir, 'coverage/report.xml'))
+      Dir.chdir(dir) { load File.expand_path('../Rakefile', __dir__) }
+      assert_path_exists(File.join(dir, 'coverage/report.xml'), 'the Rakefile deleted coverage when loaded')
     end
   end
 end
