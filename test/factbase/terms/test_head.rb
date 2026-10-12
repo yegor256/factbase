@@ -41,4 +41,11 @@ class TestHead < Factbase::Test
     e = assert_raises(ArgumentError) { t.predict(maps, Factbase.new(maps), {}) }
     assert_includes(e.message, "A non-negative count is expected by 'head', but -1 provided", e.message)
   end
+
+  def test_takes_all_facts_for_a_huge_count
+    fb = Factbase.new
+    fb.insert.x = 1
+    fb.insert.x = 2
+    assert_equal(2, fb.query('(head 99999999999999999999 (always))').each.to_a.size)
+  end
 end
