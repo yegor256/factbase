@@ -57,4 +57,10 @@ class TestNth < Factbase::Test
       Factbase::Nth.new([0, name.to_sym]).evaluate(fact, [{ name => [rnd.rand(1..1000)] }], Factbase.new)
     end
   end
+
+  def test_gives_nil_for_a_huge_position
+    assert_nil(
+      Factbase::Nth.new([99_999_999_999_999_999_999, :letter]).evaluate(nil, [{ 'letter' => 'a' }], Factbase.new)
+    )
+  end
 end

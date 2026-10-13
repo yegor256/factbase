@@ -28,6 +28,7 @@ class Factbase::Nth < Factbase::TermBase
     k = @operands[1]
     raise(ArgumentError, "A symbol is expected, but #{k} provided") unless k.is_a?(Symbol)
     raise(ArgumentError, "A property name is expected, but the parameter #{k} provided") if k.start_with?('$')
+    return if pos >= maps.size
     m = maps[pos]
     return if m.nil?
     m[k.to_s]
