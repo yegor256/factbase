@@ -12,6 +12,7 @@ class Factbase::IndexedAnd
 
   def predict(maps, fb, params)
     return if @idx.nil?
+    return unless @term.operands.all?(Factbase::Term)
     key = [maps.object_id, @term.operands.first, @term.op]
     r = nil
     if @term.operands.all? { |o| o.op == :eq } && @term.operands.size > 1 \
@@ -47,7 +48,9 @@ class Factbase::IndexedAnd
       j =
         tuples.flat_map do |t|
           entry[:index][t.map { |value| normalize(value) }] || []
-        end.uniq(&:object_id).sort_by { |m| entry[:pos][m] }
+        end
+      j.uniq!(&:object_id)
+      j.sort_by! { |m| entry[:pos][m] }
       r = maps.respond_to?(:repack) ? maps.repack(j) : j
     else
       fail = false
