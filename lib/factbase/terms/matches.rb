@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../regexp_comments'
 require_relative 'base'
 
 # Matches term.
@@ -47,11 +48,13 @@ class Factbase::Matches < Factbase::TermBase
   end
 
   def anchored(source)
+    comments = Factbase::RegexpComments.new
     depth = 0
     escaped = false
     property = false
     lead = nil
-    source.each_char.map do |c|
+    source.each_char.with_index.map do |c, position|
+      next c if comments.skip?(source, position, c, depth.zero? && !escaped && !property)
       first = lead
       lead = nil
       if property
