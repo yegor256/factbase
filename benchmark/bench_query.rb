@@ -43,7 +43,7 @@ def bench_query(bmk, fb, cycles)
     bmk.report(q.tr("\n", ' ').gsub(/\s+/, ' ').ellipsized(50, :right)) do
       Timeout.timeout(cycles * 3) do
         cycles.times do
-          fb.query(q).each.size
+          fb.query(q).each.to_a.size
         end
       end
     end

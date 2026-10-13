@@ -29,7 +29,7 @@ def bench_indexed_txn(bmk, _fb, cycles)
           f.id = n + i
           f.type = 'comment'
         end
-        fb_ins.query("(and (eq type 'issue') (eq status 'open'))").each.size
+        fb_ins.query("(and (eq type 'issue') (eq status 'open'))").each.to_a.size
       end
     end
     fb_del = Factbase::IndexedFactbase.new(Factbase.new)
@@ -46,7 +46,7 @@ def bench_indexed_txn(bmk, _fb, cycles)
           f.type = 'tmp'
           f.status = 'tmp'
         end
-        fb_del.query("(and (eq type 'issue') (eq status 'open'))").each.size
+        fb_del.query("(and (eq type 'issue') (eq status 'open'))").each.to_a.size
       end
     end
   end
