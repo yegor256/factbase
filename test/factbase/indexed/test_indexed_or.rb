@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_or'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/taped'
@@ -15,6 +16,25 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestIndexedOr < Factbase::Test
+  def test_keeps_distinct_equal_facts_in_indexed_or
+    maps = Array.new(2) { { 'name' => ['alice'], 'team' => ['blue'] } }
+    10.times { maps << { 'name' => ['other'], 'team' => ['red'] } }
+    plain = Factbase.new(maps)
+    indexed = Factbase::IndexedFactbase.new(plain)
+    query = '(or (eq name "alice") (eq team "blue"))'
+    assert_equal(2, plain.query(query).each.count)
+    assert_equal(2, indexed.query(query).each.count)
+    assert_equal(%w[alice alice], indexed.query(query).each.map(&:name))
+  end
+
+  def test_deduplicates_overlapping_branches_by_fact_identity
+    maps = [{ 'name' => ['alice'], 'team' => ['blue'] }]
+    10.times { maps << { 'name' => ['other'], 'team' => ['red'] } }
+    indexed = Factbase::IndexedFactbase.new(Factbase.new(maps))
+    assert_equal(1, indexed.query('(or (eq name "alice") (eq team "blue"))').each.count)
+    assert_equal(11, indexed.size)
+  end
+
   def test_predicts_on_or
     term = Factbase::Term.new(
       :or,
