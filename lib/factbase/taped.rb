@@ -127,6 +127,7 @@ class Factbase::Taped
     def each(&)
       return to_enum(__method__) unless block_given?
       @origin.each(&)
+      self
     end
 
     def [](key)
