@@ -46,6 +46,12 @@ class Factbase::Fact
     @map.keys
   end
 
+  # Original map behind this fact, for identifying query selections.
+  def _source
+    map = @map.respond_to?(:_source) ? @map._source : @map
+    map.instance_variable_get(:@factbase_source_map) || map
+  end
+
   others do |*args|
     k = args[0].to_s
     if k.end_with?('=')

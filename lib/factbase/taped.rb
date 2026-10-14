@@ -96,6 +96,11 @@ class Factbase::Taped
       @added = added
     end
 
+    # Map behind this tracked view, for identifying selections.
+    def _source
+      @origin
+    end
+
     def keys
       @origin.keys
     end
