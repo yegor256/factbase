@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'threads'
+require 'timeout'
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/sync/sync_factbase'
 require_relative '../../test__helper'
@@ -96,5 +97,30 @@ class TestSyncFactbase < Factbase::Test
 
   def test_refuses_a_nil_factbase
     assert_raises(ArgumentError) { Factbase::SyncFactbase.new(nil) }
+  end
+
+  def test_writes_to_a_new_fact_under_the_monitor
+    monitor = Monitor.new
+    fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
+    fact = fb.insert
+    ready = Queue.new
+    writer = nil
+    monitor.synchronize do
+      writer =
+        Thread.new do
+          ready << true
+          fact.foo = 42
+        end
+      Timeout.timeout(2) do
+        ready.pop
+        Thread.pass until writer.status == 'sleep' || !writer.alive?
+      end
+      assert_equal('sleep', writer.status, 'the writer must block on the held monitor')
+    end
+    assert(writer.join(2), 'the writer must finish when the monitor is released')
+    assert_equal(42, fb.query('(exists foo)').each.to_a.first['foo'].first)
+  ensure
+    writer&.kill
+    writer&.join
   end
 end
