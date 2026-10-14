@@ -12,6 +12,18 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestTaped < Factbase::Test
+  def test_time_array_reads_are_detached
+    stamp = Time.utc(2026, 10, 13, 12)
+    added = []
+    array = Factbase::Taped::TapedArray.new([stamp], 1, added)
+    array[0].localtime('+03:00')
+    array.to_a.first.localtime('+03:00')
+    array.each { |time| time.localtime('+03:00') }
+    array.any? { |time| time.localtime('+03:00') }
+    assert_equal(0, stamp.utc_offset)
+    assert_empty(added)
+  end
+
   def test_tracks_insertion
     t = Factbase::Taped.new([])
     t << {}
