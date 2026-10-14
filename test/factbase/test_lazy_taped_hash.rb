@@ -15,6 +15,38 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLazyTapedHash < Factbase::Test
+  def test_commits_partial_mutations_after_handled_callback_errors
+    %i[transform_values! merge!].each do |operation|
+      base = Factbase.new
+      fact = base.insert
+      fact.x = 1
+      fact.y = 2
+      churn =
+        base.txn do |tx|
+          tx.each do |map|
+            assert_raises(RuntimeError) do
+              if operation == :transform_values!
+                map.transform_values! do |values|
+                  raise(RuntimeError, 'stop') if values == [2]
+                  [3]
+                end
+              else
+                map.merge!('x' => [3], 'y' => [4]) do |key, _old, value|
+                  raise(RuntimeError, 'stop') if key == 'y'
+                  value
+                end
+              end
+            end
+            assert_equal([3], map['x'].to_a)
+          end
+        end
+      assert_equal(3, base.query('(always)').first.x)
+      assert_equal(2, base.query('(always)').first.y)
+      assert_equal(1, churn.added)
+      assert_equal(0, churn.deleted)
+    end
+  end
+
   def test_keys
     hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
     assert_read(hash, origin, %w[foo bar], hash.keys)
