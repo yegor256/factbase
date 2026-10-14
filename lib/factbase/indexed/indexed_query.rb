@@ -71,9 +71,9 @@ class Factbase::IndexedQuery
   # @param [Factbase] fb The factbase
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
-    @origin.delete!(fb).tap do
-      @idx.clear
-      @fresh.clear
-    end
+    @origin.delete!(fb)
+  ensure
+    @idx.clear
+    @fresh.clear
   end
 end
