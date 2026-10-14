@@ -140,7 +140,11 @@ class Factbase::Rules
 
     def it(fact, fb)
       term = Factbase::Syntax.new(@expr).to_term
-      return if term.evaluate(fact, [], fb)
+      result = term.evaluate(fact, [], fb)
+      unless result.is_a?(TrueClass) || result.is_a?(FalseClass)
+        raise(ArgumentError, "Unexpected evaluation result of type #{result.class}, must be Boolean at #{term}")
+      end
+      return if result
       text = (@expr.length > 32 ? "#{@expr[0..31]}..." : @expr).inspect
       failed = Check.failed(term, fact, fb)
       text = "#{failed} of the #{text}" unless failed.nil? || failed.to_s == term.to_s
