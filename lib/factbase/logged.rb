@@ -201,7 +201,10 @@ class Factbase::Logged
       if r.nil?
         @tube.say(mono, "Nothing found by '#{@termtext}' #{tail}")
       else
-        @tube.say(mono, "Found #{r.to_s.ellipsized(Factbase::Logged::Fact::MAX_LENGTH)} (#{r.class}) by '#{@termtext}' #{tail}")
+        @tube.say(
+          mono,
+          "Found #{r.to_s.ellipsized(Factbase::Logged::Fact::MAX_LENGTH)} (#{r.class}) by '#{@termtext}' #{tail}"
+        )
       end
       r
     end
