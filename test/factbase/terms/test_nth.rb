@@ -54,4 +54,10 @@ class TestNth < Factbase::Test
       Factbase::Nth.new([99_999_999_999_999_999_999, :letter]).evaluate(nil, [{ 'letter' => 'a' }], Factbase.new)
     )
   end
+
+  def test_takes_the_position_from_a_sub_term
+    fb = Factbase.new
+    [5, 7, 9].each { |i| fb.insert.v = i }
+    assert_equal([7], fb.query('(agg (always) (nth (minus 2 1) v))').one)
+  end
 end
