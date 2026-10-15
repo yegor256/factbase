@@ -130,6 +130,25 @@ class TestLazyTapedHash < Factbase::Test
     end
   end
 
+  def test_does_not_expose_the_original_arrays_through_other_readers
+    readers = {
+      fetch: ->(h) { h.fetch('x') },
+      dig: ->(h) { h.dig('x') },
+      each: ->(h) { h.each { |_key, items| break items } },
+      to_a: ->(h) { h.to_a.first.last },
+      values_at: ->(h) { h.values_at('x').first }
+    }
+    readers.each do |name, reader|
+      fb = Factbase.new
+      fb.insert.x = 1
+      fb.txn do |transaction|
+        reader.call(transaction.each.first) << 2
+        raise(Factbase::Rollback)
+      end
+      assert_equal({ 'x' => [1] }, fb.each.first.to_h, name)
+    end
+  end
+
   private
 
   def read_array(hash, name)
