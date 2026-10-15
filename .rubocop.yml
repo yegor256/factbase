@@ -78,6 +78,7 @@ Elegant/GoodMethodName:
     - '_search'
     - '_tape'
     - '_track'
+    - '_unwrap'
     - '_values'
     - 'all_properties'
     - 'assert_args'
