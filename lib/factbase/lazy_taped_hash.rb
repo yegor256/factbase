@@ -106,8 +106,7 @@ class Factbase::LazyTaped
     end
 
     def method_missing(method, *, &)
-      mutating = method.to_s.end_with?('=', '!') || MUTATING_METHODS.include?(method)
-      unless mutating
+      unless method.to_s.end_with?('=', '!') || MUTATING_METHODS.include?(method)
         return current_map.transform_values { |value| detached(value) }.__send__(method, *, &)
       end
       ensure_copied_map
