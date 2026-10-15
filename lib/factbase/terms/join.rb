@@ -30,7 +30,9 @@ class Factbase::Join < Factbase::TermBase
         .map! do |j|
           pieces = j.split('<=')
           raise(ArgumentError, "A join mapping can contain at most one '<=': '#{j}'") if pieces.size > 2
-          pieces.map(&:strip)
+          pieces.map!(&:strip)
+          raise(ArgumentError, "A join mapping can't use a '$' name: '#{j}'") if pieces.any? { |p| p.start_with?('$') }
+          pieces
         end
         .map! { |j| j.size == 1 ? [j[0], j[0]] : j }
     term = @operands[1]
