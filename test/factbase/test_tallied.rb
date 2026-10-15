@@ -174,4 +174,15 @@ class TestTallied < Factbase::Test
     end
     assert_equal(before, churn.to_s, "failed insertion changed the churn of #{before}, seed #{seed}")
   end
+
+  def test_rollback_keeps_what_another_tallied_counted
+    churn = Factbase::Churn.new
+    second = Factbase::Tallied.new(Factbase.new, churn)
+    Factbase::Tallied.new(Factbase.new, churn).txn do |fbt|
+      fbt.insert.x = 1
+      second.insert.y = 2
+      raise(Factbase::Rollback)
+    end
+    assert_equal('1i/0d/1a', churn.to_s)
+  end
 end
