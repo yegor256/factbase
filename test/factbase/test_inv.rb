@@ -54,6 +54,6 @@ class TestInv < Factbase::Test
   end
 
   def test_refuses_a_nil_factbase
-    assert_raises(ArgumentError) { Factbase::Inv.new(nil) { |_p, _v| nil } }
+    assert_raises(ArgumentError) { Factbase::Inv.new(nil) { |_p, _v| true } }
   end
 end
