@@ -12,6 +12,7 @@ require_relative 'base'
 # License:: MIT
 class Factbase::Matches < Factbase::TermBase
   ANCHORS = { '^' => '\\A', '$' => '\\z' }.freeze
+  CONTROLS = { 'c' => :char, 'C' => :dash }.freeze
 
   def initialize(operands)
     super()
@@ -50,15 +51,22 @@ class Factbase::Matches < Factbase::TermBase
     depth = 0
     escaped = false
     property = false
+    control = nil
     lead = nil
     source.each_char.map do |c|
       first = lead
       lead = nil
-      if property
+      if control == :dash
+        control = :char
+      elsif control
+        control = nil
+        escaped = c == '\\'
+      elsif property
         property = c != '}'
       elsif escaped
         escaped = false
         property = c.casecmp?('p')
+        control = CONTROLS[c]
       elsif c == '\\'
         escaped = true
       elsif first == :open && c == '^'
