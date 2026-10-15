@@ -150,7 +150,7 @@ class TestRules < Factbase::Test
       end
     end
     assert(ok)
-    assert_equal(0, fb.query('(eq hello $v)').each(v: 42).to_a.size)
+    assert_equal(0, fb.query('(eq hello $v)').each(fb, 'v' => [42]).to_a.size)
   end
 
   def test_error_message_includes_expression
