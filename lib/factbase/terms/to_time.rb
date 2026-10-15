@@ -32,9 +32,10 @@ class Factbase::ToTime < Factbase::TermBase
   def parse(value)
     return value if value.is_a?(Time)
     return Time.at(value).utc if value.is_a?(Integer) || value.is_a?(Float)
+    time = Time.parse(value.to_s)
     date = value.to_s.match(/\A\s*(\d{4})-(\d{2})-(\d{2})/)
-    raise(ArgumentError, 'there is no such date') if date && !Date.valid_date?(*date.captures.map(&:to_i))
-    Time.parse(value.to_s)
+    raise(ArgumentError, 'there is no such date') if date && !Date.valid_date?(*date.captures.map { |i| Integer(i, 10) })
+    time
   rescue ArgumentError => e
     raise(RuntimeError, "Cannot parse '#{value}' as Time in (to_time ...): #{e.message}")
   end
