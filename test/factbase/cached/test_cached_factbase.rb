@@ -140,4 +140,15 @@ class TestCachedFactbase < Factbase::Test
       fb.query('(and (exists x) (traced (always)))').each.to_a
     end
   end
+
+  def test_runs_a_repeated_defn_after_undef
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    fb.query('(defn cached_redefined "true")').each.to_a
+    fb.query('(undef cached_redefined)').each.to_a
+    fb.query('(defn cached_redefined "true")').each.to_a
+    assert(Factbase::Term.private_method_defined?(:cached_redefined, false))
+  ensure
+    Factbase.new.query('(undef cached_redefined)').each.to_a
+  end
 end
