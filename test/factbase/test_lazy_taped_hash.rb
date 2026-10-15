@@ -119,30 +119,11 @@ class TestLazyTapedHash < Factbase::Test
   end
 
   def test_does_not_expose_the_original_arrays
-    %i[values map to_h].each do |name|
+    %i[values map to_h fetch each first to_a values_at].each do |name|
       fb = Factbase.new
       fb.insert.x = 1
       fb.txn do |transaction|
         read_array(transaction.each.first, name) << 2
-        raise(Factbase::Rollback)
-      end
-      assert_equal({ 'x' => [1] }, fb.each.first.to_h, name)
-    end
-  end
-
-  def test_does_not_expose_the_original_arrays_through_other_readers
-    readers = {
-      fetch: ->(h) { h.fetch('x') },
-      dig: ->(h) { h.dig('x') },
-      each: ->(h) { h.each { |_key, items| break items } },
-      to_a: ->(h) { h.to_a.first.last },
-      values_at: ->(h) { h.values_at('x').first }
-    }
-    readers.each do |name, reader|
-      fb = Factbase.new
-      fb.insert.x = 1
-      fb.txn do |transaction|
-        reader.call(transaction.each.first) << 2
         raise(Factbase::Rollback)
       end
       assert_equal({ 'x' => [1] }, fb.each.first.to_h, name)
@@ -155,6 +136,11 @@ class TestLazyTapedHash < Factbase::Test
     case name
     when :values then hash.values.first
     when :map then hash.map { |_key, items| items }.first
+    when :fetch then hash.fetch('x')
+    when :each then hash.each.first.last
+    when :first then hash.first.last
+    when :to_a then hash.to_a.first.last
+    when :values_at then hash.values_at('x').first
     else hash.to_h['x']
     end
   end
