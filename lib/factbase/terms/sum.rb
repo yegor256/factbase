@@ -18,7 +18,7 @@ class Factbase::Sum < Factbase::TermBase
 
   # Evaluate term on a fact.
   # @param [Factbase::Fact] _fact The fact
-  # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Array<Hash>] maps All maps available
   # @param [Factbase] _fb Factbase to use for sub-queries
   # @return [Integer] The sum of values for the specified key across all maps
   def evaluate(_fact, maps, _fb)
