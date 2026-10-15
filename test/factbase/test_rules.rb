@@ -211,4 +211,16 @@ class TestRules < Factbase::Test
     fb.import(good.export)
     assert_equal(1, fb.size)
   end
+
+  def test_checks_a_txn_against_the_pending_factbase
+    fb = Factbase.new
+    fb.insert.v = 1
+    fb.query('(defn rules_within_limit "fb.size <= 1")').each.to_a
+    assert_raises(ArgumentError) do
+      Factbase::Rules.new(fb, '(rules_within_limit)').txn { |fbt| fbt.insert.v = 2 }
+    end
+    assert_equal(1, fb.size)
+  ensure
+    Factbase.new.query('(undef rules_within_limit)').each.to_a
+  end
 end
