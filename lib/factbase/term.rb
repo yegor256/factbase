@@ -183,6 +183,7 @@ class Factbase::Term < Factbase::TermBase
   # should be evaluated. If no prediction can be made,
   # the same list is returned.
   # @param [Array<Hash>, Factbase::Taped, Factbase::LazyTaped] maps Records to iterate, maybe
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @param [Hash] params Params to use (keys must be strings, not symbols, with values as arrays)
   # @return [Array<Hash>] Records to iterate
   def predict(maps, fb, params)

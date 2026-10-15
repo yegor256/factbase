@@ -16,6 +16,7 @@ class Factbase::SyncQuery
   # Constructor.
   # @param [Factbase::Query] origin Original query
   # @param [Monitor] monitor The monitor
+  # @param [Factbase] fb The factbase
   def initialize(origin, monitor, fb)
     @origin = origin
     @monitor = monitor
@@ -28,6 +29,7 @@ class Factbase::SyncQuery
   end
 
   # Iterate facts one by one.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
