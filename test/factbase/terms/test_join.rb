@@ -56,10 +56,7 @@ class TestJoin < Factbase::Test
     fb = Factbase.new
     fb.insert.id = 1
     %w[x<=$y $x<=y $y].each do |j|
-      assert_includes(
-        assert_raises(RuntimeError) { fb.query("(join '#{j}' (eq id 1))").each.to_a }.message,
-        j
-      )
+      assert_includes(assert_raises(RuntimeError) { fb.query("(join '#{j}' (eq id 1))").each.to_a }.message, j)
     end
   end
 end
