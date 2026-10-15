@@ -233,8 +233,10 @@ class TestIndexedFactbase < Factbase::Test
   end
 
   def test_import_nil_raises_error
-    e = assert_raises(StandardError) { Factbase::IndexedFactbase.new(Factbase.new).import(nil) }
-    assert_equal('The input is nil, cannot load a factbase', e.message)
+    assert_equal(
+      'The input is nil, cannot load a factbase',
+      assert_raises(StandardError) { Factbase::IndexedFactbase.new(Factbase.new).import(nil) }.message
+    )
   end
 
   def test_index_does_not_grow_unbounded_during_transactions
