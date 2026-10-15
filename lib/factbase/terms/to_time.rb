@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require 'date'
 require_relative 'base'
 # Represents a string conversion term 'to_time'.
 # This class is used to evaluate a term and return its time representation.
@@ -31,6 +32,8 @@ class Factbase::ToTime < Factbase::TermBase
   def parse(value)
     return value if value.is_a?(Time)
     return Time.at(value).utc if value.is_a?(Integer) || value.is_a?(Float)
+    date = value.to_s.match(/\A\s*(\d{4})-(\d{2})-(\d{2})/)
+    raise(ArgumentError, 'there is no such date') if date && !Date.valid_date?(*date.captures.map(&:to_i))
     Time.parse(value.to_s)
   rescue ArgumentError => e
     raise(RuntimeError, "Cannot parse '#{value}' as Time in (to_time ...): #{e.message}")
