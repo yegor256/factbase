@@ -21,7 +21,6 @@ class Factbase::Syntax
   # If the syntax is broken.
   class Broken < StandardError; end
 
-  # The longest part of a query or a cause, in a +Broken+ message.
   MAX_LENGTH = 200
 
   # Ctor.
