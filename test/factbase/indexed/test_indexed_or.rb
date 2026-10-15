@@ -35,6 +35,34 @@ class TestIndexedOr < Factbase::Test
     assert_equal(11, indexed.size)
   end
 
+  def test_keeps_distinct_equal_facts_in_transactional_indexed_or
+    maps = Array.new(2) { { 'name' => ['alice'], 'team' => ['blue'] } }
+    10.times { maps << { 'name' => ['other'], 'team' => ['red'] } }
+    indexed = Factbase::IndexedFactbase.new(Factbase.new(maps))
+    query = '(or (eq name "alice") (eq team "blue"))'
+    indexed.txn do |txn|
+      assert_equal(2, txn.query(query).each.count)
+      assert_equal(2, txn.query(query).each.count)
+      txn.query(query).each { |fact| fact.visited = true }
+      assert_equal(2, txn.query('(exists visited)').each.count)
+    end
+    assert_equal(2, indexed.query('(exists visited)').each.count)
+  end
+
+  def test_deduplicates_overlapping_branches_in_transactional_indexed_or
+    maps = [{ 'name' => ['alice'], 'team' => ['blue'] }]
+    10.times { maps << { 'name' => ['other'], 'team' => ['red'] } }
+    indexed = Factbase::IndexedFactbase.new(Factbase.new(maps))
+    query = '(or (eq name "alice") (eq team "blue"))'
+    indexed.txn do |txn|
+      assert_equal(1, txn.query(query).each.count)
+      assert_equal(1, txn.query(query).each.count)
+      txn.query(query).each { |fact| fact.visited = true }
+      assert_equal(1, txn.query('(exists visited)').each.count)
+    end
+    assert_equal(1, indexed.query('(exists visited)').each.count)
+  end
+
   def test_predicts_on_or
     term = Factbase::Term.new(
       :or,
