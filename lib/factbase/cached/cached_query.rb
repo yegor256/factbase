@@ -48,12 +48,14 @@ class Factbase::CachedQuery
       end
     else
       collected = []
+      mark = "collecting #{key}"
+      @cache[mark] = true
       @origin.each(fb, params) do |f|
         collected << f
         c += 1
         yield(Factbase::CachedFact.new(f, @cache))
       end
-      @cache[key] = collected if @cacheable
+      @cache[key] = collected if @cache.delete(mark) && @cacheable
     end
     c
   end
