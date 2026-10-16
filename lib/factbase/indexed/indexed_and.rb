@@ -37,11 +37,7 @@ class Factbase::IndexedAnd
       end
       tuples = Enumerator.product(
         *@term.operands.sort_by { |o| o.operands.first }.map do |o|
-          if o.operands[1].is_a?(Symbol)
-            params[o.operands[1].to_s] || []
-          else
-            [o.operands[1]]
-          end
+          _resolve(o.operands[1], params)
         end
       )
       j =
@@ -87,7 +83,16 @@ class Factbase::IndexedAnd
   # @return [Boolean] TRUE if the index can take it
   def _scalar?(item)
     return item.to_s.start_with?('$') if item.is_a?(Symbol)
-    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float)
+    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) ||
+      item.is_a?(TrueClass) || item.is_a?(FalseClass)
+  end
+
+  def _resolve(operand, params)
+    return [operand] unless operand.is_a?(Symbol)
+    value = params[operand.to_s]
+    value = params[operand.to_s[1..]] if value.nil? && operand.to_s.start_with?('$') && params.respond_to?(:[])
+    return [] if value.nil?
+    value.respond_to?(:each) ? value : [value]
   end
 
   def _all_tuples(fact, props)

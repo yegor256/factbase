@@ -99,4 +99,43 @@ class TestIndexedEq < Factbase::Test
       indexed.query('(eq rank $ranks)').each(indexed, params).map(&:rank)
     )
   end
+
+  def test_matches_scalar_false_query_parameter
+    term = Factbase::Term.new(:eq, %i[enabled $enabled])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    maps = [{ 'enabled' => [false], 'tag' => ['off'] }, { 'enabled' => [true], 'tag' => ['on'] }]
+    assert_equal(['off'], term.predict(maps, nil, { '$enabled' => false }).to_a.map { |m| m['tag'].first })
+    assert_equal(['off'], term.predict(maps, nil, { 'enabled' => false }).to_a.map { |m| m['tag'].first })
+    assert_equal(['on'], term.predict(maps, nil, { '$enabled' => true }).to_a.map { |m| m['tag'].first })
+    assert_equal(['off'], term.predict(maps, nil, { '$enabled' => [false] }).to_a.map { |m| m['tag'].first })
+  end
+
+  def test_matches_literal_boolean_values
+    term = Factbase::Term.new(:eq, [:enabled, false])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    maps = [{ 'enabled' => [false], 'name' => ['a'] }, { 'enabled' => [true], 'name' => ['b'] }]
+    assert_equal(['a'], term.predict(maps, nil, {}).to_a.map { |m| m['name'].first })
+  end
+
+  def test_compares_plain_and_indexed_on_boolean_values
+    plain = Factbase.new
+    indexed = Factbase::IndexedFactbase.new(Factbase.new)
+    [plain, indexed].each do |fb|
+      first = fb.insert
+      first.enabled = false
+      first.tag = 'inactive'
+      second = fb.insert
+      second.enabled = true
+      second.tag = 'active'
+    end
+    [
+      ['(eq enabled $enabled)', { 'enabled' => false }, ['inactive']],
+      ['(eq enabled $enabled)', { 'enabled' => true }, ['active']],
+      ['(eq enabled false)', {}, ['inactive']],
+      ['(eq enabled true)', {}, ['active']]
+    ].each do |query, params, expected|
+      assert_equal(expected, plain.query(query).each(plain, params).map(&:tag))
+      assert_equal(expected, indexed.query(query).each(indexed, params).map(&:tag))
+    end
+  end
 end
