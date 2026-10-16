@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require 'time'
 require 'yaml'
 require_relative '../factbase'
 require_relative '../factbase/flatten'
@@ -28,6 +29,21 @@ class Factbase::ToYAML
   # Convert the entire factbase into YAML.
   # @return [String] The factbase in YAML format
   def yaml
-    YAML.dump(Factbase::Flatten.new(@fb.each.to_a, @sorter).it)
+    YAML.dump(
+      Factbase::Flatten.new(@fb.each.to_a, @sorter).it.map do |m|
+        m.to_h do |k, vv|
+          [k, vv.is_a?(Array) ? vv.map { |v| plain(v) } : plain(vv)]
+        end
+      end
+    )
+  end
+
+  private
+
+  # Render one value the way ToJSON renders it.
+  # @param [Object] val The value
+  # @return [Object] The value, with a Time turned into ISO 8601
+  def plain(val)
+    val.is_a?(Time) ? val.utc.iso8601(6) : val
   end
 end
