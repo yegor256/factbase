@@ -14,6 +14,40 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLazyTapedArray < Factbase::Test
+  def test_each_retains_the_wrapper_for_chained_writes
+    arr, hash, added = wrap([1])
+    assert_same(arr, arr.each(&:itself))
+    arr.each(&:itself) << 2
+    assert_write(hash, added, [1, 2], arr.to_a)
+  end
+
+  def test_chained_iteration_write_rolls_back
+    base = Factbase.new
+    base.insert.x = 1
+    base.txn do |tx|
+      tx.each { |map| map['x'].each(&:itself) << 2 }
+      raise(Factbase::Rollback)
+    end
+    assert_equal([1], base.each.first['x'])
+  end
+
+  def test_chained_iteration_write_commits_after_copying
+    base = Factbase.new
+    2.times do |id|
+      fact = base.insert
+      fact.id = id
+      fact.x = 1
+    end
+    base.txn do |tx|
+      tx.query('(eq id 0)').first.x = 2
+      tx.each do |map|
+        next unless map['id'].to_a == [1]
+        map['x'].each(&:itself) << 3
+      end
+    end
+    assert_equal([1, 3], base.query('(eq id 1)').first['x'])
+  end
+
   def test_each
     arr, hash = wrap([1, 2, 3])
     sum = 0
