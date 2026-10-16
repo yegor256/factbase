@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../lib/factbase/syntax'
-
 require_relative '../test__helper'
 
 # Syntax test.
@@ -12,6 +11,21 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestSyntax < Factbase::Test
+  def test_matches_properties_named_like_delimiter_tokens
+    fb = Factbase.new
+    f = fb.insert
+    f.open = 1
+    f.close = 2
+    assert_equal(1, fb.query('(and (eq open 1) (eq close 2))').count)
+    assert_equal(1, fb.query('(and (exists open) (exists close))').count)
+  end
+
+  def test_keeps_parentheses_inside_string_literals
+    fb = Factbase.new
+    fb.insert.text = '()'
+    assert_equal(1, fb.query('(eq text "()")').count)
+  end
+
   def test_parses_string_right
     [
       "(foo 'abc')",

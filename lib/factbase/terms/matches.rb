@@ -39,7 +39,9 @@ class Factbase::Matches < Factbase::TermBase
 
   def regexp(pattern)
     key = pattern.to_s
-    @regexps[key] ||= Regexp.new(anchored(key))
+    rx = @regexps[key] || Regexp.new(anchored(key))
+    @regexps[key] = rx if @operands[1].is_a?(String)
+    rx
   rescue RegexpError => e
     raise(RuntimeError, "Invalid regexp '#{key}': #{e.message}")
   end
@@ -47,13 +49,25 @@ class Factbase::Matches < Factbase::TermBase
   def anchored(source)
     depth = 0
     escaped = false
+    property = false
+    lead = nil
     source.each_char.map do |c|
-      if escaped
+      first = lead
+      lead = nil
+      if property
+        property = c != '}'
+      elsif escaped
         escaped = false
+        property = c.casecmp?('p')
       elsif c == '\\'
         escaped = true
+      elsif first == :open && c == '^'
+        lead = :caret
+      elsif first && c == ']'
+        next c
       elsif c == '['
         depth += 1
+        lead = :open
       elsif c == ']' && depth.positive?
         depth -= 1
       elsif depth.zero? && ANCHORS.key?(c)

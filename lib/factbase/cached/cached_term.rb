@@ -14,6 +14,7 @@ module Factbase::CachedTerm
   # Does it match the fact?
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @return [bool] TRUE if matches
   def evaluate(fact, maps, fb)
     return super unless static? && !abstract?

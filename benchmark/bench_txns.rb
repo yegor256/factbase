@@ -17,13 +17,13 @@ def bench_txns(bmk, _fb, cycles)
     fb_read_plain = Factbase.new.tap { |f| fuzz.feed(f, total) }
     raise(StandardError, 'not enough facts') unless fb_read_plain.query('(always)').each.any?
     bmk.report("#{p_total} facts: read") do
-      cycles.times { fb_read_plain.query('(always)').each.size }
+      cycles.times { fb_read_plain.query('(always)').each.to_a.size }
     end
     fb_read_txn = Factbase.new.tap { |f| fuzz.feed(f, total) }
     raise(StandardError, 'not enough facts') unless fb_read_txn.query('(always)').each.any?
     bmk.report("#{p_total} facts: read in txn") do
       cycles.times do
-        fb_read_txn.txn { |fbt| fbt.query('(always)').each.size }
+        fb_read_txn.txn { |fbt| fbt.query('(always)').each.to_a.size }
       end
     end
     fb_ins_plain = Factbase.new.tap { |f| fuzz.feed(f, total) }

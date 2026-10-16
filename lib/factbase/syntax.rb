@@ -74,22 +74,22 @@ class Factbase::Syntax
   # @param [Integer] at Position to start parsing from
   # @return [Array<Factbase::Term,Integer>] The term detected and ending position
   def to_ast(tokens, at)
-    raise(StandardError, "Closing too soon at ##{at}") if tokens[at] == :close
-    return [tokens[at], at + 1] unless tokens[at] == :open
+    raise(StandardError, "Closing too soon at ##{at}") if tokens[at] == :')'
+    return [tokens[at], at + 1] unless tokens[at] == :'('
     at += 1
     op = tokens[at]
-    raise(StandardError, 'No token found') if op == :close
+    raise(StandardError, 'No token found') if op == :')'
     operands = []
     at += 1
     loop do
       raise(StandardError, "End of token stream at ##{at}") if tokens[at].nil?
-      break if tokens[at] == :close
+      break if tokens[at] == :')'
       (operand, at1) = to_ast(tokens, at)
       raise(StandardError, "Stuck at position ##{at}") if at == at1
       raise(StandardError, "Jump back at position ##{at}") if at1 < at
       at = at1
       operands << operand
-      break if tokens[at] == :close
+      break if tokens[at] == :')'
     end
     [Factbase::Term.new(op, operands), at + 1]
   end
@@ -127,9 +127,9 @@ class Factbase::Syntax
       end
       case c
       when '('
-        list << :open
+        list << :'('
       when ')'
-        list << :close
+        list << :')'
       when ' ', "\n", "\t", "\r"
         next
       else

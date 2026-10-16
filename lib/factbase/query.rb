@@ -25,6 +25,7 @@ class Factbase::Query
   # Constructor.
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [String|Factbase::Term] term The query term
+  # @param [Factbase] fb The factbase
   def initialize(maps, term, fb)
     @maps = maps
     @term = term.is_a?(String) ? Factbase::Syntax.new(term).to_term : term

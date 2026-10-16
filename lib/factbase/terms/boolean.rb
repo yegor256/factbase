@@ -9,15 +9,13 @@ class Factbase::Boolean
   # Constructor.
   # @param [Object] val The value to check
   # @param [Object] from The source of the value (for error messages)
-  # @return [Boolean] The boolean value
-  # @raise [RuntimeError] If value is not a boolean
   def initialize(val, from)
     @val = val
     @from = from
   end
 
   # @return [Boolean] The boolean value
-  # @raise [RuntimeError] If value is not a boolean
+  # @raise [ArgumentError] If value is not a boolean
   def bool?
     val = @val
     val = val[0] if val.respond_to?(:each)

@@ -16,9 +16,8 @@ class TestSyncFactbase < Factbase::Test
   def test_queries_and_inserts
     fb = Factbase::SyncFactbase.new(Factbase.new)
     fb.insert.foo = 42
-    fb.query('(exists foo)').each do
-      fb.insert
-    end
+    assert_equal(1, fb.query('(exists foo)').each { fb.insert })
+    assert_equal(2, fb.size)
   end
 
   def test_insert_threadsafe

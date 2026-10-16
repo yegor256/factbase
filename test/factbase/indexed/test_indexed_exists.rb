@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_one'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/lazy_taped'
@@ -67,5 +68,14 @@ class TestIndexedExists < Factbase::Test
       n = term.predict(c[:input], nil, {})
       assert_kind_of(c[:expected], n, "Expect #{c[:expected]}, but got #{n.class} for input #{c[:input].class}")
     end
+  end
+
+  def test_leaves_a_query_parameter_to_the_plain_evaluation
+    plain = Factbase.new
+    indexed = Factbase::IndexedFactbase.new(Factbase.new)
+    [plain, indexed].each { |fb| fb.insert.foo = 1 }
+    q = '(exists $param)'
+    params = { 'param' => ['yes'] }
+    assert_equal(plain.query(q).each(plain, params).to_a.size, indexed.query(q).each(indexed, params).to_a.size)
   end
 end

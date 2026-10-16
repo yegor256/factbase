@@ -49,4 +49,10 @@ class TestNth < Factbase::Test
       )
     )
   end
+
+  def test_gives_nil_for_a_huge_position
+    assert_nil(
+      Factbase::Nth.new([99_999_999_999_999_999_999, :letter]).evaluate(nil, [{ 'letter' => 'a' }], Factbase.new)
+    )
+  end
 end

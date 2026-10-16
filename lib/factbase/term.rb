@@ -183,6 +183,7 @@ class Factbase::Term < Factbase::TermBase
   # should be evaluated. If no prediction can be made,
   # the same list is returned.
   # @param [Array<Hash>, Factbase::Taped, Factbase::LazyTaped] maps Records to iterate, maybe
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @param [Hash] params Params to use (keys must be strings, not symbols, with values as arrays)
   # @return [Array<Hash>] Records to iterate
   def predict(maps, fb, params)
@@ -252,7 +253,7 @@ class Factbase::Term < Factbase::TermBase
   # @return [Boolean] TRUE if static
   def static?
     return true if @op == :agg
-    return false if %i[join as].include?(@op)
+    return false if %i[join as traced unique prev].include?(@op)
     return false if custom?
     @operands.each do |o|
       return false if o.is_a?(Factbase::Term) && !o.static?
@@ -292,7 +293,7 @@ class Factbase::Term < Factbase::TermBase
     raise(ArgumentError, "An integer position is expected, but #{i} provided") unless i.is_a?(Integer)
     raise(ArgumentError, "A non-negative position is expected, but #{i} provided") if i.negative?
     v = _values(1, fact, maps, fb)
-    return if v.nil?
+    return if v.nil? || i >= v.size
     v[i]
   end
 end

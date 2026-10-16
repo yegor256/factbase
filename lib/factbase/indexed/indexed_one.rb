@@ -14,6 +14,7 @@ class Factbase::IndexedOne
     operand = @term.operands.first
     return unless operand.is_a?(Symbol)
     prop = operand.to_s
+    return if prop.start_with?('$')
     key = [maps.object_id, prop, @term.op]
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]

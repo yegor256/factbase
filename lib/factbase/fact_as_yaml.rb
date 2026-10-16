@@ -13,7 +13,8 @@ require_relative '../factbase'
 #
 #  require 'factbase/fact_as_yaml'
 #  fb = Factbase.new
-#  f = fb.query('(eq foo 42)').to_a.first
+#  fb.insert.foo = 42
+#  f = fb.query('(eq foo 42)').each.to_a.first
 #  puts Factbase::FactAsYaml.new(f).to_s
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
