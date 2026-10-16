@@ -94,4 +94,46 @@ class TestIndexedAnd < Factbase::Test
     fb.txn { |fbt| fbt.query('(and (eq a 1) (exists b))').each { |f| f.c = 7 } }
     assert_equal(200, fb.query('(exists c)').each.to_a.size, 'writes through an intersection were lost on commit')
   end
+
+  def test_conjunction_with_scalar_false_parameter
+    plain = Factbase.new
+    indexed = Factbase::IndexedFactbase.new(Factbase.new)
+    [plain, indexed].each do |fb|
+      first = fb.insert
+      first.enabled = false
+      first.kind = 'job'
+      first.title = 't1'
+      second = fb.insert
+      second.enabled = true
+      second.kind = 'job'
+      second.title = 't2'
+      third = fb.insert
+      third.enabled = false
+      third.kind = 'task'
+      third.title = 't3'
+    end
+    query = '(and (eq enabled $enabled) (eq kind "job"))'
+    assert_equal(['t1'], plain.query(query).each(plain, { 'enabled' => false }).map(&:title))
+    assert_equal(['t1'], indexed.query(query).each(indexed, { 'enabled' => false }).map(&:title))
+    assert_equal(['t2'], plain.query(query).each(plain, { 'enabled' => true }).map(&:title))
+    assert_equal(['t2'], indexed.query(query).each(indexed, { 'enabled' => true }).map(&:title))
+  end
+
+  def test_conjunction_predict_with_scalar_false_in_hash
+    term = Factbase::Term.new(
+      :and,
+      [
+        Factbase::Term.new(:eq, %i[enabled $enabled]),
+        Factbase::Term.new(:eq, [:kind, 'job'])
+      ]
+    )
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    maps = [
+      { 'enabled' => [false], 'kind' => ['job'], 'id' => [1] },
+      { 'enabled' => [true], 'kind' => ['job'], 'id' => [2] }
+    ]
+    assert_equal([1], term.predict(maps, nil, { '$enabled' => false }).to_a.map { |m| m['id'].first })
+    assert_equal([1], term.predict(maps, nil, { 'enabled' => false }).to_a.map { |m| m['id'].first })
+    assert_equal([2], term.predict(maps, nil, { '$enabled' => true }).to_a.map { |m| m['id'].first })
+  end
 end

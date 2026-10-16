@@ -41,7 +41,8 @@ class Factbase::IndexedEq
   # @return [Boolean] TRUE if the index can take it
   def _scalar?(item)
     return item.to_s.start_with?('$') if item.is_a?(Symbol)
-    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float)
+    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) ||
+      item.is_a?(TrueClass) || item.is_a?(FalseClass)
   end
 
   # @todo #1213:60min Notice a fact replaced in the scoped array without a change of its size.
@@ -71,7 +72,10 @@ class Factbase::IndexedEq
 
   def _resolve(operand, params)
     return [operand] unless operand.is_a?(Symbol)
-    params[operand.to_s] || []
+    value = params[operand.to_s]
+    value = params[operand.to_s[1..]] if value.nil? && operand.to_s.start_with?('$') && params.respond_to?(:[])
+    return [] if value.nil?
+    value.respond_to?(:each) ? value : [value]
   end
 
   def normalize(value)
