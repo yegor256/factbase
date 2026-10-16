@@ -81,6 +81,17 @@ class TestIndexedNot < Factbase::Test
     assert_equal([1], query.each(fb, v: values).map(&:x))
   end
 
+  def test_answers_after_param_string_changes
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    %w[alice bob].each { |name| fb.insert.name = name }
+    query = fb.query('(not (eq name $n))')
+    value = +'alice'
+    values = [value]
+    assert_equal(['bob'], query.each(fb, n: values).map(&:name))
+    value.replace('bob')
+    assert_equal(['alice'], query.each(fb, n: values).map(&:name))
+  end
+
   def test_predicts_after_param_array_changes
     term = Factbase::Term.new(:not, [Factbase::Term.new(:eq, %i[x $v])])
     term.redress!(Factbase::IndexedTerm, idx: {})
