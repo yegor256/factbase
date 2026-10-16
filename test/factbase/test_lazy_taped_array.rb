@@ -74,6 +74,14 @@ class TestLazyTapedArray < Factbase::Test
     assert_read(hash, false, arr.any?(false))
   end
 
+  def test_reads_like_an_array
+    arr, hash = wrap([42, 7])
+    assert_read(hash, true, arr.include?(42))
+    assert_read(hash, 42, arr.first)
+    assert_read(hash, 2, arr.size)
+    assert_read(hash, [7, 42], arr.sort)
+  end
+
   private
 
   def wrap(origin)
