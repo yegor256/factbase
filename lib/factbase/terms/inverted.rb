@@ -27,6 +27,6 @@ class Factbase::Inverted < Factbase::TermBase
     assert_args(1)
     term = @operands[0]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
-    _flatten(fb.query(term, maps).each(fb, params).to_a.reverse)
+    _unwrap(fb.query(term, maps).each(fb, params).to_a.reverse)
   end
 end
