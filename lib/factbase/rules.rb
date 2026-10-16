@@ -10,6 +10,7 @@ require_relative '../factbase/accum'
 require_relative '../factbase/syntax'
 require_relative '../factbase/tallied'
 require_relative 'enumerated'
+require_relative 'no_conversion'
 
 # A decorator of a Factbase, that checks rules on every set.
 #
@@ -104,6 +105,8 @@ class Factbase::Rules
       end
       @fact.method_missing(*args)
     end
+
+    prepend Factbase::NoConversion
   end
 
   # Query decorator.
