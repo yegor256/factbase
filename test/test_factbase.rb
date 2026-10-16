@@ -583,4 +583,17 @@ class TestFactbase < Factbase::Test
     end
     assert_equal(total - 1, count, "each inside txn counted a deleted fact among #{total}, seed #{seed}")
   end
+
+  def test_commits_a_delete_on_a_fact_after_a_write_in_txn
+    fb = Factbase.new
+    fb.insert.id = 1
+    b = fb.insert
+    b.id = 2
+    b.foo = 2
+    fb.txn do |fbt|
+      fbt.query('(eq id 1)').each { |f| f.bar = 1 }
+      fbt.each { |m| m.delete('foo') if m['id'][0] == 2 }
+    end
+    assert_empty(fb.query('(exists foo)').each.to_a, 'the delete in txn was lost on commit')
+  end
 end
