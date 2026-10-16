@@ -80,6 +80,39 @@ class TestIndexedNot < Factbase::Test
     assert_operator(idx.size, :<, 5, 'a new index entry was kept for every value of the param')
   end
 
+  def test_does_not_reuse_stale_prediction_when_array_param_mutated
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    fb.insert.x = 2
+    query = fb.query('(not (eq x $v))')
+    values = [1]
+    assert_equal([2], query.each(fb, v: values).to_a.map { |f| f['x'].first })
+    values.replace([2])
+    assert_equal([1], query.each(fb, v: values).to_a.map { |f| f['x'].first })
+  end
+
+  def test_does_not_reuse_stale_prediction_when_string_param_mutated
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.name = 'alice'
+    fb.insert.name = 'bob'
+    query = fb.query('(not (eq name $n))')
+    val = +'alice'
+    assert_equal(['bob'], query.each(fb, n: [val]).to_a.map { |f| f['name'].first })
+    val.replace('bob')
+    assert_equal(['alice'], query.each(fb, n: [val]).to_a.map { |f| f['name'].first })
+  end
+
+  def test_does_not_reuse_stale_prediction_with_hash_params
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.x = 10
+    fb.insert.x = 20
+    query = fb.query('(not (eq x $v))')
+    params = { 'v' => [10] }
+    assert_equal([20], query.each(fb, params).to_a.map { |f| f['x'].first })
+    params['v'].replace([20])
+    assert_equal([10], query.each(fb, params).to_a.map { |f| f['x'].first })
+  end
+
   private
 
   def _assert_not
