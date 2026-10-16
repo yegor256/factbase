@@ -20,6 +20,8 @@ class Factbase::IndexedFactbase
   decoor(:origin)
   include Factbase::Enumerated
 
+  ARRAYS = 8
+
   # Constructor.
   # @param [Factbase] origin Original factbase to decorate
   # @param [Hash] idx Index to use
@@ -30,6 +32,7 @@ class Factbase::IndexedFactbase
     raise(ArgumentError, 'Wrong type of index') unless idx.is_a?(Hash)
     @idx = idx
     @fresh = fresh
+    @arrays = {}
   end
 
   # Insert a new fact and return it.
@@ -54,6 +57,7 @@ class Factbase::IndexedFactbase
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
+    remember(maps) unless maps.nil?
     Factbase::IndexedQuery.new(@origin.query(term, maps), @idx, self, @fresh)
   end
 
@@ -115,5 +119,23 @@ class Factbase::IndexedFactbase
   # @return [Integer] How many facts are in there
   def size
     @origin.size
+  end
+
+  private
+
+  # Keep the entries of the index only for the few arrays of maps seen last.
+  #
+  # Every index entry is keyed by the +object_id+ of the array it was built for,
+  # so a query over a new array adds new entries, which nothing else ever drops.
+  #
+  # @param [Array<Hash>] maps The array of maps a query is made for
+  def remember(maps)
+    oid = maps.object_id
+    @arrays.delete(oid)
+    @arrays[oid] = true
+    return if @arrays.size <= ARRAYS
+    old = @arrays.first[0]
+    @arrays.delete(old)
+    @idx.delete_if { |k, _| k[0] == old }
   end
 end
