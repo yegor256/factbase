@@ -75,6 +75,11 @@ class Factbase::Inv
       @fact.all_properties
     end
 
+    # Original map behind the decorated fact.
+    def _source
+      @fact._source
+    end
+
     others do |*args|
       k = args[0].to_s
       @block.call(k[0..-2], args[1]) if k.end_with?('=')

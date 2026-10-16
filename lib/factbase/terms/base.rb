@@ -68,6 +68,8 @@ class Factbase::TermBase
       f.all_properties.each_with_object({}) do |k, h|
         v = f[k]
         h[k] = v unless v.nil?
+      end.tap do |map|
+        map.instance_variable_set(:@factbase_source_map, f._source)
       end
     end
   end

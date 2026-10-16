@@ -94,7 +94,12 @@ class Factbase::Query
     maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
     before = @maps.to_a.dup
     @maps.delete_if do |m|
-      pos = maybe.index { |c| c.eql?(m) }
+      original = @maps.source_of(m) if @maps.respond_to?(:source_of)
+      pos =
+        maybe.index do |candidate|
+          source = candidate.instance_variable_get(:@factbase_source_map)
+          source.nil? ? candidate.eql?(m) : source.equal?(m) || source.equal?(original)
+        end
       d = !pos.nil? && @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), before, fb)
       maybe.delete_at(pos) if d
       deleted += 1 if d
