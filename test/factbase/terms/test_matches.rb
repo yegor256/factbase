@@ -111,4 +111,10 @@ class TestMatches < Factbase::Test
       end.message, "Invalid regexp '[a-'"
     )
   end
+
+  def test_anchors_the_whole_value_after_a_bracket_in_a_group_name
+    ['(?<a[b>^OK$)', "(?'a[b'^OK$)"].each do |pattern|
+      refute(Factbase::Matches.new([:foo, pattern]).evaluate(fact('foo' => "FAIL\nOK"), [], Factbase.new), pattern)
+    end
+  end
 end

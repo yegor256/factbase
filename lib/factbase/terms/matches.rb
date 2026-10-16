@@ -50,17 +50,30 @@ class Factbase::Matches < Factbase::TermBase
     depth = 0
     escaped = false
     property = false
+    name = nil
     lead = nil
     source.each_char.map do |c|
       first = lead
       lead = nil
-      if property
+      if name
+        name = nil if c == name
+      elsif first == :angle && !'=!'.include?(c)
+        name = '>'
+      elsif property
         property = c != '}'
       elsif escaped
         escaped = false
         property = c.casecmp?('p')
       elsif c == '\\'
         escaped = true
+      elsif first == :query && c == '<'
+        lead = :angle
+      elsif first == :query && c == "'"
+        name = c
+      elsif first == :paren && c == '?'
+        lead = :query
+      elsif depth.zero? && c == '('
+        lead = :paren
       elsif first == :open && c == '^'
         lead = :caret
       elsif first && c == ']'
