@@ -20,7 +20,8 @@ class Factbase::IndexedOr
         break
       end
       r = maps & [] if r.nil?
-      r |= n.to_a
+      matches = (r.to_a + n.to_a).uniq(&:object_id)
+      r = maps.respond_to?(:repack) ? maps.repack(matches) : matches
       return maps if r.size > maps.size / 4
     end
     r
