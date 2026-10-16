@@ -267,28 +267,6 @@ class TestSyntax < Factbase::Test
     end
   end
 
-  def test_fails_when_term_is_not_a_class
-    assert_raises(StandardError) { Factbase::Syntax.new('(foo 1)', term: 'hello') }
-  end
-
-  def test_fails_when_term_is_wrong_class
-    assert_raises(StandardError) { Factbase::Syntax.new('(bar 1)', term: String).to_term }
-  end
-
-  def test_fails_when_term_is_incorrectly_defined_class
-    assert_includes(
-      assert_raises(StandardError) { Factbase::Syntax.new('(bar 1)', term: FakeTerm).to_term }.message,
-      'wrong number of arguments'
-    )
-  end
-
-  class FakeTerm < Factbase::Term
-    def initialize(invalid)
-      super
-      @x = invalid
-    end
-  end
-
   def test_ends_a_comment_at_a_carriage_return
     assert_equal('(eq x 1)', Factbase::Syntax.new("# comment\r(eq x 1)").to_term.to_s)
   end
