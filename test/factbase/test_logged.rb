@@ -167,4 +167,14 @@ class TestLogged < Factbase::Test
     Factbase::Logged.new(Factbase.new, Loog::NULL).insert.when = t
     assert_equal(3 * 60 * 60, t.utc_offset, 'the logged time was moved to UTC')
   end
+
+  def test_reports_the_size_of_the_maps_it_ran_over
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    10.times { |i| fb.insert.i = i }
+    fb.query('(gt i 0)', fb.each.to_a.first(3)).each.to_a
+    fb.query('(gt i 1000)', []).delete!
+    assert_includes(buf.to_s, 'Found 2/3 fact(s)', buf.to_s)
+    assert_includes(buf.to_s, 'There were no facts', buf.to_s)
+  end
 end

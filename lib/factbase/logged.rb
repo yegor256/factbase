@@ -184,9 +184,9 @@ class Factbase::Logged
       end
       q ||= @termtext
       if r.zero?
-        @tube.say(mono, "Zero/#{@fb.size} facts found by #{q} #{tail}")
+        @tube.say(mono, "Zero/#{total} facts found by #{q} #{tail}")
       else
-        @tube.say(mono, "Found #{r}/#{@fb.size} fact(s) by #{q} #{tail}")
+        @tube.say(mono, "Found #{r}/#{total} fact(s) by #{q} #{tail}")
       end
       r
     end
@@ -209,7 +209,7 @@ class Factbase::Logged
     def delete!(fb = @fb)
       r = nil
       mono = Process.clock_gettime(Factbase::Logged::MONO)
-      before = @fb.size
+      before = total
       tail =
         Factbase::Logged.elapsed do
           r = @fb.query(@term, @maps).delete!(fb)
@@ -223,6 +223,12 @@ class Factbase::Logged
         @tube.say(mono, "Deleted #{r} fact(s) out of #{before} by #{@term} #{tail}")
       end
       r
+    end
+
+    private
+
+    def total
+      @maps.nil? ? @fb.size : @maps.size
     end
   end
 
