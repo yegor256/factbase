@@ -21,6 +21,19 @@ class TestToTime < Factbase::Test
     assert_equal(t, Factbase::ToTime.new([t]).evaluate(fact, [], Factbase.new))
   end
 
+  def test_reads_string_without_offset_as_utc
+    t = Factbase::ToTime.new(['2024-01-01T10:00:00.25']).evaluate(fact, [], Factbase.new)
+    assert_predicate(t, :utc?, 'a string with no offset must be read as UTC')
+    assert_equal(Time.utc(2024, 1, 1, 10, 0, 0, 250_000), t)
+  end
+
+  def test_keeps_explicit_offset
+    assert_equal(
+      Time.utc(2024, 1, 1, 1, 0, 0),
+      Factbase::ToTime.new(['2024-01-01T10:00:00+09:00']).evaluate(fact, [], Factbase.new)
+    )
+  end
+
   def test_rejects_unparsable_value
     t = Factbase::ToTime.new(['hello'])
     e =
