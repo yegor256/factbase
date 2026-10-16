@@ -102,4 +102,15 @@ class TestTallied < Factbase::Test
     assert_equal(3, fb.size)
     assert_equal(3, fb.churn.inserted, 'Imported facts must be counted as inserted')
   end
+
+  def test_rollback_keeps_what_another_tallied_counted
+    churn = Factbase::Churn.new
+    second = Factbase::Tallied.new(Factbase.new, churn)
+    Factbase::Tallied.new(Factbase.new, churn).txn do |fbt|
+      fbt.insert.x = 1
+      second.insert.y = 2
+      raise(Factbase::Rollback)
+    end
+    assert_equal('1i/0d/1a', churn.to_s)
+  end
 end
