@@ -150,7 +150,7 @@ class TestQuery < Factbase::Test
 
   def test_simple_parsing_with_time
     maps = []
-    now = Time.now.utc
+    now = Time.now.utc.floor
     maps << { 'foo' => [now] }
     assert_equal(1, Factbase::Query.new(maps, "(eq foo #{now.iso8601})", Factbase.new).each.to_a.size)
   end
