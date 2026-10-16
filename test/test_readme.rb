@@ -13,13 +13,12 @@ require_relative 'test__helper'
 # License:: MIT
 class TestReadme < Factbase::Test
   def test_every_documented_term_exists
-    term = Factbase::Term.new(:always, [])
-    known = term.instance_variable_get(:@terms).keys.map(&:to_s)
+    known = Factbase::Term.new(:always, []).instance_variable_get(:@terms).keys.map(&:to_s)
     File.readlines(File.join(__dir__, '../README.md')).each do |line|
       next unless line.start_with?('* `(')
       op = line[4..].split(/[\s)`]/).first
       assert(
-        known.include?(op) || term.respond_to?(op.to_sym, true),
+        known.include?(op) || Factbase::Term.private_method_defined?(op.to_sym, false),
         "The term '#{op}' is documented in README.md, but does not exist"
       )
     end
