@@ -111,4 +111,13 @@ class TestMatches < Factbase::Test
       end.message, "Invalid regexp '[a-'"
     )
   end
+
+  def test_keeps_a_control_escape_with_an_anchor_char
+    [['\\c$', "\x04"], ['\\c^', "\x1e"], ['\\C-$', "\x04"]].each do |pattern, text|
+      assert(
+        Factbase::Matches.new([:foo, pattern]).evaluate(fact('foo' => text), [], Factbase.new),
+        "#{pattern} on #{text.inspect}"
+      )
+    end
+  end
 end
