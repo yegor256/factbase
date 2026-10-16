@@ -468,4 +468,16 @@ class TestIndexedFactbase < Factbase::Test
     a.foo = 1
     assert_equal(1, fb.query('(exists foo)').each.to_a.size)
   end
+
+  def test_finds_a_fact_inserted_in_txn_and_changed_after_commit
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    f = nil
+    fb.txn do |fbt|
+      f = fbt.insert
+      f.x = 1
+    end
+    fb.query('(eq x 1)').each.to_a
+    f.x = 2
+    assert_equal(1, fb.query('(eq x 2)').each.to_a.size)
+  end
 end
