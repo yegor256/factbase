@@ -71,6 +71,27 @@ class TestIndexedNot < Factbase::Test
     assert_equal(1, idx.keys.count { |k| k[2] == :not }, 'each run of the same query must reuse one entry')
   end
 
+  def test_answers_after_param_array_changes
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    [1, 2].each { |x| fb.insert.x = x }
+    query = fb.query('(not (eq x $v))')
+    values = [1]
+    assert_equal([2], query.each(fb, v: values).map(&:x))
+    values.replace([2])
+    assert_equal([1], query.each(fb, v: values).map(&:x))
+  end
+
+  def test_predicts_after_param_array_changes
+    term = Factbase::Term.new(:not, [Factbase::Term.new(:eq, %i[x $v])])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    maps = [{ 'x' => [1] }, { 'x' => [2] }]
+    values = [1]
+    params = { '$v' => values }
+    assert_equal([maps[1]], term.predict(maps, nil, params))
+    values.replace([2])
+    assert_equal([maps[0]], term.predict(maps, nil, params))
+  end
+
   def test_keeps_one_entry_for_many_params
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
