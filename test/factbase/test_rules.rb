@@ -211,4 +211,15 @@ class TestRules < Factbase::Test
     fb.import(good.export)
     assert_equal(1, fb.size)
   end
+
+  def test_checks_a_fact_inserted_in_txn_and_changed_after_commit
+    fb = Factbase::Rules.new(Factbase.new, '(one x)')
+    f = nil
+    fb.txn do |fbt|
+      f = fbt.insert
+      f.x = 1
+    end
+    assert_raises(ArgumentError) { f.x = 2 }
+    assert_equal(0, fb.query('(eq x 2)').each.to_a.size)
+  end
 end
