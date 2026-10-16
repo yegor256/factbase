@@ -48,4 +48,11 @@ class TestHead < Factbase::Test
     fb.insert.x = 2
     assert_equal(2, fb.query('(head 99999999999999999999 (always))').each.to_a.size)
   end
+
+  def test_takes_the_count_from_a_param_or_a_sub_term
+    fb = Factbase.new
+    3.times { |i| fb.insert.v = i }
+    assert_equal(2, fb.query('(head $n (always))').each(fb, 'n' => [2]).to_a.size)
+    assert_equal(2, fb.query('(head (plus 1 1) (always))').each.to_a.size)
+  end
 end
