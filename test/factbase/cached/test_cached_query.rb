@@ -165,4 +165,14 @@ class TestCachedQuery < Factbase::Test
       Factbase::Term.new(:undef, [:context_is_single]).evaluate(nil, [], base)
     end
   end
+
+  def test_does_not_let_the_caller_change_the_cached_answer
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    f = fb.insert
+    f.a = 1
+    f.a = 2
+    query = '(agg (exists a) (first a))'
+    fb.query(query).one << 99
+    assert_equal([1, 2], fb.query(query).one)
+  end
 end
