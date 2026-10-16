@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../fact'
 require_relative 'base'
 
 # The Factbase::Join class is a specialized term that performs
@@ -33,6 +34,9 @@ class Factbase::Join < Factbase::TermBase
           pieces.map(&:strip)
         end
         .map! { |j| j.size == 1 ? [j[0], j[0]] : j }
+        .each do |j|
+          raise(ArgumentError, "Invalid prop name '#{j[0]}' in '#{@operands[0]}'") unless j[0].match?(Factbase::Fact::NAME)
+        end
     term = @operands[1]
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected, but '#{term}' provided")
