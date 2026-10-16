@@ -33,4 +33,10 @@ class TestAs < Factbase::Test
       end
     end
   end
+
+  def test_skips_an_empty_string
+    fb = Factbase.new
+    fb.insert.x = 1
+    assert_equal([nil], fb.query('(as y (concat zz))').each.map { |f| f['y'] })
+  end
 end
