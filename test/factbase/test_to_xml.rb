@@ -144,4 +144,20 @@ class TestToXML < Factbase::Test
     refute_empty(xml.xpath('/fb'))
     assert_operator(Integer(xml.xpath('/fb/@size').first.value, 10), :>=, 0)
   end
+
+  def test_prints_facts_modified_inside_txn
+    seed = Random.new_seed
+    fb = Factbase.new
+    fb.insert._id = 1
+    value = Random.new(seed).rand(1..1000)
+    text = nil
+    fb.txn do |fbt|
+      fbt.query('(eq _id 1)').each { |f| f.bar = value }
+      text = Factbase::ToXML.new(fbt).xml
+    end
+    assert_includes(
+      text, "<bar t=\"I\">#{value}</bar>",
+      "printed facts miss the bar of #{value} written inside txn, seed #{seed}"
+    )
+  end
 end

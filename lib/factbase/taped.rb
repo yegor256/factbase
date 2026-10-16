@@ -104,6 +104,10 @@ class Factbase::Taped
       @origin.map(&)
     end
 
+    def sort(&)
+      @origin.sort(&)
+    end
+
     def [](key)
       v = @origin[key]
       v = TapedArray.new(v, @origin.object_id, @added) if v.is_a?(Array)
