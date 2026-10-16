@@ -23,6 +23,7 @@ class Factbase::First < Factbase::TermBase
     assert_args(1)
     k = @operands[0]
     raise(ArgumentError, "A symbol is expected, but #{k} provided") unless k.is_a?(Symbol)
+    raise(ArgumentError, "A property name is expected, but the parameter #{k} provided") if k.start_with?('$')
     first = maps[0]
     return if first.nil?
     first[k.to_s]
