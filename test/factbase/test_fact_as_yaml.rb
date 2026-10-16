@@ -92,4 +92,44 @@ class TestFactAsYaml < Factbase::Test
       YAML.safe_load(Factbase::FactAsYaml.new(fb.query('(always)').each.to_a.first).to_s)
     )
   end
+
+  def test_ruby_interpolation_syntax
+    f = Factbase.new.insert
+    f.msg = "\#{name}"
+    f.ivar = "\#@name"
+    f.gvar = "\#$name"
+    yaml_str = Factbase::FactAsYaml.new(f).to_s
+    assert_includes(yaml_str, 'msg:')
+    assert_equal("\#{name}", YAML.safe_load(yaml_str)['msg'])
+    assert_equal("\#@name", YAML.safe_load(yaml_str)['ivar'])
+    assert_equal("\#$name", YAML.safe_load(yaml_str)['gvar'])
+  end
+
+  def test_interpolation_syntax_in_array
+    f = Factbase.new.insert
+    f.items = "\#{first}"
+    f.items = "\#@second"
+    f.items = "\#$third"
+    yaml_str = Factbase::FactAsYaml.new(f).to_s
+    assert_includes(yaml_str, 'items: [')
+    assert_equal(["\#{first}", "\#@second", "\#$third"], YAML.safe_load(yaml_str)['items'])
+  end
+
+  def test_escaped_interpolation_syntax
+    f = Factbase.new.insert
+    f.code = '\\#{name}'
+    yaml_str = Factbase::FactAsYaml.new(f).to_s
+    assert_includes(yaml_str, 'code:')
+    assert_equal('\\#{name}', YAML.safe_load(yaml_str)['code'])
+  end
+
+  def test_hash_symbol_without_interpolation
+    f = Factbase.new.insert
+    f.tag = '#tag'
+    f.comment = 'inline#hash'
+    yaml_str = Factbase::FactAsYaml.new(f).to_s
+    assert_includes(yaml_str, 'tag:')
+    assert_equal('#tag', YAML.safe_load(yaml_str)['tag'])
+    assert_equal('inline#hash', YAML.safe_load(yaml_str)['comment'])
+  end
 end
