@@ -163,6 +163,19 @@ class TestRules < Factbase::Test
     refute_includes(ex.message, 'nil', 'Error message should not contain "nil"')
   end
 
+  def test_rejects_non_boolean_rule_results_before_writing
+    ['(either false true)', '(plus 1 2)'].each do |expression|
+      base = Factbase.new
+      base.insert.x = 2
+      rules = Factbase::Rules.new(base, expression)
+      assert_includes(
+        assert_raises(ArgumentError) { rules.query('(always)').each { |fact| fact.y = 1 } }.message,
+        'must be Boolean'
+      )
+      assert_nil(base.query('(always)').each.first['y'])
+    end
+  end
+
   def test_does_not_write_a_value_rejected_by_a_rule
     base = Factbase.new
     fact = Factbase::Rules.new(base, '(exists foo)').insert
