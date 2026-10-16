@@ -52,4 +52,8 @@ class TestInv < Factbase::Test
     assert_raises(StandardError) { fb.import(src.export) }
     assert_equal(0, fb.size, 'A refused fact must not be imported')
   end
+
+  def test_refuses_a_missing_block
+    assert_raises(ArgumentError) { Factbase::Inv.new(Factbase.new) }
+  end
 end

@@ -29,6 +29,7 @@ class Factbase::Inv
 
   def initialize(fb, &block)
     @fb = fb
+    raise(ArgumentError, 'The block is missing') if block.nil?
     @block = block
   end
 
