@@ -65,6 +65,7 @@ Elegant/GoodMethodName:
     - '_assert_not'
     - '_assert_one'
     - '_by_symbol'
+    - '_calculate'
     - '_compare'
     - '_feed'
     - '_flatten'
