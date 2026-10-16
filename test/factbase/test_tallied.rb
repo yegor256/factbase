@@ -76,6 +76,15 @@ class TestTallied < Factbase::Test
     assert_predicate(fb.churn, :zero?)
   end
 
+  def test_counts_in_txn_left_by_break
+    fb = Factbase::Tallied.new(Factbase.new)
+    fb.txn do |fbt|
+      fbt.insert.boom = 3
+      break
+    end
+    assert_equal(1, fb.churn.inserted, 'fact committed by break was not counted')
+  end
+
   def test_counts_in_txn_in_threads
     fb = Factbase::Tallied.new(Factbase.new)
     t = 5

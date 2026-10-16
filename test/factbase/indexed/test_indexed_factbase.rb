@@ -56,6 +56,17 @@ class TestIndexedFactbase < Factbase::Test
     end
   end
 
+  def test_forgets_index_after_txn_left_by_break
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    fb.query('(absent bar)').each.to_a
+    fb.txn do |fbt|
+      fbt.query('(exists foo)').each { |f| f.bar = 1 }
+      break
+    end
+    assert_empty(fb.query('(absent bar)').each.to_a, 'stale index was used after break')
+  end
+
   def test_queries_after_update_rollback_in_txn
     [
       '(absent bar)',
