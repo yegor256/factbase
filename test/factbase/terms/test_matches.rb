@@ -12,7 +12,52 @@ class TestMatches < Factbase::Test
     t = Factbase::Matches.new([:foo, '[a-z]+'])
     assert(t.evaluate(fact('foo' => 'hello'), [], Factbase.new))
     assert(t.evaluate(fact('foo' => 'hello 42'), [], Factbase.new))
-    refute(t.evaluate(fact('foo' => 42), [], Factbase.new))
+  end
+
+  def test_cannot_match_integer
+    seed = Random.new_seed
+    num = Random.new(seed).rand(1..1_000_000)
+    t = Factbase::Matches.new([:foo, num.to_s])
+    assert_raises(RuntimeError, "integer #{num} was converted to a string, seed #{seed}") do
+      t.evaluate(fact('foo' => num), [], Factbase.new)
+    end
+  end
+
+  def test_cannot_match_float
+    seed = Random.new_seed
+    num = Random.new(seed).rand * 1000
+    t = Factbase::Matches.new([:foo, num.to_s])
+    assert_raises(RuntimeError, "float #{num} was converted to a string, seed #{seed}") do
+      t.evaluate(fact('foo' => num), [], Factbase.new)
+    end
+  end
+
+  def test_cannot_match_time
+    seed = Random.new_seed
+    time = Time.at(Random.new(seed).rand(0..2_000_000_000)).utc
+    t = Factbase::Matches.new([:foo, time.year.to_s])
+    assert_raises(RuntimeError, "time #{time} was converted to a string, seed #{seed}") do
+      t.evaluate(fact('foo' => time), [], Factbase.new)
+    end
+  end
+
+  def test_cannot_match_boolean
+    seed = Random.new_seed
+    flag = Random.new(seed).rand(2).zero?
+    t = Factbase::Matches.new([:foo, flag.to_s])
+    assert_raises(RuntimeError, "boolean #{flag} was converted to a string, seed #{seed}") do
+      t.evaluate(fact('foo' => flag), [], Factbase.new)
+    end
+  end
+
+  def test_cannot_match_integer_via_query
+    seed = Random.new_seed
+    fb = Factbase.new
+    num = Random.new(seed).rand(1..1_000_000)
+    fb.insert.num = num
+    assert_raises(RuntimeError, "query matched integer #{num} as a string, seed #{seed}") do
+      fb.query("(matches num '#{num}')").each.to_a
+    end
   end
 
   def test_regexp_from_property
