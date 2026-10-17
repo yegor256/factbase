@@ -29,7 +29,7 @@ class Factbase::Agg < Factbase::TermBase
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected, but '#{term}' provided")
     end
-    term.evaluate(nil, fb.query(selector, maps).each(fb, params(fact)).to_a, fb)
+    term.evaluate(nil, Temporary.new(fb.query(selector, maps).each(fb, params(fact)).to_a), fb)
   end
 
   private
@@ -39,6 +39,15 @@ class Factbase::Agg < Factbase::TermBase
   # @return [Hash] Parameters indexed by their names
   def params(fact)
     Context.new(fact, fact.all_properties.to_h { |name| [name, fact["$#{name}"]] }.compact)
+  end
+
+  # Temporary array of facts collected for an aggregation operand.
+  class Temporary < Array
+    # Is it temporary?
+    # @return [Boolean] TRUE
+    def temporary?
+      true
+    end
   end
 
   # Values available to the selector of an aggregation.
