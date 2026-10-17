@@ -6,6 +6,7 @@ require_relative '../../lib/factbase/term'
 # SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
+require 'date'
 
 # Term test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -106,5 +107,49 @@ class TestTerm < Factbase::Test
     t = Time.new(2026, 10, 4, 12, 0, 0, '+03:00')
     Factbase::Term.new(:eq, [:when, t]).to_s
     assert_equal(3 * 60 * 60, t.utc_offset, 'the time of the term was moved to UTC')
+  end
+
+  def test_term_message_on_unsupported_date_param
+    fb = Factbase.new
+    fb.insert.foo = 'bar'
+    msg = assert_raises(StandardError) do
+      fb.query('(eq foo $p)').each(fb, 'p' => Date.today).to_a
+    end.message
+    assert_includes(msg, 'Wrong type Date')
+    assert_includes(msg, '$p')
+    assert_includes(msg, 'Float, Integer, String, Time, TrueClass, FalseClass')
+  end
+
+  def test_term_message_on_unsupported_symbol_param
+    fb = Factbase.new
+    fb.insert.foo = 'bar'
+    msg = assert_raises(StandardError) do
+      fb.query('(eq foo $p)').each(fb, 'p' => :some_symbol).to_a
+    end.message
+    assert_includes(msg, 'Wrong type Symbol')
+    assert_includes(msg, ':some_symbol')
+    assert_includes(msg, '$p')
+    assert_includes(msg, 'Float, Integer, String, Time, TrueClass, FalseClass')
+  end
+
+  def test_term_message_on_unsupported_nil_param
+    fb = Factbase.new
+    fb.insert.foo = 'bar'
+    msg = assert_raises(StandardError) do
+      fb.query('(eq foo $p)').each(fb, 'p' => [nil]).to_a
+    end.message
+    assert_includes(msg, 'Wrong type NilClass')
+    assert_includes(msg, 'nil')
+    assert_includes(msg, '$p')
+    assert_includes(msg, 'Float, Integer, String, Time, TrueClass, FalseClass')
+  end
+
+  def test_term_message_on_unsupported_type_in_term
+    t = Factbase::Term.new(:eq, [:foo, Date.today])
+    msg = assert_raises(StandardError) do
+      t.evaluate(fact('foo' => 'bar'), [], Factbase.new)
+    end.message
+    assert_includes(msg, 'Wrong type Date')
+    assert_includes(msg, 'Float, Integer, String, Time, TrueClass, FalseClass')
   end
 end
