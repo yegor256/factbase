@@ -379,6 +379,79 @@ class TestQuery < Factbase::Test
     )
   end
 
+  def test_searches_twice_with_unique_nested_in_and
+    fb = Factbase.new
+    [10, 10, 20, 20, 30].each { |v| fb.insert.k = v }
+    q = fb.query('(and (exists k) (unique k))')
+    first = q.each.to_a.map { |f| f['k'] }
+    assert_equal([[10], [20], [30]], first)
+    assert_equal(
+      first,
+      q.each.to_a.map { |f| f['k'] },
+      'nested unique inside and did not yield same facts on second run'
+    )
+  end
+
+  def test_searches_twice_with_unique_nested_in_or
+    fb = Factbase.new
+    [['a', 1], ['a', 2], ['b', 1], ['b', 2]].each do |x, y|
+      f = fb.insert
+      f.x = x
+      f.y = y
+    end
+    q = fb.query('(or (eq y 99) (unique x))')
+    first = q.each.to_a.map { |f| [f['x'], f['y']] }
+    assert_equal([[['a'], [1]], [['b'], [1]]], first)
+    assert_equal(
+      first,
+      q.each.to_a.map { |f| [f['x'], f['y']] },
+      'nested unique inside or did not yield same facts on second run'
+    )
+  end
+
+  def test_searches_twice_with_unique_nested_in_not
+    fb = Factbase.new
+    %w[m m n o o].each { |v| fb.insert.k = v }
+    q = fb.query('(and (exists k) (not (unique k)))')
+    first = q.each.to_a.map { |f| f['k'] }
+    assert_equal([['m'], ['o']], first)
+    assert_equal(
+      first,
+      q.each.to_a.map { |f| f['k'] },
+      'nested unique inside not did not yield same facts on second run'
+    )
+  end
+
+  def test_searches_twice_with_unique_in_deep_nesting
+    fb = Factbase.new
+    [1, 1, 2, 3, 3].each { |v| fb.insert.val = v }
+    q = fb.query('(and (exists val) (or (eq val 2) (not (not (unique val)))))')
+    first = q.each.to_a.map { |f| f['val'] }
+    assert_equal([[1], [2], [3]], first)
+    assert_equal(
+      first,
+      q.each.to_a.map { |f| f['val'] },
+      'deeply nested unique did not yield same facts on second run'
+    )
+  end
+
+  def test_searches_twice_with_multiple_nested_uniques
+    fb = Factbase.new
+    [[1, 'a'], [1, 'b'], [2, 'a'], [2, 'b']].each do |num, tag|
+      f = fb.insert
+      f.num = num
+      f.tag = tag
+    end
+    q = fb.query('(and (unique num) (or (eq tag "z") (unique tag)))')
+    first = q.each.to_a.map { |f| [f['num'], f['tag']] }
+    assert_equal([[[1], ['a']]], first)
+    assert_equal(
+      first,
+      q.each.to_a.map { |f| [f['num'], f['tag']] },
+      'multiple nested uniques did not yield same facts on second run'
+    )
+  end
+
   def test_deletes_after_searching_with_the_same_query
     fb = Factbase.new
     %w[a a b].each { |v| fb.insert.foo = v }
