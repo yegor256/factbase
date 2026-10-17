@@ -47,6 +47,41 @@ class TestLazyTapedHash < Factbase::Test
     end
   end
 
+  def test_does_not_journal_a_failed_copy
+    added = []
+    hash = Factbase::LazyTaped::LazyTapedHash.new(
+      { 'x' => [1] },
+      Class.new do
+        def get_copied_map(_origin)
+          raise(RuntimeError, 'copy failed')
+        end
+      end.new,
+      added
+    )
+    assert_equal('copy failed', assert_raises(RuntimeError) { hash.clear }.message)
+    assert_empty(added)
+    refute_predicate(hash, :copied?)
+  end
+
+  def test_does_not_journal_a_failed_mutator_without_changes
+    hash, origin, added = wrap({ 'x' => [1] })
+    assert_raises(TypeError) { hash.merge!(nil) }
+    assert_empty(added)
+    assert_equal(origin, hash.to_h)
+  end
+
+  def test_journals_array_changes_before_a_callback_raises
+    hash, _origin, added = wrap({ 'x' => [1] })
+    assert_raises(RuntimeError) do
+      hash.transform_values! do |values|
+        values << 2
+        raise(RuntimeError, 'stop')
+      end
+    end
+    assert_equal([1, 2], hash['x'].to_a)
+    assert_includes(added, hash.tracking_id)
+  end
+
   def test_keys
     hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
     assert_read(hash, origin, %w[foo bar], hash.keys)
