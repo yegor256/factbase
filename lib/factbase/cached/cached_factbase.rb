@@ -45,19 +45,29 @@ class Factbase::CachedFactbase
   end
 
   # Convert a query to a term.
-  # @param [String] query The query to convert
+  #
+  # If a pre-compiled +Factbase::Term+ is provided, it is rebound to this
+  # factbase's cache so that cache invalidation remains synchronized with
+  # changes in this factbase.
+  #
+  # @param [String|Factbase::Term] query The query or term to convert
   # @return [Factbase::Term] The term
   def to_term(query)
-    t = @origin.to_term(query)
+    t = query.is_a?(Factbase::Term) ? query : @origin.to_term(query)
     t.redress!(Factbase::CachedTerm, cache: @cache)
     t
   end
 
   # Create a query capable of iterating.
-  # @param [String] term The term to use
+  #
+  # If a pre-compiled +Factbase::Term+ is provided, its cache is rebound to
+  # this factbase's cache to ensure that any previous foreign cache bindings
+  # do not prevent fresh evaluation when facts change.
+  #
+  # @param [String|Factbase::Term] term The term to use
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
-    term = to_term(term) if term.is_a?(String)
+    term = to_term(term) if term.is_a?(String) || term.is_a?(Factbase::Term)
     Factbase::CachedQuery.new(@origin.query(term, maps), @cache, self, cacheable: !term.abstract?)
   end
 
