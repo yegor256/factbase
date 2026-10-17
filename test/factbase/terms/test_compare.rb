@@ -72,4 +72,55 @@ class TestCompare < Factbase::Test
     assert_includes(e.message, 'using (compare include?)')
     assert_includes(e.message, "undefined method 'include?'")
   end
+
+  def test_keeps_looking_past_incomparable_pairing_on_right_side
+    fb = Factbase.new
+    f = fb.insert
+    f.tag = 'hello'
+    f.pat = 1
+    f.pat = 'ell'
+    assert_equal(1, fb.query('(contains tag pat)').each.to_a.size)
+    assert(Factbase::Term.new(:contains, %i[tag pat]).evaluate(f, [f], fb))
+    assert(Factbase::Compare.new(:include?, %i[tag pat]).evaluate(f, [f], fb))
+  end
+
+  def test_answers_false_when_comparable_pairing_does_not_match_with_mixed_values
+    fb = Factbase.new
+    g = fb.insert
+    g.tag = 42
+    g.tag = 'hi'
+    assert_equal(0, fb.query("(contains tag 'hello')").each.to_a.size)
+    refute(Factbase::Term.new(:contains, [:tag, 'hello']).evaluate(g, [g], fb))
+    refute(Factbase::Compare.new(:include?, [:tag, 'hello']).evaluate(g, [g], fb))
+  end
+
+  def test_answers_false_when_right_operand_has_mixed_incomparable_and_unmatched_values
+    fb = Factbase.new
+    f = fb.insert
+    f.tag = 'hello'
+    f.pat = 42
+    f.pat = 'world'
+    assert_equal(0, fb.query('(contains tag pat)').each.to_a.size)
+    refute(Factbase::Term.new(:contains, %i[tag pat]).evaluate(f, [f], fb))
+    refute(Factbase::Compare.new(:include?, %i[tag pat]).evaluate(f, [f], fb))
+  end
+
+  def test_keeps_looking_past_incomparable_right_pairing_for_greater_than
+    fb = Factbase.new
+    f = fb.insert
+    f.num = 10
+    f.bound = 'bad'
+    f.bound = 5
+    assert_equal(1, fb.query('(gt num bound)').each.to_a.size)
+    assert(Factbase::Compare.new(:>, %i[num bound]).evaluate(f, [f], fb))
+  end
+
+  def test_answers_false_when_greater_than_has_mixed_incomparable_values_and_no_match
+    fb = Factbase.new
+    f = fb.insert
+    f.num = 'bad'
+    f.num = 2
+    assert_equal(0, fb.query('(gt num 5)').each.to_a.size)
+    refute(Factbase::Compare.new(:>, [:num, 5]).evaluate(f, [f], fb))
+  end
 end
