@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/syntax'
 require_relative '../../lib/factbase/term'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
@@ -106,5 +107,66 @@ class TestTerm < Factbase::Test
     t = Time.new(2026, 10, 4, 12, 0, 0, '+03:00')
     Factbase::Term.new(:eq, [:when, t]).to_s
     assert_equal(3 * 60 * 60, t.utc_offset, 'the time of the term was moved to UTC')
+  end
+
+  def test_formats_time_with_positive_offset_in_utc
+    time = Time.new(2026, 10, 4, 15, 30, 45, '+03:00')
+    str = Factbase::Term.new(:eq, [:when, time]).to_s
+    assert_equal('(eq when 2026-10-04T12:30:45Z)', str)
+    assert(str.end_with?('Z)'))
+    refute_includes(str, '+03:00')
+    parsed = Factbase::Syntax.new(str).to_term
+    assert_equal(time, parsed.operands[1])
+    assert_predicate(parsed.operands[1], :utc?)
+  end
+
+  def test_formats_time_with_negative_offset_in_utc
+    time = Time.new(2026, 1, 15, 7, 0, 0, '-05:00')
+    str = Factbase::Term.new(:gt, [:created_at, time]).to_s
+    assert_equal('(gt created_at 2026-01-15T12:00:00Z)', str)
+    assert(str.end_with?('Z)'))
+    refute_includes(str, '-05:00')
+    parsed = Factbase::Syntax.new(str).to_term
+    assert_equal(time, parsed.operands[1])
+    assert_predicate(parsed.operands[1], :utc?)
+  end
+
+  def test_formats_time_with_half_hour_offset_in_utc
+    time = Time.new(2026, 6, 20, 20, 0, 0, '+05:30')
+    str = Factbase::Term.new(:lt, [:deadline, time]).to_s
+    assert_equal('(lt deadline 2026-06-20T14:30:00Z)', str)
+    assert(str.end_with?('Z)'))
+    refute_includes(str, '+05:30')
+    parsed = Factbase::Syntax.new(str).to_term
+    assert_equal(time, parsed.operands[1])
+    assert_predicate(parsed.operands[1], :utc?)
+  end
+
+  def test_formats_various_time_offsets_in_utc_and_parses_back
+    [
+      Time.new(2026, 3, 10, 18, 0, 0, '+03:00'),
+      Time.new(2026, 7, 4, 9, 15, 30, '-05:00'),
+      Time.new(2026, 12, 31, 23, 45, 0, '+05:30')
+    ].each do |time|
+      query = Factbase::Term.new(:eq, [:timestamp, time]).to_s
+      assert_match(/\(eq timestamp \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\)/, query)
+      parsed = Factbase::Syntax.new(query).to_term
+      assert_equal(time, parsed.operands[1])
+      assert_predicate(parsed.operands[1], :utc?)
+      assert(parsed.evaluate(fact('timestamp' => [time]), [], Factbase.new))
+    end
+  end
+
+  def test_formats_nested_terms_with_non_utc_times
+    t1 = Time.new(2026, 8, 1, 10, 0, 0, '+03:00')
+    t2 = Time.new(2026, 8, 1, 12, 0, 0, '-05:00')
+    str = Factbase::Term.new(
+      :and,
+      [Factbase::Term.new(:gte, [:time, t1]), Factbase::Term.new(:lte, [:time, t2])]
+    ).to_s
+    assert_equal('(and (gte time 2026-08-01T07:00:00Z) (lte time 2026-08-01T17:00:00Z))', str)
+    parsed = Factbase::Syntax.new(str).to_term
+    assert_equal(t1, parsed.operands[0].operands[1])
+    assert_equal(t2, parsed.operands[1].operands[1])
   end
 end
