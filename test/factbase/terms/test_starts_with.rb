@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/starts_with'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/starts_with'
 require_relative '../../test__helper'
 
 class TestStartsWith < Factbase::Test
@@ -50,9 +50,9 @@ class TestStartsWith < Factbase::Test
   end
 
   def test_empty_string_does_not_start_with_non_empty_prefix
-    t = Factbase::StartsWith.new([:foo, 'a'])
+    t = Factbase::StartsWith.new([:foo, 'apple'])
     refute(t.evaluate(fact('foo' => ''), [], Factbase.new))
-    refute(t.evaluate(fact('foo' => 'ba'), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => 'banana'), [], Factbase.new))
   end
 
   def test_shorter_string_does_not_start_with_longer_prefix
