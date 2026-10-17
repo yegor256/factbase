@@ -106,11 +106,13 @@ class Factbase::LazyTaped
     end
 
     def method_missing(method, *, &)
+      completed = false
       mutating = method.to_s.end_with?('=', '!') || MUTATING_METHODS.include?(method)
       ensure_copied_map if mutating
-      current_map.__send__(method, *, &).tap do
-        @added.append(@copied_map.object_id) if mutating
-      end
+      before = @copied_map.transform_values { |value| value.is_a?(Array) ? value.dup : value } if mutating
+      current_map.__send__(method, *, &).tap { completed = true }
+    ensure
+      @added.append(@copied_map.object_id) if mutating && @copied_map && (completed || !@copied_map.eql?(before))
     end
 
     def respond_to_missing?(method, include_private = false)
