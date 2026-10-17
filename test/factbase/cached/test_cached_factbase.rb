@@ -140,4 +140,61 @@ class TestCachedFactbase < Factbase::Test
       fb.query('(and (exists x) (traced (always)))').each.to_a
     end
   end
+
+  def test_traces_every_fact_on_subsequent_runs
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    3.times { |i| fb.insert.x = i }
+    assert_output("(traced (always)) -> true\n" * 3) do
+      fb.query('(and (exists x) (traced (always)))').each.to_a
+    end
+    assert_output("(traced (always)) -> true\n" * 3) do
+      fb.query('(and (exists x) (traced (always)))').each.to_a
+    end
+  end
+
+  def test_traces_query_with_term_object_on_subsequent_runs
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    2.times { |i| fb.insert.x = i }
+    term = fb.to_term('(and (exists x) (traced (always)))')
+    assert_output("(traced (always)) -> true\n" * 2) do
+      fb.query(term).each.to_a
+    end
+    assert_output("(traced (always)) -> true\n" * 2) do
+      fb.query(term).each.to_a
+    end
+  end
+
+  def test_determines_cacheability_correctly
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    assert(fb.cacheable?('(eq x 1)'))
+    refute(fb.cacheable?('(eq x $x)'))
+    refute(fb.cacheable?('(traced (always))'))
+    refute(fb.cacheable?('(and (exists x) (traced (always)))'))
+    refute(fb.cacheable?(fb.to_term('(traced (always))')))
+    refute(fb.cacheable?(fb.to_term('(and (exists x) (traced (always)))')))
+  end
+
+  def test_traces_nested_subterm_on_subsequent_runs
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    assert_output("(traced (eq x 1)) -> true\n") do
+      fb.query('(and (always) (traced (eq x 1)))').each.to_a
+    end
+    assert_output("(traced (eq x 1)) -> true\n") do
+      fb.query('(and (always) (traced (eq x 1)))').each.to_a
+    end
+  end
+
+  def test_traces_with_block_on_subsequent_runs
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 10
+    total = 0
+    assert_output("(traced (always)) -> true\n") do
+      fb.query('(and (exists x) (traced (always)))').each { |f| total += f.x }
+    end
+    assert_output("(traced (always)) -> true\n") do
+      fb.query('(and (exists x) (traced (always)))').each { |f| total += f.x }
+    end
+    assert_equal(20, total)
+  end
 end
