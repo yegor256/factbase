@@ -13,6 +13,7 @@ class Factbase::As < Factbase::TermBase
   def initialize(operands)
     super()
     @operands = operands
+    @op = :as
   end
 
   # Evaluate term on a fact.
@@ -22,6 +23,7 @@ class Factbase::As < Factbase::TermBase
   # @return [Boolean] True if succeeded
   def evaluate(fact, maps, fb)
     assert_args(2)
+    raise(StandardError, "The '#{@name || @op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
     a = @operands[0]
     raise(ArgumentError, "A symbol is expected as first argument of 'as'") unless a.is_a?(Symbol)
     vv = _values(1, fact, maps, fb)
