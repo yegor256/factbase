@@ -430,6 +430,15 @@ class TestQuery < Factbase::Test
     assert_equal([Integer], fb.query('(always)').each.map { |f| f.x.class }, 'the fact with 1 was deleted instead')
   end
 
+  def test_refuses_to_delete_from_a_subset_of_maps
+    fb = Factbase.new
+    3.times { |i| fb.insert.x = i }
+    sub = fb.query('(always)').each.to_a.first(2)
+    assert_raises(ArgumentError) { fb.query('(always)', sub).delete! }
+    assert_equal(3, fb.size)
+    assert_equal(2, sub.size)
+  end
+
   private
 
   def with_factbases(maps = [], &)
