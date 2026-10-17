@@ -55,7 +55,14 @@ class Factbase::Syntax
     @tokens ||= to_tokens
     raise(StandardError, 'No tokens') if @tokens.empty?
     @ast ||= to_ast(@tokens, 0)
-    raise(ArgumentError, "Too many terms (#{@ast[1]} != #{@tokens.size})") if @ast[1] != @tokens.size
+    if @ast[1] != @tokens.size
+      token = @tokens[@ast[1]]
+      raise(StandardError, "Unexpected closing parenthesis at ##{@ast[1]}") if token == :')'
+      raise(
+        ArgumentError,
+        "Too many terms: unexpected token '#{token}' at ##{@ast[1]} (#{@ast[1]} != #{@tokens.size})"
+      )
+    end
     t = @ast[0]
     raise(StandardError, 'No terms found in the AST') if t.nil?
     raise(ArgumentError, "#{t.class.name} is not an instance of Term") unless t.is_a?(Factbase::Term)
@@ -74,15 +81,17 @@ class Factbase::Syntax
   # @param [Integer] at Position to start parsing from
   # @return [Array<Factbase::Term,Integer>] The term detected and ending position
   def to_ast(tokens, at)
-    raise(StandardError, "Closing too soon at ##{at}") if tokens[at] == :')'
+    raise(StandardError, "Unexpected closing parenthesis at ##{at}") if tokens[at] == :')'
     return [tokens[at], at + 1] unless tokens[at] == :'('
+    open = at
     at += 1
+    raise(StandardError, "Unclosed parenthesis at ##{open}") if tokens[at].nil?
     op = tokens[at]
-    raise(StandardError, 'No token found') if op == :')'
+    raise(StandardError, "Unexpected closing parenthesis at ##{at}") if op == :')'
     operands = []
     at += 1
     loop do
-      raise(StandardError, "End of token stream at ##{at}") if tokens[at].nil?
+      raise(StandardError, "Unclosed parenthesis at ##{open}") if tokens[at].nil?
       break if tokens[at] == :')'
       (operand, at1) = to_ast(tokens, at)
       raise(StandardError, "Stuck at position ##{at}") if at == at1
