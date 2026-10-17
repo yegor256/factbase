@@ -20,7 +20,7 @@ class Factbase::Simplified
   # Removes duplicate operands, except the ones that write into the fact,
   # such as +as+ and +join+, since each of them adds its value again
   def unique
-    strs = []
+    strs = Set.new
     ops = []
     @operands.each do |o|
       o = o.simplify if o.is_a?(Factbase::Term)
