@@ -132,4 +132,12 @@ class TestFactAsYaml < Factbase::Test
     assert_equal('#tag', YAML.safe_load(yaml_str)['tag'])
     assert_equal('inline#hash', YAML.safe_load(yaml_str)['comment'])
   end
+
+  def test_literal_backslash_followed_by_hash
+    f = Factbase.new.insert
+    f.raw = '\\#abc'
+    yaml_str = Factbase::FactAsYaml.new(f).to_s
+    assert_includes(yaml_str, 'raw:')
+    assert_equal('\\#abc', YAML.safe_load(yaml_str)['raw'])
+  end
 end
