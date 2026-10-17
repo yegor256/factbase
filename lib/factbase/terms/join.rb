@@ -13,6 +13,7 @@ class Factbase::Join < Factbase::TermBase
   def initialize(operands)
     super()
     @operands = operands
+    @op = :join
   end
 
   # Evaluate term on a fact.
@@ -22,6 +23,7 @@ class Factbase::Join < Factbase::TermBase
   # @return [Boolean] True if succeeded
   def evaluate(fact, maps, fb)
     assert_args(2)
+    raise(StandardError, "The '#{@name || @op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
     jumps = @operands[0]
     raise(ArgumentError, "A string is expected as first argument of 'join'") unless jumps.is_a?(String)
     jumps =

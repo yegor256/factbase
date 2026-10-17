@@ -22,6 +22,7 @@ class Factbase::Empty < Factbase::TermBase
   # @return [Boolean] The result of the emptiness check
   def evaluate(fact, maps, fb)
     assert_args(1)
+    raise(StandardError, "The '#{@name || @op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
     term = @operands[0]
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected, but '#{term}' provided")
