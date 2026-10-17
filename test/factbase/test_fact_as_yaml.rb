@@ -136,8 +136,11 @@ class TestFactAsYaml < Factbase::Test
   def test_literal_backslash_followed_by_hash
     f = Factbase.new.insert
     f.raw = '\\#abc'
+    f.mid = 'foo\\#bar'
     yaml_str = Factbase::FactAsYaml.new(f).to_s
-    assert_includes(yaml_str, 'raw:')
+    assert_includes(yaml_str, 'raw: "\\\\#abc"')
+    assert_includes(yaml_str, 'mid: "foo\\\\#bar"')
     assert_equal('\\#abc', YAML.safe_load(yaml_str)['raw'])
+    assert_equal('foo\\#bar', YAML.safe_load(yaml_str)['mid'])
   end
 end
