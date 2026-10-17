@@ -65,4 +65,86 @@ class TestSorted < Factbase::Test
     ).query('(join "f<=foo" (head 1 (sorted foo (eq foo $foo))))').each.to_a
     assert_equal('888 111 444', ff.map { |m| m['f'].first }.join(' '))
   end
+
+  def test_orders_facts_by_first_value_with_integers
+    fb = Factbase.new
+    f = fb.insert
+    f.id = 'f'
+    f.k = 9
+    f.k = 1
+    g = fb.insert
+    g.id = 'g'
+    g.k = 5
+    h = fb.insert
+    h.id = 'h'
+    h.k = 2
+    h.k = 10
+    sorted = fb.query('(sorted k (always))').each.to_a
+    assert_equal(%w[h g f], sorted.map { |m| m['id'].first })
+  end
+
+  def test_orders_facts_by_first_value_with_strings
+    fb = Factbase.new
+    f = fb.insert
+    f.id = 'f'
+    f.tag = 'zebra'
+    f.tag = 'apple'
+    g = fb.insert
+    g.id = 'g'
+    g.tag = 'mango'
+    h = fb.insert
+    h.id = 'h'
+    h.tag = 'banana'
+    h.tag = 'zoo'
+    sorted = fb.query('(sorted tag (always))').each.to_a
+    assert_equal(%w[h g f], sorted.map { |m| m['id'].first })
+  end
+
+  def test_orders_facts_by_first_value_with_times
+    fb = Factbase.new
+    early = Time.utc(2025, 1, 1)
+    late = Time.utc(2025, 12, 1)
+    f = fb.insert
+    f.id = 'f'
+    f.when = late
+    f.when = early
+    g = fb.insert
+    g.id = 'g'
+    g.when = Time.utc(2025, 6, 1)
+    h = fb.insert
+    h.id = 'h'
+    h.when = early
+    h.when = late
+    sorted = fb.query('(sorted when (always))').each.to_a
+    assert_equal(%w[h g f], sorted.map { |m| m['id'].first })
+  end
+
+  def test_predict_orders_facts_by_first_value
+    list = Factbase::Syntax.new('(sorted k (always))').to_term.predict(
+      [
+        { 'id' => ['f'], 'k' => [99, 1] },
+        { 'id' => ['g'], 'k' => [50] },
+        { 'id' => ['h'], 'k' => [10, 100] }
+      ], Factbase.new, {}
+    )
+    assert_equal(%w[h g f], list.map { |m| m['id'].first })
+  end
+
+  def test_orders_facts_with_differing_value_counts
+    fb = Factbase.new
+    f = fb.insert
+    f.id = 'f'
+    f.k = 30
+    f.k = 1
+    f.k = 5
+    g = fb.insert
+    g.id = 'g'
+    g.k = 20
+    h = fb.insert
+    h.id = 'h'
+    h.k = 10
+    h.k = 100
+    sorted = fb.query('(sorted k (always))').each.to_a
+    assert_equal(%w[h g f], sorted.map { |m| m['id'].first })
+  end
 end
