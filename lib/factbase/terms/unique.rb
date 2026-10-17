@@ -18,7 +18,28 @@ class Factbase::Unique < Factbase::TermBase
   # Forget the tuples seen while earlier facts were evaluated.
   # @return [Set] The tuples left, none of them
   def forget
+    (Thread.current[:"_fb_unique_#{object_id}"] ||= []).push(Set.new)
     @seen.clear
+  end
+
+  # Finish evaluation and clean up scoped seen set.
+  def finish
+    stack = Thread.current[:"_fb_unique_#{object_id}"]
+    return if stack.nil?
+    stack.pop
+    Thread.current[:"_fb_unique_#{object_id}"] = nil if stack.empty?
+  end
+
+  # Clone the term with an isolated seen set.
+  # @return [Factbase::Unique] Cloned instance with fresh seen set
+  def clone
+    super.tap { |c| c.instance_variable_set(:@seen, Set.new) }
+  end
+
+  # Duplicate the term with an isolated seen set.
+  # @return [Factbase::Unique] Duplicated instance with fresh seen set
+  def dup
+    super.tap { |c| c.instance_variable_set(:@seen, Set.new) }
   end
 
   # Evaluate term on a fact.
@@ -31,6 +52,7 @@ class Factbase::Unique < Factbase::TermBase
     vv = (0..(@operands.size - 1)).map { |i| _values(i, fact, maps, fb) }
     return false if vv.any?(nil)
     tuples = Enumerator.product(*vv).to_a
-    tuples.filter_map { |t| @seen.add?(t) }.any?
+    seen = Thread.current[:"_fb_unique_#{object_id}"]&.last || @seen
+    tuples.filter_map { |t| seen.add?(t) }.any?
   end
 end

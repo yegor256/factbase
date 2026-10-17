@@ -209,6 +209,12 @@ class Factbase::Term < Factbase::TermBase
     @operands.each { |o| o.forget if o.is_a?(Factbase::TermBase) }
   end
 
+  # Finish what was evaluated and clean up scoped state.
+  def finish
+    @terms[@op].finish if @terms.key?(@op) && @terms[@op].respond_to?(:finish)
+    @operands.each { |o| o.finish if o.respond_to?(:finish) }
+  end
+
   # Evaluate term on a fact
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
