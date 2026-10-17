@@ -24,9 +24,8 @@ class Factbase::Compare < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(2)
     lefts = _values(0, fact, maps, fb)
-    return false if lefts.nil?
     rights = _values(1, fact, maps, fb)
-    return false if rights.nil?
+    return false if lefts.nil? || rights.nil?
     _search(lefts, rights)
   end
 
