@@ -40,26 +40,89 @@ class TestAssert < Factbase::Test
 
   def test_assert_with_array_true_condition
     assert(
-      Factbase::Assert.new(['at least one positive', Factbase::Term.new(:gt, [:foo, 0])]).evaluate(
+      Factbase::Assert.new(['at least one positive', Factbase::Term.new(:either, [:foo, 0])]).evaluate(
         fact('foo' => [1, 2, 3]), [], Factbase.new
       )
     )
   end
 
   def test_assert_with_array_false_condition
-    t = Factbase::Assert.new(['at least one positive', Factbase::Term.new(:gt, [:foo, 0])])
+    t = Factbase::Assert.new(['at least one positive', Factbase::Term.new(:either, [:foo, 0])])
     assert_includes(
       assert_raises(StandardError) do
-        t.evaluate(fact('foo' => [-1, -2, -3]), [], Factbase.new)
+        t.evaluate(fact('foo' => [0, 0, 0]), [], Factbase.new)
       end.message, 'at least one positive'
     )
   end
 
   def test_assert_with_mixed_array
     assert(
-      Factbase::Assert.new(['at least one positive', Factbase::Term.new(:gt, [:foo, 0])]).evaluate(
-        fact('foo' => [-1, 0, 3]), [], Factbase.new
+      Factbase::Assert.new(['at least one positive', Factbase::Term.new(:either, [:foo, 0])]).evaluate(
+        fact('foo' => [0, 0, 3]), [], Factbase.new
       )
+    )
+  end
+
+  def test_assert_with_array_of_booleans_passing
+    assert(
+      Factbase::Assert.new(['at least one true', Factbase::Term.new(:either, [:foo, false])]).evaluate(
+        fact('foo' => [false, true]), [], Factbase.new
+      )
+    )
+  end
+
+  def test_assert_with_array_of_booleans_failing
+    t = Factbase::Assert.new(['at least one true', Factbase::Term.new(:either, [:foo, false])])
+    assert_includes(
+      assert_raises(StandardError) do
+        t.evaluate(fact('foo' => [false, false]), [], Factbase.new)
+      end.message, 'at least one true'
+    )
+  end
+
+  def test_assert_with_array_of_strings
+    assert(
+      Factbase::Assert.new(['at least one string', Factbase::Term.new(:either, [:foo, 'default'])]).evaluate(
+        fact('foo' => %w[first second]), [], Factbase.new
+      )
+    )
+  end
+
+  def test_assert_with_empty_array
+    t = Factbase::Assert.new(['cannot be empty', Factbase::Term.new(:either, [:foo, 0])])
+    assert_includes(
+      assert_raises(StandardError) do
+        t.evaluate(fact('foo' => []), [], Factbase.new)
+      end.message, 'cannot be empty'
+    )
+  end
+
+  def test_assert_with_array_containing_false_and_zero
+    t = Factbase::Assert.new(['must have truthy non-zero', Factbase::Term.new(:either, [:bar, 0])])
+    assert_includes(
+      assert_raises(StandardError) do
+        t.evaluate(fact('bar' => [false, 0]), [], Factbase.new)
+      end.message, 'must have truthy non-zero'
+    )
+  end
+
+  def test_assert_query_with_multi_valued_property_passing
+    fb = Factbase.new
+    f = fb.insert
+    f.foo = 1
+    f.foo = 2
+    assert_equal(1, fb.query('(assert "must have values" (either foo 0))').each.to_a.size)
+  end
+
+  def test_assert_query_with_multi_valued_property_failing
+    fb = Factbase.new
+    f = fb.insert
+    f.bar = 0
+    f.bar = false
+    assert_includes(
+      assert_raises(StandardError) do
+        fb.query('(assert "all are false or zero" (either bar 0))').each.to_a
+      end.message, 'all are false or zero'
     )
   end
 
