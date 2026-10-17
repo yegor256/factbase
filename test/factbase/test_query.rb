@@ -430,6 +430,78 @@ class TestQuery < Factbase::Test
     assert_equal([Integer], fb.query('(always)').each.map { |f| f.x.class }, 'the fact with 1 was deleted instead')
   end
 
+  def test_each_refuses_integer_term
+    fb = Factbase.new
+    fb.insert.x = 42
+    assert_match(
+      /\AUnexpected evaluation result of type Integer, must be Boolean at \(plus x 1\)\z/,
+      assert_raises(ArgumentError) { fb.query('(plus x 1)').each.to_a }.message
+    )
+  end
+
+  def test_each_refuses_concat_term
+    fb = Factbase.new
+    fb.insert.x = 'hello'
+    assert_match(
+      /\AUnexpected evaluation result of type String, must be Boolean at \(concat x\)\z/,
+      assert_raises(ArgumentError) { fb.query('(concat x)').each.to_a }.message
+    )
+  end
+
+  def test_each_refuses_to_string_term
+    fb = Factbase.new
+    fb.insert.x = 'world'
+    assert_match(
+      /\AUnexpected evaluation result of type String, must be Boolean at \(to_string x\)\z/,
+      assert_raises(ArgumentError) { fb.query('(to_string x)').each.to_a }.message
+    )
+  end
+
+  def test_each_refuses_float_term
+    fb = Factbase.new
+    fb.insert.x = 3.14
+    assert_match(
+      /\AUnexpected evaluation result of type Float, must be Boolean at \(to_float x\)\z/,
+      assert_raises(ArgumentError) { fb.query('(to_float x)').each.to_a }.message
+    )
+  end
+
+  def test_each_refuses_array_term
+    fb = Factbase.new
+    fb.insert.x = 42
+    assert_match(
+      /\AUnexpected evaluation result of type Array, must be Boolean at \(first x\)\z/,
+      assert_raises(ArgumentError) { fb.query('(first x)').each.to_a }.message
+    )
+  end
+
+  def test_each_refuses_nil_term
+    fb = Factbase.new
+    fb.insert.x = 42
+    assert_match(
+      /\AUnexpected evaluation result of type NilClass, must be Boolean at \(prev x\)\z/,
+      assert_raises(ArgumentError) { fb.query('(prev x)').each.to_a }.message
+    )
+  end
+
+  def test_each_refuses_nil_for_missing_property
+    fb = Factbase.new
+    fb.insert.x = 42
+    assert_match(
+      /\AUnexpected evaluation result of type NilClass, must be Boolean at \(first missing\)\z/,
+      assert_raises(ArgumentError) { fb.query('(first missing)').each.to_a }.message
+    )
+  end
+
+  def test_each_with_block_refuses_non_boolean_term
+    fb = Factbase.new
+    fb.insert.x = 42
+    assert_match(
+      /\AUnexpected evaluation result of type Integer, must be Boolean at \(plus x 1\)\z/,
+      assert_raises(ArgumentError) { fb.query('(plus x 1)').each { |f| f } }.message
+    )
+  end
+
   private
 
   def with_factbases(maps = [], &)
