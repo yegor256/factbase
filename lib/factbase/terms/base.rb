@@ -55,6 +55,10 @@ class Factbase::TermBase
     raise(ArgumentError, "Too few (#{c}) operands for '#{name}' (#{num} expected)") if c < num
   end
 
+  def the_fact(fact)
+    raise(ArgumentError, "The '#{@name || @op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
+  end
+
   # Turns facts into plain maps, keeping only the properties they really carry.
   #
   # A fact coming out of a query is a +Factbase::Tee+, whose +all_properties+
@@ -90,7 +94,7 @@ class Factbase::TermBase
   def _by_symbol(pos, fact)
     o = @operands[pos]
     raise(ArgumentError, "A symbol expected at ##{pos}, but '#{o}' (#{o.class}) provided") unless o.is_a?(Symbol)
-    raise(ArgumentError, "The '#{@name || @op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
+    the_fact(fact)
     fact[o.to_s]
   end
 
@@ -100,7 +104,7 @@ class Factbase::TermBase
     v = v.evaluate(fact, maps, fb) if v.is_a?(Factbase::Term)
     v = v.evaluate(fact, maps, fb) if v.is_a?(Factbase::TermBase)
     if v.is_a?(Symbol)
-      raise(ArgumentError, "The '#{@name || @op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
+      the_fact(fact)
       v = fact[v.to_s]
     end
     return v if v.nil?
