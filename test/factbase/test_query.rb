@@ -430,6 +430,56 @@ class TestQuery < Factbase::Test
     assert_equal([Integer], fb.query('(always)').each.map { |f| f.x.class }, 'the fact with 1 was deleted instead')
   end
 
+  def test_concurrent_zip_enumerations_with_unique
+    fb = Factbase.new
+    [['a', 1], ['a', 2], ['b', 3], ['c', 4]].each do |k, x|
+      f = fb.insert
+      f.k = k
+      f.x = x
+    end
+    q = fb.query('(unique k)')
+    pairs = q.zip(q)
+    assert_equal(3, pairs.size)
+    assert_equal([[1, 1], [3, 3], [4, 4]], pairs.map { |a, b| [a.x, b&.x] })
+  end
+
+  def test_nested_enumeration_with_unique_and_count
+    fb = Factbase.new
+    [['a', 1], ['a', 2], ['b', 3], ['c', 4]].each do |k, x|
+      f = fb.insert
+      f.k = k
+      f.x = x
+    end
+    q = fb.query('(unique k)')
+    r = q.map { |f| "#{f.x} of #{q.count}" }
+    assert_equal(3, r.size)
+    assert_equal(['1 of 3', '3 of 3', '4 of 3'], r)
+  end
+
+  def test_nested_unique_with_concurrent_enumerations
+    fb = Factbase.new
+    [['a', 1], ['a', 2], ['b', 3], ['b', 4]].each do |k, x|
+      f = fb.insert
+      f.k = k
+      f.x = x
+    end
+    q = fb.query('(and (unique k) (unique x))')
+    pairs = q.zip(q)
+    assert_equal(2, pairs.size)
+    assert_equal([[1, 1], [3, 3]], pairs.map { |a, b| [a.x, b&.x] })
+  end
+
+  def test_unique_clone_and_dup_resets_seen
+    u = Factbase::Unique.new([:k])
+    fb = Factbase.new
+    f = fb.insert
+    f.k = 1
+    assert(u.evaluate(f, [], fb))
+    refute(u.evaluate(f, [], fb))
+    assert(u.dup.evaluate(f, [], fb))
+    assert(u.clone.evaluate(f, [], fb))
+  end
+
   private
 
   def with_factbases(maps = [], &)

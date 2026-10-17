@@ -50,17 +50,21 @@ class Factbase::Query
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     maybe = @term.predict(@maps, fb, Factbase::Tee.new({}, params))
     maybe ||= @maps unless maybe.equal?(@maps)
-    maybe.each do |m|
-      extras = {}
-      f = Factbase::Fact.new(m)
-      f = Factbase::Tee.new(f, params)
-      r = @term.evaluate(Factbase::Accum.new(f, extras, false), @maps, fb)
-      unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
-        raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term}")
+    begin
+      maybe.each do |m|
+        extras = {}
+        f = Factbase::Fact.new(m)
+        f = Factbase::Tee.new(f, params)
+        r = @term.evaluate(Factbase::Accum.new(f, extras, false), @maps, fb)
+        unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+          raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term}")
+        end
+        next unless r
+        yield(Factbase::Accum.new(f, extras, true))
+        yielded += 1
       end
-      next unless r
-      yield(Factbase::Accum.new(f, extras, true))
-      yielded += 1
+    ensure
+      @term.finish if @term.respond_to?(:finish)
     end
     yielded
   end
@@ -77,6 +81,8 @@ class Factbase::Query
       raise(StandardError, "Incorrect type #{r.class} returned by #{@term}")
     end
     r
+  ensure
+    @term.finish if @term.respond_to?(:finish)
   end
 
   # Delete all facts that match the query.

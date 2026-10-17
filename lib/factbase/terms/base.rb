@@ -25,6 +25,11 @@ class Factbase::TermBase
   # A term that remembers nothing has nothing to forget.
   def forget; end
 
+  # Finish what was evaluated and clean up scoped state.
+  #
+  # A term that remembers nothing has nothing to clean up.
+  def finish; end
+
   # Turns it into a string.
   # @return [String] The string of it
   def to_s
