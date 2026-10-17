@@ -140,4 +140,51 @@ class TestCachedFactbase < Factbase::Test
       fb.query('(and (exists x) (traced (always)))').each.to_a
     end
   end
+
+  def test_query_with_foreign_compiled_term_after_insert
+    fb1 = Factbase::CachedFactbase.new(Factbase.new)
+    fb1.insert.foo = 42
+    term = fb1.to_term('(count)')
+    fb2 = Factbase::CachedFactbase.new(Factbase.new)
+    fb2.insert.foo = 1
+    assert_equal(1, fb2.query(term).one)
+    fb2.insert.bar = 2
+    assert_equal(2, fb2.query(term).one)
+    assert_equal(1, fb1.query(term).one)
+  end
+
+  def test_query_with_foreign_compiled_term_evaluated_before_and_after_insert
+    fb1 = Factbase::CachedFactbase.new(Factbase.new)
+    fb1.insert.k = 100
+    term = fb1.to_term('(count)')
+    assert_equal(1, fb1.query(term).one)
+    fb2 = Factbase::CachedFactbase.new(Factbase.new)
+    fb2.insert.a = 1
+    assert_equal(1, fb2.query(term).one)
+    fb2.insert.b = 2
+    assert_equal(2, fb2.query(term).one)
+    assert_equal(1, fb1.query(term).one)
+  end
+
+  def test_foreign_compiled_aggregate_term_invalidated_on_fact_change
+    fb1 = Factbase::CachedFactbase.new(Factbase.new)
+    fb1.insert.val = 5
+    term = fb1.to_term('(agg (always) (max val))')
+    fb2 = Factbase::CachedFactbase.new(Factbase.new)
+    fact = fb2.insert
+    fact.val = 10
+    assert_equal(10, fb2.query(term).one)
+    fact.val = 25
+    assert_equal(25, fb2.query(term).one)
+    assert_equal(5, fb1.query(term).one)
+  end
+
+  def test_query_with_uncached_compiled_term_after_insert
+    term = Factbase.new.to_term('(count)')
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    assert_equal(1, fb.query(term).one)
+    fb.insert.y = 2
+    assert_equal(2, fb.query(term).one)
+  end
 end
