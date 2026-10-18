@@ -37,6 +37,15 @@ class TestLogged < Factbase::Test
     assert_equal([42], fb.query('(agg (exists bar) (first bar))').one)
   end
 
+  def test_shortens_the_value_found_by_one
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.body = 'x' * 10_000
+    assert_equal(10_000, fb.query('(agg (always) (first body))').one.first.length)
+    found = buf.to_s.lines.find { |l| l.include?('Found') }
+    assert_operator(found.length, :<, 200, found)
+  end
+
   def test_avoid_inner_logging
     buf = Loog::Buffer.new
     fb = Factbase.new
@@ -166,5 +175,15 @@ class TestLogged < Factbase::Test
     t = Time.new(2026, 10, 4, 12, 0, 0, '+03:00')
     Factbase::Logged.new(Factbase.new, Loog::NULL).insert.when = t
     assert_equal(3 * 60 * 60, t.utc_offset, 'the logged time was moved to UTC')
+  end
+
+  def test_reports_the_size_of_the_maps_it_ran_over
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    10.times { |i| fb.insert.i = i }
+    fb.query('(gt i 0)', fb.each.to_a.first(3)).each.to_a
+    fb.query('(gt i 1000)', []).delete!
+    assert_includes(buf.to_s, 'Found 2/3 fact(s)', buf.to_s)
+    assert_includes(buf.to_s, 'There were no facts', buf.to_s)
   end
 end

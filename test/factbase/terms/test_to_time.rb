@@ -87,4 +87,11 @@ class TestToTime < Factbase::Test
       "time made into a float was not read back, seed #{seed}"
     )
   end
+
+  def test_refuses_an_impossible_date
+    %w[2026-02-30T00:00:00Z 2026-04-31T00:00:00Z 2025-02-29T00:00:00Z].each do |s|
+      assert_raises(RuntimeError, s) { Factbase::ToTime.new([s]).evaluate(fact, [], Factbase.new) }
+    end
+    assert_equal(29, Factbase::ToTime.new(['2024-02-29T00:00:00Z']).evaluate(fact, [], Factbase.new).day)
+  end
 end

@@ -150,7 +150,7 @@ class TestRules < Factbase::Test
       end
     end
     assert(ok)
-    assert_equal(0, fb.query('(eq hello $v)').each(v: 42).to_a.size)
+    assert_equal(0, fb.query('(eq hello $v)').each(fb, 'v' => [42]).to_a.size)
   end
 
   def test_error_message_includes_expression
@@ -161,6 +161,24 @@ class TestRules < Factbase::Test
       end
     assert_includes(ex.message, '(exists foo)', 'Error message should include the rule expression')
     refute_includes(ex.message, 'nil', 'Error message should not contain "nil"')
+  end
+
+  def test_keeps_uid_tracking_after_a_nested_transaction_is_refused
+    base = Factbase.new
+    rules = Factbase::Rules.new(base, '(exists foo)', uid: 'id')
+    assert_raises(ArgumentError) do
+      rules.txn do |tx|
+        valid = tx.insert
+        valid.id = 1
+        valid.foo = 1
+        assert_raises(StandardError) { tx.txn { flunk('nested transaction entered') } }
+        invalid = tx.insert
+        invalid.id = 2
+        invalid.bar = 1
+      end
+    end
+    assert_equal(0, base.size)
+    assert_raises(ArgumentError) { rules.insert.bar = 1 }
   end
 
   def test_does_not_write_a_value_rejected_by_a_rule
@@ -210,5 +228,17 @@ class TestRules < Factbase::Test
     good.insert.foo = 1
     fb.import(good.export)
     assert_equal(1, fb.size)
+  end
+
+  def test_checks_a_txn_against_the_pending_factbase
+    fb = Factbase.new
+    fb.insert.v = 1
+    fb.query('(defn rules_within_limit "fb.size <= 1")').each.to_a
+    assert_raises(ArgumentError) do
+      Factbase::Rules.new(fb, '(rules_within_limit)').txn { |fbt| fbt.insert.v = 2 }
+    end
+    assert_equal(1, fb.size)
+  ensure
+    Factbase.new.query('(undef rules_within_limit)').each.to_a
   end
 end
