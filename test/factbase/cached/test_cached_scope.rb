@@ -19,4 +19,12 @@ class TestCachedScope < Factbase::Test
     assert_equal(1, fb.query('(exists foo)', fb.each.to_a[0..0]).each.to_a.size)
     assert_equal(2, fb.query('(exists foo)').each.to_a.size)
   end
+
+  def test_does_not_give_the_full_answer_to_a_subset_query
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 1
+    fb.insert.foo = 2
+    assert_equal(2, fb.query('(exists foo)').each.to_a.size)
+    assert_equal(1, fb.query('(exists foo)', fb.each.to_a[0..0]).each.to_a.size)
+  end
 end
