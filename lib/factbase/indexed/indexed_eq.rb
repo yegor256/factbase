@@ -71,7 +71,9 @@ class Factbase::IndexedEq
 
   def _resolve(operand, params)
     return [operand] unless operand.is_a?(Symbol)
-    params[operand.to_s] || []
+    v = params[operand.to_s]
+    return [] if v.nil?
+    v.respond_to?(:each) ? v : [v]
   end
 
   def normalize(value)
