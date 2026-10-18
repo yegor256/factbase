@@ -37,6 +37,15 @@ class TestLogged < Factbase::Test
     assert_equal([42], fb.query('(agg (exists bar) (first bar))').one)
   end
 
+  def test_shortens_the_value_found_by_one
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.body = 'x' * 10_000
+    assert_equal(10_000, fb.query('(agg (always) (first body))').one.first.length)
+    found = buf.to_s.lines.find { |l| l.include?('Found') }
+    assert_operator(found.length, :<, 200, found)
+  end
+
   def test_avoid_inner_logging
     buf = Loog::Buffer.new
     fb = Factbase.new
