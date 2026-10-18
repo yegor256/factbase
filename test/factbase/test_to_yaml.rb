@@ -51,4 +51,17 @@ class TestToYAML < Factbase::Test
     fb.insert.note = 'hello'
     assert_equal('hello', YAML.load(Factbase::ToYAML.new(fb).yaml)[0]['note'])
   end
+
+  def test_prints_facts_modified_inside_txn
+    seed = Random.new_seed
+    fb = Factbase.new
+    fb.insert._id = 1
+    value = Random.new(seed).rand(1..1000)
+    text = nil
+    fb.txn do |fbt|
+      fbt.query('(eq _id 1)').each { |f| f.bar = value }
+      text = Factbase::ToYAML.new(fbt).yaml
+    end
+    assert_includes(text, "bar: #{value}", "printed facts miss the bar of #{value} written inside txn, seed #{seed}")
+  end
 end
