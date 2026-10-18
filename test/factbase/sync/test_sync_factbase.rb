@@ -93,4 +93,8 @@ class TestSyncFactbase < Factbase::Test
     end
     assert_equal(1, fb.each { |_m| true })
   end
+
+  def test_refuses_a_nil_factbase
+    assert_raises(ArgumentError) { Factbase::SyncFactbase.new(nil) }
+  end
 end
