@@ -124,7 +124,16 @@ class Factbase::Tallied
     end
 
     def delete!(fb = @fb)
-      c = @query.delete!(fb)
+      before = @fb.size
+      inserted = @churn.inserted
+      deleted = @churn.deleted
+      begin
+        c = @query.delete!(fb)
+      rescue StandardError
+        removed = before + @churn.inserted - inserted - @fb.size - (@churn.deleted - deleted)
+        @churn.append(0, removed, 0) if removed.positive?
+        raise
+      end
       @churn.append(0, c, 0)
       c
     end
