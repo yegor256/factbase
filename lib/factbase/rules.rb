@@ -112,6 +112,7 @@ class Factbase::Rules
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   class Query
+    include Enumerable
     decoor(:query)
 
     def initialize(query, check, fb)
