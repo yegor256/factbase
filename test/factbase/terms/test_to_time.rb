@@ -94,4 +94,13 @@ class TestToTime < Factbase::Test
     end
     assert_equal(29, Factbase::ToTime.new(['2024-02-29T00:00:00Z']).evaluate(fact, [], Factbase.new).day)
   end
+
+  def test_rejects_a_property_with_many_values
+    t = Factbase::ToTime.new([:foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => [1, 2]), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at first position, one expected', e.message)
+  end
 end

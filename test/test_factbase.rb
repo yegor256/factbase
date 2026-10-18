@@ -595,4 +595,19 @@ class TestFactbase < Factbase::Test
     assert_equal(2, q.each.to_a.size, 'a query built before import must see the imported facts, as it sees an insert')
     assert_equal(2, fb.size)
   end
+
+  def test_conversions_and_sprintf_refuse_multi_value_properties
+    fb = Factbase.new
+    f = fb.insert
+    f.multi = 1
+    f.multi = 2
+    f.s = 'a'
+    f.s = 'b'
+    [
+      '(to_string multi)', '(to_integer multi)', '(to_float multi)',
+      '(to_time multi)', '(sprintf "%s" multi)', '(sprintf s 1)'
+    ].each do |q|
+      assert_includes(assert_raises(StandardError) { fb.query(q).each.to_a }.message, 'Too many values')
+    end
+  end
 end
