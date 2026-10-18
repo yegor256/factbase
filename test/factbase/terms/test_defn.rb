@@ -82,6 +82,18 @@ class TestDefn < Factbase::Test
     end
   end
 
+  def test_defn_with_simplify_suffix_does_not_break_other_term
+    n = @defn_name
+    s = :"#{n}_simplify"
+    Factbase::Defn.new([n, 'true']).evaluate(fact, [], Factbase.new)
+    Factbase::Defn.new([s, 'true']).evaluate(fact, [], Factbase.new)
+    fb = Factbase.new
+    fb.insert.x = 1
+    assert_equal(1, fb.query("(#{n})").each.to_a.size)
+  ensure
+    Factbase::Undef.new([s]).evaluate(fact, [], Factbase.new)
+  end
+
   def test_defn_non_symbol_argument
     assert_raises(ArgumentError) do
       Factbase::Defn.new(%w[string_name true]).evaluate(fact, [], Factbase.new)
