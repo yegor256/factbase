@@ -7,6 +7,7 @@ require_relative '../test__helper'
 require 'threads'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/tallied'
+require_relative '../../lib/factbase/term'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -101,5 +102,51 @@ class TestTallied < Factbase::Test
     fb.import(src.export)
     assert_equal(3, fb.size)
     assert_equal(3, fb.churn.inserted, 'Imported facts must be counted as inserted')
+  end
+
+  def test_counts_churn_in_one_with_default_context
+    n = :_churn_in_one_default
+    Factbase::Term.new(:defn, [n, 'fb.insert.value = 2; fb.size']).evaluate(nil, [], Factbase.new)
+    begin
+      fb = Factbase::Tallied.new(Factbase.new)
+      assert_equal(1, fb.query("(#{n})").one)
+      assert_equal(1, fb.churn.inserted)
+      assert_equal(0, fb.churn.deleted)
+      assert_equal(1, fb.churn.added)
+      assert_equal(1, fb.size)
+    ensure
+      Factbase::Term.new(:undef, [n]).evaluate(nil, [], Factbase.new)
+    end
+  end
+
+  def test_counts_churn_in_one_with_explicit_context
+    n = :_churn_in_one_explicit
+    Factbase::Term.new(:defn, [n, 'fb.insert.value = 2; fb.size']).evaluate(nil, [], Factbase.new)
+    begin
+      fb = Factbase::Tallied.new(Factbase.new)
+      assert_equal(1, fb.query("(#{n})").one(fb))
+      assert_equal(1, fb.churn.inserted)
+      assert_equal(0, fb.churn.deleted)
+      assert_equal(1, fb.churn.added)
+      assert_equal(1, fb.size)
+    ensure
+      Factbase::Term.new(:undef, [n]).evaluate(nil, [], Factbase.new)
+    end
+  end
+
+  def test_query_default_context_matches_explicit_context_churn
+    n = :_churn_context_match
+    Factbase::Term.new(:defn, [n, 'fb.insert.value = 2; fb.size']).evaluate(nil, [], Factbase.new)
+    begin
+      fb1 = Factbase::Tallied.new(Factbase.new)
+      fb2 = Factbase::Tallied.new(Factbase.new)
+      assert_equal(fb2.query("(#{n})").one(fb2), fb1.query("(#{n})").one)
+      assert_equal(fb2.churn.inserted, fb1.churn.inserted)
+      assert_equal(fb2.churn.deleted, fb1.churn.deleted)
+      assert_equal(fb2.churn.added, fb1.churn.added)
+      assert_equal(fb2.size, fb1.size)
+    ensure
+      Factbase::Term.new(:undef, [n]).evaluate(nil, [], Factbase.new)
+    end
   end
 end
