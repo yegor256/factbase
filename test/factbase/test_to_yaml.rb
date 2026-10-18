@@ -44,7 +44,7 @@ class TestToYAML < Factbase::Test
     fb = Factbase.new
     time = Time.now
     fb.insert.ts = time
-    assert_equal(time.utc.iso8601(6), YAML.load(Factbase::ToYAML.new(fb).yaml)[0]['ts'])
+    assert_equal(time.getutc.iso8601(9), YAML.load(Factbase::ToYAML.new(fb).yaml)[0]['ts'])
   end
 
   def test_reads_its_own_output_back

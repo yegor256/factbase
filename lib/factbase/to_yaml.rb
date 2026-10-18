@@ -44,6 +44,6 @@ class Factbase::ToYAML
   # @param [Object] val The value
   # @return [Object] The value, with a Time turned into ISO 8601
   def plain(val)
-    val.is_a?(Time) ? val.utc.iso8601(6) : val
+    val.is_a?(Time) ? val.getutc.iso8601(9) : val
   end
 end
