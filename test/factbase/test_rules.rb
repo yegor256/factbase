@@ -163,6 +163,24 @@ class TestRules < Factbase::Test
     refute_includes(ex.message, 'nil', 'Error message should not contain "nil"')
   end
 
+  def test_keeps_uid_tracking_after_a_nested_transaction_is_refused
+    base = Factbase.new
+    rules = Factbase::Rules.new(base, '(exists foo)', uid: 'id')
+    assert_raises(ArgumentError) do
+      rules.txn do |tx|
+        valid = tx.insert
+        valid.id = 1
+        valid.foo = 1
+        assert_raises(StandardError) { tx.txn { flunk('nested transaction entered') } }
+        invalid = tx.insert
+        invalid.id = 2
+        invalid.bar = 1
+      end
+    end
+    assert_equal(0, base.size)
+    assert_raises(ArgumentError) { rules.insert.bar = 1 }
+  end
+
   def test_does_not_write_a_value_rejected_by_a_rule
     base = Factbase.new
     fact = Factbase::Rules.new(base, '(exists foo)').insert
