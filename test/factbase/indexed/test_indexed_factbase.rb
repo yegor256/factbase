@@ -497,6 +497,7 @@ class TestIndexedFactbase < Factbase::Test
     assert_equal(1, fb.query('(exists foo)').each.to_a.size)
   end
 
+<<<<<<< HEAD
   def test_finds_a_fact_inserted_in_txn_and_changed_after_commit
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     f = nil
@@ -507,5 +508,31 @@ class TestIndexedFactbase < Factbase::Test
     fb.query('(eq x 1)').each.to_a
     f.x = 2
     assert_equal(1, fb.query('(eq x 2)').each.to_a.size)
+  end
+
+  def test_query_in_txn_sees_write_through_fact_before_txn
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    f = fb.insert
+    f.foo = 42
+    fb.txn do |t|
+      assert_equal(1, t.query('(eq foo 42)').each.to_a.size)
+      assert_equal(0, t.query('(exists bar)').each.to_a.size)
+      f.bar = 100
+      assert_equal(1, t.query('(exists bar)').each.to_a.size)
+      assert_equal(100, t.query('(exists bar)').each.to_a.first.bar)
+    end
+    assert_equal(1, fb.query('(exists bar)').each.to_a.size)
+  end
+
+  def test_query_in_txn_sees_write_through_query_fact_before_txn
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    f = fb.query('(eq foo 42)').each.to_a.first
+    fb.txn do |t|
+      assert_equal(0, t.query('(exists bar)').each.to_a.size)
+      f.bar = 99
+      assert_equal(1, t.query('(exists bar)').each.to_a.size)
+    end
+    assert_equal(1, fb.query('(exists bar)').each.to_a.size)
   end
 end

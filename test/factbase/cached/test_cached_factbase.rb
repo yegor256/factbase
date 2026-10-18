@@ -164,6 +164,7 @@ class TestCachedFactbase < Factbase::Test
     end
   end
 
+<<<<<<< HEAD
   def test_running_agg_always_count_one_repeatedly_does_not_grow_cache
     cache = {}
     fb = Factbase::CachedFactbase.new(Factbase.new, cache)
@@ -206,5 +207,31 @@ class TestCachedFactbase < Factbase::Test
     fb.insert.bar = 42
     assert_equal(42, fb.query('(agg (always) (max bar))').one)
     refute(cache.keys.any? { |k| k.is_a?(Array) && k.last == '(max bar)' })
+  end
+
+  def test_query_in_txn_sees_write_through_fact_before_txn
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    f = fb.insert
+    f.foo = 42
+    fb.txn do |t|
+      assert_equal(1, t.query('(eq foo 42)').each.to_a.size)
+      assert_equal(0, t.query('(exists bar)').each.to_a.size)
+      f.bar = 100
+      assert_equal(1, t.query('(exists bar)').each.to_a.size)
+      assert_equal(100, t.query('(exists bar)').each.to_a.first.bar)
+    end
+    assert_equal(1, fb.query('(exists bar)').each.to_a.size)
+  end
+
+  def test_query_in_txn_sees_write_through_query_fact_before_txn
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    f = fb.query('(eq foo 42)').each.to_a.first
+    fb.txn do |t|
+      assert_equal(0, t.query('(exists bar)').each.to_a.size)
+      f.bar = 99
+      assert_equal(1, t.query('(exists bar)').each.to_a.size)
+    end
+    assert_equal(1, fb.query('(exists bar)').each.to_a.size)
   end
 end
