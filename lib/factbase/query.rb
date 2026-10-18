@@ -46,18 +46,19 @@ class Factbase::Query
   def each(fb = @fb, params = {})
     fb = factbase(fb)
     return to_enum(__method__, fb, params) unless block_given?
-    @term.forget
+    term = @term.isolated
+    term.forget
     yielded = 0
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    maybe = @term.predict(@maps, fb, Factbase::Tee.new({}, params))
+    maybe = term.predict(@maps, fb, Factbase::Tee.new({}, params))
     maybe ||= @maps unless maybe.equal?(@maps)
     maybe.each do |m|
       extras = {}
       f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
-      r = @term.evaluate(Factbase::Accum.new(f, extras, false), @maps, fb)
+      r = term.evaluate(Factbase::Accum.new(f, extras, false), @maps, fb)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
-        raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term}")
+        raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{term}")
       end
       next unless r
       yield(Factbase::Accum.new(f, extras, true))
@@ -72,11 +73,12 @@ class Factbase::Query
   # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
   def one(fb = @fb, params = {})
     fb = factbase(fb)
-    @term.forget
+    term = @term.isolated
+    term.forget
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
-    r = @term.evaluate(Factbase::Tee.new(Factbase::Fact.new({}), params), @maps, fb)
+    r = term.evaluate(Factbase::Tee.new(Factbase::Fact.new({}), params), @maps, fb)
     unless %w[String Integer Float TrueClass FalseClass Time Array NilClass].include?(r.class.to_s)
-      raise(StandardError, "Incorrect type #{r.class} returned by #{@term}")
+      raise(StandardError, "Incorrect type #{r.class} returned by #{term}")
     end
     r
   end
@@ -92,9 +94,10 @@ class Factbase::Query
   # @param [Factbase] fb The factbase to delete from
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
-    @term.forget
+    term = @term.isolated
+    term.forget
     deleted = 0
-    maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
+    maybe = (term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
     before = @maps.to_a.dup
     @maps.delete_if do |m|
       original = @maps.source_of(m) if @maps.respond_to?(:source_of)
@@ -103,7 +106,7 @@ class Factbase::Query
           source = candidate.instance_variable_get(:@factbase_source_map)
           source.nil? ? candidate.eql?(m) : source.equal?(m) || source.equal?(original)
         end
-      d = !pos.nil? && @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), before, fb)
+      d = !pos.nil? && term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), before, fb)
       maybe.delete_at(pos) if d
       deleted += 1 if d
       d
