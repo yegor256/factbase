@@ -129,4 +129,22 @@ class TestSprintf < Factbase::Test
     assert_includes(e.message, "Cannot format [100000000000000000000, 42] with '%*d' in (sprintf ...):")
     assert_includes(e.message, 'too big to convert')
   end
+
+  def test_rejects_an_argument_with_many_values
+    t = Factbase::Sprintf.new(['%s', :foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => [1, 2]), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at position 1, one expected', e.message)
+  end
+
+  def test_rejects_a_format_with_many_values
+    t = Factbase::Sprintf.new([:foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => ['%s', '%d']), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at position 0, one expected', e.message)
+  end
 end
