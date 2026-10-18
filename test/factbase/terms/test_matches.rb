@@ -120,4 +120,9 @@ class TestMatches < Factbase::Test
       )
     end
   end
+
+  def test_anchors_the_whole_value_after_a_control_escape
+    refute(Factbase::Matches.new([:foo, '\\cA$']).evaluate(fact('foo' => "\x01\nX"), [], Factbase.new))
+    assert(Factbase::Matches.new([:foo, '\\cA$']).evaluate(fact('foo' => "\x01"), [], Factbase.new))
+  end
 end
