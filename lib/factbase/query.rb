@@ -90,6 +90,7 @@ class Factbase::Query
   # same question twice (#694).
   #
   # @param [Factbase] fb The factbase to delete from
+  # @yield Called once for each removed fact.
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
     @term.forget
@@ -105,7 +106,10 @@ class Factbase::Query
         end
       d = !pos.nil? && @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), before, fb)
       maybe.delete_at(pos) if d
-      deleted += 1 if d
+      if d
+        deleted += 1
+        yield if block_given?
+      end
       d
     end
     deleted
