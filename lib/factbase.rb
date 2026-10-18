@@ -261,6 +261,7 @@ class Factbase
   #
   # The facts that existed in the factbase before importing will remain there.
   # The facts from the incoming byte stream will be added to them.
+  # All incoming properties are validated before any facts are added.
   #
   # This method supports both the original format (Array of maps) and
   # the IndexedFactbase format (Hash with :maps and :idx keys).
@@ -282,11 +283,19 @@ class Factbase
     begin
       data = Marshal.load(bytes)
       data = Marshal.load(data[:maps]) if data.is_a?(Hash) && data.key?(:maps)
+      raise(ArgumentError, 'expected an array of maps') unless data.is_a?(Array) && data.all?(Hash)
+      require_relative('factbase/fact')
+      data.each do |map|
+        fact = Factbase::Fact.new({})
+        map.each do |key, values|
+          unless key.is_a?(String) && values.is_a?(Array) && !values.empty?
+            raise(ArgumentError, 'expected string properties with non-empty arrays of values')
+          end
+          values.each { |value| fact.__send__("#{key}=", value) }
+        end
+      end
     rescue TypeError, ArgumentError => e
       raise(StandardError, "The input is not a valid factbase: #{e.message}")
-    end
-    unless data.is_a?(Array) && data.all?(Hash)
-      raise(StandardError, 'The input is not a valid factbase: expected an array of maps')
     end
     @maps.concat(data)
   end
