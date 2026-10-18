@@ -307,4 +307,41 @@ class TestSyntax < Factbase::Test
     assert_equal('tail\\', Factbase::Syntax.new('(eq x "tail\\\\")').to_term.operands[1])
     assert_equal("x'y", Factbase::Syntax.new("(eq x 'x\\'y')").to_term.operands[1])
   end
+
+  def test_refuses_ordering_nested_in_logic
+    fb = Factbase.new
+    fb.insert.num = 1
+    outers = %w[or]
+    ['(head 1 (always))', '(sorted num (always))', '(inverted (always))'].each do |inner|
+      outers.each do |outer|
+        assert_includes(
+          assert_raises(Factbase::Syntax::Broken) { fb.query("(#{outer} #{inner} (always))") }.message,
+          'nested'
+        )
+      end
+      assert_raises(Factbase::Syntax::Broken) { fb.query("(not #{inner})") }
+      assert_equal(1, fb.query("(and #{inner})").each.to_a.size)
+    end
+  end
+
+  def test_refuses_ordering_nested_in_not_with_specific_message
+    ['(head 2 (always))', '(sorted num (always))', '(inverted (always))'].each do |inner|
+      msg = assert_raises(Factbase::Syntax::Broken) do
+        Factbase.new.query("(not #{inner})")
+      end.message
+      assert_includes(msg, "nested inside 'not'")
+      assert_includes(msg, 'silently ignored')
+    end
+  end
+
+  def test_refuses_ordering_nested_as_second_operand_in_or
+    ['(head 1 (always))', '(sorted num (always))', '(inverted (always))'].each do |inner|
+      assert_includes(
+        assert_raises(Factbase::Syntax::Broken) do
+          Factbase.new.query("(or (always) #{inner})")
+        end.message,
+        "nested inside 'or'"
+      )
+    end
+  end
 end
