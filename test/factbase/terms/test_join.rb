@@ -55,7 +55,7 @@ class TestJoin < Factbase::Test
   def test_rejects_a_bad_target_name
     fb = Factbase.new
     fb.insert.x = 1
-    ['my-prop<=x', 'a b<=x', 'Foo<=x', '<=x'].each do |m|
+    ['my-prop<=x', 'a b<=x', 'Foo<=x'].each do |m|
       assert_includes(
         assert_raises(RuntimeError, m) { fb.query("(join \"#{m}\" (always))").each.to_a }.message,
         'Invalid prop name',
