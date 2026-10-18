@@ -487,4 +487,16 @@ class TestIndexedFactbase < Factbase::Test
     second.query('(eq foo 1)').each { |f| f.foo = 2 }
     assert_equal(1, second.query(term).each(second, value: [2]).to_a.size)
   end
+
+  def test_leaves_a_term_built_by_another_working_there
+    first = Factbase::IndexedFactbase.new(Factbase.new)
+    first.insert.foo = 1
+    term = first.to_term('(eq foo $value)')
+    first.query(term).each(first, value: [1]).to_a
+    second = Factbase::IndexedFactbase.new(Factbase.new)
+    second.insert.foo = 5
+    second.query(term).each(second, value: [5]).to_a
+    first.query('(eq foo 1)').each { |f| f.foo = 3 }
+    assert_equal(1, first.query(term).each(first, value: [3]).to_a.size)
+  end
 end
