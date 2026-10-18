@@ -152,4 +152,16 @@ class TestCachedFactbase < Factbase::Test
     f.x = 2
     assert_equal(1, fb.query('(eq x 2)').each.to_a.size)
   end
+
+  def test_sees_a_fact_inserted_in_txn_after_an_outer_query
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    assert_equal(1, fb.query('(exists x)').each.to_a.size)
+    fb.txn do |fbt|
+      fbt.insert.x = 2
+      assert_equal(2, fbt.query('(exists x)').each.to_a.size, 'The txn must see its own insert')
+      throw(:rollback)
+    end
+    assert_equal(1, fb.query('(exists x)').each.to_a.size, 'The rolled back insert must not stay in the cache')
+  end
 end
