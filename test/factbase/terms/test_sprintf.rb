@@ -65,4 +65,68 @@ class TestSprintf < Factbase::Test
     assert_includes(e.message, "Cannot format [\"hello\"] with '%s %s' in (sprintf ...):")
     assert_includes(e.message, 'too few arguments')
   end
+
+  def test_rejects_number_too_big_for_char
+    t = Factbase::Sprintf.new(['%c', 10**20])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact, [], Factbase.new)
+      end
+    assert_includes(e.message, "Cannot format [100000000000000000000] with '%c' in (sprintf ...):")
+    assert_includes(e.message, 'too big to convert')
+  end
+
+  def test_rejects_byte_char_out_of_range
+    t = Factbase::Sprintf.new(['%c'.b, 100_000])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact, [], Factbase.new)
+      end
+    assert_includes(e.message, "Cannot format [100000] with '%c' in (sprintf ...):")
+    assert_includes(e.message, 'out of char range')
+  end
+
+  def test_rejects_width_too_big
+    t = Factbase::Sprintf.new(['%*d', 10**20, 1])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact, [], Factbase.new)
+      end
+    assert_includes(e.message, "Cannot format [100000000000000000000, 1] with '%*d' in (sprintf ...):")
+    assert_includes(e.message, 'too big to convert')
+  end
+
+  def test_rejects_precision_too_big
+    t = Factbase::Sprintf.new(['%.*f', 10**20, 1.0])
+    e =
+      assert_raises(RuntimeError) do
+        t.evaluate(fact, [], Factbase.new)
+      end
+    assert_includes(e.message, "Cannot format [100000000000000000000, 1.0] with '%.*f' in (sprintf ...):")
+    assert_includes(e.message, 'too big to convert')
+  end
+
+  def test_rejects_number_too_big_for_char_in_query
+    fb = Factbase.new
+    fb.insert.code = 10**20
+    e =
+      assert_raises(StandardError) do
+        fb.query('(eq (sprintf "%c" code) "a")').each.to_a
+      end
+    assert_includes(e.message, "Cannot format [100000000000000000000] with '%c' in (sprintf ...):")
+    assert_includes(e.message, 'too big to convert')
+  end
+
+  def test_rejects_width_too_big_in_query
+    fb = Factbase.new
+    f = fb.insert
+    f.width = 10**20
+    f.val = 42
+    e =
+      assert_raises(StandardError) do
+        fb.query('(eq (sprintf "%*d" width val) "42")').each.to_a
+      end
+    assert_includes(e.message, "Cannot format [100000000000000000000, 42] with '%*d' in (sprintf ...):")
+    assert_includes(e.message, 'too big to convert')
+  end
 end

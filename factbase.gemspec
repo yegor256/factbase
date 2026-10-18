@@ -8,7 +8,7 @@ require_relative 'lib/factbase/version'
 
 Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to?(:required_rubygems_version=)
-  s.required_ruby_version = '>=3.0'
+  s.required_ruby_version = '>=3.2'
   s.name = 'factbase'
   s.version = Factbase::VERSION
   s.license = 'MIT'

@@ -25,10 +25,17 @@ class Factbase::Simplified
     @operands.each do |o|
       o = o.simplify if o.is_a?(Factbase::Term)
       s = o.to_s
-      next if strs.include?(s) && !(o.is_a?(Factbase::Term) && WRITERS.include?(o.op))
+      next if strs.include?(s) && !writer?(o)
       strs << s
       ops << o
     end
     ops
+  end
+
+  private
+
+  def writer?(term)
+    term.is_a?(Factbase::Term) &&
+      (WRITERS.include?(term.op) || term.operands.any? { |operand| writer?(operand) })
   end
 end

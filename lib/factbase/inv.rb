@@ -28,6 +28,7 @@ class Factbase::Inv
   include Factbase::Enumerated
 
   def initialize(fb, &block)
+    raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @fb = fb
     @block = block
   end

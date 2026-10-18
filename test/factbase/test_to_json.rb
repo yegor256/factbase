@@ -87,4 +87,17 @@ class TestToJSON < Factbase::Test
     assert_equal(2, json[1]['prio'])
     assert_equal(3, json[2]['prio'])
   end
+
+  def test_prints_facts_modified_inside_txn
+    seed = Random.new_seed
+    fb = Factbase.new
+    fb.insert._id = 1
+    value = Random.new(seed).rand(1..1000)
+    text = nil
+    fb.txn do |fbt|
+      fbt.query('(eq _id 1)').each { |f| f.bar = value }
+      text = Factbase::ToJSON.new(fbt).json
+    end
+    assert_includes(text, "\"bar\":#{value}", "printed facts miss the bar of #{value} written inside txn, seed #{seed}")
+  end
 end

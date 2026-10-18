@@ -43,4 +43,12 @@ class TestJoin < Factbase::Test
       'left<=right<=unexpected'
     )
   end
+
+  def test_rejects_mapping_with_an_empty_side
+    fb = Factbase.new
+    fb.insert.id = 1
+    %w[x<= <=x x<=y<=].each do |j|
+      assert_raises(RuntimeError, j) { fb.query("(join '#{j}' (eq id 1))").each.to_a }
+    end
+  end
 end

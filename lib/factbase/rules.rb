@@ -71,10 +71,12 @@ class Factbase::Rules
       unless churn.zero?
         fbt.query('(always)').each do |f|
           next unless later.include?(f)
-          @check.it(f, @fb)
+          @check.it(f, fbt)
         end
       end
     end
+  ensure
+    @check = before
   end
 
   # Fact decorator.
