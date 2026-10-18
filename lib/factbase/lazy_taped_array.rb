@@ -8,6 +8,8 @@ require_relative '../factbase'
 class Factbase::LazyTaped
   # Decorator of Array that triggers copy-on-write.
   class LazyTapedArray
+    include Enumerable
+
     # Creates a new lazy array wrapper.
     # @param origin [Array] The original array to wrap
     # @param key [String] The key in the parent hash where this array is stored
@@ -28,6 +30,10 @@ class Factbase::LazyTaped
 
     def [](idx)
       value(current_array[idx])
+    end
+
+    def size
+      current_array.size
     end
 
     def to_a
