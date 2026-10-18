@@ -65,26 +65,9 @@ class Factbase::CachedFactbase
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
     @origin.txn do |fbt|
-      yield(Factbase::CachedFactbase.new(fbt, Linked.new(@cache)))
+      yield(Factbase::CachedFactbase.new(fbt, @cache))
     end
   ensure
     @cache.clear
-  end
-
-  # A cache of a transaction, which clears the outer cache too, so that
-  # a fact inserted in the transaction and written to after the commit
-  # does not leave the outer cache stale.
-  #
-  # This is an internal class, it is not supposed to be instantiated directly.
-  class Linked < Hash
-    def initialize(outer)
-      super()
-      @outer = outer
-    end
-
-    def clear
-      @outer.clear
-      super
-    end
   end
 end
