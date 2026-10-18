@@ -23,7 +23,7 @@ class Factbase::Sprintf < Factbase::TermBase
   # @return [String] The formatted string
   def evaluate(fact, maps, fb)
     raise(ArgumentError, "Too few operands for 'sprintf' (at least 1 expected)") if @operands.empty?
-    fmt = _values(0, fact, maps, fb)&.first
+    fmt = only(0, fact, maps, fb)
     if fmt.nil?
       raise(ArgumentError, "The format of 'sprintf' is #{@operands[0].inspect}, which the fact doesn't have")
     end
@@ -32,8 +32,23 @@ class Factbase::Sprintf < Factbase::TermBase
 
   private
 
+  # Read one value at the given position, refusing a property that has more.
+  # @param [Integer] pos The position of the operand
+  # @param [Factbase::Fact] fact The fact
+  # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Factbase] fb Factbase to use for sub-queries
+  # @return [Object] The only value at this position
+  def only(pos, fact, maps, fb)
+    vv = _values(pos, fact, maps, fb)
+    return if vv.nil?
+    if vv.size > 1 && !@operands[pos].is_a?(Array)
+      raise(ArgumentError, "Too many values at position #{pos}, one expected")
+    end
+    vv[0]
+  end
+
   def argument(pos, fmt, fact, maps, fb)
-    value = _values(pos, fact, maps, fb)&.first
+    value = only(pos, fact, maps, fb)
     if value.nil?
       raise(ArgumentError, "The operand #{@operands[pos].inspect} of 'sprintf' with '#{fmt}' is absent in the fact")
     end

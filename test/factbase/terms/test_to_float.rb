@@ -75,4 +75,13 @@ class TestToFloat < Factbase::Test
   def test_converts_multiple_values_array_picks_first_float
     assert_in_delta(7.5, Factbase::ToFloat.new([[7.5, 9.9]]).evaluate(fact, [], Factbase.new))
   end
+
+  def test_rejects_a_property_with_many_values
+    t = Factbase::ToFloat.new([:foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => [1, 2]), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at first position, one expected', e.message)
+  end
 end

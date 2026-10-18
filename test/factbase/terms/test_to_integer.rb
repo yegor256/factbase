@@ -75,4 +75,13 @@ class TestToInteger < Factbase::Test
   def test_converts_positive_integer_directly
     assert_equal(100, Factbase::ToInteger.new([[100]]).evaluate(fact, [], Factbase.new))
   end
+
+  def test_rejects_a_property_with_many_values
+    t = Factbase::ToInteger.new([:foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => [1, 2]), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at first position, one expected', e.message)
+  end
 end

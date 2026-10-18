@@ -144,4 +144,13 @@ class TestToTime < Factbase::Test
     fb.insert.t1 = '2026-06-01T00:00:00Z'
     assert_equal(2, fb.query('(gt (to_time t1) (to_time "2025-01-01T00:00:00Z"))').each.to_a.size)
   end
+
+  def test_rejects_a_property_with_many_values
+    t = Factbase::ToTime.new([:foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => [1, 2]), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at first position, one expected', e.message)
+  end
 end
