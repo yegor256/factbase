@@ -123,4 +123,19 @@ class TestDefn < Factbase::Test
     n = @defn_name
     assert_equal(3, fb.query("(and (undef #{n}) (defn #{n} \"true\") (#{n}))").each.to_a.size)
   end
+
+  def test_refuses_to_redefine_an_inherited_private_helper
+    fb = Factbase.new
+    fb.insert.foo = 42
+    e = assert_raises(StandardError) { fb.query('(defn _values "999")').each.to_a }
+    assert_includes(e.message, "Term '_values' is already defined", e.message)
+    assert_equal(1, fb.query('(eq foo (at 0 foo))').each.to_a.size)
+  end
+
+  def test_refuses_a_name_that_kernel_keeps_private
+    fb = Factbase.new
+    fb.insert.foo = 42
+    e = assert_raises(StandardError) { fb.query('(defn warn "999")').each.to_a }
+    assert_includes(e.message, "Term 'warn' is already defined", e.message)
+  end
 end
