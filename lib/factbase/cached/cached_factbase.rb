@@ -65,7 +65,7 @@ class Factbase::CachedFactbase
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
     @origin.txn do |fbt|
-      yield(Factbase::CachedFactbase.new(fbt, {}))
+      yield(Factbase::CachedFactbase.new(fbt, @cache))
     end
   ensure
     @cache.clear
