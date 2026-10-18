@@ -112,4 +112,8 @@ class TestSyncFactbase < Factbase::Test
     writer.join
     assert_equal(42, fb.query('(exists foo)').each.to_a.first['foo'].first)
   end
+
+  def test_refuses_a_nil_factbase
+    assert_raises(ArgumentError) { Factbase::SyncFactbase.new(nil) }
+  end
 end

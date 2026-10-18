@@ -33,7 +33,7 @@ class Factbase::Tallied
   end
 
   def query(query, maps = nil)
-    Query.new(@fb.query(query, maps), @churn, @fb)
+    Query.new(@fb.query(query, maps), @churn, self)
   end
 
   def import(bytes)

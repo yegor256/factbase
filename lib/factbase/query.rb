@@ -25,6 +25,7 @@ class Factbase::Query
   # Constructor.
   # @param [Array<Fact>] maps Array of facts to start with
   # @param [String|Factbase::Term] term The query term
+  # @param [Factbase] fb The factbase
   def initialize(maps, term, fb)
     @maps = maps
     @term = term.is_a?(String) ? Factbase::Syntax.new(term).to_term : term
@@ -43,6 +44,7 @@ class Factbase::Query
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded (if block given), otherwise enumerator
   def each(fb = @fb, params = {})
+    fb = factbase(fb)
     return to_enum(__method__, fb, params) unless block_given?
     @term.forget
     yielded = 0
@@ -69,6 +71,7 @@ class Factbase::Query
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return [String|Integer|Float|Time|Array|NilClass] The value evaluated
   def one(fb = @fb, params = {})
+    fb = factbase(fb)
     @term.forget
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     r = @term.evaluate(Factbase::Tee.new(Factbase::Fact.new({}), params), @maps, fb)
@@ -101,5 +104,15 @@ class Factbase::Query
       d
     end
     deleted
+  end
+
+  private
+
+  # Make sure that the factbase is not a +Hash+ of query parameters.
+  # @param [Factbase] fb The factbase
+  # @return [Factbase] The same factbase
+  def factbase(fb)
+    raise(ArgumentError, 'A factbase is expected, not a Hash, pass the params after it') if fb.is_a?(Hash)
+    fb
   end
 end

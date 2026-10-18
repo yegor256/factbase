@@ -54,4 +54,45 @@ class TestNth < Factbase::Test
       Factbase::Nth.new([99_999_999_999_999_999_999, :letter]).evaluate(nil, [{ 'letter' => 'a' }], Factbase.new)
     )
   end
+
+  def test_modifying_returned_array_does_not_alter_fact_via_append
+    fb = Factbase.new
+    f = fb.insert
+    f.x = 10
+    f.x = 20
+    fb.query('(nth 0 x)').one << 99
+    assert_equal([10, 20], f['x'])
+    assert_equal(10, f.x)
+  end
+
+  def test_modifying_returned_array_does_not_alter_fact_via_index_assignment
+    fb = Factbase.new
+    f = fb.insert
+    f.x = 10
+    f.x = 20
+    fb.query('(nth 0 x)').one[0] = 99
+    assert_equal([10, 20], f['x'])
+    assert_equal(10, f.x)
+  end
+
+  def test_modifying_returned_array_at_nonzero_position_does_not_alter_fact
+    fb = Factbase.new
+    fb.insert.x = 1
+    f = fb.insert
+    f.x = 10
+    f.x = 20
+    v = fb.query('(nth 1 x)').one
+    v << 99
+    v[0] = 99
+    assert_equal([10, 20], f['x'])
+    assert_equal(10, f.x)
+  end
+
+  def test_evaluating_nth_returns_duplicate_of_array
+    map = { 'num' => [1, 2, 3] }
+    v = Factbase::Nth.new([0, :num]).evaluate(fact, [map], Factbase.new)
+    v << 99
+    v[0] = 42
+    assert_equal([1, 2, 3], map['num'])
+  end
 end

@@ -22,6 +22,7 @@ class Factbase::SyncFactbase
   # @param [Factbase] origin Original factbase to decorate
   # @param [Monitor] monitor Monitor to use for synchronization
   def initialize(origin, monitor = Monitor.new)
+    raise(ArgumentError, 'The "origin" is nil') if origin.nil?
     @origin = origin
     @monitor = monitor
   end
