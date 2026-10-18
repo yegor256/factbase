@@ -23,6 +23,7 @@ class Factbase::LazyTaped
     def each
       return to_enum(__method__) unless block_given?
       current_array.each { |item| yield(value(item)) }
+      self
     end
 
     def [](idx)
