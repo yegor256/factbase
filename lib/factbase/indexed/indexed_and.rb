@@ -65,6 +65,7 @@ class Factbase::IndexedAnd
           small, large = n.size < r.size ? [n.to_a, r.to_a] : [r.to_a, n.to_a]
           ids = Set.new(small.map(&:object_id))
           r = large.select { |f| ids.include?(f.object_id) }
+          r = maps.repack(r) if maps.respond_to?(:repack)
         end
         break if r.size < maps.size / 32
         break if r.size < 128

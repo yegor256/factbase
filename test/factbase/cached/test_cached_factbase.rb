@@ -132,4 +132,12 @@ class TestCachedFactbase < Factbase::Test
     fb.insert.rand = 'hello'
     assert_equal('hello', fb.query('(always)').each.to_a.first.rand)
   end
+
+  def test_traces_every_fact
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    3.times { |i| fb.insert.x = i }
+    assert_output("(traced (always)) -> true\n" * 3) do
+      fb.query('(and (exists x) (traced (always)))').each.to_a
+    end
+  end
 end

@@ -314,4 +314,11 @@ class TestLazyTaped < Factbase::Test
     assert_equal(4, churn.deleted, churn.to_s)
     assert_equal(0, fb.size)
   end
+
+  def test_reads_negative_positions_across_the_staged_maps
+    tape = Factbase::LazyTaped.new([{ 'a' => [1] }, { 'a' => [2] }])
+    tape << { 'a' => [3] }
+    assert_equal([[3], [2], [1]], [tape[-1]['a'], tape[-2]['a'], tape[-3]['a']])
+    assert_nil(tape[-4])
+  end
 end

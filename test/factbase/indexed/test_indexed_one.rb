@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_one'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/lazy_taped'
@@ -44,6 +45,15 @@ class TestIndexedOne < Factbase::Test
     term = Factbase::Term.new(:one, [Factbase::Term.new(:eq, [:kind, 'a'])])
     term.redress!(Factbase::IndexedTerm, idx: {})
     assert_nil(term.predict([{ 'kind' => ['a'] }], nil, {}))
+  end
+
+  def test_leaves_a_query_parameter_to_the_plain_evaluation
+    plain = Factbase.new
+    indexed = Factbase::IndexedFactbase.new(Factbase.new)
+    [plain, indexed].each { |fb| fb.insert.foo = 1 }
+    q = '(one $param)'
+    params = { 'param' => ['yes'] }
+    assert_equal(plain.query(q).each(plain, params).to_a.size, indexed.query(q).each(indexed, params).to_a.size)
   end
 
   private

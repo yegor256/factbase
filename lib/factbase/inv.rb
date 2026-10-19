@@ -28,6 +28,7 @@ class Factbase::Inv
   include Factbase::Enumerated
 
   def initialize(fb, &block)
+    raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @fb = fb
     @block = block
   end
@@ -87,6 +88,7 @@ class Factbase::Inv
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Query
+    include Enumerable
     decoor(:query)
 
     def initialize(query, block, fb)

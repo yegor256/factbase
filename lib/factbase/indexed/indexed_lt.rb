@@ -14,7 +14,7 @@ class Factbase::IndexedLt
     op1, op2 = @term.operands
     return unless op1.is_a?(Symbol) && _scalar?(op2)
     prop = op1.to_s
-    target = op2.is_a?(Symbol) ? params[op2.to_s]&.first : op2
+    target = op2.is_a?(Symbol) ? bounded(params[op2.to_s]) : op2
     return maps || [] if target.nil?
     target = _floored(target)
     return unless sortable?(maps, prop)
@@ -38,6 +38,21 @@ class Factbase::IndexedLt
   # @return [Object] The value to compare with
   def _floored(value)
     value.is_a?(Time) ? value.floor : value
+  end
+
+  # Picks the value of a parameter that decides the comparison.
+  #
+  # A fact matches when any of its values passes the comparison with any value
+  # of the parameter, hence only the largest value of the parameter matters.
+  # When the values can't be compared with each other, there is no bound and
+  # all facts are left for the evaluation.
+  #
+  # @param [Array<Object>] values The values of the parameter, if any
+  # @return [Object, nil] The value to compare with
+  def bounded(values)
+    values&.max
+  rescue ArgumentError
+    nil
   end
 
   def _scalar?(item)
