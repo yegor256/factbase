@@ -107,4 +107,14 @@ class TestTerm < Factbase::Test
     Factbase::Term.new(:eq, [:when, t]).to_s
     assert_equal(3 * 60 * 60, t.utc_offset, 'the time of the term was moved to UTC')
   end
+
+  def test_refuses_ordering_terms_nested_in_or_and_not
+    head = Factbase::Term.new(:head, [1, Factbase::Term.new(:always, [])])
+    sorted = Factbase::Term.new(:sorted, [:x, Factbase::Term.new(:always, [])])
+    inverted = Factbase::Term.new(:inverted, [Factbase::Term.new(:always, [])])
+    [head, sorted, inverted].each do |term|
+      assert_raises(ArgumentError) { Factbase::Term.new(:or, [term, Factbase::Term.new(:always, [])]) }
+      assert_raises(ArgumentError) { Factbase::Term.new(:not, [term]) }
+    end
+  end
 end
