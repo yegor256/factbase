@@ -149,4 +149,29 @@ class TestTallied < Factbase::Test
       Factbase::Term.new(:undef, [n]).evaluate(nil, [], Factbase.new)
     end
   end
+
+  def test_dont_count_insertion_that_raises
+    churn = Factbase::Churn.new
+    fb = Factbase::Tallied.new(Factbase.new([].freeze), churn)
+    begin
+      fb.insert
+    rescue FrozenError
+      nil
+    end
+    assert_predicate(churn, :zero?, "churn counts an insertion that never happened: #{churn}")
+  end
+
+  def test_keeps_previous_churn_when_insertion_raises
+    seed = Random.new_seed
+    random = Random.new(seed)
+    churn = Factbase::Churn.new(random.rand(1..1000), random.rand(1..1000), random.rand(1..1000))
+    before = churn.to_s
+    fb = Factbase::Tallied.new(Factbase.new([{ 'x' => [1] }].freeze), churn)
+    begin
+      fb.insert
+    rescue FrozenError
+      nil
+    end
+    assert_equal(before, churn.to_s, "failed insertion changed the churn of #{before}, seed #{seed}")
+  end
 end
