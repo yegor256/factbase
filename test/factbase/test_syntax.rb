@@ -307,4 +307,26 @@ class TestSyntax < Factbase::Test
     assert_equal('tail\\', Factbase::Syntax.new('(eq x "tail\\\\")').to_term.operands[1])
     assert_equal("x'y", Factbase::Syntax.new("(eq x 'x\\'y')").to_term.operands[1])
   end
+
+  def test_finds_a_value_with_a_backslash_before_a_quote
+    fb = Factbase.new
+    fb.insert.s = 'a\\"b'
+    assert_equal(1, fb.query(%q{(eq s 'a\\\\\\"b')}).each.to_a.size, 'the value a\\"b is not found')
+  end
+
+  def test_dont_find_a_quote_without_its_backslash
+    fb = Factbase.new
+    fb.insert.s = 'a"b'
+    assert_empty(fb.query(%q{(eq s 'a\\\\\\"b')}).each.to_a, 'the value a"b is found by a query for a\\"b')
+  end
+
+  def test_parses_an_escaped_backslash_before_an_escaped_own_quote
+    assert_equal("x\\'y", Factbase::Syntax.new("(eq x 'x\\\\\\'y')").to_term.operands[1], 'x\\\'y is not parsed')
+  end
+
+  def test_parses_two_escaped_backslashes_before_an_escaped_quote
+    assert_equal(
+      'a\\\\"b', Factbase::Syntax.new('(eq x "a\\\\\\\\\\"b")').to_term.operands[1], 'a\\\\"b is not parsed'
+    )
+  end
 end
