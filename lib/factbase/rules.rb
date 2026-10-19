@@ -51,7 +51,10 @@ class Factbase::Rules
   def import(bytes)
     probe = Factbase.new
     probe.import(bytes)
-    probe.query('(always)').each { |f| @check.it(f, @fb) }
+    after = Factbase.new
+    after.import(@fb.export)
+    after.import(bytes)
+    probe.query('(always)').each { |f| @check.it(f, after) }
     @fb.import(bytes)
   end
 
