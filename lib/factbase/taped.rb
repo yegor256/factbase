@@ -122,6 +122,8 @@ class Factbase::Taped
 
   # Decorator of Array.
   class TapedArray
+    include Enumerable
+
     def initialize(origin, oid, added)
       @origin = origin
       @oid = oid
@@ -136,6 +138,10 @@ class Factbase::Taped
 
     def [](key)
       @origin[key]
+    end
+
+    def size
+      @origin.size
     end
 
     def to_a
