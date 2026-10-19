@@ -15,7 +15,7 @@ def bench_query(bmk, fb, cycles)
     f.where = 'github'
     f.id = i
     f.title = "Object Thinking #{i}"
-    f.time = Time.now.iso8601
+    f.time = Time.now
     f.cost = rand(1..100)
     f.foo = rand(0.0..100.0).round(3)
     f.bar = rand(100..300)
@@ -24,7 +24,7 @@ def bench_query(bmk, fb, cycles)
     f.zzz = "Extra#{i}" if (i % 10).zero?
   end
   [
-    '(gt time \'2024-03-23T03:21:43Z\')',
+    '(gt time 2024-03-23T03:21:43Z)',
     '(gt cost 50)',
     '(eq title \'Object Thinking 5000\')',
     '(and (eq foo 42.998) (or (gt bar 200) (absent zzz)))',
@@ -43,7 +43,7 @@ def bench_query(bmk, fb, cycles)
     bmk.report(q.tr("\n", ' ').gsub(/\s+/, ' ').ellipsized(50, :right)) do
       Timeout.timeout(cycles * 3) do
         cycles.times do
-          fb.query(q).each.size
+          fb.query(q).each.to_a.size
         end
       end
     end

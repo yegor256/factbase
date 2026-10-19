@@ -293,6 +293,6 @@ class Factbase
     unless data.is_a?(Array) && data.all?(Hash)
       raise(StandardError, 'The input is not a valid factbase: expected an array of maps')
     end
-    @maps += data
+    @maps.concat(data)
   end
 end

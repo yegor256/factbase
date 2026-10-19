@@ -44,8 +44,24 @@ class Factbase::LazyTaped
       current_map.keys
     end
 
-    def map(&)
-      current_map.map(&)
+    # Maps the pairs of the hash, giving the block copies of the property arrays.
+    # @return [Array, Enumerator] Results of the block
+    def map
+      return to_enum(:map) unless block_given?
+      current_map.map { |pair| yield([pair[0], detached(pair[1])]) }
+    end
+
+    # Returns the values of the hash, with copies of the property arrays.
+    # @return [Array] Values, so that changing an array does not touch the fact
+    def values
+      current_map.values.map { |value| detached(value) }
+    end
+
+    # Converts the hash to a plain one, with copies of the property arrays.
+    # @return [Hash] The hash, so that changing an array does not touch the fact
+    def to_h(&)
+      return current_map.to_h { |key, value| [key, detached(value)] } unless block_given?
+      current_map.to_h { |key, value| yield(key, detached(value)) }
     end
 
     def [](key)
@@ -79,6 +95,10 @@ class Factbase::LazyTaped
     end
 
     private
+
+    def detached(value)
+      value.is_a?(Array) ? value.dup : value
+    end
 
     def current_map
       ensure_copied_map if @lazy_taped.copied?

@@ -83,4 +83,15 @@ class TestIndexedAnd < Factbase::Test
       'the multi-equality index must retain numerically equal Integer and Float values'
     )
   end
+
+  def test_commits_writes_through_an_intersection_in_txn
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    200.times do |i|
+      f = fb.insert
+      f.a = 1
+      f.b = i
+    end
+    fb.txn { |fbt| fbt.query('(and (eq a 1) (exists b))').each { |f| f.c = 7 } }
+    assert_equal(200, fb.query('(exists c)').each.to_a.size, 'writes through an intersection were lost on commit')
+  end
 end

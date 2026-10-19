@@ -77,13 +77,15 @@ class Factbase::Rules
         verify(fbt, later, churn) unless (done && rollback) || $ERROR_INFO
       end
     end
+  ensure
+    @check = before
   end
 
   def verify(fbt, later, churn)
     return if churn.zero?
     fbt.query('(always)').each do |f|
       next unless later.include?(f)
-      @check.it(f, @fb)
+      @check.it(f, fbt)
     end
   end
   private :verify
@@ -121,6 +123,7 @@ class Factbase::Rules
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   class Query
+    include Enumerable
     decoor(:query)
 
     def initialize(query, check, fb)

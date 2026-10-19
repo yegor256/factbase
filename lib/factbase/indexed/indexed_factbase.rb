@@ -101,6 +101,7 @@ class Factbase::IndexedFactbase
   #
   # @param [String] bytes Binary string to import
   def import(bytes)
+    raise(StandardError, 'The input is nil, cannot load a factbase') if bytes.nil?
     raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?
     data = Marshal.load(bytes)
     if data.is_a?(Hash) && data.key?(:maps)

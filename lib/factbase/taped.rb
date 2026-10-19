@@ -104,6 +104,10 @@ class Factbase::Taped
       @origin.map(&)
     end
 
+    def sort(&)
+      @origin.sort(&)
+    end
+
     def [](key)
       v = @origin[key]
       v = TapedArray.new(v, @origin.object_id, @added) if v.is_a?(Array)
@@ -127,6 +131,7 @@ class Factbase::Taped
     def each(&)
       return to_enum(__method__) unless block_given?
       @origin.each(&)
+      self
     end
 
     def [](key)
@@ -137,12 +142,8 @@ class Factbase::Taped
       @origin.to_a.dup
     end
 
-    def any?(pattern = nil, &)
-      if pattern.nil?
-        @origin.any?(&)
-      else
-        @origin.any?(pattern)
-      end
+    def any?(*pattern, &)
+      @origin.any?(*pattern, &)
     end
 
     def <<(item)

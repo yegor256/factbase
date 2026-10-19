@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/factbase/syntax'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../../lib/factbase/syntax'
 require_relative '../test__helper'
 
 # Syntax test.
@@ -11,6 +11,21 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestSyntax < Factbase::Test
+  def test_matches_properties_named_like_delimiter_tokens
+    fb = Factbase.new
+    f = fb.insert
+    f.open = 1
+    f.close = 2
+    assert_equal(1, fb.query('(and (eq open 1) (eq close 2))').count)
+    assert_equal(1, fb.query('(and (exists open) (exists close))').count)
+  end
+
+  def test_keeps_parentheses_inside_string_literals
+    fb = Factbase.new
+    fb.insert.text = '()'
+    assert_equal(1, fb.query('(eq text "()")').count)
+  end
+
   def test_parses_string_right
     [
       "(foo 'abc')",
@@ -286,5 +301,10 @@ class TestSyntax < Factbase::Test
       )
     end
     assert_equal('(eq x 0.0)', Factbase::Syntax.new('(eq x 0.0e-9999)').to_term.to_s)
+  end
+
+  def test_parses_a_string_that_ends_in_an_escaped_backslash
+    assert_equal('tail\\', Factbase::Syntax.new('(eq x "tail\\\\")').to_term.operands[1])
+    assert_equal("x'y", Factbase::Syntax.new("(eq x 'x\\'y')").to_term.operands[1])
   end
 end

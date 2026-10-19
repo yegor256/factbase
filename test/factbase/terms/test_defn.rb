@@ -82,6 +82,18 @@ class TestDefn < Factbase::Test
     end
   end
 
+  def test_defn_with_simplify_suffix_does_not_break_other_term
+    n = @defn_name
+    s = :"#{n}_simplify"
+    Factbase::Defn.new([n, 'true']).evaluate(fact, [], Factbase.new)
+    Factbase::Defn.new([s, 'true']).evaluate(fact, [], Factbase.new)
+    fb = Factbase.new
+    fb.insert.x = 1
+    assert_equal(1, fb.query("(#{n})").each.to_a.size)
+  ensure
+    Factbase::Undef.new([s]).evaluate(fact, [], Factbase.new)
+  end
+
   def test_defn_non_symbol_argument
     assert_raises(ArgumentError) do
       Factbase::Defn.new(%w[string_name true]).evaluate(fact, [], Factbase.new)
@@ -110,5 +122,20 @@ class TestDefn < Factbase::Test
     3.times { |i| fb.insert.x = i }
     n = @defn_name
     assert_equal(3, fb.query("(and (undef #{n}) (defn #{n} \"true\") (#{n}))").each.to_a.size)
+  end
+
+  def test_refuses_to_redefine_an_inherited_private_helper
+    fb = Factbase.new
+    fb.insert.foo = 42
+    e = assert_raises(StandardError) { fb.query('(defn _values "999")').each.to_a }
+    assert_includes(e.message, "Term '_values' is already defined", e.message)
+    assert_equal(1, fb.query('(eq foo (at 0 foo))').each.to_a.size)
+  end
+
+  def test_refuses_a_name_that_kernel_keeps_private
+    fb = Factbase.new
+    fb.insert.foo = 42
+    e = assert_raises(StandardError) { fb.query('(defn warn "999")').each.to_a }
+    assert_includes(e.message, "Term 'warn' is already defined", e.message)
   end
 end
