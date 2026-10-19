@@ -302,4 +302,23 @@ class TestLazyTaped < Factbase::Test
       assert_equal(10, fbt.query('(eq id 99)').each.to_a.size)
     end
   end
+
+  def test_deletes_every_fact_while_walking_a_copied_txn
+    fb = Factbase.new
+    4.times { |i| fb.insert.id = i + 1 }
+    churn =
+      fb.txn do |fbt|
+        fbt.query('(eq id 1)').each { |f| f.changed = true }
+        fbt.each { |f| fbt.query("(eq id #{f['id'][0]})").delete! }
+      end
+    assert_equal(4, churn.deleted, churn.to_s)
+    assert_equal(0, fb.size)
+  end
+
+  def test_reads_negative_positions_across_the_staged_maps
+    tape = Factbase::LazyTaped.new([{ 'a' => [1] }, { 'a' => [2] }])
+    tape << { 'a' => [3] }
+    assert_equal([[3], [2], [1]], [tape[-1]['a'], tape[-2]['a'], tape[-3]['a']])
+    assert_nil(tape[-4])
+  end
 end

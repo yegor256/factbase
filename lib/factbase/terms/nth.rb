@@ -27,8 +27,9 @@ class Factbase::Nth < Factbase::TermBase
     raise(ArgumentError, "A non-negative position is expected, but #{pos} provided") if pos.negative?
     k = @operands[1]
     raise(ArgumentError, "A symbol is expected, but #{k} provided") unless k.is_a?(Symbol)
+    return if pos >= maps.size
     m = maps[pos]
     return if m.nil?
-    m[k.to_s]
+    m[k.to_s]&.dup
   end
 end

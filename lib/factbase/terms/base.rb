@@ -37,7 +37,7 @@ class Factbase::TermBase
             if o.is_a?(String)
               "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"')}'"
             elsif o.is_a?(Time)
-              o.utc.iso8601(o.subsec.zero? ? 0 : 9)
+              o.getutc.iso8601(o.subsec.zero? ? 0 : 9)
             else
               o.to_s
             end
@@ -72,10 +72,25 @@ class Factbase::TermBase
     end
   end
 
+  # Read an operand that may be either a property name or a nested term.
+  # @param [Integer] pos The position of the operand
+  # @param [Factbase::Fact] fact The fact
+  # @param [Array<Hash>] maps All maps available
+  # @param [Factbase] fb Factbase to use for sub-queries
+  # @return [Object|nil] The value of the property, or of the nested term
+  def _operand(pos, fact, maps, fb)
+    o = @operands[pos]
+    if o.is_a?(Factbase::Term) || o.is_a?(Factbase::TermBase)
+      _values(pos, fact, maps, fb)
+    else
+      _by_symbol(pos, fact)
+    end
+  end
+
   def _by_symbol(pos, fact)
     o = @operands[pos]
     raise(ArgumentError, "A symbol expected at ##{pos}, but '#{o}' (#{o.class}) provided") unless o.is_a?(Symbol)
-    raise(ArgumentError, "The '#{@op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
+    raise(ArgumentError, "The '#{@name || @op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
     fact[o.to_s]
   end
 
@@ -85,7 +100,7 @@ class Factbase::TermBase
     v = v.evaluate(fact, maps, fb) if v.is_a?(Factbase::Term)
     v = v.evaluate(fact, maps, fb) if v.is_a?(Factbase::TermBase)
     if v.is_a?(Symbol)
-      raise(ArgumentError, "The '#{@op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
+      raise(ArgumentError, "The '#{@name || @op}' term needs a fact and cannot be used as an aggregate") if fact.nil?
       v = fact[v.to_s]
     end
     return v if v.nil?

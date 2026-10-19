@@ -13,7 +13,8 @@ require_relative '../factbase'
 #
 #  require 'factbase/fact_as_yaml'
 #  fb = Factbase.new
-#  f = fb.query('(eq foo 42)').to_a.first
+#  fb.insert.foo = 42
+#  f = fb.query('(eq foo 42)').each.to_a.first
 #  puts Factbase::FactAsYaml.new(f).to_s
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -36,7 +37,7 @@ class Factbase::FactAsYaml
     end
     hash.sort.to_h.map do |k, vv|
       [
-        k,
+        key(k),
         ': ',
         if vv.size == 1
           v_to_s(vv.first)
@@ -53,10 +54,15 @@ class Factbase::FactAsYaml
 
   private
 
+  # A property name YAML would read as a boolean or null, like +yes+ or +null+, gets quoted.
+  def key(name)
+    YAML.safe_load(name).is_a?(String) ? name : "'#{name}'"
+  end
+
   def v_to_s(val)
     s = val
     s = s.inspect.ellipsized if s.is_a?(String)
-    s = s.utc.iso8601(6) if s.is_a?(Time)
+    s = s.getutc.iso8601(9) if s.is_a?(Time)
     s
   end
 end

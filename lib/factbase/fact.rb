@@ -52,6 +52,7 @@ class Factbase::Fact
       kk = k[0..-2]
       raise(ArgumentError, "Invalid prop name '#{kk}'") unless kk.match?(/\A[a-z_][_a-zA-Z0-9]*\z/)
       raise(ArgumentError, "Prohibited prop name '#{kk}'") if methods.include?(kk.to_sym)
+      raise(ArgumentError, "The prop name '#{kk}' would be read as a boolean in a query") if %w[true false].include?(kk)
       v = args[1]
       raise(ArgumentError, "The value of '#{kk}' can't be nil") if v.nil?
       raise(ArgumentError, "The value of '#{kk}' can't be empty") if v == ''
@@ -61,18 +62,21 @@ class Factbase::Fact
       ].include?(v.class)
       raise(ArgumentError, "The value of '#{kk}' can't be #{v}") if v.is_a?(Float) && !v.finite?
       v = v.getutc if v.is_a?(Time)
+      v = -v if v.is_a?(String)
       @map[kk] = [] if @map[kk].nil?
       @map[kk] << v
       nil
     elsif k == '[]'
-      @map[args[1].to_s]
+      vv = @map[args[1].to_s]
+      vv.is_a?(Array) ? vv.dup : vv
     else
       v = @map[k]
       if v.nil?
         raise(ArgumentError, "Can't get '#{k}', the fact is empty") if @map.empty?
         raise(ArgumentError, "Can't find '#{k}' attribute out of [#{@map.keys.join(', ')}]")
       end
-      v[0]
+      value = v[0]
+      value.is_a?(String) ? -value : value
     end
   end
 end

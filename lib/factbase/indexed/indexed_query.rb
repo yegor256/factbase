@@ -17,6 +17,7 @@ class Factbase::IndexedQuery
   # Constructor.
   # @param [Factbase::Query] origin Original query
   # @param [Hash] idx The index
+  # @param [Factbase] fb The factbase
   # @param [Set] fresh The set of IDs of newly inserted facts
   def initialize(origin, idx, fb, fresh)
     @origin = origin
@@ -32,6 +33,7 @@ class Factbase::IndexedQuery
   end
 
   # Iterate facts one by one.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
@@ -46,7 +48,13 @@ class Factbase::IndexedQuery
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
     n = 0
-    @origin.each(fb, params).to_a.tap { @fresh.clear }.each do |f|
+    found =
+      begin
+        @origin.each(fb, params).to_a
+      ensure
+        @fresh.clear
+      end
+    found.each do |f|
       yield(Factbase::IndexedFact.new(f, @idx, @fresh))
       n += 1
     end
@@ -65,9 +73,9 @@ class Factbase::IndexedQuery
   # @param [Factbase] fb The factbase
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
-    @origin.delete!(fb).tap do
-      @idx.clear
-      @fresh.clear
-    end
+    @origin.delete!(fb)
+  ensure
+    @idx.clear
+    @fresh.clear
   end
 end

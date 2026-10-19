@@ -6,6 +6,7 @@
 require 'decoor'
 require 'others'
 require_relative '../factbase'
+require_relative 'enumerated'
 
 # A decorator of a Factbase, that checks invariants on every set.
 #
@@ -24,8 +25,10 @@ require_relative '../factbase'
 # License:: MIT
 class Factbase::Inv
   decoor(:fb)
+  include Factbase::Enumerated
 
   def initialize(fb, &block)
+    raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @fb = fb
     @block = block
   end
@@ -36,6 +39,17 @@ class Factbase::Inv
 
   def query(query, maps = nil)
     Query.new(@fb.query(query, maps), @block, self)
+  end
+
+  def import(bytes)
+    probe = Factbase.new
+    probe.import(bytes)
+    probe.query('(always)').each do |f|
+      f.all_properties.each do |p|
+        f[p].each { |v| @block.call(p, v) }
+      end
+    end
+    @fb.import(bytes)
   end
 
   def txn
@@ -74,6 +88,7 @@ class Factbase::Inv
   # This is an internal class, it is not supposed to be instantiated directly.
   #
   class Query
+    include Enumerable
     decoor(:query)
 
     def initialize(query, block, fb)

@@ -29,6 +29,7 @@ module Factbase::IndexedTerm
   # NIL must be returned if indexing is prohibited in this case.
   #
   # @param [Array<Hash>] maps Array of facts
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @param [Hash] params Key/value params to use
   # @return [Array<Hash>|nil] Returns a new array, or NIL if the original array must be used
   def predict(maps, fb, params)
@@ -40,6 +41,8 @@ module Factbase::IndexedTerm
     return __send__(m, maps, fb, params) if respond_to?(m)
     _init_indexes unless @indexes
     @indexes[@op].predict(maps, fb, params) if @indexes.key?(@op)
+  rescue Factbase::Term::Wrapped => e
+    raise(e)
   rescue NoMethodError => e
     raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
   rescue StandardError => e

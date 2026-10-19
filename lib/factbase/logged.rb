@@ -8,6 +8,7 @@ require 'ellipsized'
 require 'others'
 require 'tago'
 require 'time'
+require_relative 'enumerated'
 require_relative 'syntax'
 
 # A decorator of a Factbase, that logs all operations.
@@ -35,11 +36,13 @@ class Factbase::Logged
   end
 
   decoor(:origin)
+  include Factbase::Enumerated
 
   def insert
+    start = Time.now
     Process.clock_gettime(MONO).then do |mono|
       Fact.new(@origin.insert, tube: @tube).tap do
-        @tube.say(mono, "Inserted new fact ##{@origin.size} in #{Time.now.ago}")
+        @tube.say(mono, "Inserted new fact ##{@origin.size} in #{start.ago}")
       end
     end
   end
@@ -50,6 +53,7 @@ class Factbase::Logged
   end
 
   def txn
+    start = Time.now
     mono = Process.clock_gettime(MONO)
     id = nil
     rollback = false
@@ -70,9 +74,9 @@ class Factbase::Logged
         raise(e)
       end
     if rollback
-      @tube.say(mono, "Txn ##{id} rolled back in #{Time.now.ago}")
+      @tube.say(mono, "Txn ##{id} rolled back in #{start.ago}")
     else
-      @tube.say(mono, "Txn ##{id} touched #{r} in #{Time.now.ago}")
+      @tube.say(mono, "Txn ##{id} touched #{r} in #{start.ago}")
     end
     r
   end
@@ -127,7 +131,7 @@ class Factbase::Logged
       if k.end_with?('=')
         s =
           if v.is_a?(Time)
-            v.utc.iso8601
+            v.getutc.iso8601
           elsif v.is_a?(String)
             v.inspect
           else
@@ -180,9 +184,9 @@ class Factbase::Logged
       end
       q ||= @termtext
       if r.zero?
-        @tube.say(mono, "Zero/#{@fb.size} facts found by #{q} #{tail}")
+        @tube.say(mono, "Zero/#{total} facts found by #{q} #{tail}")
       else
-        @tube.say(mono, "Found #{r}/#{@fb.size} fact(s) by #{q} #{tail}")
+        @tube.say(mono, "Found #{r}/#{total} fact(s) by #{q} #{tail}")
       end
       r
     end
@@ -197,7 +201,10 @@ class Factbase::Logged
       if r.nil?
         @tube.say(mono, "Nothing found by '#{@termtext}' #{tail}")
       else
-        @tube.say(mono, "Found #{r} (#{r.class}) by '#{@termtext}' #{tail}")
+        @tube.say(
+          mono,
+          "Found #{r.to_s.ellipsized(Factbase::Logged::Fact::MAX_LENGTH)} (#{r.class}) by '#{@termtext}' #{tail}"
+        )
       end
       r
     end
@@ -205,7 +212,7 @@ class Factbase::Logged
     def delete!(fb = @fb)
       r = nil
       mono = Process.clock_gettime(Factbase::Logged::MONO)
-      before = @fb.size
+      before = total
       tail =
         Factbase::Logged.elapsed do
           r = @fb.query(@term, @maps).delete!(fb)
@@ -220,10 +227,18 @@ class Factbase::Logged
       end
       r
     end
+
+    private
+
+    def total
+      @maps.nil? ? @fb.size : @maps.size
+    end
   end
 
   def self.elapsed
-    yield
-    "in #{Time.now.ago}"
+    Time.now.then do |start|
+      yield
+      "in #{start.ago}"
+    end
   end
 end

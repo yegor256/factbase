@@ -26,6 +26,6 @@ class Factbase::CachedFact
 
   others do |*args|
     @cache.clear if args[0].to_s.end_with?('=')
-    @origin.__send__(*args)
+    @origin.public_send(*args)
   end
 end

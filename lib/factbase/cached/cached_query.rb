@@ -33,6 +33,7 @@ class Factbase::CachedQuery
   end
 
   # Iterate facts one by one.
+  # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
   # @return [Integer] Total number of facts yielded
@@ -40,7 +41,7 @@ class Factbase::CachedQuery
     return to_enum(__method__, fb, params) unless block_given?
     invalidate_if_dirty!
     c = 0
-    key = "each #{@origin}"
+    key = "each #{fb.object_id} #{@origin}"
     if @cacheable && !@cache[key].nil?
       @cache[key].each do |f|
         c += 1
@@ -59,8 +60,8 @@ class Factbase::CachedQuery
   end
 
   # Read a single value.
-  # @param [Hash] fb The factbase
-  # @param [Hash] params Optional params accessible in the query via the "$" symbol (unused)
+  # @param [Factbase] fb The factbase
+  # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return The value evaluated
   def one(fb = @fb, params = {})
     invalidate_if_dirty!

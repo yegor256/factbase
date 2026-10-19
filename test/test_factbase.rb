@@ -46,6 +46,15 @@ class TestFactbase < Factbase::Test
     assert_equal('(eq foo 42)', Factbase.new.to_term('(eq foo 42)').to_s)
   end
 
+  def test_query_rejects_non_query_objects
+    [nil, 42].each do |invalid|
+      assert_includes(
+        assert_raises(ArgumentError) { Factbase.new.query(invalid) }.message,
+        "while #{invalid.class} provided"
+      )
+    end
+  end
+
   def test_simple_setting
     fb = Factbase.new
     fb.insert
@@ -110,6 +119,13 @@ class TestFactbase < Factbase::Test
         end.message, 'cannot load a factbase'
       )
     end
+  end
+
+  def test_import_rejects_nil
+    assert_includes(
+      assert_raises(StandardError) { Factbase.new.import(nil) }.message,
+      'The input is nil, cannot load a factbase'
+    )
   end
 
   def test_empty_or_not
@@ -510,5 +526,73 @@ class TestFactbase < Factbase::Test
         end.message, 'The input is not a valid factbase'
       )
     end
+  end
+
+  def test_import_rejects_a_valid_marshal_with_the_wrong_shape
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase.new.import(Marshal.dump({ unexpected: true }))
+      end.message,
+      'The input is not a valid factbase'
+    )
+  end
+
+  def test_counts_facts_in_each
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    total = rnd.rand(1..50)
+    total.times { fb.insert.foo = rnd.rand(1000) }
+    assert_equal(total, fb.each { |m| m }, "each did not return the number of #{total} facts, seed #{seed}")
+  end
+
+  def test_counts_no_facts_in_each_of_empty_factbase
+    assert_equal(0, Factbase.new.each { |m| m }, 'each of an empty factbase did not return zero')
+  end
+
+  def test_counts_facts_in_each_inside_txn
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    total = rnd.rand(1..50)
+    total.times { fb.insert.foo = rnd.rand(1000) }
+    count = 0
+    fb.txn { |fbt| count = fbt.each { |m| m } }
+    assert_equal(total, count, "each inside txn did not return the number of #{total} facts, seed #{seed}")
+  end
+
+  def test_enumerates_facts_in_each_without_block
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    total = rnd.rand(1..50)
+    total.times { fb.insert.foo = rnd.rand(1000) }
+    assert_equal(total, fb.each.to_a.size, "each without block lost some of #{total} facts, seed #{seed}")
+  end
+
+  def test_counts_facts_left_after_delete_in_each_inside_txn
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase.new
+    total = rnd.rand(2..50)
+    total.times { |i| fb.insert.foo = i }
+    count = 0
+    fb.txn do |fbt|
+      fbt.query("(eq foo #{rnd.rand(total)})").delete!
+      count = fbt.each { |m| m }
+    end
+    assert_equal(total - 1, count, "each inside txn counted a deleted fact among #{total}, seed #{seed}")
+  end
+
+  def test_import_is_visible_to_a_query_made_before_it
+    other = Factbase.new
+    other.insert.foo = 1
+    fb = Factbase.new
+    q = fb.query('(always)')
+    fb.insert.bar = 2
+    assert_equal(1, q.each.to_a.size)
+    fb.import(other.export)
+    assert_equal(2, q.each.to_a.size, 'a query built before import must see the imported facts, as it sees an insert')
+    assert_equal(2, fb.size)
   end
 end

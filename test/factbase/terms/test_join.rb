@@ -33,4 +33,22 @@ class TestJoin < Factbase::Test
       end
     end
   end
+
+  def test_rejects_mapping_with_extra_separator
+    term = Factbase::Syntax.new('(join "left<=right<=unexpected" (always))').to_term
+    assert_includes(
+      assert_raises(RuntimeError) do
+        term.evaluate(Factbase::Accum.new(fact({}), {}, false), [], Factbase.new)
+      end.message,
+      'left<=right<=unexpected'
+    )
+  end
+
+  def test_rejects_mapping_with_an_empty_side
+    fb = Factbase.new
+    fb.insert.id = 1
+    %w[x<= <=x x<=y<=].each do |j|
+      assert_raises(RuntimeError, j) { fb.query("(join '#{j}' (eq id 1))").each.to_a }
+    end
+  end
 end

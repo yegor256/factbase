@@ -118,7 +118,27 @@ class TestLazyTapedHash < Factbase::Test
     assert_equal([1], handles.last['seen'].to_a)
   end
 
+  def test_does_not_expose_the_original_arrays
+    %i[values map to_h].each do |name|
+      fb = Factbase.new
+      fb.insert.x = 1
+      fb.txn do |transaction|
+        read_array(transaction.each.first, name) << 2
+        raise(Factbase::Rollback)
+      end
+      assert_equal({ 'x' => [1] }, fb.each.first.to_h, name)
+    end
+  end
+
   private
+
+  def read_array(hash, name)
+    case name
+    when :values then hash.values.first
+    when :map then hash.map { |_key, items| items }.first
+    else hash.to_h['x']
+    end
+  end
 
   def wrap(input)
     added = []

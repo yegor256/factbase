@@ -14,6 +14,7 @@ class Factbase::IndexedOne
     operand = @term.operands.first
     return unless operand.is_a?(Symbol)
     prop = operand.to_s
+    return if prop.start_with?('$')
     key = [maps.object_id, prop, @term.op]
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
@@ -24,6 +25,10 @@ class Factbase::IndexedOne
   private
 
   def _feed(facts, entry, prop)
+    if entry[:count] > facts.size
+      entry[:facts] = []
+      entry[:count] = 0
+    end
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |f|
       entry[:facts] << f if !f[prop].nil? && f[prop].size == 1

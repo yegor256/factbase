@@ -75,10 +75,8 @@ f = fb.insert
 You can also count the amount of changes made to a factbase:
 
 ```ruby
-require 'loog'
 require 'factbase/tallied'
-log = Loog::VERBOSE
-fb = Factbase::Tallied.new(Factbase.new, log)
+fb = Factbase::Tallied.new(Factbase.new)
 f = fb.insert
 churn = fb.churn
 assert churn.inserted == 1
@@ -135,7 +133,8 @@ fb.query('(eq foo $bar)').each(Factbase.new, bar: [42]).to_a
 # Returns the fact with foo = 42
 ```
 
-Variables are passed as keyword arguments to `each` or `one`. The value must
+Variables are passed as a `Hash`, the second argument of `each` or `one`,
+right after the factbase. The value must
 be an array (even for a single value). This works with any term:
 
 ```ruby
@@ -220,7 +219,9 @@ properties have duplicate values in this particular combination
 
 The `agg` term enables sub-queries by evaluating the first argument (term)
 over all available facts, passing the entire subset to the second argument,
-and then returning the result as an atomic value:
+and then returning whatever the second argument returns. Most of the terms
+below return an atomic value, while `first` and `nth` return all values of
+the property they are asked about:
 
 * `(lt age (agg (eq gender 'F') (max age)))` selects all facts where
 the `age` is smaller than the maximum `age` of all women
@@ -231,10 +232,10 @@ with the salary average in their departments
 There are also terms that match the entire factbase
 and must be used primarily inside the `(agg ..)` term:
 
-* `(nth v p)` returns the `p` property of the fact at position `v`, counting
-  from zero (must be a non-negative integer); `(nth 0 p)` is the same as
-  `(first p)`
-* `(first p)` returns the `p` property of the first fact
+* `(nth v p)` returns all values of the `p` property of the fact at position
+  `v`, counting from zero (must be a non-negative integer); `(nth 0 p)` is
+  the same as `(first p)`
+* `(first p)` returns all values of the `p` property of the first fact
 * `(count)` returns the tally of facts
 * `(max p)` returns the maximum value of the `p` property in all facts
 * `(min p)` returns the minimum

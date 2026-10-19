@@ -17,6 +17,7 @@ class Factbase::IndexedExists
 
   def predict(maps, _fb, _params)
     operand = @term.operands.first.to_s
+    return if operand.start_with?('$')
     key = [maps.object_id, operand, @term.op]
     @idx[key] = { facts: [], count: 0 } if @idx[key].nil?
     entry = @idx[key]
@@ -27,6 +28,10 @@ class Factbase::IndexedExists
   private
 
   def _feed(facts, entry, operand)
+    if entry[:count] > facts.size
+      entry[:facts] = []
+      entry[:count] = 0
+    end
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |m|
       entry[:facts] << m unless m[operand].nil?

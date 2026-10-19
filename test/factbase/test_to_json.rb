@@ -46,7 +46,13 @@ class TestToJSON < Factbase::Test
   def test_time_value_in_iso8601
     fb = Factbase.new
     fb.insert.when = Time.utc(2026, 9, 1, 10, 20, 30, 123_456)
-    assert_equal('2026-09-01T10:20:30.123456Z', JSON.parse(Factbase::ToJSON.new(fb).json)[0]['when'])
+    assert_equal('2026-09-01T10:20:30.123456000Z', JSON.parse(Factbase::ToJSON.new(fb).json)[0]['when'])
+  end
+
+  def test_keeps_nanoseconds_of_time
+    fb = Factbase.new
+    fb.insert.when = Time.utc(2026, 9, 30) + Rational(123_456_789, 1_000_000_000)
+    assert_equal('2026-09-30T00:00:00.123456789Z', JSON.parse(Factbase::ToJSON.new(fb).json)[0]['when'])
   end
 
   def test_string_value
@@ -80,5 +86,18 @@ class TestToJSON < Factbase::Test
     assert_equal(1, json[0]['prio'])
     assert_equal(2, json[1]['prio'])
     assert_equal(3, json[2]['prio'])
+  end
+
+  def test_prints_facts_modified_inside_txn
+    seed = Random.new_seed
+    fb = Factbase.new
+    fb.insert._id = 1
+    value = Random.new(seed).rand(1..1000)
+    text = nil
+    fb.txn do |fbt|
+      fbt.query('(eq _id 1)').each { |f| f.bar = value }
+      text = Factbase::ToJSON.new(fbt).json
+    end
+    assert_includes(text, "\"bar\":#{value}", "printed facts miss the bar of #{value} written inside txn, seed #{seed}")
   end
 end

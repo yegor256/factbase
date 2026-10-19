@@ -65,6 +65,19 @@ class TestQuery < Factbase::Test
     end
   end
 
+  def test_refuses_params_in_place_of_the_factbase
+    fb = Factbase.new
+    fb.insert.foo = 42
+    assert_includes(
+      assert_raises(ArgumentError) { fb.query('(eq foo $bar)').each(bar: [42]).to_a }.message,
+      'not a Hash'
+    )
+    assert_includes(
+      assert_raises(ArgumentError) { fb.query('(agg (eq foo $bar) (count))').one(bar: [42]) }.message,
+      'not a Hash'
+    )
+  end
+
   def test_simple_parsing
     maps = []
     maps << { 'foo' => [42] }
@@ -419,6 +432,15 @@ class TestQuery < Factbase::Test
       "Incorrect type FalseClass returned by (eq what 'issue')",
       assert_raises(StandardError) { fb.query('(eq what "issue")').one }.message
     )
+  end
+
+  def test_deletes_the_fact_it_selects_when_another_differs_only_by_float
+    fb = Factbase.new
+    fb.insert.x = 1
+    fb.insert.x = 1.0
+    assert_equal([Float], fb.query('(head 1 (inverted (always)))').each.map { |f| f.x.class })
+    assert_equal(1, fb.query('(head 1 (inverted (always)))').delete!)
+    assert_equal([Integer], fb.query('(always)').each.map { |f| f.x.class }, 'the fact with 1 was deleted instead')
   end
 
   private

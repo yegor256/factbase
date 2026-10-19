@@ -9,6 +9,7 @@ require_relative '../factbase'
 require_relative '../factbase/accum'
 require_relative '../factbase/syntax'
 require_relative '../factbase/tallied'
+require_relative 'enumerated'
 
 # A decorator of a Factbase, that checks rules on every set.
 #
@@ -27,6 +28,7 @@ require_relative '../factbase/tallied'
 # License:: MIT
 class Factbase::Rules
   decoor(:fb)
+  include Factbase::Enumerated
 
   def initialize(fb, rules, check = Check.new(rules), uid: nil)
     raise(ArgumentError, 'The "fb" is nil') if fb.nil?
@@ -46,6 +48,13 @@ class Factbase::Rules
     Query.new(@fb.query(term, maps), @check, self)
   end
 
+  def import(bytes)
+    probe = Factbase.new
+    probe.import(bytes)
+    probe.query('(always)').each { |f| @check.it(f, @fb) }
+    @fb.import(bytes)
+  end
+
   def txn
     before = @check
     later = Later.new(@uid)
@@ -62,10 +71,12 @@ class Factbase::Rules
       unless churn.zero?
         fbt.query('(always)').each do |f|
           next unless later.include?(f)
-          @check.it(f, @fb)
+          @check.it(f, fbt)
         end
       end
     end
+  ensure
+    @check = before
   end
 
   # Fact decorator.
@@ -101,6 +112,7 @@ class Factbase::Rules
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   class Query
+    include Enumerable
     decoor(:query)
 
     def initialize(query, check, fb)

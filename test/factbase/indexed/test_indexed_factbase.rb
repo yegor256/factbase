@@ -211,6 +211,13 @@ class TestIndexedFactbase < Factbase::Test
     end
   end
 
+  def test_import_nil_raises_error
+    assert_equal(
+      'The input is nil, cannot load a factbase',
+      assert_raises(StandardError) { Factbase::IndexedFactbase.new(Factbase.new).import(nil) }.message
+    )
+  end
+
   def test_index_does_not_grow_unbounded_during_transactions
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
@@ -437,5 +444,14 @@ class TestIndexedFactbase < Factbase::Test
       f.bar = 3
     end
     assert_equal([51], fb.query('(and (eq foo 2) (unique bar))').each.to_a.map(&:id))
+  end
+
+  def test_finds_a_fact_changed_after_a_query_that_raised
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    a = fb.insert
+    a.bar = 0
+    assert_raises(StandardError) { fb.query('(or (exists foo) (eq 1 (div 1 bar)))').each.to_a }
+    a.foo = 1
+    assert_equal(1, fb.query('(exists foo)').each.to_a.size)
   end
 end

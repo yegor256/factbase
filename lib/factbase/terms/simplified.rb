@@ -11,21 +11,31 @@ require_relative '../../factbase'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Simplified
+  WRITERS = %i[as join].freeze
+
   def initialize(operands)
     @operands = operands
   end
 
-  # Removes duplicate operands
+  # Removes duplicate operands, except the ones that write into the fact,
+  # such as +as+ and +join+, since each of them adds its value again
   def unique
     strs = []
     ops = []
     @operands.each do |o|
       o = o.simplify if o.is_a?(Factbase::Term)
       s = o.to_s
-      next if strs.include?(s)
+      next if strs.include?(s) && !writer?(o)
       strs << s
       ops << o
     end
     ops
+  end
+
+  private
+
+  def writer?(term)
+    term.is_a?(Factbase::Term) &&
+      (WRITERS.include?(term.op) || term.operands.any? { |operand| writer?(operand) })
   end
 end

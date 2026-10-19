@@ -12,9 +12,13 @@ class Factbase::IndexedNot
 
   def predict(maps, fb, params)
     sub = @term.operands.first
-    key = [maps.object_id, sub.to_s, @term.op, snapshot(params)]
-    @idx[key] ||= { facts: nil, count: 0, yes_set: nil }
+    key = [maps.object_id, sub.to_s, @term.op]
+    snap = snapshot(params)
     entry = @idx[key]
+    if entry.nil? || entry[:params] != snap
+      entry = { facts: nil, count: 0, yes_set: nil, params: snap }
+      @idx[key] = entry
+    end
     _feed(maps.to_a, entry) do
       sub.predict(maps, fb, params)
     end
@@ -32,7 +36,7 @@ class Factbase::IndexedNot
   end
 
   def _feed(facts, entry)
-    return unless entry[:count] < facts.size
+    return if entry[:count] == facts.size
     yes = yield
     if yes.nil?
       entry[:facts] = nil

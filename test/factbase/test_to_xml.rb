@@ -19,7 +19,7 @@ class TestToXML < Factbase::Test
     xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     refute_empty(xml.xpath('/fb/f[t]'))
     assert_match(
-      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}Z$/,
+      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{9}Z$/,
       xml.xpath('/fb/f/t/text()').text
     )
   end
@@ -133,9 +133,31 @@ class TestToXML < Factbase::Test
     end
   end
 
+  def test_keeps_nanoseconds_of_time
+    fb = Factbase.new
+    fb.insert.when = Time.utc(2026, 9, 30) + Rational(123_456_789, 1_000_000_000)
+    assert_includes(Factbase::ToXML.new(fb).xml, '2026-09-30T00:00:00.123456789Z')
+  end
+
   def test_empty_factbase
     xml = Nokogiri::XML.parse(Factbase::ToXML.new(Factbase.new).xml)
     refute_empty(xml.xpath('/fb'))
     assert_operator(Integer(xml.xpath('/fb/@size').first.value, 10), :>=, 0)
+  end
+
+  def test_prints_facts_modified_inside_txn
+    seed = Random.new_seed
+    fb = Factbase.new
+    fb.insert._id = 1
+    value = Random.new(seed).rand(1..1000)
+    text = nil
+    fb.txn do |fbt|
+      fbt.query('(eq _id 1)').each { |f| f.bar = value }
+      text = Factbase::ToXML.new(fbt).xml
+    end
+    assert_includes(
+      text, "<bar t=\"I\">#{value}</bar>",
+      "printed facts miss the bar of #{value} written inside txn, seed #{seed}"
+    )
   end
 end

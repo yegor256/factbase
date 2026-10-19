@@ -25,6 +25,6 @@ class Factbase::First < Factbase::TermBase
     raise(ArgumentError, "A symbol is expected, but #{k} provided") unless k.is_a?(Symbol)
     first = maps[0]
     return if first.nil?
-    first[k.to_s]
+    first[k.to_s]&.dup
   end
 end
