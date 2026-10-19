@@ -528,6 +528,16 @@ class TestFactbase < Factbase::Test
     end
   end
 
+  def test_import_of_a_marshal_with_a_broken_regexp
+    ["\x04\b[\x06/\x06[\x00", "\x04\b[\x06/\x06(\x00"].each do |bytes|
+      assert_includes(
+        assert_raises(StandardError) do
+          Factbase.new.import(bytes.b)
+        end.message, 'The input is not a valid factbase'
+      )
+    end
+  end
+
   def test_import_rejects_a_valid_marshal_with_the_wrong_shape
     assert_includes(
       assert_raises(StandardError) do
