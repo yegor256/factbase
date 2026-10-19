@@ -156,6 +156,42 @@ class TestSyntax < Factbase::Test
     end
   end
 
+  def test_accepts_a_day_the_julian_calendar_skipped
+    assert(
+      Factbase::Syntax.new('(eq t 1582-10-10T00:00:00Z)').to_term.evaluate(
+        { 't' => [Time.utc(1582, 10, 10)] }, [], Factbase.new
+      ),
+      'the literal of a Gregorian day skipped by the Julian calendar does not match its time'
+    )
+  end
+
+  def test_finds_a_fact_stored_on_a_day_the_julian_calendar_skipped
+    fb = Factbase.new
+    fb.insert.t = Time.utc(1582, 10, 14, 23, 59, 59)
+    assert_equal(1, fb.query('(eq t 1582-10-14T23:59:59Z)').each.to_a.size, 'a fact on 1582-10-14 is not found')
+  end
+
+  def test_rejects_a_leap_day_only_the_julian_calendar_has
+    assert_raises(Factbase::Syntax::Broken, 'a Julian leap day is not refused') do
+      Factbase::Syntax.new('(eq t 1500-02-29T00:00:00Z)').to_term
+    end
+  end
+
+  def test_rejects_a_century_leap_day_the_gregorian_calendar_drops
+    assert_raises(Factbase::Syntax::Broken, 'a century leap day dropped by Gregorian calendar is not refused') do
+      Factbase::Syntax.new('(eq t 1700-02-29T00:00:00Z)').to_term
+    end
+  end
+
+  def test_accepts_a_leap_day_both_calendars_have
+    assert(
+      Factbase::Syntax.new('(eq t 1600-02-29T00:00:00Z)').to_term.evaluate(
+        { 't' => [Time.utc(1600, 2, 29)] }, [], Factbase.new
+      ),
+      'the literal of a leap day of both calendars does not match its time'
+    )
+  end
+
   def test_prints_a_time_with_fractional_seconds
     assert_equal(
       '(eq t 2024-01-01T00:00:00.500000000Z)',
