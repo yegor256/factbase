@@ -63,6 +63,19 @@ class TestAssert < Factbase::Test
     )
   end
 
+  def test_assert_with_term_base
+    assert(Factbase::Assert.new(['always holds', Factbase::Always.new([])]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_assert_with_failing_term_base
+    t = Factbase::Assert.new(['never holds', Factbase::Never.new([])])
+    assert_includes(
+      assert_raises(StandardError) do
+        t.evaluate(fact, [], Factbase.new)
+      end.message, 'never holds'
+    )
+  end
+
   def test_assert_raises_when_message_not_string
     assert_match(
       /A string is expected as first argument of 'assert', but '123' provided/,

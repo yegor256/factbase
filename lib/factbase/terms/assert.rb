@@ -29,7 +29,7 @@ class Factbase::Assert < Factbase::TermBase
       raise(ArgumentError, "A string is expected as first argument of 'assert', but '#{message}' provided")
     end
     t = @operands[1]
-    unless t.is_a?(Factbase::Term)
+    unless t.is_a?(Factbase::Term) || t.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected as second argument of 'assert', but '#{t}' provided")
     end
     result = t.evaluate(fact, maps, fb)
