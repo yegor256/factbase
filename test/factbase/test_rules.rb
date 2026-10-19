@@ -241,4 +241,20 @@ class TestRules < Factbase::Test
   ensure
     Factbase.new.query('(undef rules_within_limit)').each.to_a
   end
+
+  def test_checks_through_to_a_and_map_as_well
+    fb = Factbase::Rules.new(Factbase.new, '(when (exists first) (exists second))')
+    fb.insert.foo = 42
+    assert_raises(StandardError) { fb.query('(always)').to_a.first.first = 1 }
+    assert_raises(StandardError) { fb.query('(always)').map { |f| f.first = 1 } }
+    assert_raises(StandardError) { fb.query('(always)').first.first = 1 }
+    assert_raises(StandardError) { fb.query('(always)').take(1).first.first = 1 }
+  end
+
+  def test_checks_through_find_and_detect
+    fb = Factbase::Rules.new(Factbase.new, '(when (exists first) (exists second))')
+    fb.insert.foo = 42
+    assert_raises(StandardError) { fb.query('(always)').find { |f| f.first = 100 } }
+    assert_raises(StandardError) { fb.query('(always)').detect { |f| f.first = 200 } }
+  end
 end
