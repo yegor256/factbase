@@ -595,4 +595,50 @@ class TestFactbase < Factbase::Test
     assert_equal(2, q.each.to_a.size, 'a query built before import must see the imported facts, as it sees an insert')
     assert_equal(2, fb.size)
   end
+
+  def test_refuses_txn_inside_its_own_txn
+    fb = Factbase.new
+    fb.insert.id = 1
+    assert_raises(StandardError, 'a txn inside a txn of the same factbase is not refused') do
+      fb.txn { fb.txn { |t| t.query('(eq id 1)').each { |f| f.inner = true } } }
+    end
+  end
+
+  def test_keeps_one_fact_when_txn_inside_its_own_txn_is_refused
+    fb = Factbase.new
+    fb.insert.id = 1
+    fb.txn do |fbt|
+      fbt.query('(eq id 1)').each { |f| f.outer = true }
+      begin
+        fb.txn { |t| t.query('(eq id 1)').each { |f| f.inner = true } }
+      rescue StandardError
+        nil
+      end
+    end
+    assert_equal(1, fb.size, 'a refused nested txn split the fact into two')
+  end
+
+  def test_refuses_second_txn_inside_its_own_txn_after_first_is_refused
+    fb = Factbase.new
+    assert_raises(StandardError, 'a second nested txn is not refused after the first one') do
+      fb.txn do
+        begin
+          fb.txn { |t| t.insert.x = 1 }
+        rescue StandardError
+          nil
+        end
+        fb.txn { |t| t.insert.x = 2 }
+      end
+    end
+  end
+
+  def test_runs_txn_after_txn_that_raised
+    fb = Factbase.new
+    begin
+      fb.txn { raise(ArgumentError, 'Ой') }
+    rescue ArgumentError
+      nil
+    end
+    assert_equal(1, fb.txn { |t| t.insert.x = 1 }.inserted, 'a txn after a failed txn is refused')
+  end
 end
