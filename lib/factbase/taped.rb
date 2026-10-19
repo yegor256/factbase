@@ -128,22 +128,22 @@ class Factbase::Taped
       @added = added
     end
 
-    def each(&)
+    def each
       return to_enum(__method__) unless block_given?
-      @origin.each(&)
+      @origin.each { |item| yield(value(item)) }
       self
     end
 
     def [](key)
-      @origin[key]
+      value(@origin[key])
     end
 
     def to_a
-      @origin.to_a.dup
+      @origin.map { |item| value(item) }
     end
 
     def any?(*pattern, &)
-      @origin.any?(*pattern, &)
+      to_a.any?(*pattern, &)
     end
 
     def <<(item)
@@ -155,6 +155,12 @@ class Factbase::Taped
       changed = @origin.uniq!
       @added.append(@oid) unless changed.nil?
       changed
+    end
+
+    private
+
+    def value(item)
+      item.is_a?(String) ? -item : item
     end
   end
 
