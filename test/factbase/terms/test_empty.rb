@@ -30,6 +30,25 @@ class TestEmpty < Factbase::Test
     refute(t.evaluate(Factbase::Fact.new({ '_x' => [44] }), maps, Factbase.new))
   end
 
+  def test_reads_query_params_inside
+    fb = Factbase.new
+    fb.insert.tag = 'ёж'
+    fb.insert.tag = 'y'
+    assert_equal(
+      2, fb.query('(not (empty (eq tag $t)))').each(fb, t: ['ёж']).to_a.size,
+      'a query param inside empty resolves to nothing'
+    )
+  end
+
+  def test_finds_nothing_for_a_query_param_no_fact_matches
+    fb = Factbase.new
+    fb.insert.tag = 'x'
+    assert_empty(
+      fb.query('(not (empty (eq tag $t)))').each(fb, t: ['z']).to_a,
+      'a query param inside empty matches a value it does not hold'
+    )
+  end
+
   def test_empty_wrong_arguments
     t = Factbase::Empty.new([])
     assert_equal(
