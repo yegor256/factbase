@@ -58,8 +58,10 @@ class Factbase::IndexedEq
     from = entry[:count]
     facts[from..].each_with_index do |m, i|
       entry[:pos][m] = from + i
-      m[operand]&.uniq&.each do |v|
+      seen = Set.new
+      m[operand]&.each do |v|
         key = normalize(v)
+        next unless seen.add?(key)
         entry[:facts][key] ||= []
         entry[:facts][key] << m
       end

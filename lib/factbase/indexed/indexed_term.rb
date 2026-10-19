@@ -29,6 +29,7 @@ module Factbase::IndexedTerm
   # NIL must be returned if indexing is prohibited in this case.
   #
   # @param [Array<Hash>] maps Array of facts
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @param [Hash] params Key/value params to use
   # @return [Array<Hash>|nil] Returns a new array, or NIL if the original array must be used
   def predict(maps, fb, params)

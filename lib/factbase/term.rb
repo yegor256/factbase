@@ -183,22 +183,14 @@ class Factbase::Term < Factbase::TermBase
   # should be evaluated. If no prediction can be made,
   # the same list is returned.
   # @param [Array<Hash>, Factbase::Taped, Factbase::LazyTaped] maps Records to iterate, maybe
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @param [Hash] params Params to use (keys must be strings, not symbols, with values as arrays)
   # @return [Array<Hash>] Records to iterate
   def predict(maps, fb, params)
-    m = :"#{@op}_predict"
-    if @terms.key?(@op)
-      t = @terms[@op]
-      if t.respond_to?(:predict)
-        t.predict(maps, fb, params)
-      else
-        maps
-      end
-    elsif respond_to?(m)
-      __send__(m, maps, fb, params)
-    else
-      maps
-    end
+    return maps unless @terms.key?(@op)
+    t = @terms[@op]
+    return maps unless t.respond_to?(:predict)
+    t.predict(maps, fb, params)
   end
 
   # Forget what was remembered while earlier facts were evaluated.
@@ -232,16 +224,8 @@ class Factbase::Term < Factbase::TermBase
   # Simplify it if possible.
   # @return [Factbase::Term] New term or itself
   def simplify
-    if @terms.key?(@op) && @terms[@op].respond_to?(:simplify)
-      @terms[@op].simplify
-    else
-      m = "#{@op}_simplify"
-      if respond_to?(m, true)
-        __send__(m)
-      else
-        self
-      end
-    end
+    return self unless @terms.key?(@op) && @terms[@op].respond_to?(:simplify)
+    @terms[@op].simplify
   end
 
   # Does it have any dependencies on a fact?
@@ -252,7 +236,7 @@ class Factbase::Term < Factbase::TermBase
   # @return [Boolean] TRUE if static
   def static?
     return true if @op == :agg
-    return false if %i[join as traced].include?(@op)
+    return false if %i[join as traced unique prev].include?(@op)
     return false if custom?
     @operands.each do |o|
       return false if o.is_a?(Factbase::Term) && !o.static?

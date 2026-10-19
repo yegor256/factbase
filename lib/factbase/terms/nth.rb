@@ -31,6 +31,6 @@ class Factbase::Nth < Factbase::TermBase
     return if pos >= maps.size
     m = maps[pos]
     return if m.nil?
-    m[k.to_s]
+    m[k.to_s]&.dup
   end
 end

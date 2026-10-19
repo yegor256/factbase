@@ -26,6 +26,6 @@ class Factbase::First < Factbase::TermBase
     raise(ArgumentError, "A property name is expected, but the parameter #{k} provided") if k.start_with?('$')
     first = maps[0]
     return if first.nil?
-    first[k.to_s]
+    first[k.to_s]&.dup
   end
 end

@@ -13,6 +13,23 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestIndexedQuery < Factbase::Test
+  def test_invalidates_indexes_after_partial_deletion_fails
+    base = Factbase.new
+    indexed = Factbase::IndexedFactbase.new(base)
+    [1, 2].each do |value|
+      fact = indexed.insert
+      fact.x = value
+      fact.keep = 1
+    end
+    assert_equal([1, 2], indexed.query('(exists keep)').map(&:x))
+    assert_raises(StandardError) { indexed.query('(assert "stop" (lt x 2))').delete! }
+    fact = indexed.insert
+    fact.x = 3
+    fact.keep = 1
+    assert_equal([2, 3], base.query('(exists keep)').map(&:x))
+    assert_equal([2, 3], indexed.query('(exists keep)').map(&:x))
+  end
+
   def test_converts_to_string
     fb = Factbase.new
     fb.insert.foo = 42
