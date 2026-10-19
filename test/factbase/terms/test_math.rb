@@ -147,7 +147,7 @@ class TestMath < Factbase::Test
       assert_raises(StandardError) do
         t.evaluate(fact('birth' => Time.new(2026, 1, 1)), [], Factbase.new)
       end.message,
-      'undefined method'
+      "can only be on the left of 'plus' or 'minus'"
     )
   end
 end
