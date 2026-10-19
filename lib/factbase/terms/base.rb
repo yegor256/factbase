@@ -8,6 +8,8 @@
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::TermBase
+  TYPES = [Float, Integer, String, Time, TrueClass, FalseClass].freeze
+
   # Set the name the user used for this term and its implementation helpers.
   # @param [Symbol] name Name of the term in the query
   # rubocop:disable Elegant/GoodMethodName
@@ -113,8 +115,14 @@ class Factbase::TermBase
         end
     end
     raise(ArgumentError, 'Why not array?') unless v.is_a?(Array)
-    unless v.all? { |i| [Float, Integer, String, Time, TrueClass, FalseClass].any? { |t| i.is_a?(t) } }
-      raise(ArgumentError, 'Wrong type inside')
+    unless v.all? { |i| TYPES.any? { |t| i.is_a?(t) } }
+      b = v.find { |i| TYPES.none? { |t| i.is_a?(t) } }
+      o = @operands[pos]
+      raise(
+        ArgumentError,
+        "Wrong type #{b.class} of value #{b.inspect} for '#{o.nil? ? 'nil' : o}' at ##{pos}, " \
+        "allowed types are #{TYPES.join(', ')}"
+      )
     end
     v
   end
