@@ -13,6 +13,17 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestFactAsYaml < Factbase::Test
+  def test_preserves_nanoseconds_in_time_values
+    fact = Factbase.new.insert
+    times = [123_456_001, 123_456_999].map { |ns| Time.at(1_700_000_000, ns, :nanosecond).utc }
+    times.each { |time| fact.when = time }
+    fact.single = times.first
+    yaml = YAML.safe_load(Factbase::FactAsYaml.new(fact).to_s, permitted_classes: [Time])
+    assert_equal(times, yaml['when'])
+    assert_equal(times.first, yaml['single'])
+    refute_equal(yaml['when'][0], yaml['when'][1])
+  end
+
   def test_prints_exactly
     f = Factbase.new.insert
     f._id = 1
@@ -125,7 +136,7 @@ class TestFactAsYaml < Factbase::Test
     fb.insert.id = rnd.rand(1..1000)
     assert_includes(
       Factbase::FactAsYaml.new(fb.query("(as t (to_time '2026-01-01T12:00:00.25#{zone}'))").each.first).to_s,
-      "t: #{Time.parse("2026-01-01T12:00:00.25#{zone}").utc.iso8601(6)}",
+      "t: #{Time.parse("2026-01-01T12:00:00.25#{zone}").utc.iso8601(9)}",
       "printed time is not in UTC, seed #{seed}"
     )
   end
