@@ -24,6 +24,13 @@ class TestToXML < Factbase::Test
     )
   end
 
+  def test_keeps_offset_of_stored_time
+    time = Time.new(2024, 1, 1, 12, 0, 0, '+03:00')
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(Factbase.new([{ '_id' => [1], 't' => [time] }])).xml)
+    assert_equal('2024-01-01T09:00:00.000000000Z', xml.xpath('/fb/f/t/text()').text, xml.to_s)
+    assert_equal(10_800, time.utc_offset, 'printing moved the stored time to UTC')
+  end
+
   def test_control_character_rendering
     fb = Factbase.new
     fb.insert.t = "a#{1.chr}b"
