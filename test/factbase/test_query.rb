@@ -443,6 +443,29 @@ class TestQuery < Factbase::Test
     assert_equal([Integer], fb.query('(always)').each.map { |f| f.x.class }, 'the fact with 1 was deleted instead')
   end
 
+  def test_deletes_facts_matched_by_query_params_through_every_decorator
+    with_factbases do |badge, fb|
+      fb.insert.bar = 1
+      fb.insert.bar = 2
+      fb.query('(eq bar $bar)').delete!(fb, 'bar' => [1])
+      assert_empty(fb.query('(eq bar 1)').each.to_a, "a parameterized delete missed in #{badge}")
+    end
+  end
+
+  def test_counts_facts_deleted_by_query_params
+    fb = Factbase.new
+    fb.insert.name = 'Ёлка'
+    fb.insert.name = 'Pine'
+    assert_equal(1, fb.query('(eq name $n)').delete!(fb, n: ['Ёлка']), 'a parameterized delete counted wrong')
+  end
+
+  def test_keeps_facts_no_query_param_matches
+    fb = Factbase.new
+    fb.insert.bar = 1
+    fb.query('(eq bar $bar)').delete!(fb, 'bar' => [7])
+    assert_equal(1, fb.size, 'a parameterized delete removed a fact it does not match')
+  end
+
   private
 
   def with_factbases(maps = [], &)

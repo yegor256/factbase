@@ -71,9 +71,10 @@ class Factbase::IndexedQuery
 
   # Delete all facts that match the query.
   # @param [Factbase] fb The factbase
+  # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return [Integer] Total number of facts deleted
-  def delete!(fb = @fb)
-    @origin.delete!(fb)
+  def delete!(fb = @fb, params = {})
+    @origin.delete!(fb, params)
   ensure
     @idx.clear
     @fresh.clear
