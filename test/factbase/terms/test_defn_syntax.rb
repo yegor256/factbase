@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/undef'
 require_relative '../../test__helper'
 
 # Test.
@@ -19,5 +21,17 @@ class TestDefnSyntax < Factbase::Test
         fb.query('(defn brk "1 +")').each.to_a
       end
     assert_includes(e.message, "Cannot define the term 'brk'", e.message)
+  end
+
+  def test_defn_on_empty_factbase
+    fn = :_defn_empty_factbase
+    Factbase::Undef.new([fn]).evaluate(nil, [], Factbase.new)
+    fb = Factbase.new
+    fb.query("(defn #{fn} \"true\")").each(fb).to_a
+    assert(Factbase::Term.private_method_defined?(fn))
+    fb.insert.a = 1
+    assert_equal(1, fb.query("(#{fn})").each(fb).count)
+  ensure
+    Factbase::Undef.new([fn]).evaluate(nil, [], Factbase.new)
   end
 end
