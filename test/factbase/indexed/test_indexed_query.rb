@@ -231,7 +231,7 @@ class TestIndexedQuery < Factbase::Test
     end
   end
 
-  def test_materializes_before_iterating
+  def test_streams_insert_during_iteration_like_plain_factbase
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     3.times do |i|
       f = fb.insert
@@ -243,7 +243,20 @@ class TestIndexedQuery < Factbase::Test
       fb.insert.then { |n| n.kind = 'out' }
       created += 1
     end
-    assert_equal(3, created)
+    assert_equal(1, created, 'inserts during each must not extend a pre-built snapshot')
+  end
+
+  def test_skips_facts_deleted_while_the_block_runs
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.id = 1
+    fb.insert.id = 2
+    seen = []
+    fb.query('(always)').each(fb) do |f|
+      seen << f.id
+      fb.query("(eq id #{f.id})").delete!(fb) if f.id == 1
+    end
+    assert_equal([1], seen)
+    assert_equal(1, fb.size)
   end
 
   def test_deletes_too
