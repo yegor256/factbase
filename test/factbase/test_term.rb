@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/syntax'
 require_relative '../../lib/factbase/term'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
@@ -106,5 +107,33 @@ class TestTerm < Factbase::Test
     t = Time.new(2026, 10, 4, 12, 0, 0, '+03:00')
     Factbase::Term.new(:eq, [:when, t]).to_s
     assert_equal(3 * 60 * 60, t.utc_offset, 'the time of the term was moved to UTC')
+  end
+
+  def test_dont_call_agg_static_when_its_selector_is_traced
+    refute_predicate(
+      Factbase::Syntax.new('(agg (traced (exists x)) (count))').to_term, :static?,
+      'agg with a traced selector is static'
+    )
+  end
+
+  def test_dont_call_agg_static_when_traced_is_deep_inside
+    refute_predicate(
+      Factbase::Syntax.new('(agg (and (eq y 1) (not (traced (exists x)))) (count))').to_term, :static?,
+      'agg with traced deep inside its selector is static'
+    )
+  end
+
+  def test_dont_call_agg_static_when_its_aggregate_is_traced
+    refute_predicate(
+      Factbase::Syntax.new('(agg (exists x) (traced (count)))').to_term, :static?,
+      'agg with a traced aggregate is static'
+    )
+  end
+
+  def test_calls_agg_static_without_traced_inside
+    assert_predicate(
+      Factbase::Syntax.new('(agg (and (eq y 1) (exists x)) (max x))').to_term, :static?,
+      'agg without traced inside is not static'
+    )
   end
 end
