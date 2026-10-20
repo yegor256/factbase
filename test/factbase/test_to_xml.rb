@@ -145,6 +145,13 @@ class TestToXML < Factbase::Test
     assert_operator(Integer(xml.xpath('/fb/@size').first.value, 10), :>=, 0)
   end
 
+  def test_printing_does_not_move_a_time_to_utc
+    time = Time.new(2026, 10, 4, 12, 0, 0, '+03:00')
+    text = Factbase::ToXML.new(Factbase.new([{ 'when' => [time] }])).xml
+    assert_includes(text, '2026-10-04T09:00:00.000000000Z', text)
+    assert_equal(3 * 60 * 60, time.utc_offset)
+  end
+
   def test_prints_facts_modified_inside_txn
     seed = Random.new_seed
     fb = Factbase.new
