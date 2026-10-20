@@ -97,6 +97,17 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(2, fb.query('(always)').each.to_a.size)
   end
 
+  def test_one_sees_in_place_change_on_inner_factbase_behind_pre
+    require_relative '../../../lib/factbase/pre'
+    inner = Factbase.new
+    inner.insert.x = 10
+    fb = Factbase::CachedFactbase.new(Factbase::Pre.new(inner) { |_, _| })
+    agg = '(agg (always) (max x))'
+    assert_equal(10, fb.query(agg).one)
+    inner.query('(always)').each { |f| f.x = 20 }
+    assert_equal(20, fb.query(agg).one)
+  end
+
   def test_insert_after_one_returns_new_value
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.foo = 10
