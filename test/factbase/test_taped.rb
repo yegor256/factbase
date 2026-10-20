@@ -24,6 +24,28 @@ class TestTaped < Factbase::Test
     assert_empty(added)
   end
 
+  def test_distinguishes_nil_pattern_from_no_pattern
+    values = Factbase::Taped::TapedArray.new([1], 1, [])
+    refute(values.any?(nil))
+    assert_predicate(values, :any?)
+    assert(values.any?(Integer))
+    refute(values.any? { |value| value > 1 })
+    assert(Factbase::Taped::TapedArray.new([false], 1, []).any?(false))
+  end
+
+  def test_keeps_nil_pattern_results_after_transaction_copy
+    base = Factbase.new
+    base.insert.x = 1
+    refute(base.each.first['x'].any?(nil))
+    base.txn do |tx|
+      refute(tx.each.first['x'].any?(nil))
+      tx.query('(always)').each { |fact| fact.trigger = 1 }
+      refute(tx.each.first['x'].any?(nil))
+      assert_predicate(tx.each.first['x'], :any?)
+    end
+    refute(base.each.first['x'].any?(nil))
+  end
+
   def test_tracks_insertion
     t = Factbase::Taped.new([])
     t << {}

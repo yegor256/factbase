@@ -142,12 +142,8 @@ class Factbase::Taped
       @origin.map { |item| value(item) }
     end
 
-    def any?(pattern = nil, &)
-      if pattern.nil?
-        to_a.any?(&)
-      else
-        to_a.any?(pattern)
-      end
+    def any?(*pattern, &)
+      to_a.any?(*pattern, &)
     end
 
     def <<(item)
