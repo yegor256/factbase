@@ -40,6 +40,7 @@ class Factbase::CachedQuery
   def each(fb = @fb, params = {})
     return to_enum(__method__, fb, params) unless block_given?
     invalidate_if_dirty!
+    invalidate_if_stale!(fb)
     c = 0
     key = "each #{fb.object_id} #{@origin}"
     if @cacheable && !@cache[key].nil?
@@ -65,6 +66,7 @@ class Factbase::CachedQuery
   # @return The value evaluated
   def one(fb = @fb, params = {})
     invalidate_if_dirty!
+    invalidate_if_stale!(fb)
     return @origin.one(fb, params) unless @cacheable
     key = "one: #{@origin} #{params}"
     @cache[key] = @origin.one(fb, params) unless @cache.key?(key)
@@ -86,5 +88,12 @@ class Factbase::CachedQuery
   def invalidate_if_dirty!
     return unless @cache.delete(:__dirty__)
     @cache.clear
+  end
+
+  def invalidate_if_stale!(fb)
+    size = fb.size
+    return if @cache[:__size__] == size
+    @cache.clear
+    @cache[:__size__] = size
   end
 end

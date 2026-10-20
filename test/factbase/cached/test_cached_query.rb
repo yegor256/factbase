@@ -114,8 +114,9 @@ class TestCachedQuery < Factbase::Test
     origin = Factbase.new
     query = Factbase::CachedFactbase.new(origin, {}).query('(agg (exists foo) (max foo))')
     query.one(origin, {})
-    origin.insert.foo = "дубок #{Random.new(seed).rand(1_000_000)}"
-    assert_nil(query.one(origin, {}), "nil result of one is evaluated again instead of being cached, seed #{seed}")
+    value = "дубок #{Random.new(seed).rand(1_000_000)}"
+    origin.insert.foo = value
+    assert_equal(value, query.one(origin, {}), "nil result of one is re-evaluated after an origin insert, seed #{seed}")
   end
 
   def test_drops_nil_result_of_one_after_insert
