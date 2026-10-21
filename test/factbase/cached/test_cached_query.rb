@@ -109,6 +109,24 @@ class TestCachedQuery < Factbase::Test
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end
 
+  def test_forgets_rows_cached_by_the_deleting_query
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.a = 1
+    assert_equal(1, fb.query('(eq a (agg (exists a) (max a)))').delete!)
+    assert_equal(0, fb.size)
+    assert_equal(0, fb.query('(exists a)').each.to_a.size)
+  end
+
+  def test_forgets_rows_cached_by_the_deleting_query_inside_txn
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.a = 1
+    fb.txn do |fbt|
+      fbt.query('(eq a (agg (exists a) (max a)))').delete!
+      assert_equal(0, fbt.query('(exists a)').each.to_a.size)
+    end
+    assert_equal(0, fb.query('(exists a)').each.to_a.size)
+  end
+
   def test_keeps_nil_result_of_one
     seed = Random.new_seed
     origin = Factbase.new
