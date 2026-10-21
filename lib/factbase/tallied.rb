@@ -28,8 +28,7 @@ class Factbase::Tallied
   include Factbase::Enumerated
 
   def insert
-    @churn.append(1, 0, 0)
-    Fact.new(@fb.insert, @churn)
+    Fact.new(@fb.insert, @churn).tap { @churn.append(1, 0, 0) }
   end
 
   def query(query, maps = nil)
