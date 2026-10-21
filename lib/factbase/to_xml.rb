@@ -92,7 +92,7 @@ class Factbase::ToXML
 
   def to_str(val)
     if val.is_a?(Time)
-      val.utc.iso8601(9)
+      val.getutc.iso8601(9)
     else
       val.to_s
     end
