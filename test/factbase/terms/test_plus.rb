@@ -51,4 +51,15 @@ class TestPlus < Factbase::Test
     assert_equal(time + (3 * 60 * 60 * 24 * 7), t.evaluate(fact('foo' => time), [], Factbase.new))
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
+
+  def test_rejects_underscores_in_a_duration_of_plus
+    fb = Factbase.new
+    f = fb.insert
+    f.start = Time.utc(2024, 1, 1)
+    f.span = '1_0 days'
+    assert_includes(
+      assert_raises(StandardError) { fb.query('(as later (plus start span))').each.to_a }.message,
+      "Amount '1_0' in '1_0 days' must be a whole number"
+    )
+  end
 end
