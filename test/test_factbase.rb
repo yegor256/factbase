@@ -537,6 +537,87 @@ class TestFactbase < Factbase::Test
     )
   end
 
+  def test_import_rejects_invalid_property_names
+    [:foo, 42, '', 'Foo', 'foo-bar', "foo\nbar", 'all_properties', 'true', 'false'].each do |name|
+      assert_includes(
+        assert_raises(StandardError) do
+          Factbase.new.import(Marshal.dump([{ name => [42] }]))
+        end.message,
+        'The input is not a valid factbase'
+      )
+    end
+  end
+
+  def test_import_rejects_values_that_are_not_nonempty_arrays
+    [42, nil, '42', []].each do |values|
+      assert_includes(
+        assert_raises(StandardError) do
+          Factbase.new.import(Marshal.dump([{ 'foo' => values }]))
+        end.message,
+        'The input is not a valid factbase'
+      )
+    end
+  end
+
+  def test_import_rejects_invalid_property_values
+    [nil, '', :symbol, {}, [], Object.new, Float::INFINITY, -Float::INFINITY, Float::NAN].each do |value|
+      assert_includes(
+        assert_raises(StandardError) do
+          Factbase.new.import(Marshal.dump([{ 'foo' => [42, value] }]))
+        end.message,
+        'The input is not a valid factbase'
+      )
+    end
+  end
+
+  def test_import_validates_all_maps_before_appending
+    maps = Marshal.dump([{ 'foo' => [42] }, { 'bar' => [7], 'broken' => [nil] }])
+    [maps, Marshal.dump({ maps: maps, idx: {} })].each do |bytes|
+      fb = Factbase.new
+      fb.insert.foo = 13
+      before = fb.export # rubocop:disable Elegant/NoRedundantVariable -- Capture the bytes before import.
+      query = fb.query('(always)')
+      assert_equal([13], query.each.map(&:foo))
+      assert_includes(assert_raises(StandardError) { fb.import(bytes) }.message, 'The input is not a valid factbase')
+      assert_equal(before, fb.export)
+      assert_equal([13], query.each.map(&:foo))
+    end
+  end
+
+  def test_import_rejection_preserves_existing_index
+    require_relative('../lib/factbase/indexed/indexed_factbase')
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.foo = 13
+    query = fb.query('(eq foo 13)')
+    assert_equal([13], query.each.map(&:foo))
+    before = fb.export # rubocop:disable Elegant/NoRedundantVariable -- Capture the bytes before import.
+    maps = Marshal.dump([{ 'foo' => [42] }, { bar: [7] }])
+    assert_raises(StandardError) { fb.import(Marshal.dump({ maps: maps, idx: {} })) }
+    assert_equal(before, fb.export)
+    assert_equal([13], query.each.map(&:foo))
+    assert_equal(0, fb.query('(eq foo 42)').each.to_a.size)
+  end
+
+  def test_import_preserves_supported_properties_and_empty_facts
+    require_relative('../lib/factbase/indexed/indexed_factbase')
+    source = Factbase.new
+    fact = source.insert
+    values = ['hello', 42, -17, 1.25, Time.utc(2026, 10, 18), true, false, 42]
+    values.each { |value| fact.foo = value }
+    fact._metaValue = 'metadata'
+    source.insert
+    [source.export, Factbase::IndexedFactbase.new(source).export].each do |bytes|
+      fb = Factbase.new
+      fb.insert.foo = 'existing'
+      fb.import(bytes)
+      assert_equal(3, fb.size)
+      assert_equal(values, fb.query('(eq foo 42)').each.first['foo'])
+      assert_equal('metadata', fb.query('(exists _metaValue)').each.first._metaValue)
+      assert_equal(1, fb.query('(absent foo)').each.to_a.size)
+      assert_equal('existing', fb.query('(eq foo "existing")').each.first.foo)
+    end
+  end
+
   def test_counts_facts_in_each
     seed = Random.new_seed
     rnd = Random.new(seed)
