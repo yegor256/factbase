@@ -37,8 +37,10 @@ class Factbase::Accum
     if k.end_with?('=')
       kk = k[0..-2]
       @fact.method_missing(*args) if @pass
+      v = args[1]
+      v = v.getutc if v.is_a?(Time)
       @props[kk] = [] if @props[kk].nil?
-      @props[kk] << args[1]
+      @props[kk] << v
     elsif k == '[]'
       kk = args[1].to_s
       vv = []
