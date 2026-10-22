@@ -52,10 +52,11 @@ class Factbase::SyncQuery
 
   # Delete all facts that match the query.
   # @param [Factbase] fb The factbase
+  # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @return [Integer] Total number of facts deleted
-  def delete!(fb = @fb)
+  def delete!(fb = @fb, params = {})
     try_lock do
-      @origin.delete!(fb)
+      @origin.delete!(fb, params)
     end
   end
 
