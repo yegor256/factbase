@@ -36,4 +36,13 @@ class TestAnd < Factbase::Test
       )
     end
   end
+
+  def test_reads_an_absent_property_through_a_single_operand
+    fb = Factbase.new
+    fb.insert.done = true
+    fb.insert.id = 2
+    ['(and (at 0 done))', '(and (at 0 done) (at 0 done))', '(or (either done false))'].each do |q|
+      assert_equal(1, fb.query(q).each.to_a.size, q)
+    end
+  end
 end
