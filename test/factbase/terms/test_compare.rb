@@ -70,6 +70,6 @@ class TestCompare < Factbase::Test
     e = assert_raises(RuntimeError) { t.evaluate(fact, [], Factbase.new) }
     assert_includes(e.message, 'Cannot compare 42 (Integer) with 7 (Integer)')
     assert_includes(e.message, 'using (compare include?)')
-    assert_includes(e.message, "undefined method 'include?'")
+    assert_match(/undefined method [`']include\?'/, e.message)
   end
 end
