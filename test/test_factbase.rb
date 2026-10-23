@@ -286,6 +286,28 @@ class TestFactbase < Factbase::Test
     assert_equal(1, fb.query('(eq foo 1)').each.to_a.size)
   end
 
+  def test_keeps_write_through_earlier_fact_made_during_txn
+    fb = Factbase.new
+    fb.insert.id = 1
+    f = fb.query('(eq id 1)').each.to_a.first
+    fb.txn do |fbt|
+      fbt.query('(eq id 1)').each { |x| x.seen = true }
+      f.extra = 42
+    end
+    assert_equal(1, fb.query('(and (eq extra 42) (eq seen true))').each.to_a.size)
+  end
+
+  def test_keeps_value_added_through_earlier_fact_to_property_changed_in_txn
+    fb = Factbase.new
+    fb.insert.tag = 'a'
+    f = fb.query('(eq tag "a")').each.to_a.first
+    fb.txn do |fbt|
+      fbt.query('(eq tag "a")').each { |x| x.tag = 'b' }
+      f.tag = 'c'
+    end
+    assert_equal(%w[a b c], fb.query('(always)').each.to_a.first['tag'].sort)
+  end
+
   def test_keeps_order_when_modifying_a_fact_in_txn
     fb = Factbase.new
     3.times { |i| fb.insert.then { |f| f.num = i } }
