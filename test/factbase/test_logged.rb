@@ -58,6 +58,34 @@ class TestLogged < Factbase::Test
     refute_includes(buf.to_s, '\'(exists bar)\'')
   end
 
+  def test_logs_an_insert_made_by_a_term_with_default_context
+    n = :_logged_insert_default
+    Factbase::Term.new(:defn, [n, 'fb.insert.value = 2; fb.size']).evaluate(nil, [], Factbase.new)
+    begin
+      buf = Loog::Buffer.new
+      assert_equal(1, Factbase::Logged.new(Factbase.new, buf).query("(#{n})").one)
+      assert_includes(buf.to_s, 'Inserted new fact #1', buf.to_s)
+      assert_includes(buf.to_s, "Set 'value' to 2 (Integer)", buf.to_s)
+    ensure
+      Factbase::Term.new(:undef, [n]).evaluate(nil, [], Factbase.new)
+    end
+  end
+
+  def test_logs_an_insert_made_by_a_term_in_each_with_default_context
+    n = :_logged_insert_each
+    Factbase::Term.new(:defn, [n, 'fb.insert.value = 3 if fb.size == 1; true']).evaluate(nil, [], Factbase.new)
+    begin
+      buf = Loog::Buffer.new
+      fb = Factbase::Logged.new(Factbase.new, buf)
+      fb.insert.seed = 1
+      fb.query("(#{n})").each.to_a
+      assert_equal(2, fb.size)
+      assert_includes(buf.to_s, "Set 'value' to 3 (Integer)", buf.to_s)
+    ensure
+      Factbase::Term.new(:undef, [n]).evaluate(nil, [], Factbase.new)
+    end
+  end
+
   def test_with_txn
     log = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, log)

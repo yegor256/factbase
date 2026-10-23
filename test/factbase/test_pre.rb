@@ -33,6 +33,32 @@ class TestPre < Factbase::Test
     assert_equal(2, arr[1].total)
   end
 
+  def test_runs_block_on_a_fact_inserted_by_a_term_with_default_context
+    n = :_pre_insert_default
+    Factbase::Term.new(:defn, [n, 'fb.insert.value = 2; fb.size']).evaluate(nil, [], Factbase.new)
+    begin
+      fb = Factbase::Pre.new(Factbase.new) { |f| f.stamp = 1 }
+      assert_equal(1, fb.query("(#{n})").one)
+      assert_equal([1], fb.query('(always)').each.to_a.first['stamp'], 'the block must run on the inserted fact')
+    ensure
+      Factbase::Term.new(:undef, [n]).evaluate(nil, [], Factbase.new)
+    end
+  end
+
+  def test_runs_block_on_a_fact_inserted_by_a_term_in_each_with_default_context
+    n = :_pre_insert_each
+    Factbase::Term.new(:defn, [n, 'fb.insert.value = 3 if fb.size == 1; true']).evaluate(nil, [], Factbase.new)
+    begin
+      fb = Factbase::Pre.new(Factbase.new) { |f| f.stamp = 1 }
+      fb.insert.seed = 1
+      fb.query("(#{n})").each.to_a
+      assert_equal(2, fb.size)
+      assert_equal(2, fb.query('(exists stamp)').each.to_a.size, 'every fact must carry the stamp')
+    ensure
+      Factbase::Term.new(:undef, [n]).evaluate(nil, [], Factbase.new)
+    end
+  end
+
   def test_runs_block_on_imported_facts
     src = Factbase.new
     src.insert.foo = 1
