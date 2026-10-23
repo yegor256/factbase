@@ -35,7 +35,7 @@ class Factbase::Fact
   end
 
   # Convert it to a string.
-  # @return [String] String representation of it (in JSON)
+  # @return [String] Short human-readable line with all properties, sorted by name
   def to_s
     "[ #{@map.map { |k, v| "#{k}: #{v}" }.sort!.join(', ')} ]"
   end
