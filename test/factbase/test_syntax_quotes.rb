@@ -22,4 +22,13 @@ class TestSyntaxQuotes < Factbase::Test
     fb.insert.foo = 'a" "b'
     assert_equal(1, fb.query(%q{(eq foo 'a" "b')}).each.to_a.size)
   end
+
+  def test_finds_a_value_ending_in_backslashes_by_its_printed_query
+    ['dir\\', 'dir\\\\'].each do |v|
+      fb = Factbase.new
+      fb.insert.path = v
+      q = Factbase::Term.new(:eq, [:path, v]).to_s
+      assert_equal(1, fb.query(q).each.to_a.size, "the value #{v.inspect} is not found by #{q}")
+    end
+  end
 end
