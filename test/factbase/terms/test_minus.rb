@@ -47,4 +47,15 @@ class TestMinus < Factbase::Test
       )
     end
   end
+
+  def test_rejects_underscores_in_a_duration_of_minus
+    fb = Factbase.new
+    f = fb.insert
+    f.start = Time.utc(2024, 1, 1)
+    f.span = '1_0 hours'
+    assert_includes(
+      assert_raises(StandardError) { fb.query('(as later (minus start span))').each.to_a }.message,
+      "Amount '1_0' in '1_0 hours' must be a whole number"
+    )
+  end
 end
