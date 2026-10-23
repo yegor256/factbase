@@ -129,4 +129,23 @@ class TestSprintf < Factbase::Test
     assert_includes(e.message, "Cannot format [100000000000000000000, 42] with '%*d' in (sprintf ...):")
     assert_includes(e.message, 'too big to convert')
   end
+
+  def test_reads_a_string_with_a_leading_zero_as_decimal
+    {
+      ['%d', '010'] => '10',
+      ['%05d|%s', '010', '010'] => '00010|010',
+      ['%%d %x', '010'] => '%d a',
+      ['%2$s %1$d', '010', '010'] => '010 10',
+      ['%*d', 4, '010'] => '  10'
+    }.each do |ops, out|
+      assert_equal(out, Factbase::Sprintf.new(ops).evaluate(fact, [], Factbase.new), ops.inspect)
+    end
+  end
+
+  def test_refuses_a_hexadecimal_or_binary_string_for_an_integer
+    %w[0x1A 0b101].each do |v|
+      e = assert_raises(RuntimeError) { Factbase::Sprintf.new(['%d', v]).evaluate(fact, [], Factbase.new) }
+      assert_includes(e.message, "Cannot format [\"#{v}\"] with '%d' in (sprintf ...):", e.message)
+    end
+  end
 end
