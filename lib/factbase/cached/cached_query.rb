@@ -74,8 +74,9 @@ class Factbase::CachedQuery
   # Delete all facts that match the query.
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
-    @cache.clear
     @origin.delete!(fb)
+  ensure
+    @cache.clear
   end
 
   private
