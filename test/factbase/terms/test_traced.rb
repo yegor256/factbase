@@ -19,6 +19,20 @@ class TestTraced < Factbase::Test
     end
   end
 
+  def test_traced_with_term_base
+    t = Factbase::Traced.new([Factbase::Always.new([])])
+    assert_output("(traced (always)) -> true\n") do
+      assert(t.evaluate(fact, [], Factbase.new))
+    end
+  end
+
+  def test_traced_with_never_term_base
+    t = Factbase::Traced.new([Factbase::Never.new([])])
+    assert_output("(traced (never)) -> false\n") do
+      refute(t.evaluate(fact, [], Factbase.new))
+    end
+  end
+
   def test_traced_raises
     assert_match(
       /A term is expected, but 'foo' provided/,
