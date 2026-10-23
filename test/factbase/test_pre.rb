@@ -6,6 +6,7 @@
 require_relative '../test__helper'
 require 'loog'
 require_relative '../../lib/factbase/pre'
+require_relative '../../lib/factbase/term'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)

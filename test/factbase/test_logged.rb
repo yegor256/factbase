@@ -8,6 +8,7 @@ require 'loog'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/cached/cached_factbase'
 require_relative '../../lib/factbase/logged'
+require_relative '../../lib/factbase/term'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
