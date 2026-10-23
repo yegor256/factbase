@@ -177,6 +177,21 @@ class TestLogged < Factbase::Test
     assert_equal(3 * 60 * 60, t.utc_offset, 'the logged time was moved to UTC')
   end
 
+  def test_logs_the_fraction_of_a_time
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.when = Time.utc(2026, 10, 19, 12, 0, 0.25r)
+    fb.insert.when = Time.utc(2026, 10, 19, 12, 0, 0.75r)
+    assert_includes(buf.to_s, "Set 'when' to 2026-10-19T12:00:00.250000000Z (Time)", buf.to_s)
+    assert_includes(buf.to_s, "Set 'when' to 2026-10-19T12:00:00.750000000Z (Time)", buf.to_s)
+  end
+
+  def test_logs_a_time_of_whole_seconds_without_fraction
+    buf = Loog::Buffer.new
+    Factbase::Logged.new(Factbase.new, buf).insert.when = Time.new(2026, 10, 19, 15, 0, 0, '+03:00')
+    assert_includes(buf.to_s, "Set 'when' to 2026-10-19T12:00:00Z (Time)", buf.to_s)
+  end
+
   def test_reports_the_size_of_the_maps_it_ran_over
     buf = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, buf)
