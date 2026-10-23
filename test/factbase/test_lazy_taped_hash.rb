@@ -119,7 +119,7 @@ class TestLazyTapedHash < Factbase::Test
   end
 
   def test_does_not_expose_the_original_arrays
-    %i[values map to_h].each do |name|
+    %i[values map to_h to_h_with_block].each do |name|
       fb = Factbase.new
       fb.insert.x = 1
       fb.txn do |transaction|
@@ -136,6 +136,7 @@ class TestLazyTapedHash < Factbase::Test
     case name
     when :values then hash.values.first
     when :map then hash.map { |_key, items| items }.first
+    when :to_h_with_block then hash.to_h { |key, items| [key, items] }['x']
     else hash.to_h['x']
     end
   end
