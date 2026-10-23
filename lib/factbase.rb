@@ -223,6 +223,7 @@ class Factbase
           h
         end
       pos = original.nil? || garbage.key?(original) ? nil : positions[original]
+      original.each { |k, v| b[k] = b.fetch(k, []) + (v - b.fetch(k, [])) } unless pos.nil?
       if pos.nil?
         garbage[original] = true if original
         @maps << b
