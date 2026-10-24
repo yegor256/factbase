@@ -52,6 +52,17 @@ class TestPlus < Factbase::Test
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
 
+  def test_plus_time_singular_units
+    time = Time.utc(2024, 1, 1)
+    { 'second' => 1, 'minute' => 60, 'day' => 60 * 60 * 24, 'week' => 60 * 60 * 24 * 7 }.each do |unit, secs|
+      assert_equal(
+        time + secs,
+        Factbase::Plus.new([:foo, "1 #{unit}"]).evaluate(fact('foo' => time), [], Factbase.new),
+        unit
+      )
+    end
+  end
+
   def test_rejects_underscores_in_a_duration_of_plus
     fb = Factbase.new
     f = fb.insert
