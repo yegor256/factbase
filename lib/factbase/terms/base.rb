@@ -55,23 +55,6 @@ class Factbase::TermBase
     raise(ArgumentError, "Too few (#{c}) operands for '#{name}' (#{num} expected)") if c < num
   end
 
-  # Turns facts into plain maps, keeping only the properties they really carry.
-  #
-  # A fact coming out of a query is a +Factbase::Tee+, whose +all_properties+
-  # also lists the names of the query parameters. Reading such a name back gives
-  # NIL, which is not a value any property may have.
-  #
-  # @param [Array<Factbase::Fact>] facts The facts to turn into maps
-  # @return [Array<Hash>] The maps
-  def _flatten(facts)
-    facts.map do |f|
-      f.all_properties.each_with_object({}) do |k, h|
-        v = f[k]
-        h[k] = v unless v.nil?
-      end
-    end
-  end
-
   # Read an operand that may be either a property name or a nested term.
   # @param [Integer] pos The position of the operand
   # @param [Factbase::Fact] fact The fact
