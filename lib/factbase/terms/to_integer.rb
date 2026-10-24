@@ -23,6 +23,9 @@ class Factbase::ToInteger < Factbase::TermBase
     assert_args(1)
     vv = _values(0, fact, maps, fb)
     return if vv.nil?
+    if vv.size > 1 && !@operands[0].is_a?(Array)
+      raise(ArgumentError, 'Too many values at first position, one expected')
+    end
     to_integer(vv[0])
   end
 
