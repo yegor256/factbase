@@ -123,6 +123,11 @@ class Factbase::Logged
       @fact.all_properties
     end
 
+    # Original map behind the decorated fact.
+    def _source
+      @fact._source
+    end
+
     others do |*args|
       mono = Process.clock_gettime(Factbase::Logged::MONO) if args[0].to_s.end_with?('=')
       r = @fact.method_missing(*args)

@@ -88,6 +88,11 @@ class Factbase::Tallied
       @fact.all_properties
     end
 
+    # Original map behind the decorated fact.
+    def _source
+      @fact._source
+    end
+
     others do |*args|
       r = @fact.method_missing(*args)
       @churn.append(0, 0, 1) if args[0].to_s.end_with?('=')

@@ -97,6 +97,11 @@ class Factbase::Rules
       @fact.all_properties
     end
 
+    # Original map behind the decorated fact.
+    def _source
+      @fact._source
+    end
+
     others do |*args|
       k = args.first.to_s
       if k.end_with?('=')
