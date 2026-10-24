@@ -96,4 +96,31 @@ class TestAgg < Factbase::Test
       assert_includes(e.message, "The '#{name}' term needs a fact", e.message)
     end
   end
+
+  def test_names_agg_when_it_is_the_aggregate_of_another_agg
+    fb = Factbase.new
+    fb.insert.foo = 1
+    assert_includes(
+      assert_raises(StandardError) { fb.query('(gt foo (agg (always) (agg (always) (count))))').each.to_a }.message,
+      "The 'agg' term needs a fact",
+      'agg as the aggregate of another agg is not explained'
+    )
+  end
+
+  def test_refuses_to_aggregate_without_a_fact
+    assert_raises(ArgumentError, 'agg without a fact is not refused') do
+      Factbase::Agg.new(
+        [Factbase::Term.new(:always, []), Factbase::Term.new(:count, [])]
+      ).evaluate(nil, [{ 'x' => [1] }], Factbase.new)
+    end
+  end
+
+  def test_aggregates_with_agg_inside_its_selector
+    fb = Factbase.new
+    [3, 7, 7].each { |v| fb.insert.v = v }
+    assert_equal(
+      2, fb.query('(agg (eq v (agg (always) (max v))) (count))').one,
+      'agg inside the selector of another agg does not count the facts'
+    )
+  end
 end
