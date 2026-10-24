@@ -51,4 +51,32 @@ class TestJoin < Factbase::Test
       assert_raises(RuntimeError, j) { fb.query("(join '#{j}' (eq id 1))").each.to_a }
     end
   end
+
+  def test_reads_query_params_inside
+    fb = Factbase.new
+    a = fb.insert
+    a.k = 1
+    a.tag = 'x'
+    b = fb.insert
+    b.k = 2
+    b.tag = 'щ'
+    assert_equal(
+      [[2], [2]], fb.query("(join 'kk<=k' (eq tag $t))").each(fb, t: ['щ']).map { |f| f['kk'] },
+      'a query param inside join resolves to nothing'
+    )
+  end
+
+  def test_reads_outer_property_inside_when_no_param_has_its_name
+    fb = Factbase.new
+    a = fb.insert
+    a.k = 1
+    a.tag = 'x'
+    b = fb.insert
+    b.k = 2
+    b.tag = 'x'
+    assert_equal(
+      [[1, 2], [1, 2]], fb.query("(join 'kk<=k' (eq tag $tag))").each(fb, t: ['y']).map { |f| f['kk'] },
+      'the outer property inside join is not read when no param has its name'
+    )
+  end
 end

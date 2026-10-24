@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative 'agg'
 require_relative 'base'
 
 # The 'empty' term checks for emptiness in the results of a query evaluation.
@@ -27,7 +28,7 @@ class Factbase::Empty < Factbase::TermBase
       raise(ArgumentError, "A term is expected, but '#{term}' provided")
     end
     # rubocop:disable Lint/UnreachableLoop
-    fb.query(term, maps).each(fb, fact) do
+    fb.query(term, maps).each(fb, Factbase::Agg::Context.new(fact)) do
       return false
     end
     # rubocop:enable Lint/UnreachableLoop

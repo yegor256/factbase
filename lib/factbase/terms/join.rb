@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative 'agg'
 require_relative 'base'
 
 # The Factbase::Join class is a specialized term that performs
@@ -38,7 +39,7 @@ class Factbase::Join < Factbase::TermBase
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected, but '#{term}' provided")
     end
-    subset = fb.query(term, maps).each(fb, fact).to_a
+    subset = fb.query(term, maps).each(fb, Factbase::Agg::Context.new(fact)).to_a
     subset.each do |s|
       jumps.each do |to, from|
         s[from]&.each do |v|
