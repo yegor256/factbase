@@ -48,7 +48,7 @@ class Factbase::Query
     return to_enum(__method__, fb, params) unless block_given?
     @term.forget
     yielded = 0
-    params = params.transform_keys(&:to_s) if params.is_a?(Hash)
+    params = normalize_params(params)
     maybe = @term.predict(@maps, fb, Factbase::Tee.new({}, params))
     maybe ||= @maps unless maybe.equal?(@maps)
     maybe.each do |m|
@@ -73,7 +73,7 @@ class Factbase::Query
   def one(fb = @fb, params = {})
     fb = factbase(fb)
     @term.forget
-    params = params.transform_keys(&:to_s) if params.is_a?(Hash)
+    params = normalize_params(params)
     r = @term.evaluate(Factbase::Tee.new(Factbase::Fact.new({}), params), @maps, fb)
     unless %w[String Integer Float Time Array NilClass].include?(r.class.to_s)
       raise(StandardError, "Incorrect type #{r.class} returned by #{@term}")
@@ -107,6 +107,14 @@ class Factbase::Query
   end
 
   private
+
+  # @param [Hash, nil] params Query parameters from the caller
+  # @return [Hash] Parameters with string keys, never +nil+
+  def normalize_params(params)
+    params = {} if params.nil?
+    return params unless params.is_a?(Hash)
+    params.transform_keys(&:to_s)
+  end
 
   # Make sure that the factbase is not a +Hash+ of query parameters.
   # @param [Factbase] fb The factbase
