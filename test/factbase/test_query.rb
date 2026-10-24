@@ -76,6 +76,10 @@ class TestQuery < Factbase::Test
       assert_raises(ArgumentError) { fb.query('(agg (eq foo $bar) (count))').one(bar: [42]) }.message,
       'not a Hash'
     )
+    assert_includes(
+      assert_raises(ArgumentError) { fb.query('(eq foo 42)').delete!(bar: [42]) }.message,
+      'not a Hash'
+    )
   end
 
   def test_simple_parsing
