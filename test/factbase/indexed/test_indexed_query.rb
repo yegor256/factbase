@@ -252,4 +252,67 @@ class TestIndexedQuery < Factbase::Test
     fb.query('(eq foo 1)').delete!
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end
+
+  def test_delete_preserves_index_when_zero_facts_deleted
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb.insert.foo = 42
+    fb.query('(eq foo 42)').each.to_a
+    refute_empty(idx)
+    before = idx.dup
+    assert_equal(0, fb.query('(eq foo 99)').delete!)
+    refute_empty(idx)
+    assert_equal(before, idx)
+    assert_equal(before.keys, idx.keys)
+  end
+
+  def test_delete_clears_index_when_facts_deleted
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb.insert.foo = 42
+    fb.query('(eq foo 42)').each.to_a
+    refute_empty(idx)
+    assert_equal(1, fb.query('(eq foo 42)').delete!)
+    assert_empty(idx)
+  end
+
+  def test_indexed_query_delete_direct_preserves_index_when_nothing_deleted
+    raw = Factbase.new
+    raw.insert.foo = 10
+    idx = {}
+    fresh = Set.new
+    indexed = Factbase::IndexedFactbase.new(raw, idx, fresh)
+    indexed.query('(eq foo 10)').each.to_a
+    refute_empty(idx)
+    before = idx.dup
+    query = Factbase::IndexedQuery.new(raw.query('(eq foo 20)'), idx, indexed, fresh)
+    assert_equal(0, query.delete!)
+    assert_equal(0, query.each.to_a.size)
+    assert_equal(before, idx)
+    assert_equal(before.keys, idx.keys)
+  end
+
+  def test_delete_zero_facts_keeps_index_usable_for_subsequent_queries
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb.insert.bar = 'hello'
+    fb.insert.bar = 'world'
+    assert_equal(1, fb.query('(eq bar "hello")').each.to_a.size)
+    refute_empty(idx)
+    before = idx.size
+    assert_equal(0, fb.query('(eq bar "nonexistent")').delete!)
+    assert_equal(before, idx.size)
+    assert_equal(before, idx.keys.size)
+    assert_equal(1, fb.query('(eq bar "world")').each.to_a.size)
+    assert_equal(1, fb.query('(eq bar "hello")').each.to_a.size)
+  end
+
+  def test_delete_clears_fresh_even_when_zero_facts_deleted
+    fresh = Set.new
+    fb = Factbase::IndexedFactbase.new(Factbase.new, {}, fresh)
+    fb.insert.foo = 1
+    assert_equal(1, fresh.size)
+    assert_equal(0, fb.query('(eq foo 99)').delete!)
+    assert_empty(fresh)
+  end
 end

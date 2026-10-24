@@ -70,12 +70,21 @@ class Factbase::IndexedQuery
   end
 
   # Delete all facts that match the query.
+  #
+  # When one or more facts are deleted, the index is cleared so that
+  # stale references are not retained. When the query matches no facts
+  # and the deleted count is zero, the existing index is preserved.
+  #
   # @param [Factbase] fb The factbase
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
-    @origin.delete!(fb)
+    cleared = false
+    @origin.delete!(fb).tap do |count|
+      @idx.clear if count.positive?
+      cleared = true
+    end
   ensure
-    @idx.clear
+    @idx.clear unless cleared
     @fresh.clear
   end
 end
