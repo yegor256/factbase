@@ -123,4 +123,35 @@ class TestTaped < Factbase::Test
       "taped hash of #{names.inspect} was not sorted by its keys, seed #{seed}"
     )
   end
+
+  def test_answers_hash_calls_without_block_like_the_hash
+    map = { 'a' => [1], 'b' => [2] }
+    h = Factbase::Taped::TapedHash.new(map, [])
+    assert_equal(2, h.count)
+    assert_predicate(h, :any?)
+    assert_equal(map, h.to_h)
+    assert_equal(['a', [1]], h.min)
+    assert_equal(map.uniq, h.uniq)
+  end
+
+  def test_answers_hash_calls_with_block_like_the_hash
+    h = Factbase::Taped::TapedHash.new({ 'a' => [1], 'b' => [2] }, [])
+    assert_equal(1, h.count { |_, v| v == [2] })
+    assert_equal(['b', [2]], h.find { |k, _| k == 'b' })
+    assert_equal({ 'a' => 1, 'b' => 2 }, h.to_h { |k, v| [k, v[0]] })
+  end
+
+  def test_answers_count_of_a_fact_inside_txn_after_a_write
+    fb = Factbase.new
+    f = fb.insert
+    f.a = 1
+    f.b = 2
+    fb.insert.c = 3
+    fb.txn do |t|
+      t.query('(exists c)').each { |x| x.d = 4 }
+      h = t.each.first
+      assert_equal(2, h.count)
+      assert_equal({ 'a' => [1], 'b' => [2] }, h.to_h)
+    end
+  end
 end
