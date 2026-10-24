@@ -19,8 +19,9 @@ class Factbase::IndexedOr
         r = nil
         break
       end
-      r = maps & [] if r.nil?
-      r |= n.to_a
+      r = [] if r.nil?
+      r.concat(n.to_a)
+      r.uniq!(&:object_id)
       return maps if r.size > maps.size / 4
     end
     r
