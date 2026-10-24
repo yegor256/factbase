@@ -129,4 +129,37 @@ class TestSprintf < Factbase::Test
     assert_includes(e.message, "Cannot format [100000000000000000000, 42] with '%*d' in (sprintf ...):")
     assert_includes(e.message, 'too big to convert')
   end
+
+  def test_rejects_an_argument_the_format_does_not_use
+    assert_raises(RuntimeError, 'sprintf dropped an argument its format does not use') do
+      Factbase::Sprintf.new(['%s', 'первый', 'second']).evaluate(fact, [], Factbase.new)
+    end
+  end
+
+  def test_rejects_an_argument_left_after_a_star_width
+    assert_raises(RuntimeError, 'sprintf dropped an argument left after the star width') do
+      Factbase::Sprintf.new(['%*d', 5, 42, 7]).evaluate(fact, [], Factbase.new)
+    end
+  end
+
+  def test_formats_with_a_star_width_using_every_argument
+    assert_equal(
+      '   42', Factbase::Sprintf.new(['%*d', 5, 42]).evaluate(fact, [], Factbase.new),
+      'sprintf refused a star width that uses every argument'
+    )
+  end
+
+  def test_rejects_an_unused_argument_in_query
+    fb = Factbase.new
+    fb.insert.name = 'Jeff'
+    assert_raises(StandardError, 'query with sprintf dropped an argument its format does not use') do
+      fb.query("(eq (sprintf 'hi, %s!' name '') 'hi, Jeff!')").each.to_a
+    end
+  end
+
+  def test_rejects_an_argument_a_numbered_format_does_not_use
+    assert_raises(RuntimeError, 'sprintf dropped an argument its numbered format does not use') do
+      Factbase::Sprintf.new(['%1$s and %1$s', 'один', 'two']).evaluate(fact, [], Factbase.new)
+    end
+  end
 end
