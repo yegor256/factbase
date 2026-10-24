@@ -55,15 +55,82 @@ class TestDefn < Factbase::Test
   end
 
   def test_defn_bad_name_with_digits
-    assert_raises(StandardError) do
-      Factbase::Defn.new([:'123abc', 'true']).evaluate(fact, [], Factbase.new)
-    end
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Defn.new([:'123abc', 'true']).evaluate(fact, [], Factbase.new)
+      end.message,
+      'must match /\A[_a-z][a-zA-Z0-9_]*\z/'
+    )
   end
 
   def test_defn_bad_name_with_caps
-    assert_raises(StandardError) do
-      Factbase::Defn.new([:FooBar, 'true']).evaluate(fact, [], Factbase.new)
-    end
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Defn.new([:FooBar, 'true']).evaluate(fact, [], Factbase.new)
+      end.message,
+      'must match /\A[_a-z][a-zA-Z0-9_]*\z/'
+    )
+  end
+
+  def test_defn_with_digits
+    n = :is_ok2
+    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
+    fb = Factbase.new
+    f1 = fb.insert
+    f1.foo = 42
+    f2 = fb.insert
+    f2.foo = 20
+    assert(Factbase::Defn.new([n, 'fact.foo == 42']).evaluate(f1, [], fb))
+    assert(Factbase::Term.new(n, []).evaluate(f1, [], fb))
+    refute(Factbase::Term.new(n, []).evaluate(f2, [], fb))
+    assert_equal(1, fb.query("(#{n})").each.to_a.size)
+  ensure
+    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
+  end
+
+  def test_defn_with_camel_case
+    n = :isOk
+    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
+    fb = Factbase.new
+    f1 = fb.insert
+    f1.bar = 100
+    f2 = fb.insert
+    f2.bar = 10
+    assert(Factbase::Defn.new([n, 'fact.bar > 50']).evaluate(f1, [], fb))
+    assert(Factbase::Term.new(n, []).evaluate(f1, [], fb))
+    refute(Factbase::Term.new(n, []).evaluate(f2, [], fb))
+    assert_equal(1, fb.query("(#{n})").each.to_a.size)
+  ensure
+    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
+  end
+
+  def test_defn_with_leading_underscore
+    n = :_foo
+    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
+    fb = Factbase.new
+    f1 = fb.insert
+    f1.msg = 'hello'
+    f2 = fb.insert
+    f2.msg = 'world'
+    assert(Factbase::Defn.new([n, "fact.msg == 'hello'"]).evaluate(f1, [], fb))
+    assert(Factbase::Term.new(n, []).evaluate(f1, [], fb))
+    refute(Factbase::Term.new(n, []).evaluate(f2, [], fb))
+    assert_equal(1, fb.query("(#{n})").each.to_a.size)
+  ensure
+    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
+  end
+
+  def test_defn_defined_and_queried_via_syntax
+    fb = Factbase.new
+    fb.insert.v = 42
+    fb.insert.v = 15
+    assert_equal(1, fb.query('(and (undef is_ok2) (defn is_ok2 "fact.v == 42") (is_ok2))').each.to_a.size)
+    assert_equal(1, fb.query('(and (undef isOk) (defn isOk "fact.v > 20") (isOk))').each.to_a.size)
+    assert_equal(1, fb.query('(and (undef _foo) (defn _foo "fact.v == 15") (_foo))').each.to_a.size)
+  ensure
+    Factbase::Undef.new([:is_ok2]).evaluate(fact, [], Factbase.new)
+    Factbase::Undef.new([:isOk]).evaluate(fact, [], Factbase.new)
+    Factbase::Undef.new([:_foo]).evaluate(fact, [], Factbase.new)
   end
 
   def test_defn_eval_arbitrary_code
