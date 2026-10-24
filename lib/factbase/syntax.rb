@@ -156,7 +156,9 @@ class Factbase::Syntax
         f
       elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
         Date.iso8601(t, Date::GREGORIAN)
-        Time.iso8601(t)
+        tm = Time.iso8601(t)
+        raise(ArgumentError, "Impossible time (#{t})") unless tm.strftime('%FT%T') == t[0, 19]
+        tm
       elsif t == 'true'
         true
       elsif t == 'false'
