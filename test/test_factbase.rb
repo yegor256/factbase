@@ -286,6 +286,18 @@ class TestFactbase < Factbase::Test
     assert_equal(1, fb.query('(eq foo 1)').each.to_a.size)
   end
 
+  def test_reports_no_churn_for_a_fact_inserted_and_deleted_in_txn
+    fb = Factbase.new
+    fb.insert.a = 1
+    churn =
+      fb.txn do |fbt|
+        fbt.insert.tmp = 1
+        fbt.query('(exists tmp)').delete!
+      end
+    assert_predicate(churn, :zero?, churn.to_s)
+    assert_equal(1, fb.size)
+  end
+
   def test_keeps_order_when_modifying_a_fact_in_txn
     fb = Factbase.new
     3.times { |i| fb.insert.then { |f| f.num = i } }
