@@ -29,7 +29,10 @@ class Factbase::ToInteger < Factbase::TermBase
   private
 
   def to_integer(value)
-    return Integer(value, 10) if value.is_a?(String)
+    if value.is_a?(String)
+      raise(ArgumentError, 'underscores are not allowed') if value.include?('_')
+      return Integer(value, 10)
+    end
     Integer(value)
   rescue ArgumentError, TypeError, FloatDomainError => e
     raise(RuntimeError, "Cannot convert '#{value}' to Integer in (to_integer ...): #{e.message}")
