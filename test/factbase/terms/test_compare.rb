@@ -72,4 +72,23 @@ class TestCompare < Factbase::Test
     assert_includes(e.message, 'using (compare include?)')
     assert_match(/undefined method [`']include\?'/, e.message)
   end
+
+  def test_returns_false_when_left_absent_with_literal
+    refute(Factbase::Compare.new(:==, [:foo, 42]).evaluate(fact('other' => 1), [], Factbase.new))
+  end
+
+  def test_returns_false_when_both_operands_absent
+    refute(Factbase::Compare.new(:==, %i[foo bar]).evaluate(fact('other' => 1), [], Factbase.new))
+  end
+
+  def test_returns_false_when_left_absent_and_right_present
+    refute(Factbase::Compare.new(:==, %i[foo bar]).evaluate(fact('bar' => 1), [], Factbase.new))
+  end
+
+  def test_evaluates_right_operand_when_left_absent
+    fb = Factbase.new
+    prev_term = Factbase::Term.new(:prev, [:score])
+    refute(Factbase::Compare.new(:==, [:missing, prev_term]).evaluate(fact('score' => 10), [], fb))
+    assert_equal([10], prev_term.evaluate(fact('score' => 20), [], fb))
+  end
 end
