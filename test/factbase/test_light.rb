@@ -22,7 +22,7 @@ class TestLight < Factbase::Test
 
   def test_keeps_unknown_operations_unknown
     assert_match(
-      /undefined method 'unknown'/,
+      /undefined method [`']unknown'/,
       assert_raises(NoMethodError) { Factbase::Light.new(Factbase.new).unknown }.message
     )
   end
