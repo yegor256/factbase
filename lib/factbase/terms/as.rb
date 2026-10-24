@@ -24,6 +24,9 @@ class Factbase::As < Factbase::TermBase
     assert_args(2)
     a = @operands[0]
     raise(ArgumentError, "A symbol is expected as first argument of 'as'") unless a.is_a?(Symbol)
+    if a.start_with?('$')
+      raise(ArgumentError, "A property name is expected as first argument of 'as', but the parameter '#{a}' provided")
+    end
     vv = _values(1, fact, maps, fb)
     vv&.each { |v| fact.__send__(:"#{a}=", v) }
     true
