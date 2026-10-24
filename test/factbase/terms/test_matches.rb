@@ -28,6 +28,50 @@ class TestMatches < Factbase::Test
     refute(t.evaluate(fact('foo' => "OK\nFAILED"), [], Factbase.new))
   end
 
+  def test_anchors_dollar_after_closed_character_class
+    t = Factbase::Matches.new([:foo, '^[a]$'])
+    assert(t.evaluate(fact('foo' => 'a'), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "a\nzzz"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "zzz\na"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "x\n[a]\ny"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "x\na\ny"), [], Factbase.new))
+  end
+
+  def test_anchors_dollar_at_end_after_character_class
+    t = Factbase::Matches.new([:foo, '[a]$'])
+    assert(t.evaluate(fact('foo' => 'a'), [], Factbase.new))
+    assert(t.evaluate(fact('foo' => "zzz\na"), [], Factbase.new))
+    assert(t.evaluate(fact('foo' => "x\ny\na"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "a\nzzz"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "x\n[a]\ny"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "x\na\ny"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "zzz\na\n"), [], Factbase.new))
+  end
+
+  def test_anchors_dollar_after_character_class_with_range_or_quantifier
+    t = Factbase::Matches.new([:foo, '^[a-z]+$'])
+    assert(t.evaluate(fact('foo' => 'hello'), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "hello\nworld"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "world\nhello"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "prefix\n[a]\nsuffix"), [], Factbase.new))
+  end
+
+  def test_anchors_dollar_after_negated_character_class
+    t = Factbase::Matches.new([:foo, '^[^0-9]+$'])
+    assert(t.evaluate(fact('foo' => 'abc'), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "abc\n123"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "123\nabc"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "first\n[0]\nlast"), [], Factbase.new))
+  end
+
+  def test_anchors_dollar_after_multiple_character_classes
+    t = Factbase::Matches.new([:foo, '^[a-z][0-9]$'])
+    assert(t.evaluate(fact('foo' => 'a1'), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "a1\nzzz"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "zzz\na1"), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "x\n[a][0]\ny"), [], Factbase.new))
+  end
+
   def test_keeps_anchor_characters_inside_class_and_escape
     t = Factbase::Matches.new([:foo, '^[^$]\\$$'])
     assert(t.evaluate(fact('foo' => 'a$'), [], Factbase.new))
