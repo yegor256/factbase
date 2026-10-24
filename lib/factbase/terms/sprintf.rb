@@ -41,8 +41,30 @@ class Factbase::Sprintf < Factbase::TermBase
   end
 
   def formatted(fmt, ops)
-    format(*([fmt] + ops))
+    format(*([fmt] + decimal(fmt, ops)))
   rescue ArgumentError, KeyError, TypeError, RangeError => e
     raise(RuntimeError, "Cannot format #{ops.inspect} with '#{fmt}' in (sprintf ...): #{e.message}")
+  end
+
+  # Reads as decimal the strings that go to an integer directive.
+  #
+  # Ruby's +format+ reads such a string with base detection, so '010' becomes 8
+  # and '0x1A' becomes 26, while +to_integer+ reads both as decimal only.
+  #
+  # @param [String] fmt The format
+  # @param [Array] ops The arguments
+  # @return [Array] The arguments, with such strings turned into integers
+  def decimal(fmt, ops)
+    ops = ops.dup
+    seq = 0
+    fmt.scan(/%(?:%|(?:(\d+)\$)?[-+ 0#]*(\*)?\d*(?:\.(\*)?\d*)?([a-zA-Z]))/) do |pos, width, prec, type|
+      next if type.nil?
+      seq += 1 if width
+      seq += 1 if prec
+      i = pos.nil? ? seq : Integer(pos, 10) - 1
+      seq += 1 if pos.nil?
+      ops[i] = Integer(ops[i], 10) if 'diubBoxX'.include?(type) && ops[i].is_a?(String)
+    end
+    ops
   end
 end
