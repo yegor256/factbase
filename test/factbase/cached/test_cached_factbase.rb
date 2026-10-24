@@ -127,6 +127,26 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(['kept'], fb.query('(exists foo)').each.to_a.map(&:foo))
   end
 
+  def test_keeps_the_cache_after_a_txn_that_changes_nothing
+    cache = {}
+    fb = Factbase::CachedFactbase.new(Factbase.new, cache)
+    fb.insert.foo = 1
+    fb.query('(exists foo)').each.to_a
+    refute_empty(cache)
+    assert_equal(
+      cache.dup.tap { fb.txn { |fbt| fbt.query('(eq foo 1)').each.to_a } }, cache,
+      'a read-only txn dropped the cache'
+    )
+  end
+
+  def test_query_after_txn_sees_modified_facts
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 1
+    assert_empty(fb.query('(exists bar)').each.to_a)
+    fb.txn { |fbt| fbt.query('(eq foo 1)').each { |f| f.bar = 2 } }
+    assert_equal([2], fb.query('(exists bar)').each.map(&:bar))
+  end
+
   def test_reads_a_property_named_like_a_kernel_method
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.rand = 'hello'
