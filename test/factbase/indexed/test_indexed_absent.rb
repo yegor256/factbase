@@ -3,6 +3,7 @@
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/lazy_taped'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/taped'
 require_relative '../../../lib/factbase/term'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
@@ -39,6 +40,19 @@ class TestIndexedAbsent < Factbase::Test
       n = term.predict(c[:input], nil, {})
       assert_kind_of(c[:expected], n, "Expect #{c[:expected]}, but got #{n.class} for input #{c[:input].class}")
     end
+  end
+
+  def test_matches_plain_when_not_absent_operand_is_not_a_property_name
+    plain = Factbase.new
+    plain.insert.foo = 1
+    plain.insert.bar = 2
+    indexed = Factbase::IndexedFactbase.new(Factbase.new)
+    indexed.insert.foo = 1
+    indexed.insert.bar = 2
+    q = '(not (absent (as tmp 1)))'
+    assert_equal(plain.query(q).count, indexed.query(q).count)
+    assert_equal(plain.query(q).delete!(plain), indexed.query(q).delete!(indexed))
+    assert_equal(plain.size, indexed.size)
   end
 
   private
