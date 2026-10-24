@@ -123,4 +123,39 @@ class TestTaped < Factbase::Test
       "taped hash of #{names.inspect} was not sorted by its keys, seed #{seed}"
     )
   end
+
+  def test_keeps_imported_string_read_by_index_after_rollback
+    assert_equal('до', mutated { |f| f['name'][0] }, 'a string read by index changed after rollback')
+  end
+
+  def test_keeps_imported_string_read_through_each_after_rollback
+    assert_equal('до', mutated { |f| f['name'].each.to_a[0] }, 'a string read through each changed after rollback')
+  end
+
+  def test_keeps_imported_string_read_through_to_a_after_rollback
+    assert_equal('до', mutated { |f| f['name'].to_a[0] }, 'a string read through to_a changed after rollback')
+  end
+
+  def test_keeps_imported_string_seen_by_any_after_rollback
+    assert_equal(
+      'до', mutated { |f| f['name'].any? { |v| v.replace('после') } }, 'a string seen by any changed after rollback'
+    )
+  end
+
+  private
+
+  def mutated
+    fb = Factbase.new
+    fb.import(Factbase.new.tap { |s| s.insert.name = 'до' }.export)
+    fb.txn do |t|
+      t.query('(always)').each { |f| f.mark = 1 }
+      begin
+        yield(t.query('(always)').each.first).to_s.replace('после')
+      rescue FrozenError
+        nil
+      end
+      raise(Factbase::Rollback)
+    end
+    fb.query('(always)').each.first.name
+  end
 end
