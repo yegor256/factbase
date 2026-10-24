@@ -14,7 +14,7 @@ require_relative 'test__helper'
 class TestReadme < Factbase::Test
   def test_every_documented_term_exists
     term = Factbase::Term.new(:always, [])
-    known = term.instance_variable_get(:@terms).keys.map(&:to_s)
+    known = Factbase::Term::TERMS.keys.map(&:to_s)
     File.readlines(File.join(__dir__, '../README.md')).each do |line|
       next unless line.start_with?('* `(')
       op = line[4..].split(/[\s)`]/).first
