@@ -22,4 +22,14 @@ class TestEither < Factbase::Test
       Factbase::Either.new([Factbase::Never.new, Factbase::Always.new]).evaluate(fact, [], Factbase.new)
     )
   end
+
+  def test_either_skips_an_empty_property_set
+    assert_equal(
+      [99],
+      Factbase::Either.new(%i[foo bar]).evaluate(
+        Factbase::Fact.new({ 'foo' => [], 'bar' => [99] }), [], Factbase.new
+      ),
+      '(either foo bar) must read bar when foo is an empty set'
+    )
+  end
 end
