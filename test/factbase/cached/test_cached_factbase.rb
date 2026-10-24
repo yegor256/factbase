@@ -97,6 +97,17 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(2, fb.query('(always)').each.to_a.size)
   end
 
+  def test_one_sees_in_place_property_change_on_wrapped_reference
+    origin = Factbase.new
+    origin.insert.foo = 10
+    fb = Factbase::CachedFactbase.new(origin)
+    agg = '(agg (always) (max foo))'
+    assert_equal(10, fb.query(agg).one)
+    origin.query('(always)').each { |f| f.foo = 20 }
+    assert_equal(20, fb.query(agg).one)
+    assert_equal(1, origin.size)
+  end
+
   def test_insert_after_one_returns_new_value
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.foo = 10
