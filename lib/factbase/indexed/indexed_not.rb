@@ -29,10 +29,18 @@ class Factbase::IndexedNot
   private
 
   def snapshot(params)
-    return params.to_a.sort_by { |pair| pair[0].to_s } if params.is_a?(Hash)
+    return params.to_a.sort_by { |pair| pair[0].to_s }.map { |k, v| [k, isolate(v)] } if params.is_a?(Hash)
     return params unless params.respond_to?(:all_properties)
     keys = params.all_properties.sort
-    keys.map { |k| [k, params["$#{k}"]] }
+    keys.map { |k| [k, isolate(params["$#{k}"])] }
+  end
+
+  def isolate(val)
+    return val.map { |x| isolate(x) } if val.is_a?(Array)
+    return val.transform_values { |x| isolate(x) } if val.is_a?(Hash)
+    val.dup
+  rescue TypeError
+    val
   end
 
   def _feed(facts, entry)
