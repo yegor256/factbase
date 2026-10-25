@@ -21,8 +21,7 @@ class Factbase::IndexedOr
       end
       r = maps & [] if r.nil?
       r |= n.to_a
-      return maps if r.size > maps.size / 4
     end
-    r
+    r && r.size > maps.size / 4 ? maps : r
   end
 end
