@@ -134,6 +134,20 @@ class TestRules < Factbase::Test
     end
   end
 
+  def test_defends_against_id_duplicates_after_a_deletion
+    base = Factbase.new
+    base.insert.then do |f|
+      f.id = 1
+      f.id = 2
+    end
+    base.insert.id = 3
+    rules = Factbase::Rules.new(base, '(always)', uid: 'id')
+    assert_raises(ArgumentError) do
+      rules.txn { |tx| tx.query('(eq id 3)').delete! }
+    end
+    assert_equal(2, base.size)
+  end
+
   def test_in_combination_with_pre
     fb = Factbase::Rules.new(Factbase.new, '(when (exists a) (exists b))')
     fb =
@@ -179,6 +193,44 @@ class TestRules < Factbase::Test
     end
     assert_equal(0, base.size)
     assert_raises(ArgumentError) { rules.insert.bar = 1 }
+  end
+
+  def test_rejects_a_deletion_that_leaves_a_dangling_reference
+    rule = '(when (exists parent) (gt (agg (eq id $parent) (count)) 0))'
+    [nil, 'id'].each do |uid|
+      base = Factbase.new
+      base.insert.id = 1
+      child = base.insert
+      child.id = 2
+      child.parent = 1
+      rules = Factbase::Rules.new(base, rule, uid: uid)
+      assert_raises(ArgumentError, "uid=#{uid.inspect}") do
+        rules.txn { |tx| tx.query('(eq id 1)').delete! }
+      end
+      assert_equal([1, 2], base.query('(always)').each.map(&:id), "uid=#{uid.inspect}")
+    end
+  end
+
+  def test_rejects_a_deletion_that_breaks_a_count_rule
+    [nil, 'id'].each do |uid|
+      base = Factbase.new
+      base.insert.id = 1
+      base.insert.id = 2
+      rules = Factbase::Rules.new(base, '(gte (agg (always) (count)) 2)', uid: uid)
+      assert_raises(ArgumentError, "uid=#{uid.inspect}") do
+        rules.txn { |tx| tx.query('(eq id 1)').delete! }
+      end
+      assert_equal([1, 2], base.query('(always)').each.map(&:id), "uid=#{uid.inspect}")
+    end
+  end
+
+  def test_commits_a_deletion_with_uid_when_the_rule_still_holds
+    base = Factbase.new
+    base.insert.id = 1
+    base.insert.id = 2
+    rules = Factbase::Rules.new(base, '(exists id)', uid: 'id')
+    rules.txn { |tx| tx.query('(eq id 1)').delete! }
+    assert_equal([2], base.query('(always)').each.map(&:id))
   end
 
   def test_does_not_write_a_value_rejected_by_a_rule
