@@ -106,10 +106,14 @@ class Factbase::LazyTaped
     end
 
     def method_missing(method, *, &)
-      mutating = method.to_s.end_with?('=', '!') || MUTATING_METHODS.include?(method)
-      ensure_copied_map if mutating
-      current_map.__send__(method, *, &).tap do
-        @added.append(@copied_map.object_id) if mutating
+      unless method.to_s.end_with?('=', '!') || MUTATING_METHODS.include?(method)
+        return current_map.__send__(method, *, &)
+      end
+      ensure_copied_map
+      before = @copied_map.dup
+      before.each_key { |key| before[key] = detached(before[key]) }
+      @copied_map.__send__(method, *, &).tap do
+        @added.append(@copied_map.object_id) unless @copied_map.eql?(before)
       end
     end
 
