@@ -46,6 +46,23 @@ class TestFactbase < Factbase::Test
     assert_equal('(eq foo 42)', Factbase.new.to_term('(eq foo 42)').to_s)
   end
 
+  def test_finds_strings_read_in_other_encodings
+    fb = Factbase.new
+    fb.insert.city = 'Zürich'
+    fb.insert.city = 'Zürich'.b
+    fb.insert.city = 'Zürich'.encode('ISO-8859-1')
+    assert_equal(3, fb.query("(eq city 'Zürich')").each.to_a.size)
+  end
+
+  def test_finds_a_fact_with_a_query_in_any_encoding
+    fb = Factbase.new
+    fb.insert.city = 'Zürich'
+    q = "(eq city 'Zürich')"
+    [q, q.b, q.encode('ISO-8859-1'), q.encode('UTF-16LE')].each do |qq|
+      assert_equal(1, fb.query(qq).each.to_a.size, "query in #{qq.encoding} found nothing")
+    end
+  end
+
   def test_query_rejects_non_query_objects
     [nil, 42].each do |invalid|
       assert_includes(
