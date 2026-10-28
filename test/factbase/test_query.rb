@@ -78,6 +78,16 @@ class TestQuery < Factbase::Test
     )
   end
 
+  def test_treats_nil_params_like_an_empty_hash
+    fb = Factbase.new
+    fb.insert.foo = 42
+    assert_equal(
+      1,
+      fb.query('(eq foo 42)').each(fb, nil) { |_| true }
+    )
+    assert_equal(1, fb.query('(agg (always) (count))').one(fb, nil))
+  end
+
   def test_simple_parsing
     maps = []
     maps << { 'foo' => [42] }
