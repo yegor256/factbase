@@ -20,6 +20,15 @@ class TestFirst < Factbase::Test
     assert_nil(Factbase::First.new([:absent]).evaluate(fact, {}, Factbase.new))
   end
 
+  def test_cannot_read_parameter_as_property
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "$w#{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}"
+    assert_raises(ArgumentError, "first read the parameter #{name} as a property, seed #{seed}") do
+      Factbase::First.new([name.to_sym]).evaluate(fact, [{ name => [rnd.rand(1..1000)] }], Factbase.new)
+    end
+  end
+
   def test_modifying_returned_array_does_not_alter_fact_via_append
     fb = Factbase.new
     f = fb.insert

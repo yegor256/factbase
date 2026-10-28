@@ -25,6 +25,7 @@ class Factbase::Sum < Factbase::TermBase
     assert_args(1)
     k = @operands[0]
     raise(ArgumentError, "A symbol is expected, but '#{k}' provided") unless k.is_a?(Symbol)
+    raise(ArgumentError, "A property name is expected, but the parameter #{k} provided") if k.start_with?('$')
     sum = 0
     maps.each do |m|
       vv = m[k.to_s]
