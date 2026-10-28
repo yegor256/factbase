@@ -92,4 +92,14 @@ class TestDiv < Factbase::Test
       "big integer #{big} divided by one is not itself, seed #{seed}"
     )
   end
+
+  def test_rejects_a_string_as_the_first_operand
+    fb = Factbase.new
+    f = fb.insert
+    f.a = 3
+    f.b = 'x'
+    e = assert_raises(StandardError) { fb.query('(eq a (div b a))').each.to_a }
+    assert_includes(e.message, 'Cannot apply quo to x (String)')
+    refute_includes(e.message, 'Probably the term')
+  end
 end

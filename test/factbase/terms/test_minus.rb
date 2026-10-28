@@ -58,4 +58,14 @@ class TestMinus < Factbase::Test
       "Amount '1_0' in '1_0 hours' must be a whole number"
     )
   end
+
+  def test_rejects_a_string_as_the_first_operand
+    fb = Factbase.new
+    f = fb.insert
+    f.a = 3
+    f.b = 'x'
+    e = assert_raises(StandardError) { fb.query('(eq a (minus b a))').each.to_a }
+    assert_includes(e.message, 'Cannot apply - to x (String)')
+    refute_includes(e.message, 'Probably the term')
+  end
 end
