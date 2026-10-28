@@ -145,7 +145,7 @@ class Factbase::Syntax
         t
       elsif t.start_with?('\'', '"')
         raise(ArgumentError, 'String literal is not closed') if t.length < 2
-        t[1..-2]
+        t[1..-2].freeze
       elsif t.match?(/^(\+|-)?[0-9]+$/)
         Integer(t, 10)
       elsif t.match?(/^[+-]?[0-9]+(\.[0-9]+([eE][+-]?[0-9]+)?|[eE][+-]?[0-9]+)$/)
