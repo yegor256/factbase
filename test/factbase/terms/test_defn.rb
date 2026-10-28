@@ -25,11 +25,9 @@ class TestDefn < Factbase::Test
   end
 
   def test_defn_simple
-    assert(Factbase::Defn.new([:foo, 'self.to_s']).evaluate(fact('foo' => 4), [], Factbase.new))
-    assert_equal(
-      '(foo \'hello, world!\')',
-      Factbase::Term.new(:foo, ['hello, world!']).evaluate(fact, [], Factbase.new)
-    )
+    n = @defn_name
+    assert(Factbase::Defn.new([n, 'self.to_s']).evaluate(fact('foo' => 4), [], Factbase.new))
+    assert_equal("(#{n} 'hello, world!')", Factbase::Term.new(n, ['hello, world!']).evaluate(fact, [], Factbase.new))
   end
 
   def test_defn_again_by_mistake
@@ -137,5 +135,13 @@ class TestDefn < Factbase::Test
     fb.insert.foo = 42
     e = assert_raises(StandardError) { fb.query('(defn warn "999")').each.to_a }
     assert_includes(e.message, "Term 'warn' is already defined", e.message)
+  end
+
+  def test_keeps_a_repeated_custom_term_that_writes
+    n = @defn_name
+    fb = Factbase.new
+    fb.insert.x = 1
+    fb.query("(defn #{n} 'fact.seen = 1; true')").each.to_a
+    assert_equal([[1, 1]], fb.query("(and (#{n}) (#{n}))").each.map { |f| f['seen'] })
   end
 end
