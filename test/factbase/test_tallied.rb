@@ -14,6 +14,56 @@ require_relative '../../lib/factbase/term'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestTallied < Factbase::Test
+  def test_counts_deletions_before_a_query_error
+    base = Factbase.new
+    [1, 2].each { |value| base.insert.x = value }
+    fb = Factbase::Tallied.new(base)
+    assert_raises(Factbase::Term::Wrapped) { fb.query('(assert "stop" (lt x 2))').delete! }
+    assert_equal([2], base.query('(always)').map(&:x))
+    assert_equal(1, fb.churn.deleted)
+    refute_predicate(fb.churn, :zero?)
+  end
+
+  def test_does_not_count_deletions_when_the_first_fact_raises
+    base = Factbase.new
+    [2, 1].each { |value| base.insert.x = value }
+    fb = Factbase::Tallied.new(base)
+    assert_raises(Factbase::Term::Wrapped) { fb.query('(assert "stop" (lt x 2))').delete! }
+    assert_equal(2, base.size)
+    assert_predicate(fb.churn, :zero?)
+  end
+
+  def test_reverts_partial_deletion_counts_on_transaction_rollback
+    base = Factbase.new
+    [1, 2].each { |value| base.insert.x = value }
+    fb = Factbase::Tallied.new(base)
+    fb.txn do |tx|
+      assert_raises(Factbase::Term::Wrapped) { tx.query('(assert "stop" (lt x 2))').delete! }
+      assert_equal(1, tx.churn.deleted)
+      raise(Factbase::Rollback)
+    end
+    assert_equal(2, base.size)
+    assert_predicate(fb.churn, :zero?)
+  end
+
+  def test_counts_partial_deletion_when_a_term_also_inserts
+    name = :_tallied_delete_insert_error
+    Factbase::Term.new(
+      :defn, [name, 'return true if fact.x == 1; fb.insert.x = 3; raise "stop"']
+    ).evaluate(nil, [], Factbase.new)
+    begin
+      base = Factbase.new
+      [1, 2].each { |value| base.insert.x = value }
+      fb = Factbase::Tallied.new(base)
+      assert_raises(Factbase::Term::Wrapped) { fb.query("(#{name})").delete! }
+      assert_equal([2, 3], base.query('(always)').map(&:x))
+      assert_equal(1, fb.churn.inserted)
+      assert_equal(1, fb.churn.deleted)
+    ensure
+      Factbase::Term.new(:undef, [name]).evaluate(nil, [], Factbase.new)
+    end
+  end
+
   def test_counts_size
     assert_equal(0, Factbase::Tallied.new(Factbase.new).size)
   end
