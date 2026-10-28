@@ -168,6 +168,37 @@ class TestFactbase < Factbase::Test
     assert_equal(2, fb.size)
   end
 
+  def test_txn_noop_calls_do_not_change_churn
+    fb = Factbase.new
+    f = fb.insert
+    f.id = 1
+    f.x = 1
+    # rubocop:disable Elegant/NoRedundantVariable
+    before = fb.export
+    churn =
+      fb.txn do |tx|
+        tx.each do |map|
+          map['x']
+          map.delete('missing')
+          map.merge!({})
+          map.delete_if { false }
+          map.transform_values!
+        end
+      end
+    assert_predicate(churn, :zero?, "churn is #{churn}")
+    assert_equal(before, fb.export)
+    # rubocop:enable Elegant/NoRedundantVariable
+  end
+
+  def test_txn_delete_of_existing_property_adds_one_fact
+    fb = Factbase.new
+    f = fb.insert
+    f.id = 1
+    f.x = 1
+    assert_equal('0i/0d/1a', fb.txn { |tx| tx.each { |map| map.delete('x') } }.to_s)
+    assert_equal({ 'id' => [1] }, fb.each.first)
+  end
+
   def test_deals_with_arrays_in_txn
     fb = Factbase.new
     n = fb.insert
