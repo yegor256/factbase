@@ -15,6 +15,20 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestIndexedFactbase < Factbase::Test
+  def test_preserves_nested_unique_after_a_broad_or_prediction
+    [127, 128, 129, 256].each do |size|
+      [Factbase.new, Factbase::IndexedFactbase.new(Factbase.new)].each do |fb|
+        size.times do |id|
+          item = fb.insert
+          item.id = id
+          item.x = id < 2 ? 1 : 2
+          item.z = id.zero? ? 0 : 4 unless id == 1
+        end
+        assert_empty(fb.query('(and (or (eq z 4) (unique x)) (absent z))').each.map(&:id), "#{fb.class}, #{size} facts")
+      end
+    end
+  end
+
   def test_queries_after_update
     origin = Factbase.new
     fb = Factbase::IndexedFactbase.new(origin)
