@@ -93,6 +93,33 @@ class TestFact < Factbase::Test
     assert_equal([42, 42], map['foo'])
   end
 
+  def test_time_reads_do_not_change_the_stored_zone
+    fact = Factbase::Fact.new({})
+    fact.when = Time.utc(2026, 10, 13, 12)
+    fact.when.localtime('+03:00')
+    fact['when'].first.localtime('-02:00')
+    assert_equal(0, fact.when.utc_offset)
+    assert_equal('2026-10-13T12:00:00Z', fact.when.iso8601)
+  end
+
+  def test_time_read_mutations_are_isolated_from_rollback
+    accesses = %i[scalar array]
+    [false, true].each do |copied|
+      accesses.each do |access|
+        base = Factbase.new
+        base.insert.when = Time.utc(2026, 10, 13, 12)
+        before = base.export # rubocop:disable Elegant/NoRedundantVariable -- snapshot must precede mutation
+        base.txn do |tx|
+          tx.query('(always)').first.changed = 1 if copied
+          fact = tx.query('(always)').first
+          (access == :scalar ? fact.when : fact['when'].first).localtime('+03:00')
+          raise(Factbase::Rollback)
+        end
+        assert_equal(before, base.export, "#{access}, copied=#{copied}")
+      end
+    end
+  end
+
   def test_time_in_utc
     f = Factbase::Fact.new({})
     t = Time.now
