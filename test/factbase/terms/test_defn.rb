@@ -24,6 +24,35 @@ class TestDefn < Factbase::Test
     super
   end
 
+  def test_reused_query_rejects_a_replacement_definition
+    %w[1 2].each do |body|
+      fb = Factbase.new
+      fb.insert.id = 1
+      name = @defn_name
+      text = "(defn #{name} \"1\")"
+      reused = fb.query(text)
+      reused.each.to_a
+      fb.query("(undef #{name})").each.to_a
+      fb.query("(defn #{name} \"#{body}\")").each.to_a
+      [fb.query(text), reused].each do |query|
+        assert_includes(assert_raises(StandardError) { query.each.to_a }.message, "Term '#{name}' is already defined")
+      end
+      assert_equal(Integer(body, 10), fb.query("(#{name})").one)
+      fb.query("(undef #{name})").each.to_a
+    end
+  end
+
+  def test_reused_query_keeps_its_own_definition_idempotent
+    fb = Factbase.new
+    fb.insert.id = 1
+    name = @defn_name
+    query = fb.query("(defn #{name} \"1\")")
+    2.times { assert_equal(1, query.each.to_a.size) }
+    fb.query("(undef #{name})").each.to_a
+    assert_equal(1, query.each.to_a.size)
+    assert_equal(1, fb.query("(#{name})").one)
+  end
+
   def test_defn_simple
     assert(Factbase::Defn.new([:foo, 'self.to_s']).evaluate(fact('foo' => 4), [], Factbase.new))
     assert_equal(

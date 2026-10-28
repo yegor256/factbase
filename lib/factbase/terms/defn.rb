@@ -29,7 +29,8 @@ class Factbase::Defn < Factbase::TermBase
     fn = @operands[0]
     raise(ArgumentError, "A symbol expected as first argument of 'defn'") unless fn.is_a?(Symbol)
     raise(ArgumentError, "Can't use '#{fn}' name as a term") if Factbase::Term.method_defined?(fn)
-    if @defined == fn && @factbase.equal?(fb) && Factbase::Term.private_method_defined?(fn, false)
+    if @factbase.equal?(fb) && Factbase::Term.private_method_defined?(fn, false) \
+      && @defined == Factbase::Term.instance_method(fn)
       return true
     end
     raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term.private_method_defined?(fn)
@@ -41,7 +42,7 @@ class Factbase::Defn < Factbase::TermBase
         "class Factbase::Term\nprivate\ndef #{fn}(fact, maps, fb)\n#{@operands[1]}\nend\nend",
         binding, __FILE__, __LINE__ - 1
       )
-      @defined = fn
+      @defined = Factbase::Term.instance_method(fn)
       @factbase = fb
       # rubocop:enable Security/Eval
     rescue SyntaxError => e
