@@ -82,19 +82,13 @@ class Factbase::LazyTaped
 
   def each
     return to_enum(__method__) unless block_given?
-    yielded_size = 0
     is_copied = copied?
-    unless is_copied
-      @origin.each do |m|
-        yield(_tape(m))
-        yielded_size += 1
-      end
-    end
+    @origin.each { |m| yield(_tape(m)) } unless is_copied
     staged =
       if is_copied
         @staged.dup
       elsif copied?
-        @staged[yielded_size..]
+        @staged.select { |m| @sources[m].equal?(m) }
       else
         @staged
       end
