@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/accum'
 require_relative '../../lib/factbase/fact'
 require_relative '../../lib/factbase/tee'
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
-
 require_relative '../test__helper'
 
 def global_function_for_test_only(foo)
@@ -18,6 +18,22 @@ end
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestTee < Factbase::Test
+  def test_coerces_a_key_when_reading_a_queried_fact
+    fb = Factbase.new
+    fb.insert.foo = 42
+    key = Object.new
+    key.define_singleton_method(:to_s) { 'foo' }
+    assert_equal([42], fb.query('(always)').each.first[key])
+  end
+
+  def test_coerces_a_key_before_reading_a_query_parameter
+    fb = Factbase.new
+    fb.insert.foo = 42
+    key = Object.new
+    key.define_singleton_method(:to_s) { '$bar' }
+    assert_equal([13], fb.query('(always)').each(fb, bar: [13]).first[key])
+  end
+
   def test_two_facts
     prim = Factbase::Fact.new({})
     prim.foo = 42
