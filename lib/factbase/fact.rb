@@ -7,6 +7,7 @@ require 'json'
 require 'others'
 require 'time'
 require_relative '../factbase'
+require_relative 'no_conversion'
 
 # A single fact in a factbase.
 #
@@ -79,4 +80,6 @@ class Factbase::Fact
       value.is_a?(String) ? -value : value
     end
   end
+
+  prepend Factbase::NoConversion
 end

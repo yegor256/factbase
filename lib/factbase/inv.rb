@@ -7,6 +7,7 @@ require 'decoor'
 require 'others'
 require_relative '../factbase'
 require_relative 'enumerated'
+require_relative 'no_conversion'
 
 # A decorator of a Factbase, that checks invariants on every set.
 #
@@ -81,6 +82,8 @@ class Factbase::Inv
       @block.call(k[0..-2], args[1]) if k.end_with?('=')
       @fact.method_missing(*args)
     end
+
+    prepend Factbase::NoConversion
   end
 
   # Query decorator.
