@@ -79,6 +79,12 @@ class Factbase::Syntax
     at += 1
     op = tokens[at]
     raise(StandardError, 'No token found') if op == :')'
+    if op == :'(' || !op.is_a?(Symbol)
+      raise(
+        StandardError,
+        "A term name is expected at ##{at}, while #{op == :'(' ? 'an opening bracket' : op.inspect} found"
+      )
+    end
     operands = []
     at += 1
     loop do
