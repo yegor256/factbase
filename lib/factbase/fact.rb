@@ -34,6 +34,14 @@ class Factbase::Fact
     @map = map
   end
 
+  # The value of a parameter of the query, and nothing else.
+  #
+  # A plain fact is not part of any query, so it carries no parameters.
+  #
+  # @param [String] _name The name of the parameter, with no "$" in front
+  # @return [nil] Always NIL
+  def query_parameter(_name); end
+
   # Convert it to a string.
   # @return [String] Short human-readable line with all properties, sorted by name
   def to_s
