@@ -44,10 +44,10 @@ class TestDiv < Factbase::Test
   def test_div_times_not_supported
     t = Factbase::Div.new([:warranty, Time.new(2024, 1, 1)])
     assert_includes(
-      assert_raises(NoMethodError) do
+      assert_raises(ArgumentError) do
         t.evaluate(fact('warranty' => Time.new(2026, 1, 1)), [], Factbase.new)
       end.message,
-      'undefined method'
+      "can only be on the left of 'plus' or 'minus'"
     )
   end
 
