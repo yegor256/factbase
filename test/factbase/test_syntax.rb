@@ -329,6 +329,18 @@ class TestSyntax < Factbase::Test
     assert_equal('(eq x 1)', Factbase::Syntax.new("# comment\r(eq x 1)").to_term.to_s)
   end
 
+  def test_keeps_broken_message_short
+    [
+      "#{'(not ' * 20_000}(always)#{')' * 20_000}",
+      "(eq x '#{'a' * 100_000}'",
+      '(eq x 1))'
+    ].each do |q|
+      e = assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new(q).to_term }
+      assert_operator(e.message.length, :<, 500, e.message)
+      assert_equal(1, e.message.lines.size, e.message)
+    end
+  end
+
   def test_refuses_float_literals_out_of_range
     %w[1e9999 1e-9999 -2.5e-9999 1E9999].each do |t|
       assert_includes(
