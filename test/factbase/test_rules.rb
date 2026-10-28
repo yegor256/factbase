@@ -32,6 +32,22 @@ class TestRules < Factbase::Test
     end
   end
 
+  def test_rejects_non_boolean_rule_evaluation
+    fb = Factbase::Rules.new(Factbase.new, '(size foo)')
+    e =
+      assert_raises(ArgumentError) do
+        fb.txn { |fbt| fbt.insert.bar = 1 }
+      end
+    assert_includes(e.message, 'Boolean', e.message)
+  end
+
+  def test_zero_is_not_truthy_for_rules
+    fb = Factbase::Rules.new(Factbase.new, '(minus 1 1)')
+    assert_raises(ArgumentError) do
+      fb.txn { |fbt| fbt.insert.z = 1 }
+    end
+  end
+
   def test_keeps_checking_after_a_rollback
     fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
     fb.txn do |fbt|
