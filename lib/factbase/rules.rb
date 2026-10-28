@@ -61,23 +61,34 @@ class Factbase::Rules
     @check = later
     @fb.txn do |fbt|
       churn = Factbase::Churn.new
+      done = false
       begin
-        catch(:commit) do
-          yield(Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn))
+        rollback = true
+        catch(:rollback) do
+          catch(:commit) do
+            yield(Factbase::Tallied.new(Factbase::Rules.new(fbt, @rules, @check, uid: @uid), churn))
+          end
+          rollback = false
         end
+        done = true
+        throw(:rollback) if rollback
       ensure
         @check = before
-      end
-      unless churn.zero?
-        fbt.query('(always)').each do |f|
-          next unless later.include?(f)
-          @check.it(f, fbt)
-        end
+        verify(fbt, later, churn) unless (done && rollback) || $ERROR_INFO
       end
     end
   ensure
     @check = before
   end
+
+  def verify(fbt, later, churn)
+    return if churn.zero?
+    fbt.query('(always)').each do |f|
+      next unless later.include?(f)
+      @check.it(f, fbt)
+    end
+  end
+  private :verify
 
   # Fact decorator.
   #
