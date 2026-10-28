@@ -12,6 +12,8 @@ class Factbase::IndexedOr
 
   def predict(maps, fb, params)
     return if @idx.nil?
+    copying = %i[head sorted inverted]
+    return if @term.operands.any? { |o| copying.include?(o.op) }
     r = nil
     @term.operands.each do |o|
       n = o.predict(maps, fb, params)

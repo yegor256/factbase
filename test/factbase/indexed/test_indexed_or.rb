@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_or'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/taped'
@@ -48,5 +49,38 @@ class TestIndexedOr < Factbase::Test
     )
     term.redress!(Factbase::IndexedTerm, idx: {})
     assert_equal(1, term.predict(Factbase::Taped.new([{ 'foo' => [34] }]), nil, {}).size)
+  end
+
+  def test_dont_predict_when_an_operand_is_head
+    term = Factbase::Term.new(
+      :or,
+      [
+        Factbase::Term.new(:head, [1, Factbase::Term.new(:eq, [:x, 3])]),
+        Factbase::Term.new(:eq, [:x, 5])
+      ]
+    )
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    assert_nil(
+      term.predict(Factbase::Taped.new(Array.new(20) { |i| { 'x' => [i] } }), Factbase.new, {}),
+      'or predicted the copies that head made'
+    )
+  end
+
+  def test_finds_the_same_facts_as_plain_factbase_with_sorted_inside
+    plain = Factbase.new
+    indexed = Factbase::IndexedFactbase.new(Factbase.new)
+    [plain, indexed].each { |fb| 20.times { |i| fb.insert.x = i } }
+    q = '(or (sorted x (eq x 3)) (eq x 5))'
+    assert_equal(
+      plain.query(q).each.map(&:x), indexed.query(q).each.map(&:x),
+      'or with sorted inside finds other facts than plain factbase'
+    )
+  end
+
+  def test_keeps_writes_through_or_with_inverted_inside
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    20.times { |i| fb.insert.x = i }
+    fb.query('(or (inverted (eq x 3)) (eq x 5))').each { |f| f.y = 1 }
+    assert_equal(20, fb.query('(exists y)').each.to_a.size, 'writes through or with inverted inside are lost')
   end
 end
