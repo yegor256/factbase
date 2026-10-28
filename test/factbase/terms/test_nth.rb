@@ -40,6 +40,23 @@ class TestNth < Factbase::Test
     assert_includes(e.message, 'A non-negative position is expected, but -1 provided', e.message)
   end
 
+  def test_reads_the_position_from_a_param
+    fb = Factbase.new
+    [5, 7, 9].each { |i| fb.insert.v = i }
+    assert_equal([7], fb.query('(eq v (nth $n v))').each(fb, 'n' => [1]).map(&:v))
+  end
+
+  def test_reads_the_position_from_a_sub_term
+    fb = Factbase.new
+    [5, 7, 9].each { |i| fb.insert.v = i }
+    assert_equal([7], fb.query('(agg (always) (nth (minus 2 1) v))').one)
+  end
+
+  def test_refuses_a_position_that_is_not_an_integer
+    e = assert_raises(ArgumentError) { Factbase::Nth.new(['1', :letter]).evaluate(fact, [{ 'letter' => 'a' }], Factbase.new) }
+    assert_includes(e.message, 'An integer is expected, but 1 provided', e.message)
+  end
+
   def test_nth_out_of_bounds
     assert_nil(
       Factbase::Nth.new([5, :letter]).evaluate(

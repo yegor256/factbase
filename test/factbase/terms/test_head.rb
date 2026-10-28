@@ -48,4 +48,24 @@ class TestHead < Factbase::Test
     fb.insert.x = 2
     assert_equal(2, fb.query('(head 99999999999999999999 (always))').each.to_a.size)
   end
+
+  def test_takes_as_many_as_a_param_says
+    fb = Factbase.new
+    [5, 7, 9].each { |i| fb.insert.v = i }
+    assert_equal(2, fb.query('(head $n (always))').each(fb, 'n' => [2]).to_a.size)
+    assert_equal(2, fb.query('(agg (head $n (always)) (count))').one(fb, 'n' => [2]))
+  end
+
+  def test_takes_as_many_as_a_sub_term_says
+    fb = Factbase.new
+    [5, 7, 9].each { |i| fb.insert.v = i }
+    assert_equal(2, fb.query('(head (plus 1 1) (always))').each.to_a.size)
+  end
+
+  def test_refuses_a_count_of_several_values
+    fb = Factbase.new
+    fb.insert.v = 1
+    e = assert_raises(StandardError) { fb.query('(head $n (always))').each(fb, 'n' => [1, 2]).to_a }
+    assert_includes(e.message, "An integer is expected as first argument of 'head'", e.message)
+  end
 end
