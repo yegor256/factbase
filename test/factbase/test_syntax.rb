@@ -199,6 +199,14 @@ class TestSyntax < Factbase::Test
     )
   end
 
+  def test_rejects_an_impossible_time
+    %w[2024-01-01T24:00:00Z 2024-01-01T23:59:60Z 2024-12-31T24:00:00Z].each do |t|
+      assert_raises(Factbase::Syntax::Broken, t) do
+        Factbase::Syntax.new("(eq when #{t})").to_term
+      end
+    end
+  end
+
   def test_simple_matching
     m = { 'foo' => ['Hello, world!'], 'bar' => [42], 'z' => [1, 2, 3, 4] }
     {
