@@ -144,6 +144,15 @@ class TestFactbase < Factbase::Test
     assert_equal(1, fb.txn { |fbt| fbt.query('(always)').each.to_a[0].zzz = 33 }.to_i)
   end
 
+  def test_tells_inserted_facts_from_modified_ones_in_txn_churn
+    fb = Factbase.new
+    fb.insert.foo = 1
+    inserted = fb.txn { |fbt| fbt.insert.bar = 2 }
+    assert_equal([1, 0, 0], [inserted.inserted, inserted.deleted, inserted.added], inserted.to_s)
+    modified = fb.txn { |fbt| fbt.query('(eq foo 1)').each { |f| f.baz = 3 } }
+    assert_equal([0, 0, 1], [modified.inserted, modified.deleted, modified.added], modified.to_s)
+  end
+
   def test_appends_in_txn
     fb = Factbase.new
     fb.insert.foo = 443
