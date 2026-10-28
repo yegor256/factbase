@@ -3,8 +3,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../accum'
+require_relative '../fact'
 require_relative '../flatten'
+require_relative '../tee'
 require_relative 'base'
+
 # This class represents a 'sorted' term in the Factbase.
 # It evaluates whether the given facts satisfy the sorted condition.
 class Factbase::Sorted < Factbase::TermBase
@@ -31,7 +35,27 @@ class Factbase::Sorted < Factbase::TermBase
     raise(ArgumentError, "A symbol is expected as first argument of 'sorted'") unless prop.is_a?(Symbol)
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
-    blank, valued = fb.query(term, maps).each(fb, params).to_a.partition { |m| m[prop].nil? }
-    _flatten(valued.sort_by.with_index { |m, i| [Factbase::Flatten.key(m[prop].first), i] } + blank)
+    term.forget
+    params = params.transform_keys(&:to_s) if params.is_a?(Hash)
+    maybe = term.predict(maps, fb, Factbase::Tee.new({}, params))
+    maybe ||= maps unless maybe.equal?(maps)
+    blank = []
+    valued = []
+    maybe.each do |m|
+      acc = Factbase::Accum.new(Factbase::Tee.new(Factbase::Fact.new(m), params), {}, false)
+      r = term.evaluate(acc, maps, fb)
+      unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+        raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{term}")
+      end
+      next unless r
+      v = acc[prop]
+      if v.nil?
+        blank << m
+      else
+        valued << [m, v]
+      end
+    end
+    valued.sort_by!.with_index { |(_m, v), i| [Factbase::Flatten.key(v.first), i] }
+    valued.map!(&:first).concat(blank)
   end
 end
