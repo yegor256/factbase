@@ -17,6 +17,10 @@ class TestToFloat < Factbase::Test
     assert_equal('Float', Factbase::ToFloat.new([[3.14, 'hello']]).evaluate(fact, [], Factbase.new).class.to_s)
   end
 
+  def test_rejects_underscores
+    assert_raises(RuntimeError) { Factbase::ToFloat.new(['2_5.5']).evaluate(fact, [], Factbase.new) }
+  end
+
   def test_rejects_invalid_value
     t = Factbase::ToFloat.new(['abc'])
     assert_includes(
