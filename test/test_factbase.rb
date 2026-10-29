@@ -605,4 +605,14 @@ class TestFactbase < Factbase::Test
     assert_equal(2, q.each.to_a.size, 'a query built before import must see the imported facts, as it sees an insert')
     assert_equal(2, fb.size)
   end
+
+  def test_keeps_a_fact_taken_before_txn_bound_to_the_stored_one
+    fb = Factbase.new
+    f = fb.insert
+    f.id = 1
+    fb.txn { |fbt| fbt.query('(eq id 1)').each { |x| x.foo = 2 } }
+    assert_equal([2], f['foo'], 'the fact does not see what txn wrote')
+    f.bar = 3
+    assert_equal(1, fb.query('(and (eq id 1) (eq foo 2) (eq bar 3))').each.to_a.size, 'a later write was lost')
+  end
 end
