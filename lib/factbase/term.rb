@@ -164,6 +164,20 @@ class Factbase::Term < Factbase::TermBase
     @terms = TERMS.to_h { |name, klass| [name, klass.new(operands).tap { |term| term.name = name }] }
   end
 
+  # Make an isolated copy of the term with fresh state for query enumeration.
+  # @return [Factbase::Term] Isolated term
+  def isolated
+    t = clone
+    t.isolated!
+    t
+  end
+
+  # Isolate operands and terms instances.
+  def isolated!
+    @operands = @operands.map { |o| o.is_a?(Factbase::Term) ? o.isolated : o }
+    @terms = TERMS.to_h { |name, klass| [name, klass.new(@operands).tap { |term| term.name = name }] }
+  end
+
   # Extend it with the module.
   # @param [Module] type The type to extend with
   # @param [Hash] args Attributes to set
