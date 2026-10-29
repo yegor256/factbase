@@ -140,6 +140,18 @@ class TestToXML < Factbase::Test
     end
   end
 
+  def test_custom_sorter
+    fb = Factbase.new
+    f = fb.insert
+    f.name = 'b'
+    f.w = 2
+    f = fb.insert
+    f.name = 'a'
+    f.w = 1
+    out = Factbase::ToXML.new(fb, 'w').xml
+    assert_equal(%w[a b], Nokogiri::XML.parse(out).xpath('/fb/f/name').map(&:text), out)
+  end
+
   def test_keeps_nanoseconds_of_time
     fb = Factbase.new
     fb.insert.when = Time.utc(2026, 9, 30) + Rational(123_456_789, 1_000_000_000)
