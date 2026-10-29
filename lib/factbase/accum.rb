@@ -46,12 +46,8 @@ class Factbase::Accum
       vvv = [vvv] if SCALARS.any? { |t| vvv.is_a?(t) }
       vvv = [vvv] unless vvv.nil? || vvv.respond_to?(:to_a)
       vv += vvv.to_a unless vvv.nil?
-      vv += @props[kk] unless @pass || @props[kk].nil?
-      if vv.empty?
-        @props[kk].nil? ? nil : @props[kk]
-      else
-        vv
-      end
+      vv += @props[kk] - vv unless @props[kk].nil?
+      vv.empty? ? nil : vv
     elsif @props[k].nil?
       @fact.public_send(*args)
     else
