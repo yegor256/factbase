@@ -36,4 +36,17 @@ class TestSyncQuery < Factbase::Test
     fb.query('(eq foo 1)').delete!
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end
+
+  def test_skips_facts_deleted_while_the_block_runs
+    fb = Factbase::SyncFactbase.new(Factbase.new)
+    fb.insert.id = 1
+    fb.insert.id = 2
+    seen = []
+    fb.query('(always)').each(fb) do |f|
+      seen << f.id
+      fb.query("(eq id #{f.id})").delete!(fb) if f.id == 1
+    end
+    assert_equal([1], seen)
+    assert_equal(1, fb.size)
+  end
 end
