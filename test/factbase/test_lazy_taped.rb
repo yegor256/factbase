@@ -321,4 +321,32 @@ class TestLazyTaped < Factbase::Test
     assert_equal([[3], [2], [1]], [tape[-1]['a'], tape[-2]['a'], tape[-3]['a']])
     assert_nil(tape[-4])
   end
+
+  def test_keeps_late_write_to_a_fact_left_unchanged_by_txn
+    fb = Factbase.new
+    fb.insert.id = 1
+    fb.insert.id = 2
+    kept = {}
+    fb.txn do |fbt|
+      fbt.query('(always)').each { |f| kept[f.id] = f }
+      kept[1].seen = true
+    end
+    kept[1].late = 1
+    kept[2].late = 2
+    assert_equal([1, 2], fb.query('(exists late)').each.map(&:id).sort!, 'a write after the commit is lost')
+  end
+
+  def test_keeps_late_write_after_rollback
+    fb = Factbase.new
+    fb.insert.id = 1
+    kept = nil
+    fb.txn do |fbt|
+      kept = fbt.query('(always)').each.first
+      kept.seen = true
+      throw(:rollback)
+    end
+    kept.late = 1
+    assert_equal([1], fb.query('(exists late)').each.map(&:id), 'a write after the rollback is lost')
+    assert_empty(fb.query('(exists seen)').each.to_a, 'a write inside the rolled back txn is kept')
+  end
 end
