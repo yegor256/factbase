@@ -174,6 +174,25 @@ class TestFact < Factbase::Test
     assert_equal('bar', fb.query('(always)').first.foo)
   end
 
+  def test_keeps_shared_imported_string_frozen_through_brackets
+    src = Factbase.new
+    src.insert.kind = 'book'
+    src.insert.kind = 'book'
+    fb = Factbase.new
+    fb.import(src.export)
+    assert_raises(FrozenError) { fb.query('(always)').each.to_a.first['kind'][0] << '-draft' }
+    assert_equal(%w[book book], fb.query('(always)').each.map(&:kind))
+    assert_equal(2, fb.query("(eq kind 'book')").each.to_a.size)
+  end
+
+  def test_keeps_other_values_of_imported_fact_as_they_are_through_brackets
+    fb = Factbase.new
+    fb.import(Marshal.dump([{ 'foo' => [+'bar', 42, 1.5] }]))
+    vv = fb.query('(always)').first['foo']
+    assert_equal(['bar', 42, 1.5], vv)
+    assert_predicate(vv[0], :frozen?)
+  end
+
   def test_keeps_value_of_string_changed_in_rolled_back_txn
     seed = Random.new_seed
     rnd = Random.new(seed)
