@@ -140,4 +140,35 @@ class TestCachedFactbase < Factbase::Test
       fb.query('(and (exists x) (traced (always)))').each.to_a
     end
   end
+
+  def test_runs_a_repeated_defn_after_undef
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    fb.query('(defn cached_redefined "true")').each.to_a
+    fb.query('(undef cached_redefined)').each.to_a
+    fb.query('(defn cached_redefined "true")').each.to_a
+    assert(Factbase::Term.private_method_defined?(:cached_redefined, false))
+  ensure
+    Factbase.new.query('(undef cached_redefined)').each.to_a
+  end
+
+  def test_still_caches_a_query_with_no_defn
+    origin = Factbase.new
+    fb = Factbase::CachedFactbase.new(origin)
+    fb.insert.x = 1
+    assert_equal(1, fb.query('(exists x)').each.to_a.size)
+    origin.insert.x = 2
+    assert_equal(1, fb.query('(exists x)').each.to_a.size, 'A plain query must still be answered from the cache')
+  end
+
+  def test_runs_a_defn_nested_in_another_term_every_time
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    fb.query('(and (exists x) (defn cached_nested "true"))').each.to_a
+    fb.query('(undef cached_nested)').each.to_a
+    fb.query('(and (exists x) (defn cached_nested "true"))').each.to_a
+    assert(Factbase::Term.private_method_defined?(:cached_nested, false))
+  ensure
+    Factbase.new.query('(undef cached_nested)').each.to_a
+  end
 end
