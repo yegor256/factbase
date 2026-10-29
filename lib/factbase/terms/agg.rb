@@ -38,15 +38,15 @@ class Factbase::Agg < Factbase::TermBase
   # @param [Factbase::Fact] fact The fact being evaluated
   # @return [Hash] Parameters indexed by their names
   def params(fact)
-    Context.new(fact, fact.all_properties.to_h { |name| [name, fact["$#{name}"]] }.compact)
+    Context.new(fact)
   end
 
   # Values available to the selector of an aggregation.
   class Context
     # Ctor.
     # @param [Factbase::Fact] fact The outer fact
-    # @param [Hash] params Parameters of the outer query
-    def initialize(fact, params)
+    # @param [Hash] params Parameters of the outer query, read from the fact by default
+    def initialize(fact, params = fact.all_properties.to_h { |name| [name, fact["$#{name}"]] }.compact)
       @fact = fact
       @params = params
     end
