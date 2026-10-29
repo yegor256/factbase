@@ -42,4 +42,81 @@ class TestPre < Factbase::Test
     assert_equal(42, f._id, 'The block must run on an imported fact')
     assert_equal(1, f.foo)
   end
+
+  def test_passes_self_as_second_argument_on_insert
+    seen = nil
+    fb =
+      Factbase::Pre.new(Factbase.new) do |_fact, fbt|
+        seen = fbt
+      end
+    fb.insert
+    assert_instance_of(Factbase::Pre, seen)
+    assert_same(fb, seen)
+  end
+
+  def test_passes_pre_as_second_argument_in_transaction
+    seen = []
+    fb =
+      Factbase::Pre.new(Factbase.new) do |_fact, fbt|
+        seen << fbt
+      end
+    tx = nil
+    fb.txn do |txn|
+      tx = txn
+      txn.insert
+      txn.insert
+    end
+    assert_equal(2, seen.size)
+    seen.each do |fbt|
+      assert_instance_of(Factbase::Pre, fbt)
+      assert_same(tx, fbt)
+    end
+  end
+
+  def test_recursive_insert_through_block_argument
+    runs = 0
+    fb =
+      Factbase::Pre.new(Factbase.new) do |fact, fbt|
+        runs += 1
+        if runs == 1
+          fact.role = 'parent'
+          fbt.insert.role = 'child'
+        end
+        fact.tagged = true
+      end
+    fb.insert
+    assert_equal(2, runs)
+    assert_equal(2, fb.size)
+    assert_equal(2, fb.query('(eq tagged true)').each.to_a.size)
+  end
+
+  def test_recursive_insert_inside_transaction
+    runs = 0
+    fb =
+      Factbase::Pre.new(Factbase.new) do |fact, fbt|
+        runs += 1
+        if runs == 1
+          fact.role = 'first'
+          fbt.insert
+        end
+        fact.done = true
+      end
+    fb.txn(&:insert)
+    assert_equal(2, runs)
+    assert_equal(2, fb.size)
+    assert_equal(2, fb.query('(eq done true)').each.to_a.size)
+  end
+
+  def test_passes_self_as_second_argument_on_import
+    seen = nil
+    fb =
+      Factbase::Pre.new(Factbase.new) do |_fact, fbt|
+        seen = fbt
+      end
+    src = Factbase.new
+    src.insert.foo = 1
+    fb.import(src.export)
+    assert_instance_of(Factbase::Pre, seen)
+    assert_same(fb, seen)
+  end
 end
