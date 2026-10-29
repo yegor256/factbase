@@ -17,6 +17,8 @@ class TestZero < Factbase::Test
     assert(t.evaluate(fact('foo' => [0]), [], Factbase.new))
     assert(t.evaluate(fact('foo' => [10, 5, 6, -8, 'hey', 0, 9, 'fdsf']), [], Factbase.new))
     refute(t.evaluate(fact('foo' => [100]), [], Factbase.new))
+    assert(t.evaluate(fact('foo' => [0.0]), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => [0.5]), [], Factbase.new))
     refute(t.evaluate(fact('foo' => []), [], Factbase.new))
     refute(t.evaluate(fact('bar' => []), [], Factbase.new))
   end
