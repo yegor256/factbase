@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: MIT
 
 require 'decoor'
-require 'loog'
 require_relative '../factbase'
 require_relative 'enumerated'
 

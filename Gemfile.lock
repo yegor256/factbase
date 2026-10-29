@@ -6,8 +6,6 @@ PATH
       decoor (~> 0.1)
       ellipsized (~> 0.3)
       json (~> 2.7)
-      logger (~> 1.0)
-      loog (~> 0.6)
       nokogiri (~> 1.10)
       others (~> 0.1)
       tago (~> 0.1)
@@ -143,6 +141,8 @@ PLATFORMS
 DEPENDENCIES
   benchmark (~> 0.5)
   factbase!
+  logger (~> 1.0)
+  loog (~> 0.6)
   minitest (~> 6.0)
   minitest-reporters (~> 1.7)
   os (~> 1.1)

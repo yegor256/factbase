@@ -29,8 +29,6 @@ Gem::Specification.new do |s|
   s.add_dependency('decoor', '~>0.1')
   s.add_dependency('ellipsized', '~>0.3')
   s.add_dependency('json', '~>2.7')
-  s.add_dependency('logger', '~>1.0')
-  s.add_dependency('loog', '~>0.6')
   s.add_dependency('nokogiri', '~>1.10')
   s.add_dependency('others', '~>0.1')
   s.add_dependency('tago', '~>0.1')
