@@ -77,6 +77,7 @@ class Factbase::LazyTaped
     end
 
     def ensure_copied_map
+      return @copied_map = @lazy_taped.get_copied_map(@origin) if @lazy_taped.finished?
       return if @copied_map
       @copied_map = @lazy_taped.get_copied_map(@origin)
     end
