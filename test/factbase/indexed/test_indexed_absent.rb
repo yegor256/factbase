@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/lazy_taped'
 require_relative '../../../lib/factbase/taped'
@@ -38,6 +39,14 @@ class TestIndexedAbsent < Factbase::Test
       term.redress!(Factbase::IndexedTerm, idx: {})
       n = term.predict(c[:input], nil, {})
       assert_kind_of(c[:expected], n, "Expect #{c[:expected]}, but got #{n.class} for input #{c[:input].class}")
+    end
+  end
+
+  def test_does_not_feed_the_last_fact_twice
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    4.times { |i| fb.insert.x = i }
+    3.times do
+      assert_equal(4, fb.query('(absent y)').each.to_a.size)
     end
   end
 
