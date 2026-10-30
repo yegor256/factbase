@@ -14,6 +14,23 @@ require_relative '../../lib/factbase/logged'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLogged < Factbase::Test
+  # A log that keeps the level of every message, unlike Loog::Buffer.
+  class Recorder
+    attr_reader :lines
+
+    def initialize
+      @lines = []
+    end
+
+    def debug(msg)
+      @lines << [:debug, msg]
+    end
+
+    def warn(msg)
+      @lines << [:warn, msg]
+    end
+  end
+
   def test_simple_setting
     fb = Factbase::Logged.new(Factbase.new, Loog::NULL)
     fb.insert
@@ -75,6 +92,27 @@ class TestLogged < Factbase::Test
     fb = Factbase::Logged.new(Factbase.new, log, time_tolerate: 0.1)
     fb.txn { sleep(0.4) }
     assert_includes(log.to_s, '(slow!)', log)
+  end
+
+  def test_logs_a_slow_operation_as_a_warning
+    log = Recorder.new
+    Factbase::Logged.new(Factbase.new, log, time_tolerate: 0).insert
+    line = log.lines.find { |l| l[1].include?('Inserted new fact') }
+    assert_equal(:warn, line[0], log.lines.inspect)
+    assert_includes(line[1], '(slow!)', log.lines.inspect)
+  end
+
+  def test_logs_a_fast_operation_as_debug
+    log = Recorder.new
+    Factbase::Logged.new(Factbase.new, log).insert
+    assert_equal(:debug, log.lines.find { |l| l[1].include?('Inserted new fact') }[0], log.lines.inspect)
+  end
+
+  def test_logs_the_id_of_a_touched_transaction
+    log = Recorder.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    fb.txn { |fbt| fbt.insert.foo = 42 }
+    assert_match(/Txn #\d+ touched/, log.lines.find { |l| l[1].start_with?('Txn #') }[1], log.lines.inspect)
   end
 
   def test_with_txn_rollback
