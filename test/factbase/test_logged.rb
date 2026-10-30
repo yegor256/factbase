@@ -98,6 +98,7 @@ class TestLogged < Factbase::Test
     log = Recorder.new
     Factbase::Logged.new(Factbase.new, log, time_tolerate: 0).insert
     line = log.lines.find { |l| l[1].include?('Inserted new fact') }
+    refute_nil(line, log.lines.inspect)
     assert_equal(:warn, line[0], log.lines.inspect)
     assert_includes(line[1], '(slow!)', log.lines.inspect)
   end
@@ -105,14 +106,30 @@ class TestLogged < Factbase::Test
   def test_logs_a_fast_operation_as_debug
     log = Recorder.new
     Factbase::Logged.new(Factbase.new, log).insert
-    assert_equal(:debug, log.lines.find { |l| l[1].include?('Inserted new fact') }[0], log.lines.inspect)
+    line = log.lines.find { |l| l[1].include?('Inserted new fact') }
+    refute_nil(line, log.lines.inspect)
+    assert_equal(:debug, line[0], log.lines.inspect)
+  end
+
+  def test_logs_the_level_of_each_message
+    log = Recorder.new
+    tube = Factbase::Logged::Tube.new(log, time_tolerate: 0.1)
+    tube.say(Process.clock_gettime(Factbase::Logged::MONO) - 1, 'slow')
+    tube.say(Process.clock_gettime(Factbase::Logged::MONO), 'fast')
+    assert_equal([[:warn, 'slow (slow!)'], [:debug, 'fast']], log.lines)
   end
 
   def test_logs_the_id_of_a_touched_transaction
     log = Recorder.new
     fb = Factbase::Logged.new(Factbase.new, log)
-    fb.txn { |fbt| fbt.insert.foo = 42 }
-    assert_match(/Txn #\d+ touched/, log.lines.find { |l| l[1].start_with?('Txn #') }[1], log.lines.inspect)
+    id = nil
+    fb.txn do |fbt|
+      id = fbt.instance_variable_get(:@origin).object_id
+      fbt.insert.foo = 42
+    end
+    line = log.lines.find { |l| l[1].start_with?('Txn #') }
+    refute_nil(line, log.lines.inspect)
+    assert_includes(line[1], "Txn ##{id} touched ", log.lines.inspect)
   end
 
   def test_with_txn_rollback
