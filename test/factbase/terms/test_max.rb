@@ -39,6 +39,12 @@ class TestMax < Factbase::Test
     )
   end
 
+  def test_max_picks_latest_time_within_same_second
+    early = Time.utc(2026, 10, 28) + Rational(1, 1_000_000_000)
+    late = early + Rational(1, 1_000_000_000)
+    assert_equal(late, Factbase::Max.new([:when]).evaluate(nil, [{ 'when' => [early] }, { 'when' => [late] }], nil))
+  end
+
   def test_reports_incomparable_values
     fb = Factbase.new
     fb.insert.v = 's'
