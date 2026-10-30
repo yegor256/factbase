@@ -199,6 +199,24 @@ class TestRules < Factbase::Test
     )
   end
 
+  def test_error_message_does_not_truncate_expression_of_32_characters
+    rule = '(exists averylongattributenamex)'
+    assert_equal(32, rule.length)
+    f = Factbase::Rules.new(Factbase.new, rule).insert
+    message = assert_raises(StandardError) { f.bar = 42 }.message
+    assert_includes(message, rule, 'Error message should contain the whole rule expression')
+    refute_includes(message, '...', 'Error message should not truncate an expression of 32 characters')
+  end
+
+  def test_error_message_does_not_name_the_failed_term_for_a_non_conjunction
+    f = Factbase::Rules.new(Factbase.new, '(exists foo)').insert
+    message = assert_raises(StandardError) { f.bar = 42 }.message
+    assert(
+      message.start_with?('The fact doesn\'t match the "(exists foo)" rule'),
+      "Error message should not name the failed term for a non-conjunction: #{message}"
+    )
+  end
+
   def test_error_message_names_failed_part_of_long_conjunction
     f = Factbase::Rules.new(
       Factbase.new,
