@@ -56,6 +56,14 @@ class TestIndexedOne < Factbase::Test
     assert_equal(plain.query(q).each(plain, params).to_a.size, indexed.query(q).each(indexed, params).to_a.size)
   end
 
+  def test_does_not_feed_the_last_fact_twice
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    4.times { |i| fb.insert.x = i }
+    3.times do
+      assert_equal(4, fb.query('(one x)').each.to_a.size)
+    end
+  end
+
   private
 
   def _assert_one
