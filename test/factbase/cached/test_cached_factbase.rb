@@ -97,6 +97,35 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(2, fb.query('(always)').each.to_a.size)
   end
 
+
+  def test_sees_facts_inserted_on_the_wrapped_reference
+    origin = Factbase.new
+    origin.insert.foo = 1
+    fb = Factbase::CachedFactbase.new(origin)
+    assert_equal(1, fb.query('(always)').each.to_a.size)
+    origin.insert.foo = 2
+    assert_equal(2, fb.query('(always)').each.to_a.size)
+  end
+
+  def test_sees_facts_deleted_on_the_wrapped_reference
+    origin = Factbase.new
+    origin.insert.foo = 1
+    origin.insert.foo = 2
+    fb = Factbase::CachedFactbase.new(origin)
+    assert_equal(2, fb.query('(always)').each.to_a.size)
+    origin.query('(eq foo 1)').delete!
+    assert_equal(1, fb.query('(always)').each.to_a.size)
+  end
+
+  def test_one_sees_facts_inserted_on_the_wrapped_reference
+    origin = Factbase.new
+    origin.insert.foo = 10
+    fb = Factbase::CachedFactbase.new(origin)
+    assert_equal(10, fb.query('(agg (always) (max foo))').one)
+    origin.insert.foo = 20
+    assert_equal(20, fb.query('(agg (always) (max foo))').one)
+  end
+
   def test_insert_after_one_returns_new_value
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.foo = 10
