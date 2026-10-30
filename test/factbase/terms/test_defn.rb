@@ -138,4 +138,50 @@ class TestDefn < Factbase::Test
     e = assert_raises(StandardError) { fb.query('(defn warn "999")').each.to_a }
     assert_includes(e.message, "Term 'warn' is already defined", e.message)
   end
+
+  def test_defn_refuses_multiline_symbol_name
+    assert_raises(ArgumentError) do
+      Factbase::Defn.new([:"_bad_multiline_probe\n#", 'true']).evaluate(fact, [], Factbase.new)
+    end
+    refute(Factbase::Term.private_method_defined?(:_bad_multiline_probe, false))
+  end
+
+  def test_defn_refuses_trailing_newline_in_symbol_name
+    assert_raises(ArgumentError) do
+      Factbase::Defn.new([:"_trailing_probe\n", 'true']).evaluate(fact, [], Factbase.new)
+    end
+    refute(Factbase::Term.private_method_defined?(:_trailing_probe, false))
+  end
+
+  def test_defn_refuses_leading_newline_in_symbol_name
+    assert_raises(ArgumentError) do
+      Factbase::Defn.new([:"\n_leading_probe", 'true']).evaluate(fact, [], Factbase.new)
+    end
+    refute(Factbase::Term.private_method_defined?(:_leading_probe, false))
+  end
+
+  def test_defn_refuses_carriage_return_in_symbol_name
+    assert_raises(ArgumentError) do
+      Factbase::Defn.new([:"_carriage_return_probe\r#", 'true']).evaluate(fact, [], Factbase.new)
+    end
+    refute(Factbase::Term.private_method_defined?(:_carriage_return_probe, false))
+  end
+
+  def test_defn_refuses_embedded_newline_in_symbol_name
+    assert_raises(ArgumentError) do
+      Factbase::Defn.new([:"first_part\nsecond_part", 'true']).evaluate(fact, [], Factbase.new)
+    end
+    refute(Factbase::Term.private_method_defined?(:first_part, false))
+    refute(Factbase::Term.private_method_defined?(:second_part, false))
+  end
+
+  def test_defn_refuses_multiline_symbol_in_query
+    fb = Factbase.new
+    fb.insert.id = 1
+    term = Factbase::Term.new(:defn, [:"_bad_query_probe\n#", 'true'])
+    assert_raises(StandardError) do
+      fb.query(term).each.to_a
+    end
+    refute(Factbase::Term.private_method_defined?(:_bad_query_probe, false))
+  end
 end
