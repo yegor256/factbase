@@ -42,10 +42,15 @@ class TestEnumerated < Factbase::Test
 
   def test_yields_plain_hash_maps_from_each_on_every_decorator
     [
-      Factbase::CachedFactbase.new(Factbase.new),
       Factbase::IndexedFactbase.new(Factbase.new),
+      Factbase::CachedFactbase.new(Factbase.new),
+      Factbase::SyncFactbase.new(Factbase.new),
       Factbase::Logged.new(Factbase.new, Loog::NULL),
-      Factbase::SyncFactbase.new(Factbase.new)
+      Factbase::Tallied.new(Factbase.new),
+      Factbase::Impatient.new(Factbase.new),
+      Factbase::Rules.new(Factbase.new, '(always)'),
+      Factbase::Inv.new(Factbase.new) { |_p, _v| true },
+      Factbase::Pre.new(Factbase.new) { |_f, _fbt| true }
     ].each do |fb|
       fb.insert.foo = 42
       yielded = fb.each.to_a
