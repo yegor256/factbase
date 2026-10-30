@@ -64,7 +64,14 @@ class TestAccum < Factbase::Test
       a.foo = 2
       a.foo = 3
       assert_equal([1, 2, 3], a['foo'], "wrong order when pass=#{pass}")
+      assert_equal(2, a.foo, "wrong getter value when pass=#{pass}")
     end
+  end
+
+  def test_getter_returns_first_value_when_as_writes_twice
+    fb = Factbase.new
+    fb.insert.x = 1
+    assert_equal([[1, [1, 2]]], fb.query('(and (as foo 1) (as foo 2))').each.map { |f| [f.foo, f['foo']] })
   end
 
   def test_empties
