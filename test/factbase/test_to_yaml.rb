@@ -67,6 +67,33 @@ class TestToYAML < Factbase::Test
     assert_equal(['naïve', 'plain', 7], YAML.load(Factbase::ToYAML.new(fb).yaml)[0]['name'])
   end
 
+  def test_prints_invalid_utf8_string_as_binary
+    fb = Factbase.new
+    bad = +"bad\xFF"
+    bad.force_encoding('UTF-8')
+    fb.insert.name = bad
+    yaml = Factbase::ToYAML.new(fb).yaml
+    assert_includes(yaml, '!binary', yaml)
+    assert_equal(bad.b, YAML.load(yaml)[0]['name'])
+  end
+
+  def test_prints_broken_utf16_string_as_binary
+    fb = Factbase.new
+    bad = (+"\x00\xD8").force_encoding(Encoding::UTF_16LE)
+    fb.insert.name = bad
+    yaml = Factbase::ToYAML.new(fb).yaml
+    assert_includes(yaml, '!binary', yaml)
+    assert_equal(bad.b, YAML.load(yaml)[0]['name'])
+  end
+
+  def test_prints_binary_string_as_binary
+    fb = Factbase.new
+    fb.insert.name = "bad\xFF".b
+    yaml = Factbase::ToYAML.new(fb).yaml
+    assert_includes(yaml, '!binary', yaml)
+    assert_equal("bad\xFF".b, YAML.load(yaml)[0]['name'])
+  end
+
   def test_prints_facts_modified_inside_txn
     seed = Random.new_seed
     fb = Factbase.new
