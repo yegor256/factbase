@@ -77,4 +77,14 @@ class TestIndexedExists < Factbase::Test
     params = { 'param' => ['yes'] }
     assert_equal(plain.query(q).each(plain, params).to_a.size, indexed.query(q).each(indexed, params).to_a.size)
   end
+
+  def test_matches_plain_when_exists_operand_is_not_a_property_name
+    maps = [{ 'foo' => 1 }, { 'bar' => 2 }]
+    plain = Factbase.new(Marshal.load(Marshal.dump(maps)))
+    indexed = Factbase::IndexedFactbase.new(Factbase.new(Marshal.load(Marshal.dump(maps))))
+    q = '(exists (as tmp 1))'
+    assert_equal(plain.query(q).count, indexed.query(q).count)
+    assert_equal(plain.query(q).delete!(plain), indexed.query(q).delete!(indexed))
+    assert_equal(plain.size, indexed.size)
+  end
 end
