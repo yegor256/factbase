@@ -205,10 +205,10 @@ class TestLogged < Factbase::Test
   def test_logs_nothing_happened
     log = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, log)
-    fb.query('(always)').delete!
-    fb.query('(agg (exists foo) (first foo))').one
+    assert_equal(0, fb.query('(always)').delete!)
+    assert_nil(fb.query('(agg (exists foo) (first foo))').one)
     fb.insert.foo = 1
-    fb.query('(exists bar)').each.to_a
+    assert_equal(0, fb.query('(exists bar)').each.to_a.size)
     [
       'There were no facts, nothing deleted by (always)',
       'Nothing found by \'(agg (exists foo) (first foo))\'',
