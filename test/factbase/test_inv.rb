@@ -53,6 +53,28 @@ class TestInv < Factbase::Test
     assert_equal(0, fb.size, 'A refused fact must not be imported')
   end
 
+  def test_checks_inside_txn
+    fb =
+      Factbase::Inv.new(Factbase.new) do |p, v|
+        raise(StandardError, 'oops') if p == 'b' && v == 42
+      end
+    assert_raises(StandardError) { fb.txn { |t| t.insert.b = 42 } }
+    assert_equal(0, fb.size, 'A refused fact must not be committed')
+  end
+
+  def test_checks_every_value_of_imported_property
+    src = Factbase.new
+    f = src.insert
+    f.b = 1
+    f.b = 42
+    fb =
+      Factbase::Inv.new(Factbase.new) do |p, v|
+        raise(StandardError, 'oops') if p == 'b' && v == 42
+      end
+    assert_raises(StandardError) { fb.import(src.export) }
+    assert_equal(0, fb.size, 'A refused fact must not be imported')
+  end
+
   def test_refuses_a_nil_factbase
     assert_raises(ArgumentError) { Factbase::Inv.new(nil) { |_p, _v| true } }
   end
