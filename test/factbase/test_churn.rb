@@ -26,6 +26,13 @@ class TestChurn < Factbase::Test
 
   def test_checks_for_zero
     assert_predicate(Factbase::Churn.new, :zero?)
+    refute_predicate(Factbase::Churn.new(1, 0, 1), :zero?)
+  end
+
+  def test_is_not_zero_with_a_single_counter
+    [[1, 0, 0], [0, 1, 0], [0, 0, 1]].each do |counts|
+      refute_predicate(Factbase::Churn.new(*counts), :zero?, "churn #{counts.inspect} is counted as zero")
+    end
   end
 
   def test_makes_a_duplicate
