@@ -203,11 +203,9 @@ class TestRules < Factbase::Test
     rule = '(exists averylongattributenamex)'
     assert_equal(32, rule.length)
     f = Factbase::Rules.new(Factbase.new, rule).insert
-    refute_includes(
-      assert_raises(StandardError) { f.bar = 42 }.message,
-      '...',
-      'Error message should not truncate an expression of 32 characters'
-    )
+    message = assert_raises(StandardError) { f.bar = 42 }.message
+    assert_includes(message, rule, 'Error message should contain the whole rule expression')
+    refute_includes(message, '...', 'Error message should not truncate an expression of 32 characters')
   end
 
   def test_error_message_does_not_name_the_failed_term_for_a_non_conjunction
