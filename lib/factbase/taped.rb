@@ -149,6 +149,7 @@ class Factbase::Taped
     def <<(item)
       @origin << item
       @added.append(@oid)
+      self
     end
 
     def uniq!
