@@ -252,4 +252,12 @@ class TestIndexedQuery < Factbase::Test
     fb.query('(eq foo 1)').delete!
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end
+
+  def test_returns_number_of_facts_yielded
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    3.times { |i| fb.insert.x = i }
+    query = fb.query('(exists x)')
+    assert_equal(3, query.each { |f| f })
+    assert_equal(3, query.each { |f| f })
+  end
 end
