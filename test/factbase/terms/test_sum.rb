@@ -7,7 +7,7 @@ require_relative '../../../lib/factbase/terms/sum'
 
 require_relative '../../test__helper'
 
-# Test for unique term.
+# Test for sum term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
