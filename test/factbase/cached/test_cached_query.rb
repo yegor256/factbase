@@ -167,6 +167,14 @@ class TestCachedQuery < Factbase::Test
     assert_equal(value, query.one(fb, {}), "cached nil result of one survives a transaction, seed #{seed}")
   end
 
+  def test_returns_number_of_facts_yielded
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    3.times { |i| fb.insert.x = i }
+    query = fb.query('(exists x)')
+    assert_equal(3, query.each { |f| f })
+    assert_equal(3, query.each { |f| f })
+  end
+
   def test_keeps_rows_apart_for_different_factbase_contexts
     base = Factbase.new
     base.insert.value = 7
