@@ -39,4 +39,22 @@ class TestEnumerated < Factbase::Test
       assert_equal(4, fb.each { |_f| true }, "#{fb.class} didn't count the facts with a block")
     end
   end
+
+  def test_yields_plain_hash_maps_from_each_on_every_decorator
+    [
+      Factbase::CachedFactbase.new(Factbase.new),
+      Factbase::IndexedFactbase.new(Factbase.new),
+      Factbase::Logged.new(Factbase.new, Loog::NULL),
+      Factbase::SyncFactbase.new(Factbase.new)
+    ].each do |fb|
+      fb.insert.foo = 42
+      yielded = fb.each.to_a
+      assert_equal(1, yielded.size, "#{fb.class} didn't yield the inserted fact")
+      yielded.each do |item|
+        assert_kind_of(Hash, item, "#{fb.class} didn't yield a plain hash")
+        assert_equal([42], item['foo'], "#{fb.class} didn't yield the property values")
+        refute_respond_to(item, :all_properties, "#{fb.class} yielded a fact, not a plain hash")
+      end
+    end
+  end
 end

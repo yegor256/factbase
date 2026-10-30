@@ -15,8 +15,12 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 module Factbase::Enumerated
-  # Iterate facts one by one.
-  # @yield [Fact] Facts one-by-one
+  # Iterate over all facts yielding plain hashes.
+  #
+  # The block receives the same plain +Hash+ maps as +Factbase#each+,
+  # not +Factbase::Fact+ objects.
+  #
+  # @yieldparam [Hash] fact Each fact as a plain Hash
   # @return [Integer|Enumerator] Total number of facts, or an enumerator if no block given
   def each(&)
     return to_enum(__method__) unless block_given?
