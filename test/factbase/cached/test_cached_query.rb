@@ -10,6 +10,7 @@ require_relative '../../../lib/factbase/cached/cached_query'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/logged'
 require_relative '../../../lib/factbase/sync/sync_factbase'
+require_relative '../../../lib/factbase/term'
 require_relative '../../test__helper'
 
 # Query test.
@@ -182,5 +183,33 @@ class TestCachedQuery < Factbase::Test
     ensure
       Factbase::Term.new(:undef, [:context_is_single]).evaluate(nil, [], base)
     end
+  end
+
+  def test_queries_a_utf16_and_utf32_string_operand
+    %w[UTF-16LE UTF-32BE].each do |enc|
+      plain = Factbase.new
+      plain.insert.foo = 'дуб'.encode(enc)
+      cached = Factbase::CachedFactbase.new(Factbase.new, {})
+      cached.insert.foo = 'дуб'.encode(enc)
+      term = Factbase::Term.new(:eq, [:foo, 'дуб'.encode(enc)])
+      assert_equal(1, plain.query(term).each.to_a.size, enc)
+      assert_equal(1, cached.query(term).each.to_a.size, enc)
+    end
+  end
+
+  def test_prints_a_non_utf8_string_operand_as_utf8
+    utf16 = Factbase::Term.new(:eq, [:foo, 'дуб'.encode('UTF-16LE')]).to_s
+    assert_predicate(utf16, :valid_encoding?)
+    refute_equal(
+      utf16, Factbase::Term.new(:eq, [:foo, 'дуб'.encode('UTF-32BE')]).to_s,
+      'the same text in two encodings printed identically'
+    )
+  end
+
+  def test_keeps_string_encodings_apart_in_the_cache
+    fb = Factbase::CachedFactbase.new(Factbase.new, {})
+    fb.insert.foo = 'дуб'.encode('UTF-16LE')
+    assert_equal(1, fb.query(Factbase::Term.new(:eq, [:foo, 'дуб'.encode('UTF-16LE')])).each.to_a.size)
+    assert_equal(0, fb.query(Factbase::Term.new(:eq, [:foo, 'дуб'])).each.to_a.size)
   end
 end

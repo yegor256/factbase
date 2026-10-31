@@ -35,7 +35,11 @@ class Factbase::TermBase
         items +=
           @operands.map do |o|
             if o.is_a?(String)
-              "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"').sub(/\\+\z/) { |s| s * 2 }}'"
+              if o.encoding == Encoding::UTF_8 || o.ascii_only?
+                "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"').sub(/\\+\z/) { |s| s * 2 }}'"
+              else
+                o.dump
+              end
             elsif o.is_a?(Time)
               o.getutc.iso8601(o.subsec.zero? ? 0 : 9)
             else
