@@ -29,7 +29,7 @@ class Factbase::Matches < Factbase::TermBase
     str = _values(0, fact, maps, fb)
     return false if str.nil?
     re = _values(1, fact, maps, fb)
-    raise(RuntimeError, 'Regexp is nil') if re.nil?
+    return false if re.nil?
     raise(RuntimeError, 'Exactly one regexp is expected') unless re.size == 1
     rx = regexp(re[0])
     str.any? { |s| s.to_s.match?(rx) }
