@@ -96,11 +96,15 @@ class TestIndexedAnd < Factbase::Test
       end
       fb.insert.x = 0
     end
-    indexed.query(query, indexed.to_enum(:each).to_a[2..]).each.to_a
+    assert_equal(
+      1,
+      indexed.query(query, indexed.to_enum(:each).to_a[2..]).each.to_a.size,
+      'the scoped query must find the one fact with z and w in the scope'
+    )
     assert_equal(2, plain.query(query).each.to_a.size, 'the plain factbase must find both facts with z and w')
     assert_equal(
-      plain.query(query).each.to_a.size,
-      indexed.query(query).each.to_a.size,
+      plain.query(query).each.map { |f| [f['z'], f['w']] },
+      indexed.query(query).each.map { |f| [f['z'], f['w']] },
       'the scoped query must not poison the multi-equality index of the next full query'
     )
   end

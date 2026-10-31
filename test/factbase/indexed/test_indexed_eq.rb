@@ -97,11 +97,15 @@ class TestIndexedEq < Factbase::Test
       end
       fb.insert.x = 0
     end
-    indexed.query('(eq z 7)', indexed.to_enum(:each).to_a[2..]).each.to_a
+    assert_equal(
+      2,
+      indexed.query('(eq z 7)', indexed.to_enum(:each).to_a[2..]).each.to_a.size,
+      'the scoped query must find the two facts with z in the scope'
+    )
     assert_equal(4, plain.query('(eq z 7)').each.to_a.size, 'the plain factbase must find every fact with z')
     assert_equal(
-      plain.query('(eq z 7)').each.to_a.size,
-      indexed.query('(eq z 7)').each.to_a.size,
+      plain.query('(eq z 7)').each.map { |f| f['z'] },
+      indexed.query('(eq z 7)').each.map { |f| f['z'] },
       'the scoped query must not poison the index of the next full query'
     )
   end
