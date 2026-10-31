@@ -212,4 +212,24 @@ class TestCachedQuery < Factbase::Test
     assert_equal(1, fb.query(Factbase::Term.new(:eq, [:foo, 'дуб'.encode('UTF-16LE')])).each.to_a.size)
     assert_equal(0, fb.query(Factbase::Term.new(:eq, [:foo, 'дуб'])).each.to_a.size)
   end
+
+  def test_queries_an_invalid_utf8_string_operand
+    bad = "\xFF".b.force_encoding('UTF-8')
+    plain = Factbase.new
+    plain.insert.city = bad.dup
+    assert_equal(1, plain.query(Factbase::Term.new(:eq, [:city, bad])).each.to_a.size)
+    assert_predicate(Factbase::Term.new(:eq, [:city, bad]).to_s, :valid_encoding?)
+    cached = Factbase::CachedFactbase.new(Factbase.new, {})
+    cached.insert.city = bad.dup
+    assert_equal(1, cached.query(Factbase::Term.new(:eq, [:city, bad])).each.to_a.size)
+  end
+
+  def test_prints_the_same_bytes_in_different_encodings_apart
+    latin = Factbase::Term.new(:eq, [:city, "\xE9".b.force_encoding('ISO-8859-1')]).to_s
+    windows = Factbase::Term.new(:eq, [:city, "\xE9".b.force_encoding('Windows-1251')]).to_s
+    binary = Factbase::Term.new(:eq, [:city, "\xE9".b]).to_s
+    refute_equal(latin, windows, 'ISO-8859-1 and Windows-1251 bytes printed identically')
+    refute_equal(latin, binary, 'ISO-8859-1 and binary bytes printed identically')
+    refute_equal(windows, binary, 'Windows-1251 and binary bytes printed identically')
+  end
 end
