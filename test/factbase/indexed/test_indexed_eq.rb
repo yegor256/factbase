@@ -86,6 +86,26 @@ class TestIndexedEq < Factbase::Test
     assert_equal([1], Factbase::IndexedFactbase.new(origin).query(query).each.to_a.map(&:amount))
   end
 
+  def test_answers_like_the_plain_factbase_after_a_scoped_query
+    plain = Factbase.new
+    indexed = Factbase::IndexedFactbase.new(Factbase.new)
+    [plain, indexed].each do |fb|
+      4.times do |i|
+        f = fb.insert
+        f.z = 7
+        f.w = i.even? ? 1 : 2
+      end
+      fb.insert.x = 0
+    end
+    indexed.query('(eq z 7)', indexed.to_enum(:each).to_a[2..]).each.to_a
+    assert_equal(4, plain.query('(eq z 7)').each.to_a.size, 'the plain factbase must find every fact with z')
+    assert_equal(
+      plain.query('(eq z 7)').each.to_a.size,
+      indexed.query('(eq z 7)').each.to_a.size,
+      'the scoped query must not poison the index of the next full query'
+    )
+  end
+
   def test_keeps_the_order_of_facts_for_a_multi_valued_parameter
     plain = Factbase.new
     indexed = Factbase::IndexedFactbase.new(Factbase.new)
