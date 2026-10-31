@@ -78,6 +78,16 @@ class TestQuery < Factbase::Test
     )
   end
 
+  def test_deletes_from_the_factbase_when_maps_is_an_explicit_subset
+    fb = Factbase.new
+    fb.insert.foo = 1
+    fb.insert.foo = 2
+    subset = fb.each.to_a.first(1)
+    assert_equal(1, fb.query('(eq foo 1)', subset).delete!(fb))
+    assert_equal(1, fb.size)
+    assert_equal([[2]], fb.each.to_a.map { |m| m['foo'] })
+  end
+
   def test_simple_parsing
     maps = []
     maps << { 'foo' => [42] }
