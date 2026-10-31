@@ -50,6 +50,18 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(1, fb.query('(gt foo 5)').each.to_a.size)
   end
 
+  def test_write_through_a_cached_fact_invalidates_the_cache
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    assert_equal(1, fb.query('(exists x)').each.to_a.size)
+    assert_equal(0, fb.query('(exists y)').each.to_a.size)
+    fb.query('(exists x)').each { |g| g.y = 2 }
+    assert_equal(1, fb.query('(exists y)').each.to_a.size)
+    assert_equal(1, fb.query('(exists x)').each.to_a.size)
+    fb.query('(exists x)').each { |g| g.y = 3 }
+    assert_equal(1, fb.query('(exists y)').each.to_a.size)
+  end
+
   def test_queries_after_update_in_txn
     origin = Factbase.new
     fb = Factbase::CachedFactbase.new(origin)
