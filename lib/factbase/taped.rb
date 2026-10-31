@@ -134,8 +134,8 @@ class Factbase::Taped
       self
     end
 
-    def [](key)
-      @origin[key]
+    def [](*)
+      @origin[*]
     end
 
     def to_a
