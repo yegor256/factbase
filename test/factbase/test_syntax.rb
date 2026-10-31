@@ -343,4 +343,32 @@ class TestSyntax < Factbase::Test
     assert_equal('tail\\', Factbase::Syntax.new('(eq x "tail\\\\")').to_term.operands[1])
     assert_equal("x'y", Factbase::Syntax.new("(eq x 'x\\'y')").to_term.operands[1])
   end
+
+  def test_reads_a_query_in_a_binary_encoding
+    fb = Factbase.new
+    fb.insert.city = 'Zürich'
+    assert_equal(1, fb.query("(eq city 'Zürich')".b).each.to_a.size)
+  end
+
+  def test_reads_a_query_in_latin1
+    fb = Factbase.new
+    fb.insert.city = 'Zürich'
+    assert_equal(1, fb.query("(eq city 'Zürich')".encode('ISO-8859-1')).each.to_a.size)
+  end
+
+  def test_reads_a_query_in_utf16
+    fb = Factbase.new
+    fb.insert.city = 'Zürich'
+    assert_equal(1, fb.query("(eq city 'Zürich')".encode('UTF-16LE')).each.to_a.size)
+  end
+
+  def test_refuses_a_query_with_invalid_bytes
+    assert_predicate(
+      assert_raises(Factbase::Syntax::Broken) do
+        Factbase::Syntax.new("(eq city '\xFF')".b).to_term
+      end.message,
+      :valid_encoding?,
+      'the message of a broken query is not valid UTF-8'
+    )
+  end
 end
