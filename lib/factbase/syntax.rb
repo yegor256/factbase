@@ -154,7 +154,7 @@ class Factbase::Syntax
           raise(ArgumentError, "The float literal #{t} is out of range")
         end
         f
-      elsif t.match?(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
+      elsif t.match?(/^-?[0-9]{4,}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/)
         Date.iso8601(t, Date::GREGORIAN)
         Time.iso8601(t)
       elsif t == 'true'
