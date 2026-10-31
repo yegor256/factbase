@@ -84,6 +84,31 @@ class TestIndexedAnd < Factbase::Test
     )
   end
 
+  def test_answers_like_the_plain_factbase_after_a_scoped_query
+    query = '(and (eq z 7) (eq w 1))'
+    plain = Factbase.new
+    indexed = Factbase::IndexedFactbase.new(Factbase.new)
+    [plain, indexed].each do |fb|
+      4.times do |i|
+        f = fb.insert
+        f.z = 7
+        f.w = i.even? ? 1 : 2
+      end
+      fb.insert.x = 0
+    end
+    assert_equal(
+      1,
+      indexed.query(query, indexed.to_enum(:each).to_a[2..]).each.to_a.size,
+      'the scoped query must find the one fact with z and w in the scope'
+    )
+    assert_equal(2, plain.query(query).each.to_a.size, 'the plain factbase must find both facts with z and w')
+    assert_equal(
+      plain.query(query).each.map { |f| [f['z'], f['w']] },
+      indexed.query(query).each.map { |f| [f['z'], f['w']] },
+      'the scoped query must not poison the multi-equality index of the next full query'
+    )
+  end
+
   def test_commits_writes_through_an_intersection_in_txn
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     200.times do |i|
