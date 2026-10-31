@@ -10,9 +10,8 @@ class Factbase::IndexedUnique
     @idx = idx
   end
 
-  # rubocop:disable Elegant/NoNilReturn
+  # rubocop:disable-next Elegant/NoNilReturn
   def predict(_maps, _fb, _params)
     nil
   end
-  # rubocop:enable Elegant/NoNilReturn
 end
