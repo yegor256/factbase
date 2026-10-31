@@ -21,6 +21,26 @@ class TestTaped < Factbase::Test
     assert(Factbase::Taped::TapedArray.new([false], 1, []).any?(false))
   end
 
+  def test_keeps_array_reads_after_transaction_copy
+    base = Factbase.new
+    fact = base.insert
+    fact.x = 7
+    fact.x = 42
+    base.txn do |tx|
+      before = tx.each.first['x']
+      assert_equal(2, before.size)
+      assert_equal(7, before.first)
+      assert(before.include?(42))
+      tx.query('(always)').each { |item| item.trigger = 1 }
+      after = tx.each.first['x']
+      assert_instance_of(Factbase::Taped::TapedArray, after)
+      assert_equal(2, after.size)
+      assert_equal(7, after.first)
+      assert(after.include?(42))
+      assert_equal([7, 42], after.sort)
+    end
+  end
+
   def test_keeps_nil_pattern_results_after_transaction_copy
     base = Factbase.new
     base.insert.x = 1
