@@ -60,6 +60,30 @@ class TestLazyTapedArray < Factbase::Test
     assert_read(hash, 20, arr[1])
   end
 
+  def test_reads_a_slice
+    arr, hash = wrap([1, 2, 3])
+    assert_read(hash, [1, 2], arr[0, 2])
+    assert_read(hash, [1, 2], arr[0..1])
+    assert_read(hash, 3, arr[-1])
+    assert_nil(arr[9])
+    refute_predicate(hash, :copied?)
+  end
+
+  def test_slice_survives_transaction_copy
+    base = Factbase.new
+    fact = base.insert
+    fact.x = 1
+    fact.x = 2
+    base.txn do |tx|
+      reader = tx.each.first['x']
+      assert_equal([1, 2], reader[0, 2])
+      tx.query('(always)').each { |f| f.y = 3 }
+      assert_equal([1, 2], reader[0, 2])
+      assert_equal([1, 2], tx.each.first['x'][0, 2])
+    end
+    assert_equal([1, 2], base.each.first['x'][0, 2])
+  end
+
   def test_to_a
     arr, hash = wrap([1, 2])
     assert_read(hash, [1, 2], arr.to_a)
@@ -76,6 +100,7 @@ class TestLazyTapedArray < Factbase::Test
     assert_raises(FrozenError) { arr[0] << 'bar' }
     assert_raises(FrozenError) { arr.each { |item| item << 'bar' } }
     assert_raises(FrozenError) { arr.to_a[0] << 'bar' }
+    assert_raises(FrozenError) { arr[0, 1][0] << 'bar' }
     assert_raises(FrozenError) { arr.any? { |item| item << 'bar' } }
     assert_equal('foo', arr[0])
     assert_empty(added)
@@ -106,6 +131,11 @@ class TestLazyTapedArray < Factbase::Test
     assert_read(hash, true, arr.any?(false))
     arr, hash = wrap([true])
     assert_read(hash, false, arr.any?(false))
+  end
+
+  def test_any_rejects_a_second_pattern
+    arr, = wrap([1, 2])
+    assert_raises(ArgumentError) { arr.any?(1, 2) }
   end
 
   def test_reads_like_an_array
