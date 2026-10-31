@@ -66,6 +66,22 @@ class TestIndexedOr < Factbase::Test
     assert_equal(1, n.count { |f| f.equal?(maps[3]) })
   end
 
+  # 4 maps keep 1 match under the maps.size / 4 threshold, so the loop reaches the repack return.
+  def test_repacks_the_merged_result
+    term = Factbase::Term.new(:or, [Factbase::Term.new(:eq, [:foo, 1]), Factbase::Term.new(:eq, [:bar, 2])])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    n = term.predict(
+      Factbase::Taped.new(
+        [{ 'foo' => [1], 'bar' => [2] }, { 'foo' => [3] }, { 'foo' => [4] }, { 'foo' => [5] }], inserted: [11]
+      ),
+      nil,
+      {}
+    )
+    assert_kind_of(Factbase::Taped, n)
+    assert_equal(1, n.size)
+    assert_equal([11], n.inserted)
+  end
+
   def test_predicts_on_nested_or
     term = Factbase::Term.new(
       :or,
