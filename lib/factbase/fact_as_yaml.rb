@@ -67,13 +67,13 @@ class Factbase::FactAsYaml
   end
 
   # Convert a string to UTF-8, since YAML can't print one in another encoding;
-  # keep the original when its bytes can't be transcoded.
+  # keep its bytes as binary when they can't be transcoded.
   # @param [String] val The value
-  # @return [String] The value in UTF-8, or as is
+  # @return [String] The value in UTF-8, or as binary
   def unicode(val)
     return val if val.encoding == Encoding::UTF_8
     val.encode(Encoding::UTF_8)
   rescue EncodingError
-    val
+    val.b
   end
 end

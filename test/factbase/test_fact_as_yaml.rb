@@ -208,6 +208,20 @@ class TestFactAsYaml < Factbase::Test
     end
   end
 
+  def test_prints_long_string_with_invalid_bytes
+    [
+      "\xFF".b * 100,
+      ("\x00\xD8\x00" * 50).force_encoding('UTF-16LE')
+    ].each do |raw|
+      f = Factbase.new.insert
+      f.message = raw
+      assert_kind_of(
+        String, YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'],
+        "long invalid bytes #{raw.inspect} are not printed as valid YAML"
+      )
+    end
+  end
+
   def test_prints_valid_yaml_for_long_strings_full_of_escapes
     seed = Random.new_seed
     rnd = Random.new(seed)
