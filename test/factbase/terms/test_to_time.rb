@@ -94,4 +94,48 @@ class TestToTime < Factbase::Test
     end
     assert_equal(29, Factbase::ToTime.new(['2024-02-29T00:00:00Z']).evaluate(fact, [], Factbase.new).day)
   end
+
+  def test_refuses_an_impossible_date_written_with_slashes
+    assert_raises(RuntimeError, 'February 30 with slashes is not refused') do
+      Factbase::ToTime.new(['2026/02/30']).evaluate(fact, [], Factbase.new)
+    end
+  end
+
+  def test_refuses_an_impossible_date_without_padding
+    assert_raises(RuntimeError, 'February 30 without padding is not refused') do
+      Factbase::ToTime.new(['2026-2-30']).evaluate(fact, [], Factbase.new)
+    end
+  end
+
+  def test_refuses_an_impossible_date_with_the_day_first
+    assert_raises(RuntimeError, 'February 30 with the day first is not refused') do
+      Factbase::ToTime.new(['30 Feb 2026']).evaluate(fact, [], Factbase.new)
+    end
+  end
+
+  def test_refuses_an_impossible_date_with_the_month_first
+    assert_raises(RuntimeError, 'February 30 with the month first is not refused') do
+      Factbase::ToTime.new(['Feb 30, 2026']).evaluate(fact, [], Factbase.new)
+    end
+  end
+
+  def test_refuses_an_impossible_date_written_without_separators
+    assert_raises(RuntimeError, 'February 30 without separators is not refused') do
+      Factbase::ToTime.new(['20260230']).evaluate(fact, [], Factbase.new)
+    end
+  end
+
+  def test_reads_a_leap_day_written_with_slashes
+    assert_equal(
+      29, Factbase::ToTime.new(['2028/02/29']).evaluate(fact, [], Factbase.new).day,
+      'a real leap day with slashes is not read as the 29th'
+    )
+  end
+
+  def test_reads_midnight_written_as_the_end_of_a_day
+    assert_equal(
+      2, Factbase::ToTime.new(['2026-01-01 24:00:00']).evaluate(fact, [], Factbase.new).day,
+      'the end of January 1 is not read as the start of January 2'
+    )
+  end
 end
