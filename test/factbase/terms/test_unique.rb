@@ -57,4 +57,11 @@ class TestUnique < Factbase::Test
     assert(t.evaluate(fact('foo' => 2, 'bar' => 'x', 'baz' => true), [], Factbase.new))
     refute(t.evaluate(fact('foo' => 1, 'bar' => 'x', 'baz' => true), [], Factbase.new))
   end
+
+  def test_refuses_fact_missing_one_of_several_operands
+    refute(
+      Factbase::Unique.new(%i[foo bar]).evaluate(fact('foo' => 1), [], Factbase.new),
+      'the fact without bar is reported unique'
+    )
+  end
 end
