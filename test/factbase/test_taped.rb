@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/factbase'
-require_relative '../../lib/factbase/taped'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/taped'
 
 require_relative '../test__helper'
 
