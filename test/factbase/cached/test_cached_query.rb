@@ -191,13 +191,19 @@ class TestCachedQuery < Factbase::Test
       plain.insert.foo = 'дуб'.encode(enc)
       cached = Factbase::CachedFactbase.new(Factbase.new, {})
       cached.insert.foo = 'дуб'.encode(enc)
+      indexed = Factbase::IndexedFactbase.new(Factbase.new, {})
+      indexed.insert.foo = 'дуб'.encode(enc)
       term = Factbase::Term.new(:eq, [:foo, 'дуб'.encode(enc)])
       assert_equal(1, plain.query(term).each.to_a.size, enc)
       assert_equal(1, cached.query(term).each.to_a.size, enc)
+      assert_equal(1, indexed.query(term).each.to_a.size, enc)
+      negated = Factbase::Term.new(:not, [Factbase::Term.new(:eq, [:foo, 'дуб'.encode(enc)])])
+      negated.redress!(Factbase::IndexedTerm, idx: {})
+      assert_equal(0, indexed.query(negated).each.to_a.size, enc)
     end
   end
 
-  def test_prints_a_non_utf8_string_operand_as_utf8
+  def test_prints_a_non_utf8_string_operand_safely
     utf16 = Factbase::Term.new(:eq, [:foo, 'дуб'.encode('UTF-16LE')]).to_s
     assert_predicate(utf16, :valid_encoding?)
     refute_equal(
