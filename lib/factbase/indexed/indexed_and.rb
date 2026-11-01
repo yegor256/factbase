@@ -12,6 +12,7 @@ class Factbase::IndexedAnd
 
   def predict(maps, fb, params)
     return if @idx.nil?
+    return unless @term.operands.all?(Factbase::Term)
     key = [maps.object_id, @term.operands.first, @term.op]
     r = nil
     if @term.operands.all? { |o| o.op == :eq } && @term.operands.size > 1 \
