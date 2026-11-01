@@ -163,6 +163,19 @@ class TestRules < Factbase::Test
     refute_includes(ex.message, 'nil', 'Error message should not contain "nil"')
   end
 
+  def test_rejects_non_boolean_rule_results_before_writing
+    ['(either false true)', '(plus 1 2)'].each do |expression|
+      base = Factbase.new
+      base.insert.x = 2
+      rules = Factbase::Rules.new(base, expression)
+      assert_includes(
+        assert_raises(ArgumentError) { rules.query('(always)').each { |fact| fact.y = 1 } }.message,
+        'must be Boolean'
+      )
+      assert_nil(base.query('(always)').each.first['y'])
+    end
+  end
+
   def test_keeps_uid_tracking_after_a_nested_transaction_is_refused
     base = Factbase.new
     rules = Factbase::Rules.new(base, '(exists foo)', uid: 'id')
