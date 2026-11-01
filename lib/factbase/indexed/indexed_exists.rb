@@ -34,7 +34,8 @@ class Factbase::IndexedExists
     end
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |m|
-      entry[:facts] << m unless m[operand].nil?
+      v = m[operand]
+      entry[:facts] << m unless v.nil? || (v.is_a?(Array) && v.empty?)
     end
     entry[:count] = facts.size
   end
