@@ -6,6 +6,7 @@
 require_relative '../test__helper'
 require 'threads'
 require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/rules'
 require_relative '../../lib/factbase/tallied'
 require_relative '../../lib/factbase/term'
 
@@ -14,6 +15,29 @@ require_relative '../../lib/factbase/term'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestTallied < Factbase::Test
+  def test_restores_churn_when_deferred_rules_reject_the_transaction
+    base = Factbase.new
+    churn = Factbase::Churn.new
+    churn.append(2, 3, 4)
+    tallied = Factbase::Tallied.new(Factbase::Rules.new(base, '(exists x)'), churn)
+    assert_raises(ArgumentError) { tallied.txn { |tx| tx.insert.y = 1 } }
+    assert_equal(0, base.size)
+    assert_equal('2i/3d/4a', churn.to_s)
+    tallied.txn { |tx| tx.insert.x = 1 }
+    assert_equal('3i/3d/5a', churn.to_s)
+  end
+
+  def test_counts_an_explicitly_committed_transaction
+    base = Factbase.new
+    tallied = Factbase::Tallied.new(base)
+    tallied.txn do |tx|
+      tx.insert.x = 1
+      throw(:commit)
+    end
+    assert_equal(1, base.size)
+    assert_equal('1i/0d/1a', tallied.churn.to_s)
+  end
+
   def test_counts_size
     assert_equal(0, Factbase::Tallied.new(Factbase.new).size)
   end
