@@ -31,6 +31,28 @@ class TestSyncQuery < Factbase::Test
     end
   end
 
+  def test_each_waits_for_the_monitor
+    monitor = Monitor.new
+    fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
+    monitor.synchronize do
+      t = Thread.new { fb.query('(always)').each { |_f| true } }
+      sleep(0.05)
+      assert_predicate(t, :alive?, 'query iteration went around the monitor')
+      t.kill
+    end
+  end
+
+  def test_delete_waits_for_the_monitor
+    monitor = Monitor.new
+    fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
+    monitor.synchronize do
+      t = Thread.new { fb.query('(always)').delete! }
+      sleep(0.05)
+      assert_predicate(t, :alive?, 'query deletion went around the monitor')
+      t.kill
+    end
+  end
+
   def test_deletes_too
     fb = Factbase::SyncFactbase.new(Factbase.new)
     fb.insert.foo = 1
