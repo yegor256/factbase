@@ -22,6 +22,7 @@ class Factbase::Join < Factbase::TermBase
   # @return [Boolean] True if succeeded
   def evaluate(fact, maps, fb)
     assert_args(2)
+    the_fact(fact)
     jumps = @operands[0]
     raise(ArgumentError, "A string is expected as first argument of 'join'") unless jumps.is_a?(String)
     jumps =
