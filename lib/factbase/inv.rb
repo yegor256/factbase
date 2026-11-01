@@ -107,5 +107,13 @@ class Factbase::Inv
         yield(Fact.new(f, @block))
       end
     end
+
+    def one(fb = @fb, params = {})
+      @query.one(fb, params)
+    end
+
+    def delete!(fb = @fb)
+      @query.delete!(fb)
+    end
   end
 end
