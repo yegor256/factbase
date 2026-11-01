@@ -90,4 +90,13 @@ class TestBest < Factbase::Test
       Factbase::Best.new { |a, b| a > b }.evaluate(:ok, maps)
     end
   end
+
+  def test_cannot_read_parameter_as_property
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "$w#{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}"
+    assert_raises(ArgumentError, "best read the parameter #{name} as a property, seed #{seed}") do
+      Factbase::Best.new { |a, b| a > b }.evaluate(name.to_sym, [{ name => [rnd.rand(1..1000)] }])
+    end
+  end
 end

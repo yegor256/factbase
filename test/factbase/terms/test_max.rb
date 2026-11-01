@@ -52,4 +52,13 @@ class TestMax < Factbase::Test
       )
     end
   end
+
+  def test_cannot_read_parameter_as_property
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "$w#{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}"
+    assert_raises(ArgumentError, "max read the parameter #{name} as a property, seed #{seed}") do
+      Factbase::Max.new([name.to_sym]).evaluate(nil, [{ name => [rnd.rand(1..1000)] }], nil)
+    end
+  end
 end
