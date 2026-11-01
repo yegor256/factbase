@@ -57,6 +57,8 @@ class Factbase::Arithmetic < Factbase::TermBase
         end
     end
     raise(ArgumentError, 'Cannot divide by zero') if @op == :quo && r.is_a?(Numeric) && r.zero?
-    v.__send__(@op, r)
+    v.__send__(@op, r).tap do |x|
+      raise(ArgumentError, "The result of '#{@op}' is #{x}, not a finite number") if x.is_a?(Float) && !x.finite?
+    end
   end
 end
