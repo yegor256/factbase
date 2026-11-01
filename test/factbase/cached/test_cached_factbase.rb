@@ -141,4 +141,48 @@ class TestCachedFactbase < Factbase::Test
       fb.query('(and (exists x) (traced (always)))').each.to_a
     end
   end
+
+  def test_running_agg_always_count_one_repeatedly_does_not_grow_cache
+    cache = {}
+    fb = Factbase::CachedFactbase.new(Factbase.new, cache)
+    4.times { |i| fb.insert.foo = i }
+    assert_equal(4, fb.query('(agg (always) (count))').one)
+    size = cache.size
+    10.times do
+      assert_equal(4, fb.query('(agg (always) (count))').one)
+      assert_equal(size, cache.size)
+    end
+    assert_equal(size, cache.size)
+    refute(cache.keys.any? { |k| k.is_a?(Array) && k.last == '(count)' })
+  end
+
+  def test_parameterized_agg_inside_query_does_not_grow_cache_by_maps_size
+    cache = {}
+    fb = Factbase::CachedFactbase.new(Factbase.new, cache)
+    5.times { |i| fb.insert.foo = i }
+    fb.query('(eq (agg (eq foo $foo) (count)) 1)').each.to_a
+    expected = cache.size
+    5.times do
+      fb.query('(eq (agg (eq foo $foo) (count)) 1)').each.to_a
+      assert_equal(expected, cache.size)
+    end
+    assert_equal(expected, cache.size)
+  end
+
+  def test_agg_with_sum_operand_does_not_cache_over_temporary_maps
+    cache = {}
+    fb = Factbase::CachedFactbase.new(Factbase.new, cache)
+    3.times { |i| fb.insert.bar = i + 1 }
+    assert_equal(6, fb.query('(agg (always) (sum bar))').one)
+    refute(cache.keys.any? { |k| k.is_a?(Array) && k.last == '(sum bar)' })
+  end
+
+  def test_agg_with_max_operand_does_not_cache_over_temporary_maps
+    cache = {}
+    fb = Factbase::CachedFactbase.new(Factbase.new, cache)
+    fb.insert.bar = 10
+    fb.insert.bar = 42
+    assert_equal(42, fb.query('(agg (always) (max bar))').one)
+    refute(cache.keys.any? { |k| k.is_a?(Array) && k.last == '(max bar)' })
+  end
 end
