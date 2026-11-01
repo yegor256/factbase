@@ -15,6 +15,47 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLazyTapedArray < Factbase::Test
+  def test_retained_array_reads_writes_from_another_handle
+    base = Factbase.new
+    base.insert.x = 1
+    base.txn do |tx|
+      values = tx.each.first['x']
+      tx.query('(always)').first.x = 2
+      assert_equal([1, 2], values.to_a)
+      assert_equal([1, 2], values.each.to_a)
+      assert_equal(2, values[1])
+      assert_equal(2, values.size)
+      assert(values.any?(2))
+    end
+  end
+
+  def test_retained_array_removes_new_duplicates
+    base = Factbase.new
+    base.insert.x = 1
+    churn =
+      base.txn do |tx|
+        values = tx.each.first['x']
+        assert_equal([1], values.to_a)
+        tx.query('(always)').first.x = 1
+        assert_equal([1], values.uniq!)
+      end
+    assert_equal([1], base.each.first['x'])
+    assert_equal([0, 0, 1], [churn.inserted, churn.deleted, churn.added])
+  end
+
+  def test_retained_array_mutations_roll_back
+    base = Factbase.new
+    base.insert.x = 1
+    base.txn do |tx|
+      values = tx.each.first['x']
+      tx.query('(always)').first.x = 2
+      assert_equal([1, 2], values.to_a)
+      values << 3
+      raise(Factbase::Rollback)
+    end
+    assert_equal([1], base.each.first['x'])
+  end
+
   def test_each_retains_the_wrapper_for_chained_writes
     arr, hash, added = wrap([1])
     assert_same(arr, arr.each(&:itself))
