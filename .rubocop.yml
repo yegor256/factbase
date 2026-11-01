@@ -76,6 +76,7 @@ Elegant/GoodMethodName:
     - '_resolve'
     - '_scalar?'
     - '_search'
+    - '_source'
     - '_tape'
     - '_track'
     - '_values'
