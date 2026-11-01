@@ -23,4 +23,11 @@ class TestEither < Factbase::Test
       Factbase::Either.new([Factbase::Never.new, Factbase::Always.new]).evaluate(fact, [], Factbase.new)
     )
   end
+
+  def test_either_does_not_evaluate_unused_fallback
+    assert_equal(
+      [42],
+      Factbase::Either.new([42, Factbase::ToInteger.new(['unused fallback'])]).evaluate(fact, [], Factbase.new)
+    )
+  end
 end
