@@ -48,6 +48,6 @@ class TestIndexedOr < Factbase::Test
       ]
     )
     term.redress!(Factbase::IndexedTerm, idx: {})
-    assert_equal(1, term.predict(Factbase::Taped.new([{ 'foo' => [34] }]), nil, {}).size)
+    assert_nil(term.predict(Factbase::Taped.new([{ 'foo' => [34] }]), nil, {}))
   end
 end
