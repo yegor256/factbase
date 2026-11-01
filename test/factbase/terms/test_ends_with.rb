@@ -13,12 +13,15 @@ class TestEndsWith < Factbase::Test
     t = Factbase::EndsWith.new([:foo, 'llo'])
     assert(t.evaluate(fact('foo' => 'hello'), [], Factbase.new))
     refute(t.evaluate(fact('foo' => 'world'), [], Factbase.new))
+    t = Factbase::EndsWith.new([:foo, 'ell'])
+    refute(t.evaluate(fact('foo' => 'hello'), [], Factbase.new))
   end
 
   def test_any_value_in_array_matches
     t = Factbase::EndsWith.new([:tags, 'by'])
     assert(t.evaluate(fact('tags' => %w[ruby rails]), [], Factbase.new))
     refute(t.evaluate(fact('tags' => %w[python go]), [], Factbase.new))
+    refute(t.evaluate(fact('tags' => %w[rubyist]), [], Factbase.new))
   end
 
   def test_via_query_dispatch
@@ -26,6 +29,7 @@ class TestEndsWith < Factbase::Test
     f = fb.insert
     f.title = 'Object Thinking'
     f.title = 'Elegant Objects'
+    fb.insert.title = 'Objects First with Java'
     assert_equal(1, fb.query("(ends_with title 'Objects')").each.to_a.size)
   end
 end
