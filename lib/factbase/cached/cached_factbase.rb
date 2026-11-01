@@ -20,6 +20,8 @@ class Factbase::CachedFactbase
   decoor(:origin)
   include Factbase::Enumerated
 
+  attr_reader :cache
+
   # Constructor.
   # @param [Factbase] origin Original factbase to decorate
   # @param [Hash] cache Cache to use
