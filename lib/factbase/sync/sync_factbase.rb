@@ -7,6 +7,7 @@ require 'decoor'
 require 'monitor'
 require_relative '../../factbase'
 require_relative '../enumerated'
+require_relative 'sync_fact'
 
 # A synchronous thread-safe factbase.
 #
@@ -30,7 +31,7 @@ class Factbase::SyncFactbase
   # @return [Factbase::Fact] The fact just inserted
   def insert
     try_lock do
-      @origin.insert
+      Factbase::SyncFact.new(@origin.insert, @monitor)
     end
   end
 
