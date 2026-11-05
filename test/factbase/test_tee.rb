@@ -7,6 +7,7 @@ require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/accum'
 require_relative '../../lib/factbase/fact'
 require_relative '../../lib/factbase/tee'
+
 require_relative '../test__helper'
 
 def global_function_for_test_only(foo)

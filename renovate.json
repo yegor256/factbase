@@ -1,5 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "automerge": true,
   "extends": [
     "config:base"
   ],
@@ -8,5 +9,6 @@
     "rdoc",
     "stackprof",
     "yard"
-  ]
+  ],
+  "platformAutomerge": false
 }

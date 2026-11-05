@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/term'
 require_relative '../test__helper'
 
 # Test.
