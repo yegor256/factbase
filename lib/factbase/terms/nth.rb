@@ -16,14 +16,17 @@ class Factbase::Nth < Factbase::TermBase
   end
 
   # Evaluate term on a fact.
-  # @param [Factbase::Fact] _fact The fact
+  # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
-  # @param [Factbase] _fb Factbase to use for sub-queries
+  # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Object] The value of the specified key from the nth map
-  def evaluate(_fact, maps, _fb)
+  def evaluate(fact, maps, fb)
     assert_args(2)
-    pos = @operands[0]
-    raise(ArgumentError, "An integer is expected, but #{pos} provided") unless pos.is_a?(Integer)
+    pos = _values(0, fact, maps, fb)
+    unless pos&.size == 1 && pos[0].is_a?(Integer)
+      raise(ArgumentError, "An integer is expected, but #{@operands[0]} provided")
+    end
+    pos = pos[0]
     raise(ArgumentError, "A non-negative position is expected, but #{pos} provided") if pos.negative?
     k = @operands[1]
     raise(ArgumentError, "A symbol is expected, but #{k} provided") unless k.is_a?(Symbol)
