@@ -15,6 +15,17 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLazyTapedArray < Factbase::Test
+  def test_time_reads_are_detached
+    arr, hash, added = wrap([Time.utc(2026, 10, 13, 12)])
+    arr[0].localtime('+03:00')
+    arr.to_a.first.localtime('+03:00')
+    arr.each { |time| time.localtime('+03:00') }
+    arr.any? { |time| time.localtime('+03:00') }
+    assert_equal(0, arr[0].utc_offset)
+    assert_empty(added)
+    refute_predicate(hash, :copied?)
+  end
+
   def test_each_retains_the_wrapper_for_chained_writes
     arr, hash, added = wrap([1])
     assert_same(arr, arr.each(&:itself))

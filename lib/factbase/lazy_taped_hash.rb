@@ -97,7 +97,8 @@ class Factbase::LazyTaped
     private
 
     def detached(value)
-      value.is_a?(Array) ? value.dup : value
+      return value unless value.is_a?(Array)
+      value.map { |item| item.is_a?(Time) ? item.dup : item }
     end
 
     def current_map

@@ -66,6 +66,7 @@ class Factbase::LazyTaped
     end
 
     def value(item)
+      return item.dup if item.is_a?(Time)
       item.is_a?(String) ? -item : item
     end
   end
