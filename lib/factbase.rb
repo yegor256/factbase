@@ -234,6 +234,7 @@ class Factbase
     @maps.delete_if { |m| garbage.key?(m) } unless garbage.empty?
     churn
   ensure
+    taped&.finish!(@maps)
     raise(RuntimeError, 'The txn block was left by break or return, its changes are lost') unless done || $ERROR_INFO
   end
 
