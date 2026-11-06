@@ -227,7 +227,7 @@ class Factbase
         garbage[original] = true if original
         @maps << b
       else
-        @maps[pos] = b
+        @maps[pos].replace(b)
       end
       churn.append(0, 0, 1)
     end
