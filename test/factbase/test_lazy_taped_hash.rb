@@ -106,6 +106,41 @@ class TestLazyTapedHash < Factbase::Test
     end
   end
 
+  def test_noop_mutators_are_not_journaled
+    assert_noop { |hash| hash.delete('zzz') }
+    assert_noop { |hash| hash.merge!({}) }
+    assert_noop { |hash| hash.delete_if { false } }
+    assert_noop(&:transform_values!)
+  end
+
+  def test_real_mutators_are_journaled
+    assert_journaled { |hash| hash.delete('a') }
+    assert_journaled { |hash| hash.store('b', 2) }
+    assert_journaled { |hash| hash.merge!({ 'b' => 2 }) }
+    assert_journaled(&:clear)
+    assert_journaled { |hash| hash.delete_if { |key, _| key == 'a' } }
+    assert_journaled { |hash| hash.transform_values! { |value| value + 1 } }
+    assert_journaled(&:compare_by_identity)
+  end
+
+  def test_noop_after_compare_by_identity_is_not_journaled
+    hash, _origin, added = wrap({ 'a' => 1 })
+    hash.compare_by_identity
+    refute_empty(added, 'compare_by_identity must be journaled')
+    added.clear
+    hash.merge!({})
+    hash.delete('zzz')
+    hash.delete_if { false }
+    assert_empty(added, 'A no-op on an identity map must not be journaled')
+  end
+
+  def test_value_type_change_is_journaled
+    hash, _origin, added = wrap({ 'a' => [1] })
+    hash.transform_values! { |value| value.map { |item| Float(item) } }
+    refute_empty(added, 'A change of a value type must be journaled')
+    assert_equal([1.0], hash.to_h['a'])
+  end
+
   def test_method_missing_reader_does_not_copy
     hash, origin = wrap({ 'a' => 1, 'b' => 2 })
     assert_read(hash, origin, 2, hash.size)
@@ -131,6 +166,21 @@ class TestLazyTapedHash < Factbase::Test
   end
 
   private
+
+  def assert_noop
+    hash, origin, added = wrap({ 'a' => 1 })
+    yield(hash)
+    assert_equal({ 'a' => 1 }, hash.to_h)
+    assert_equal({ 'a' => 1 }, origin, 'Original should not be modified')
+    assert_empty(added, 'No-op should not be tracked')
+  end
+
+  def assert_journaled
+    hash, origin, added = wrap({ 'a' => 1 })
+    yield(hash)
+    refute_empty(added, 'Modified map should be tracked')
+    assert_equal({ 'a' => 1 }, origin, 'Original should not be modified')
+  end
 
   def read_array(hash, name)
     case name
