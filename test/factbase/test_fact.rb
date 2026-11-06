@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require 'date'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/fact'
 
@@ -18,6 +19,17 @@ class TestFact < Factbase::Test
     [Float::NAN, Float::INFINITY, -Float::INFINITY].each do |v|
       assert_raises(StandardError) { f.value = v }
     end
+  end
+
+  def test_refuses_values_of_unsupported_types
+    f = Factbase::Fact.new({})
+    [:foo, [1], { 'a' => 1 }, Date.new(2024, 1, 1)].each do |v|
+      assert_includes(
+        assert_raises(ArgumentError, v.inspect) { f.value = v }.message,
+        "The type '#{v.class}' of 'value' is not allowed"
+      )
+    end
+    assert_empty(f.all_properties, 'a value of unsupported type is stored in the fact')
   end
 
   def test_injects_data_correctly
