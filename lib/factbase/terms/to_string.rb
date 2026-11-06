@@ -23,6 +23,6 @@ class Factbase::ToString < Factbase::TermBase
     assert_args(1)
     vv = _values(0, fact, maps, fb)
     return if vv.nil?
-    vv[0].to_s
+    text(vv[0])
   end
 end
