@@ -141,4 +141,9 @@ class TestCachedFactbase < Factbase::Test
       fb.query('(and (exists x) (traced (always)))').each.to_a
     end
   end
+
+  def test_refuses_a_keyword_it_does_not_read
+    fb = Factbase.new
+    assert_raises(ArgumentError) { Factbase::CachedFact.new(fb.insert, {}, fresh: true) }
+  end
 end
