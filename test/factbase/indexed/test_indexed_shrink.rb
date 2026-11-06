@@ -35,4 +35,52 @@ class TestIndexedShrink < Factbase::Test
       )
     end
   end
+
+  def test_answers_like_the_plain_factbase_after_the_scope_shrinks_by_one
+    ['(eq k 1)', '(exists k)', '(absent e)', '(one k)', '(not (eq s 0))', '(and (eq k 1) (eq s 3))'].each do |q|
+      plain = Factbase.new
+      fb = Factbase::IndexedFactbase.new(Factbase.new)
+      [plain, fb].each do |b|
+        4.times do |i|
+          f = b.insert
+          f.s = i
+          f.k = 1
+        end
+      end
+      mine = fb.to_enum(:each).to_a
+      theirs = plain.to_enum(:each).to_a
+      fb.query(q, mine).each.to_a
+      mine.pop
+      theirs.pop
+      assert_equal(
+        plain.query(q, theirs).each.map { |f| f['s'] },
+        fb.query(q, mine).each.map { |f| f['s'] },
+        "#{q} answered with facts that are no longer in the scope after popping one"
+      )
+    end
+  end
+
+  def test_answers_like_the_plain_factbase_after_one_fact_deleted
+    ['(eq k 1)', '(exists k)', '(absent e)', '(one k)', '(not (eq s 0))', '(and (eq k 1) (eq s 3))'].each do |q|
+      plain = Factbase.new
+      fb = Factbase::IndexedFactbase.new(Factbase.new)
+      [plain, fb].each do |b|
+        4.times do |i|
+          f = b.insert
+          f.s = i
+          f.k = 1
+        end
+      end
+      mine = fb.to_enum(:each).to_a
+      theirs = plain.to_enum(:each).to_a
+      fb.query(q, mine).each.to_a
+      mine.delete_at(1)
+      theirs.delete_at(1)
+      assert_equal(
+        plain.query(q, theirs).each.map { |f| f['s'] },
+        fb.query(q, mine).each.map { |f| f['s'] },
+        "#{q} answered with facts that are no longer in the scope after deleting one"
+      )
+    end
+  end
 end
