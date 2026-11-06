@@ -11,7 +11,9 @@ class Factbase::IndexedAbsent
   end
 
   def predict(maps, _fb, _params)
-    prop = @term.operands[0].to_s
+    operand = @term.operands[0]
+    return unless operand.is_a?(Symbol)
+    prop = operand.to_s
     key = [maps.object_id, prop, @term.op]
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
