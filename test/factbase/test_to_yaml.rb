@@ -67,6 +67,18 @@ class TestToYAML < Factbase::Test
     assert_equal(['naïve', 'plain', 7], YAML.load(Factbase::ToYAML.new(fb).yaml)[0]['name'])
   end
 
+  def test_custom_sorter
+    fb = Factbase.new
+    f = fb.insert
+    f.name = 'b'
+    f.w = 2
+    f = fb.insert
+    f.name = 'a'
+    f.w = 1
+    out = Factbase::ToYAML.new(fb, 'w').yaml
+    assert_equal(%w[a b], YAML.load(out).map { |m| m['name'] }, out)
+  end
+
   def test_prints_facts_modified_inside_txn
     seed = Random.new_seed
     fb = Factbase.new
