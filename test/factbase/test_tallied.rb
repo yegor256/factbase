@@ -77,6 +77,17 @@ class TestTallied < Factbase::Test
     assert_predicate(fb.churn, :zero?)
   end
 
+  def test_keeps_deleted_count_after_rollback
+    fb = Factbase::Tallied.new(Factbase.new)
+    fb.insert.x = 1
+    fb.txn do |fbt|
+      fbt.query('(always)').delete!
+      raise(Factbase::Rollback)
+    end
+    assert_equal(1, fb.size, 'the rolled back deletion removed the fact')
+    assert_equal(0, fb.churn.deleted, 'the rolled back deletion is counted')
+  end
+
   def test_counts_in_txn_in_threads
     fb = Factbase::Tallied.new(Factbase.new)
     t = 5
