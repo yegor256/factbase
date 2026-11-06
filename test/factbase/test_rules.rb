@@ -32,6 +32,26 @@ class TestRules < Factbase::Test
     end
   end
 
+  def test_refuses_fact_without_uid_that_breaks_rule
+    fb = Factbase::Rules.new(Factbase.new, '(exists name)', uid: '_id')
+    assert_raises(ArgumentError) do
+      fb.txn do |fbt|
+        fbt.insert.bar = 1
+      end
+    end
+    assert_equal(0, fb.size)
+  end
+
+  def test_commits_fact_with_uid_and_rule_property
+    fb = Factbase::Rules.new(Factbase.new, '(exists name)', uid: '_id')
+    fb.txn do |fbt|
+      f = fbt.insert
+      f._id = 1
+      f.name = 'test'
+    end
+    assert_equal(1, fb.size)
+  end
+
   def test_keeps_checking_after_a_rollback
     fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
     fb.txn do |fbt|
