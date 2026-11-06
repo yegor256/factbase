@@ -42,4 +42,8 @@ class TestPre < Factbase::Test
     assert_equal(42, f._id, 'The block must run on an imported fact')
     assert_equal(1, f.foo)
   end
+
+  def test_refuses_a_missing_block
+    assert_raises(ArgumentError) { Factbase::Pre.new(Factbase.new) }
+  end
 end

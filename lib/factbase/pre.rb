@@ -30,6 +30,7 @@ class Factbase::Pre
   def initialize(fb, &block)
     raise(ArgumentError, 'The "fb" is nil') if fb.nil?
     @fb = fb
+    raise(ArgumentError, 'The block is missing') if block.nil?
     @block = block
   end
 
