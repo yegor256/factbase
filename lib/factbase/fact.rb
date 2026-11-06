@@ -62,7 +62,7 @@ class Factbase::Fact
       ].include?(v.class)
       raise(ArgumentError, "The value of '#{kk}' can't be #{v}") if v.is_a?(Float) && !v.finite?
       v = v.getutc if v.is_a?(Time)
-      v = -v if v.is_a?(String)
+      v = -unicode(v) if v.is_a?(String)
       @map[kk] = [] if @map[kk].nil?
       @map[kk] << v
       nil
@@ -78,5 +78,20 @@ class Factbase::Fact
       value = v[0]
       value.is_a?(String) ? -value : value
     end
+  end
+
+  private
+
+  # Convert a string to UTF-8, reading the bytes of a binary one as UTF-8.
+  # @param [String] val The string
+  # @return [String] The string in UTF-8, or the original one if it cannot be read as text
+  def unicode(val)
+    if val.encoding == Encoding::BINARY
+      utf = val.dup.force_encoding(Encoding::UTF_8)
+      return utf.valid_encoding? ? utf : val
+    end
+    val.encode(Encoding::UTF_8)
+  rescue EncodingError
+    val
   end
 end
