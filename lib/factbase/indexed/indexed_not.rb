@@ -12,6 +12,7 @@ class Factbase::IndexedNot
 
   def predict(maps, fb, params)
     sub = @term.operands.first
+    return unless sub.is_a?(Factbase::Term)
     key = [maps.object_id, sub.to_s, @term.op]
     snap = snapshot(params)
     entry = @idx[key]

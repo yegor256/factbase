@@ -12,6 +12,7 @@ class Factbase::IndexedOr
 
   def predict(maps, fb, params)
     return if @idx.nil?
+    return unless @term.operands.all?(Factbase::Term)
     r = nil
     @term.operands.each do |o|
       n = o.predict(maps, fb, params)
