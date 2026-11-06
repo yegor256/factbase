@@ -57,7 +57,7 @@ class Factbase::Rules
 
   def txn
     before = @check
-    later = Later.new(@uid)
+    later = Later.new(@uid, before)
     @check = later
     @fb.txn do |fbt|
       churn = Factbase::Churn.new
@@ -67,6 +67,7 @@ class Factbase::Rules
         end
       ensure
         @check = before
+        later.finish
       end
       unless churn.zero?
         fbt.query('(always)').each do |f|
@@ -160,12 +161,21 @@ class Factbase::Rules
   #
   # This is an internal class, it is not supposed to be instantiated directly.
   class Later
-    def initialize(uid)
+    def initialize(uid, after)
       @uid = uid
+      @after = after
       @facts = Set.new
+      @finished = false
     end
 
-    def it(fact, _fb)
+    # Make every next check go to the real one, since the transaction is over
+    # and a fact inserted in it may still be written to.
+    def finish
+      @finished = true
+    end
+
+    def it(fact, fb)
+      return @after.it(fact, fb) if @finished
       return if @uid.nil?
       a = fact[@uid]
       return if a.nil?
