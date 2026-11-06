@@ -528,6 +528,19 @@ class TestFactbase < Factbase::Test
     end
   end
 
+  def test_import_wraps_any_marshal_error
+    original = Marshal.method(:load)
+    Marshal.define_singleton_method(:load) { |*_args| raise(RuntimeError, 'st_table too big') }
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase.new.import('not really marshal')
+      end.message,
+      'The input is not a valid factbase: st_table too big'
+    )
+  ensure
+    Marshal.define_singleton_method(:load, original)
+  end
+
   def test_import_of_a_marshal_with_a_broken_regexp
     ["\x04\b[\x06/\x06[\x00", "\x04\b[\x06/\x06(\x00"].each do |bytes|
       assert_includes(
