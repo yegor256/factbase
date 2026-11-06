@@ -147,7 +147,7 @@ class Factbase
     end
     maps ||= @maps
     require_relative('factbase/query')
-    Factbase::Query.new(maps, term, self)
+    Factbase::Query.new(maps || @maps, term, self, subset: !(maps.nil? || maps.equal?(@maps)))
   end
 
   # Convert a query to a term.
