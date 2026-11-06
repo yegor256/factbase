@@ -168,6 +168,60 @@ class TestFactAsYaml < Factbase::Test
     )
   end
 
+  def test_prints_long_utf16_string
+    f = Factbase.new.insert
+    f.message = ('ж' * 100).encode('UTF-16LE')
+    message = YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message']
+    assert_kind_of(String, message)
+    assert_includes(message, 'ж')
+  end
+
+  def test_prints_short_utf16_emoji
+    f = Factbase.new.insert
+    f.message = '😀'.encode('UTF-16LE')
+    assert_equal('😀', YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'])
+  end
+
+  def test_prints_windows_1251_string
+    f = Factbase.new.insert
+    f.message = 'Привет'.encode('Windows-1251')
+    assert_equal('Привет', YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'])
+  end
+
+  def test_prints_iso_8859_5_string
+    f = Factbase.new.insert
+    f.message = 'Привет'.encode('ISO-8859-5')
+    assert_equal('Привет', YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'])
+  end
+
+  def test_prints_string_with_invalid_bytes
+    [
+      "\xFF\xFE".b,
+      (+"\x00\xD8\x00").force_encoding('UTF-16LE')
+    ].each do |raw|
+      f = Factbase.new.insert
+      f.message = raw
+      assert_kind_of(
+        String, YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'],
+        "invalid bytes #{raw.inspect} are not printed as valid YAML"
+      )
+    end
+  end
+
+  def test_prints_long_string_with_invalid_bytes
+    [
+      "\xFF".b * 100,
+      ("\x00\xD8\x00" * 50).force_encoding('UTF-16LE')
+    ].each do |raw|
+      f = Factbase.new.insert
+      f.message = raw
+      assert_kind_of(
+        String, YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'],
+        "long invalid bytes #{raw.inspect} are not printed as valid YAML"
+      )
+    end
+  end
+
   def test_prints_valid_yaml_for_long_strings_full_of_escapes
     seed = Random.new_seed
     rnd = Random.new(seed)
