@@ -201,4 +201,20 @@ class TestLogged < Factbase::Test
     assert_includes(buf.to_s, 'Found 2/3 fact(s)', buf.to_s)
     assert_includes(buf.to_s, 'There were no facts', buf.to_s)
   end
+
+  def test_logs_nothing_happened
+    log = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    assert_equal(0, fb.query('(always)').delete!)
+    assert_nil(fb.query('(agg (exists foo) (first foo))').one)
+    fb.insert.foo = 1
+    assert_equal(0, fb.query('(exists bar)').each.to_a.size)
+    [
+      'There were no facts, nothing deleted by (always)',
+      'Nothing found by \'(agg (exists foo) (first foo))\'',
+      'Zero/1 facts found by (exists bar)'
+    ].each do |s|
+      assert_includes(log.to_s, s, log.to_s)
+    end
+  end
 end
