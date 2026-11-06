@@ -83,11 +83,12 @@ class TestSyncFactbase < Factbase::Test
     monitor = Monitor.new
     fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
     fb.insert.x = 1
-    [-> { fb.each { |_m| true } }, -> { fb.size }, -> { fb.export }].each do |read|
+    [-> { fb.each { |_m| true } }, -> { fb.size }, -> { fb.export }, -> { fb.insert },
+      -> { fb.import(Factbase.new.export) }].each do |read|
       monitor.synchronize do
         t = Thread.new { read.call }
         sleep(0.05)
-        assert_predicate(t, :alive?, 'a direct read went around the monitor')
+        assert_predicate(t, :alive?, 'a direct call went around the monitor')
         t.kill
       end
     end
