@@ -34,6 +34,48 @@ class TestFactbase < Factbase::Test
     assert_equal([2, 3], maps[1]['bar'])
   end
 
+  def test_queries_symbol_keys_without_changing_the_initial_maps
+    map = { foo: [1] }.freeze
+    found = Factbase.new([map].freeze).query('(exists foo)').each.first
+    refute_nil(found)
+    assert_equal([1], found[:foo])
+    assert_equal([1], found['foo'])
+    assert_equal(%w[foo], found.all_properties)
+    assert_equal({ foo: [1] }, map)
+  end
+
+  def test_imports_symbol_keys_alongside_existing_facts
+    fb = Factbase.new
+    fb.insert.bar = 2
+    fb.import(Marshal.dump([{ foo: [1] }]))
+    assert_equal(2, fb.size)
+    assert_equal([1], fb.query('(eq foo 1)').each.first[:foo])
+    assert_equal([2], fb.query('(exists bar)').each.first['bar'])
+    fb.txn do |tx|
+      tx.query('(exists foo)').each { |fact| fact.foo = 3 }
+    end
+    assert_equal([1, 3], fb.query('(exists foo)').each.first['foo'])
+  end
+
+  def test_keeps_string_maps_when_other_maps_have_symbol_keys
+    plain = { 'bar' => [2] }
+    fb = Factbase.new([{ foo: [1] }, plain])
+    assert_equal([1], fb.query('(eq foo 1)').each.first['foo'])
+    assert_same(plain, fb.each.to_a.last)
+    fb.query('(exists bar)').each { |fact| fact.bar = 3 }
+    assert_equal([2, 3], plain['bar'])
+  end
+
+  def test_refuses_ambiguous_symbol_and_string_properties
+    map = { foo: [1], 'foo' => [2] }
+    assert_includes(assert_raises(ArgumentError) { Factbase.new([map]) }.message, 'duplicate property')
+    fb = Factbase.new
+    fb.insert.bar = 3
+    assert_raises(ArgumentError) { fb.import(Marshal.dump([map])) }
+    assert_equal(1, fb.size)
+    assert_equal({ foo: [1], 'foo' => [2] }, map)
+  end
+
   def test_query_many_times
     total = 5
     fb = Factbase::Fuzz.make(total)
