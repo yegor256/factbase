@@ -31,4 +31,16 @@ class TestIndexedRangeParams < Factbase::Test
       end
     end
   end
+
+  def test_does_not_read_a_bare_property_as_a_param
+    { 'gt' => [5, 100], 'gte' => [10, 100], 'lt' => [15, -100], 'lte' => [10, -100] }.each do |op, (threshold, param)|
+      maps = [{ 'score' => [10], 'threshold' => [threshold] }]
+      term = Factbase::Syntax.new("(#{op} score threshold)").to_term
+      term.redress!(Factbase::IndexedTerm, idx: {})
+      assert_equal(
+        1, (term.predict(maps, Factbase.new, { 'threshold' => [param] }) || maps).size,
+        "(#{op} score threshold) dropped the fact"
+      )
+    end
+  end
 end

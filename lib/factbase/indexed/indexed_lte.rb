@@ -56,7 +56,8 @@ class Factbase::IndexedLte
   end
 
   def _scalar?(item)
-    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float) || item.is_a?(Symbol)
+    return item.to_s.start_with?('$') if item.is_a?(Symbol)
+    item.is_a?(String) || item.is_a?(Time) || item.is_a?(Integer) || item.is_a?(Float)
   end
 
   def _feed(facts, entry, prop)
