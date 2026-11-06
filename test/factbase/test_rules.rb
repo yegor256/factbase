@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../lib/factbase'
+require_relative '../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../lib/factbase/pre'
 require_relative '../../lib/factbase/rules'
 
@@ -240,6 +241,60 @@ class TestRules < Factbase::Test
     assert_equal(1, fb.size)
   ensure
     Factbase.new.query('(undef rules_within_limit)').each.to_a
+  end
+
+  def test_refuses_an_import_that_the_resulting_factbase_breaks
+    fb = Factbase.new
+    fb.insert.v = 1
+    fb.query('(defn import_within_one "fb.size <= 1")').each.to_a
+    incoming = Factbase.new
+    incoming.insert.v = 2
+    assert_raises(ArgumentError, 'an import breaking the size rule is accepted') do
+      Factbase::Rules.new(fb, '(import_within_one)').import(incoming.export)
+    end
+  ensure
+    Factbase.new.query('(undef import_within_one)').each.to_a
+  end
+
+  def test_keeps_the_factbase_when_the_resulting_one_breaks_the_rule
+    fb = Factbase.new
+    fb.insert.v = 1
+    fb.query('(defn import_keeps_one "fb.size <= 1")').each.to_a
+    incoming = Factbase.new
+    incoming.insert.v = 2
+    begin
+      Factbase::Rules.new(fb, '(import_keeps_one)').import(incoming.export)
+    rescue ArgumentError
+      nil
+    end
+    assert_equal(1, fb.size, 'a refused import changed the factbase')
+  ensure
+    Factbase.new.query('(undef import_keeps_one)').each.to_a
+  end
+
+  def test_accepts_an_import_that_the_resulting_factbase_keeps
+    fb = Factbase.new
+    fb.insert.v = 1
+    fb.query('(defn import_within_two "fb.size <= 2")').each.to_a
+    incoming = Factbase.new
+    incoming.insert.v = 2
+    Factbase::Rules.new(fb, '(import_within_two)').import(incoming.export)
+    assert_equal(2, fb.size, 'an import keeping the size rule is refused')
+  ensure
+    Factbase.new.query('(undef import_within_two)').each.to_a
+  end
+
+  def test_refuses_an_import_into_an_indexed_factbase_that_breaks_the_rule
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    fb.insert.v = 1
+    fb.query('(defn import_indexed_one "fb.size <= 1")').each.to_a
+    incoming = Factbase.new
+    incoming.insert.v = 2
+    assert_raises(ArgumentError, 'an import into an indexed factbase breaking the rule is accepted') do
+      Factbase::Rules.new(fb, '(import_indexed_one)').import(incoming.export)
+    end
+  ensure
+    Factbase.new.query('(undef import_indexed_one)').each.to_a
   end
 
   def test_checks_through_to_a_and_map_as_well
