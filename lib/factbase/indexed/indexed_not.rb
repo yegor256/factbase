@@ -3,6 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../../factbase'
+
 # Indexed term 'not'.
 class Factbase::IndexedNot
   def initialize(term, idx)

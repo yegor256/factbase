@@ -3,6 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../../factbase'
+
 # Base class for all terms.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko

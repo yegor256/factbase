@@ -44,9 +44,17 @@ end
 desc 'Run them via Ruby, one by one'
 task :picks do
   next if OS.windows?
+  fresh = [
+    'Object.send(:remove_const, :Factbase) if defined?(Factbase)',
+    '$LOADED_FEATURES.reject! { |f| f.end_with?("/lib/factbase/version.rb") }',
+    'load(ARGV.shift)'
+  ].join('; ')
   %w[test lib].each do |d|
     Dir["#{d}/**/*.rb"].each do |f|
-      qbash("bundle exec ruby #{Shellwords.escape(f)}", stdout: $stdout, env: { 'PICKS' => 'yes' })
+      qbash(
+        "bundle exec ruby -e #{Shellwords.escape(fresh)} #{Shellwords.escape(f)}",
+        stdout: $stdout, env: { 'PICKS' => 'yes' }
+      )
     end
   end
 end
