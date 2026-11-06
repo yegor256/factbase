@@ -23,7 +23,7 @@ class Factbase::Query
   include Enumerable
 
   # Constructor.
-  # @param [Array<Fact>] maps Array of facts to start with
+  # @param [Array<Hash>] maps Array of facts to start with
   # @param [String|Factbase::Term] term The query term
   # @param [Factbase] fb The factbase
   def initialize(maps, term, fb)

@@ -22,7 +22,7 @@ class Factbase::Max < Factbase::TermBase
 
   # Evaluate term on a fact.
   # @param [Factbase::Fact] _fact The fact
-  # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Array<Hash>] maps All maps available
   # @param [Factbase] _fb Factbase to use for sub-queries
   # @return [Object] The max value among the evaluated operands
   def evaluate(_fact, maps, _fb)
