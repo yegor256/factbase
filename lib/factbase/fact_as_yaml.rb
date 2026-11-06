@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require 'ellipsized'
+require 'json'
 require 'yaml'
 require_relative '../factbase'
 
@@ -61,7 +62,7 @@ class Factbase::FactAsYaml
 
   def v_to_s(val)
     s = val
-    s = s.ellipsized.inspect if s.is_a?(String)
+    s = s.ellipsized.to_json if s.is_a?(String)
     s = s.getutc.iso8601(9) if s.is_a?(Time)
     s
   end
