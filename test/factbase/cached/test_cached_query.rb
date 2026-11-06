@@ -105,7 +105,8 @@ class TestCachedQuery < Factbase::Test
   def test_deletes_too
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.foo = 1
-    fb.query('(eq foo 1)').delete!
+    assert_equal(1, fb.query('(always)').each.to_a.size)
+    assert_equal(1, fb.query('(eq foo 1)').delete!)
     assert_equal(0, fb.query('(always)').each.to_a.size)
   end
 
@@ -125,6 +126,55 @@ class TestCachedQuery < Factbase::Test
       assert_equal(0, fbt.query('(exists a)').each.to_a.size)
     end
     assert_equal(0, fb.query('(exists a)').each.to_a.size)
+  end
+
+  def test_drops_cached_each_after_delete
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    fb.insert.x = 2
+    assert_equal([1, 2], fb.query('(exists x)').each.map(&:x))
+    assert_equal(1, fb.query('(eq x 2)').delete!)
+    assert_equal([1], fb.query('(exists x)').each.map(&:x))
+  end
+
+  def test_drops_cached_one_after_delete
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 10
+    fb.insert.x = 20
+    query = fb.query('(agg (exists x) (max x))')
+    assert_equal(20, query.one)
+    assert_equal(1, fb.query('(eq x 20)').delete!)
+    assert_equal(10, query.one)
+  end
+
+  def test_drops_cached_result_of_same_query_after_delete
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.bar = 42
+    query = fb.query('(eq bar 42)')
+    assert_equal(1, query.each.to_a.size)
+    assert_equal(1, query.delete!)
+    assert_equal(0, query.each.to_a.size)
+  end
+
+  def test_clears_underlying_cache_on_delete
+    cache = {}
+    fb = Factbase::CachedFactbase.new(Factbase.new, cache)
+    fb.insert.k = 1
+    fb.insert.k = 2
+    assert_equal(2, fb.query('(exists k)').each.to_a.size)
+    refute_empty(cache)
+    assert_equal(1, fb.query('(eq k 2)').delete!)
+    assert_empty(cache)
+    assert_equal(1, fb.query('(exists k)').each.to_a.size)
+  end
+
+  def test_drops_cached_aggregation_count_after_delete
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    3.times { |i| fb.insert.idx = i }
+    query = fb.query('(agg (always) (count))')
+    assert_equal(3, query.one)
+    assert_equal(1, fb.query('(eq idx 1)').delete!)
+    assert_equal(2, query.one)
   end
 
   def test_keeps_nil_result_of_one
