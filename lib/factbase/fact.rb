@@ -68,7 +68,11 @@ class Factbase::Fact
       nil
     elsif k == '[]'
       vv = @map[args[1].to_s]
-      vv.is_a?(Array) ? vv.dup : vv
+      if vv.is_a?(Array)
+        vv.map { |x| x.is_a?(String) ? -x : x }
+      else
+        vv
+      end
     else
       v = @map[k]
       if v.nil?
