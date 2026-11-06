@@ -199,6 +199,38 @@ class TestSyntax < Factbase::Test
     )
   end
 
+  def test_round_trips_a_time_with_a_negative_year
+    fb = Factbase.new
+    t = Time.utc(-1, 1, 1)
+    fb.insert.when = t
+    term = Factbase::Term.new(:eq, [:when, t])
+    assert_equal(
+      t,
+      Factbase::Syntax.new(term.to_s).to_term.operands[1],
+      'the negative-year time literal does not parse back into the same time'
+    )
+    assert_equal(1, fb.query(term.to_s).each.to_a.size, 'a fact with a negative-year time is not found')
+  end
+
+  def test_round_trips_a_time_with_a_five_digit_year
+    fb = Factbase.new
+    t = Time.utc(10_000, 1, 1)
+    fb.insert.when = t
+    term = Factbase::Term.new(:eq, [:when, t])
+    assert_equal(
+      t,
+      Factbase::Syntax.new(term.to_s).to_term.operands[1],
+      'the five-digit-year time literal does not parse back into the same time'
+    )
+    assert_equal(1, fb.query(term.to_s).each.to_a.size, 'a fact with a five-digit-year time is not found')
+  end
+
+  def test_rejects_a_plus_signed_year_literal
+    assert_raises(Factbase::Syntax::Broken, 'a plus-signed year literal is not refused') do
+      Factbase::Syntax.new('(eq t +10000-01-01T00:00:00Z)').to_term
+    end
+  end
+
   def test_simple_matching
     m = { 'foo' => ['Hello, world!'], 'bar' => [42], 'z' => [1, 2, 3, 4] }
     {
