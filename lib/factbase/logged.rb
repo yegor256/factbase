@@ -49,7 +49,7 @@ class Factbase::Logged
 
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
-    Query.new(term, maps, @tube, @origin)
+    Query.new(term, maps, @tube, @origin, self)
   end
 
   def txn
@@ -150,11 +150,12 @@ class Factbase::Logged
   class Query
     include Enumerable
 
-    def initialize(term, maps, tube, fb)
+    def initialize(term, maps, tube, fb, top)
       @term = term
       @maps = maps
       @tube = tube
       @fb = fb
+      @top = top
       @termtext = term.is_a?(Factbase::Term) ? term.to_s : term
     end
 
@@ -162,7 +163,7 @@ class Factbase::Logged
       @termtext
     end
 
-    def each(fb = @fb, params = {}, &)
+    def each(fb = @top, params = {}, &)
       return to_enum(__method__, fb, params) unless block_given?
       mono = Process.clock_gettime(Factbase::Logged::MONO)
       r = nil
@@ -191,7 +192,7 @@ class Factbase::Logged
       r
     end
 
-    def one(fb = @fb, params = {})
+    def one(fb = @top, params = {})
       mono = Process.clock_gettime(Factbase::Logged::MONO)
       r = nil
       tail =
@@ -209,7 +210,7 @@ class Factbase::Logged
       r
     end
 
-    def delete!(fb = @fb)
+    def delete!(fb = @top)
       r = nil
       mono = Process.clock_gettime(Factbase::Logged::MONO)
       before = total

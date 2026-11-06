@@ -39,6 +39,10 @@ class Factbase::Pre
     f
   end
 
+  def query(term, maps = nil)
+    Query.new(@fb.query(term, maps), self)
+  end
+
   def import(bytes)
     probe = Factbase.new
     probe.import(bytes)
@@ -49,6 +53,35 @@ class Factbase::Pre
   def txn
     @fb.txn do |fbt|
       yield(Factbase::Pre.new(fbt, &@block))
+    end
+  end
+
+  # Query decorator.
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  class Query
+    include Enumerable
+    decoor(:query)
+
+    def initialize(query, fb)
+      @query = query
+      @fb = fb
+    end
+
+    def to_s
+      @query.to_s
+    end
+
+    def each(fb = @fb, params = {}, &)
+      @query.each(fb, params, &)
+    end
+
+    def one(fb = @fb, params = {})
+      @query.one(fb, params)
+    end
+
+    def delete!(fb = @fb)
+      @query.delete!(fb)
     end
   end
 end
