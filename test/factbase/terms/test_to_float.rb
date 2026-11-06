@@ -31,4 +31,13 @@ class TestToFloat < Factbase::Test
       Factbase::ToFloat.new([Time.utc(2024, 1, 1, 10, 0, 0, 500_000)]).evaluate(fact, [], Factbase.new)
     )
   end
+
+  def test_rejects_a_property_with_many_values
+    t = Factbase::ToFloat.new([:foo])
+    e =
+      assert_raises(ArgumentError) do
+        t.evaluate(fact('foo' => [1, 2]), [], Factbase.new)
+      end
+    assert_includes(e.message, 'Too many values at first position, one expected', e.message)
+  end
 end
