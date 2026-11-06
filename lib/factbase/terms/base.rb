@@ -10,7 +10,7 @@
 class Factbase::TermBase
   # Set the name the user used for this term and its implementation helpers.
   # @param [Symbol] name Name of the term in the query
-  # rubocop:disable Elegant/GoodMethodName
+  # rubocop:disable-next Elegant/GoodMethodName
   def name=(name)
     @name = name
     instance_variables.each do |variable|
@@ -18,7 +18,6 @@ class Factbase::TermBase
       value.name = name if value.is_a?(Factbase::TermBase)
     end
   end
-  # rubocop:enable Elegant/GoodMethodName
 
   # Forget what was remembered while earlier facts were evaluated.
   #
@@ -35,7 +34,11 @@ class Factbase::TermBase
         items +=
           @operands.map do |o|
             if o.is_a?(String)
-              "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"').sub(/\\+\z/) { |s| s * 2 }}'"
+              if o.ascii_only? || (o.encoding == Encoding::UTF_8 && o.valid_encoding?)
+                "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"').sub(/\\+\z/) { |s| s * 2 }}'"
+              else
+                "#{o.b.dump}@#{o.encoding.name}"
+              end
             elsif o.is_a?(Time)
               o.getutc.iso8601(o.subsec.zero? ? 0 : 9)
             else

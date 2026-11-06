@@ -69,8 +69,9 @@ class Factbase::Rules
         @check = before
       end
       unless churn.zero?
+        everything = churn.deleted.positive?
         fbt.query('(always)').each do |f|
-          next unless later.include?(f)
+          next unless later.include?(f) || everything
           @check.it(f, fbt)
         end
       end

@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/syntax'
 require_relative '../../lib/factbase/term'
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
 
 require_relative '../test__helper'
 
@@ -107,6 +108,32 @@ class TestTerm < Factbase::Test
     t = Time.new(2026, 10, 4, 12, 0, 0, '+03:00')
     Factbase::Term.new(:eq, [:when, t]).to_s
     assert_equal(3 * 60 * 60, t.utc_offset, 'the time of the term was moved to UTC')
+  end
+
+  def test_builds_only_the_term_of_its_operator
+    Factbase::Term.new(:eq, [:foo, 42])
+    assert_operator(
+      GC.stat(:total_allocated_objects).then do |before|
+        Factbase::Term.new(:eq, [:foo, 42])
+        GC.stat(:total_allocated_objects) - before
+      end,
+      :<, 60,
+      'a term builds the objects of operators it does not have'
+    )
+  end
+
+  def test_evaluates_every_known_operator_it_is_made_with
+    assert(
+      Factbase::Term.new(:and, [Factbase::Term.new(:exists, [:foo]), Factbase::Term.new(:eq, [:foo, 'ёлка'])])
+        .evaluate(fact('foo' => ['ёлка']), [], Factbase.new),
+      'a term made of nested operators does not evaluate them'
+    )
+  end
+
+  def test_refuses_an_operator_it_does_not_know
+    assert_raises(StandardError, 'an unknown operator is not refused') do
+      Factbase::Term.new(:never_heard_of, []).evaluate(fact, [], Factbase.new)
+    end
   end
 
   def test_dont_call_agg_static_when_its_selector_is_traced

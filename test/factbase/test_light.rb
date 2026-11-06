@@ -33,4 +33,42 @@ class TestLight < Factbase::Test
       assert_raises(StandardError) { Factbase::Light.new(Factbase.new).txn }.message
     )
   end
+
+  def test_counts_facts_inserted_inside_a_transaction
+    fb = Factbase.new
+    fb.insert.foo = 1
+    before = nil
+    after = nil
+    fb.txn do |t|
+      before = t.size
+      t.insert.bar = 2
+      after = t.size
+    end
+    assert_equal(1, before)
+    assert_equal(2, after)
+  end
+
+  def test_parses_a_term_inside_a_transaction
+    fb = Factbase.new
+    first = nil
+    second = nil
+    fb.txn do |t|
+      first = t.to_term('(eq x 1)')
+      second = t.to_term('(eq y 2)')
+    end
+    assert_equal('(eq x 1)', first.to_s)
+    assert_equal('(eq y 2)', second.to_s)
+  end
+
+  def test_knows_factbase_operations_inside_a_transaction
+    fb = Factbase.new
+    known = nil
+    unknown = nil
+    fb.txn do |t|
+      known = t.respond_to?(:export)
+      unknown = t.respond_to?(:unknown)
+    end
+    assert(known)
+    refute(unknown)
+  end
 end

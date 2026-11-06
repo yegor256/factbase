@@ -64,7 +64,16 @@ class TestAccum < Factbase::Test
       a.foo = 2
       a.foo = 3
       assert_equal([1, 2, 3], a['foo'], "wrong order when pass=#{pass}")
+      assert_equal(2, a.foo, "wrong getter value when pass=#{pass}")
     end
+  end
+
+  def test_getter_answers_first_of_two_values_written_by_as
+    fb = Factbase.new
+    fb.insert.x = 1
+    f = fb.query('(and (as foo 1) (as foo 2))').each.first
+    assert_equal(1, f.foo, 'getter must answer the first value written by "as"')
+    assert_equal([1, 2], f['foo'], 'both values written by "as" must be kept')
   end
 
   def test_empties

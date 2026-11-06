@@ -40,6 +40,19 @@ class TestTallied < Factbase::Test
     assert_equal(1, fb.churn.added)
   end
 
+  def test_dont_count_reads
+    fb = Factbase::Tallied.new(Factbase.new)
+    fb.insert.x = 1
+    facts = fb.query('(always)').each.to_a
+    assert_equal(1, facts.size)
+    facts.each do |f|
+      assert_equal(1, f.x)
+      assert_equal([1], f['x'])
+    end
+    assert_equal(1, fb.query('(agg (always) (nth 0 x))').one.first)
+    assert_equal('1i/0d/1a', fb.churn.to_s)
+  end
+
   def test_returns_all_props
     f = Factbase::Tallied.new(Factbase.new).insert
     f.bar = 3
