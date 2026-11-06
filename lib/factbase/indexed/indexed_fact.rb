@@ -26,6 +26,11 @@ class Factbase::IndexedFact
     @origin.to_s
   end
 
+  # Original map behind the decorated fact.
+  def _source
+    @origin._source
+  end
+
   others do |*args|
     @idx.clear if args[0].to_s.end_with?('=') && !@fresh.include?(object_id)
     @origin.public_send(*args)

@@ -31,6 +31,11 @@ class Factbase::Tee
       (@upper.is_a?(Hash) ? @upper.keys : @upper.all_properties)
   end
 
+  # Original map behind the decorated fact.
+  def _source
+    @fact._source
+  end
+
   others do |*args|
     if args[0].to_s == '[]' && args[1].start_with?('$')
       n = args[1].to_s

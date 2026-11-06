@@ -40,6 +40,11 @@ class Factbase::LazyTaped
       @copied_map = nil
     end
 
+    # Map behind this copy-on-write view, for identifying selections.
+    def _source
+      current_map
+    end
+
     def keys
       current_map.keys
     end

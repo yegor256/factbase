@@ -23,6 +23,41 @@ require_relative '../../lib/factbase/tallied'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestQuery < Factbase::Test
+  def test_deletes_selected_facts_with_computed_properties
+    [
+      ['(head 1 (and (always) (as y (plus x 10))))', [2]],
+      ['(sorted y (and (always) (as y (plus x 10))))', []],
+      ['(head 1 (sorted y (and (always) (as y (minus 10 x)))))', [1]]
+    ].each do |term, remaining|
+      with_factbases do |badge, fb|
+        fb.query('(always)').delete!
+        (1..2).each { |x| fb.insert.x = x }
+        assert_equal(2 - remaining.size, fb.query(term).delete!, "#{badge}: #{term}")
+        assert_equal(remaining, fb.query('(always)').map(&:x), "#{badge}: #{term}")
+        fb.query('(always)').each { |fact| assert_nil(fact['y']) }
+      end
+    end
+  end
+
+  def test_deletes_the_selected_identity_among_equal_maps
+    first = { 'x' => [1] }
+    maps = [first, { 'x' => [1] }]
+    assert_equal(1, Factbase.new(maps).query('(head 1 (inverted (and (always) (as y (plus x 10)))))').delete!)
+    assert_equal(1, maps.size)
+    assert_same(first, maps.first)
+  end
+
+  def test_deletes_computed_selections_inside_transactions
+    with_factbases do |badge, fb|
+      fb.query('(always)').delete!
+      (1..2).each { |x| fb.insert.x = x }
+      fb.txn do |tx|
+        assert_equal(1, tx.query('(head 1 (and (always) (as y (plus x 10))))').delete!, badge)
+      end
+      assert_equal([2], fb.query('(always)').map(&:x), badge)
+    end
+  end
+
   def test_stories
     with_factbases do |badge, fb|
       Dir[File.join(__dir__, '../../fixtures/stories/**/*.yml')].each do |fixture|
