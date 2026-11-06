@@ -12,7 +12,7 @@ class Factbase::IndexedGt
 
   def predict(maps, _fb, params)
     op1, op2 = @term.operands
-    return unless op1.is_a?(Symbol) && _scalar?(op2)
+    return unless _property?(op1) && _scalar?(op2)
     prop = op1.to_s
     target = op2.is_a?(Symbol) ? bounded(params[op2.to_s]) : op2
     return maps || [] if target.nil?
@@ -53,6 +53,10 @@ class Factbase::IndexedGt
     values&.min
   rescue ArgumentError
     nil
+  end
+
+  def _property?(item)
+    item.is_a?(Symbol) && !item.start_with?('$')
   end
 
   def _scalar?(item)
