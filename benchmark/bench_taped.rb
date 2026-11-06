@@ -20,10 +20,12 @@ def bench_taped(bmk, _fb, _)
       taped.each.to_a
     end
   end
-  cycles *= 3
+  cycles = 10
+  data = taped.each.map { |m| { foo: m[:foo] } }
+  copies = Array.new(cycles) { Factbase::Taped.new(data.map(&:dup)) }
   bmk.report("Taped.delete_if() x#{cycles}") do
-    cycles.times do
-      taped.delete_if { |m| m[:foo] < 50 }
+    copies.each do |copy|
+      copy.delete_if { |m| m[:foo] < 50 }
     end
   end
 end
