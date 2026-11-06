@@ -199,6 +199,46 @@ class TestSyntax < Factbase::Test
     )
   end
 
+  def test_parses_time_with_positive_utc_offset
+    term = Factbase::Syntax.new('(eq when 2024-01-01T12:00:00+03:00)').to_term
+    assert_instance_of(Time, term.operands[1])
+    assert_predicate(term.operands[1], :utc?)
+    assert_equal(Time.utc(2024, 1, 1, 9, 0, 0), term.operands[1])
+    assert_equal('(eq when 2024-01-01T09:00:00Z)', term.to_s)
+  end
+
+  def test_parses_time_with_negative_utc_offset
+    term = Factbase::Syntax.new('(eq when 2024-01-01T12:00:00-05:00)').to_term
+    assert_instance_of(Time, term.operands[1])
+    assert_predicate(term.operands[1], :utc?)
+    assert_equal(Time.utc(2024, 1, 1, 17, 0, 0), term.operands[1])
+    assert_equal('(eq when 2024-01-01T17:00:00Z)', term.to_s)
+  end
+
+  def test_parses_time_with_offset_and_fractional_seconds
+    term = Factbase::Syntax.new('(eq when 2024-01-01T12:00:00.500+02:00)').to_term
+    assert_instance_of(Time, term.operands[1])
+    assert_predicate(term.operands[1], :utc?)
+    assert_equal(Time.utc(2024, 1, 1, 10, 0, 0, 500_000), term.operands[1])
+    assert_equal('(eq when 2024-01-01T10:00:00.500000000Z)', term.to_s)
+  end
+
+  def test_matches_facts_using_offset_time_literal
+    fb = Factbase.new
+    fb.insert.when = Time.utc(2024, 1, 1, 9, 0, 0)
+    assert_equal(1, fb.query('(eq when 2024-01-01T12:00:00+03:00)').count)
+    assert_equal(1, fb.query('(eq when 2024-01-01T04:00:00-05:00)').count)
+  end
+
+  def test_rejects_impossible_time_with_offset
+    assert_raises(Factbase::Syntax::Broken) do
+      Factbase::Syntax.new('(eq created 2024-02-30T12:00:00+03:00)').to_term
+    end
+    assert_raises(Factbase::Syntax::Broken) do
+      Factbase::Syntax.new('(eq created 2024-01-01T12:00:00+25:00)').to_term
+    end
+  end
+
   def test_simple_matching
     m = { 'foo' => ['Hello, world!'], 'bar' => [42], 'z' => [1, 2, 3, 4] }
     {
