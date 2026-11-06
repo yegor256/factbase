@@ -97,4 +97,19 @@ class TestAgg < Factbase::Test
       assert_includes(e.message, "The '#{name}' term needs a fact", e.message)
     end
   end
+
+  def test_readme_example_with_a_param
+    fb = Factbase.new
+    fb.insert.then do |f|
+      f.dept = 'eng'
+      f.salary = 100
+    end
+    fb.insert.then do |f|
+      f.dept = 'eng'
+      f.salary = 200
+    end
+    found = fb.query('(eq salary (agg (eq dept $dept) (max salary)))').each(fb, dept: ['eng']).to_a
+    assert_equal(1, found.size)
+    assert_equal(200, found.first.salary)
+  end
 end
