@@ -25,7 +25,8 @@ class Factbase::Either < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(2)
     v = _values(0, fact, maps, fb)
-    return v unless v.nil?
-    _values(1, fact, maps, fb)
+    v = nil if v.is_a?(Array) && v.empty?
+    return _values(1, fact, maps, fb) if v.nil?
+    v
   end
 end
