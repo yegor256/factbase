@@ -41,8 +41,19 @@ class Factbase::Sprintf < Factbase::TermBase
   end
 
   def formatted(fmt, ops)
+    if spare?(fmt, ops)
+      raise(RuntimeError, "Cannot format #{ops.inspect} with '#{fmt}' in (sprintf ...): too many arguments")
+    end
     format(*([fmt] + ops))
   rescue ArgumentError, KeyError, TypeError, RangeError => e
     raise(RuntimeError, "Cannot format #{ops.inspect} with '#{fmt}' in (sprintf ...): #{e.message}")
+  end
+
+  def spare?(fmt, ops)
+    return false if ops.empty?
+    format(*([fmt] + ops[0..-2]))
+    true
+  rescue ArgumentError
+    false
   end
 end
