@@ -22,6 +22,7 @@ class Factbase::As < Factbase::TermBase
   # @return [Boolean] True if succeeded
   def evaluate(fact, maps, fb)
     assert_args(2)
+    the_fact(fact)
     a = @operands[0]
     raise(ArgumentError, "A symbol is expected as first argument of 'as'") unless a.is_a?(Symbol)
     vv = _values(1, fact, maps, fb)
