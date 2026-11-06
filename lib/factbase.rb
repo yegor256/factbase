@@ -91,6 +91,7 @@ class Factbase
   # @param [Array<Hash>] maps Array of facts to start with
   def initialize(maps = [])
     @maps = maps
+    @open = {}.compare_by_identity
   end
 
   # Size, the total number of facts in the factbase.
@@ -175,11 +176,13 @@ class Factbase
   #
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
+    raise(StandardError, 'A transaction cannot be started inside a transaction') if @open.key?(Thread.current)
     require_relative('factbase/lazy_taped')
     taped = Factbase::LazyTaped.new(@maps)
     require_relative('factbase/churn')
     churn = Factbase::Churn.new
     done = false
+    @open[Thread.current] = true
     catch(:commit) do
       require_relative('factbase/light')
       commit = false
@@ -234,6 +237,7 @@ class Factbase
     @maps.delete_if { |m| garbage.key?(m) } unless garbage.empty?
     churn
   ensure
+    @open.delete(Thread.current) unless done.nil?
     raise(RuntimeError, 'The txn block was left by break or return, its changes are lost') unless done || $ERROR_INFO
   end
 
