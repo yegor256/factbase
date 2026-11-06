@@ -22,6 +22,7 @@ class Factbase::IndexedGte
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
     _feed(maps.to_a, entry, prop)
+    return unless comparable?(entry, target)
     matched = _search(entry, target)
     maps.respond_to?(:repack) ? maps.repack(matched) : matched
   end
@@ -72,6 +73,19 @@ class Factbase::IndexedGte
     end
     entry[:facts].sort_by! { |pair| pair[0] }
     entry[:count] = facts.size
+  end
+
+  # Can the index order its values against the target?
+  #
+  # When it can't, the term has to decide fact by fact, as it does without
+  # an index, where a fact may never be compared at all, for example when an
+  # earlier operand of an +or+ has already matched it.
+  #
+  # @param [Hash] entry The entry of the index
+  # @param [Object] target The value to compare with
+  # @return [Boolean] TRUE if the values can be compared with the target
+  def comparable?(entry, target)
+    entry[:facts].empty? || !(entry[:facts].first[0] <=> target).nil?
   end
 
   def sortable?(maps, prop)
