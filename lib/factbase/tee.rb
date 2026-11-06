@@ -27,8 +27,7 @@ class Factbase::Tee
   end
 
   def all_properties
-    (@fact.is_a?(Hash) ? @fact.keys : @fact.all_properties) |
-      (@upper.is_a?(Hash) ? @upper.keys : @upper.all_properties)
+    @fact.is_a?(Hash) ? @fact.keys : @fact.all_properties
   end
 
   others do |*args|
