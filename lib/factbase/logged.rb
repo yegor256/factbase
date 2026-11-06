@@ -203,7 +203,8 @@ class Factbase::Logged
       else
         @tube.say(
           mono,
-          "Found #{r.to_s.ellipsized(Factbase::Logged::Fact::MAX_LENGTH)} (#{r.class}) by '#{@termtext}' #{tail}"
+          "Found #{r.to_s.encode(Encoding::UTF_8, invalid: :replace, undef: :replace)
+            .ellipsized(Factbase::Logged::Fact::MAX_LENGTH)} (#{r.class}) by '#{@termtext}' #{tail}"
         )
       end
       r

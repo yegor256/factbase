@@ -201,4 +201,21 @@ class TestLogged < Factbase::Test
     assert_includes(buf.to_s, 'Found 2/3 fact(s)', buf.to_s)
     assert_includes(buf.to_s, 'There were no facts', buf.to_s)
   end
+
+  def test_returns_a_non_utf8_string_unchanged
+    fb = Factbase::Logged.new(Factbase.new, Loog::NULL)
+    fb.insert.text = 'café'.encode('UTF-16LE')
+    r = fb.query('(min text)').one
+    assert_equal('café'.encode('UTF-16LE'), r)
+    assert_equal(Encoding::UTF_16LE, r.encoding)
+  end
+
+  def test_logs_a_long_non_utf8_string
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.text = ('café' * 40).encode('UTF-16LE')
+    assert_equal(Encoding::UTF_16LE, fb.query('(min text)').one.encoding)
+    assert_predicate(buf.to_s, :valid_encoding?)
+    assert_includes(buf.to_s, 'Found')
+  end
 end
