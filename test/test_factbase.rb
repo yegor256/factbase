@@ -605,4 +605,14 @@ class TestFactbase < Factbase::Test
     assert_equal(2, q.each.to_a.size, 'a query built before import must see the imported facts, as it sees an insert')
     assert_equal(2, fb.size)
   end
+
+  def test_does_not_load_a_file_again_on_insert_and_query
+    fb = Factbase.new
+    t = fb.to_term('(always)')
+    fb.insert
+    fb.query(t)
+    fb.define_singleton_method(:require_relative) { |f| raise(RuntimeError, "#{f} is loaded again") }
+    fb.insert
+    assert_equal(2, fb.query(t).each.to_a.size)
+  end
 end
