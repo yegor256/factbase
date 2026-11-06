@@ -28,8 +28,8 @@ class Factbase::LazyTaped
       self
     end
 
-    def [](idx)
-      value(current_array[idx])
+    def [](*)
+      value(current_array[*])
     end
 
     def size
@@ -41,7 +41,7 @@ class Factbase::LazyTaped
     end
 
     def any?(*pattern)
-      return current_array.any? { |item| pattern.first.public_send(:===, value(item)) } unless pattern.empty?
+      return current_array.any?(*pattern) unless pattern.empty?
       return current_array.any? unless block_given?
       current_array.any? { |item| yield(value(item)) }
     end
@@ -66,6 +66,7 @@ class Factbase::LazyTaped
     end
 
     def value(item)
+      return item.map { |i| value(i) } if item.is_a?(Array)
       item.is_a?(String) ? -item : item
     end
   end
