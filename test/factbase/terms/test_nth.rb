@@ -50,6 +50,15 @@ class TestNth < Factbase::Test
     )
   end
 
+  def test_cannot_read_parameter_as_property
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    name = "$w#{Array.new(rnd.rand(1..16)) { [*'a'..'z'].sample(random: rnd) }.join}"
+    assert_raises(ArgumentError, "nth read the parameter #{name} as a property, seed #{seed}") do
+      Factbase::Nth.new([0, name.to_sym]).evaluate(fact, [{ name => [rnd.rand(1..1000)] }], Factbase.new)
+    end
+  end
+
   def test_gives_nil_for_a_huge_position
     assert_nil(
       Factbase::Nth.new([99_999_999_999_999_999_999, :letter]).evaluate(nil, [{ 'letter' => 'a' }], Factbase.new)

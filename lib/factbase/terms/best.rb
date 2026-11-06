@@ -11,6 +11,7 @@ class Factbase::Best
 
   def evaluate(key, maps)
     raise(ArgumentError, "A symbol is expected, but #{key} provided") unless key.is_a?(Symbol)
+    raise(ArgumentError, "A property name is expected, but the parameter #{key} provided") if key.start_with?('$')
     best = nil
     maps.each do |m|
       vv = m[key.to_s]
