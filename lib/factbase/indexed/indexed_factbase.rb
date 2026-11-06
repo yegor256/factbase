@@ -53,7 +53,7 @@ class Factbase::IndexedFactbase
   # @param [String] term The term to use
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
-    term = to_term(term) if term.is_a?(String)
+    term = to_term(term.is_a?(String) ? term : term.to_s)
     Factbase::IndexedQuery.new(@origin.query(term, maps), @idx, self, @fresh)
   end
 
