@@ -6,6 +6,7 @@
 require_relative '../factbase'
 require_relative 'accum'
 require_relative 'fact'
+require_relative 'prediction'
 require_relative 'syntax'
 require_relative 'tee'
 
@@ -52,7 +53,7 @@ class Factbase::Query
     maybe = @term.predict(@maps, fb, Factbase::Tee.new({}, params))
     maybe ||= @maps unless maybe.equal?(@maps)
     maybe.each do |m|
-      extras = {}
+      extras = maybe.is_a?(Factbase::Prediction) ? maybe.extras(m) : {}
       f = Factbase::Fact.new(m)
       f = Factbase::Tee.new(f, params)
       r = @term.evaluate(Factbase::Accum.new(f, extras, false), @maps, fb)
@@ -94,7 +95,10 @@ class Factbase::Query
   def delete!(fb = @fb)
     @term.forget
     deleted = 0
-    maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
+    maybe =
+      (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.map do |m|
+        m.keys.to_h { |key| [key, m[key].to_a] }
+      end
     before = @maps.to_a.dup
     @maps.delete_if do |m|
       pos = maybe.index { |c| c.eql?(m) }
