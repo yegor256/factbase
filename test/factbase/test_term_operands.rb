@@ -23,11 +23,13 @@ class TestTermOperands < Factbase::Test
   end
 
   def test_refuses_edits_through_the_operands_reader
-    t = Factbase::Term.new(:eq, [:foo, 42])
+    t = Factbase::Term.new(:eq, [:foo, 'x'])
     assert_predicate(t.operands, :frozen?)
-    assert_raises(FrozenError) { t.operands[1] = 43 }
-    assert(t.evaluate(fact('foo' => 42), [], Factbase.new))
-    assert_equal('(eq foo 42)', Factbase::Term.new(:eq, [:foo, 42].freeze).to_s)
+    assert_predicate(t.operands[1], :frozen?)
+    assert_raises(FrozenError) { t.operands[1] = 'y' }
+    assert_raises(FrozenError) { t.operands[1] << 'y' }
+    assert(t.evaluate(fact('foo' => 'x'), [], Factbase.new))
+    assert_equal("(eq foo 'x')", Factbase::Term.new(:eq, [:foo, 'x'].freeze).to_s)
   end
 
   def test_cached_and_plain_agree_after_an_edit_attempt
@@ -51,5 +53,17 @@ class TestTermOperands < Factbase::Test
     assert_equal("(eq foo 'hello')", t.to_s)
     assert(t.evaluate(fact('foo' => 'hello'), [], Factbase.new))
     refute(t.evaluate(fact('foo' => 'hello!'), [], Factbase.new))
+  end
+
+  def test_ignores_later_edits_of_an_array_operand
+    arr = ['hello']
+    t = Factbase::Term.new(:eq, [:foo, arr])
+    assert_equal('(eq foo ["hello"])', t.to_s)
+    arr[0] = 'bye'
+    assert_equal('(eq foo ["hello"])', t.to_s)
+    assert(t.evaluate(fact('foo' => 'hello'), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => 'bye'), [], Factbase.new))
+    assert_raises(FrozenError) { t.operands[1] << 'bye' }
+    assert_raises(FrozenError) { t.operands[1][0] << '!' }
   end
 end
