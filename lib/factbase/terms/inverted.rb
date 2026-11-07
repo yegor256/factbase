@@ -5,6 +5,7 @@
 
 require_relative '../accum'
 require_relative '../fact'
+require_relative '../prediction'
 require_relative '../tee'
 require_relative 'base'
 
@@ -35,14 +36,18 @@ class Factbase::Inverted < Factbase::TermBase
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     maybe = term.predict(maps, fb, Factbase::Tee.new({}, params))
     maybe ||= maps unless maybe.equal?(maps)
+    extras = {}.compare_by_identity
     result = []
     maybe.each do |m|
-      r = term.evaluate(Factbase::Accum.new(Factbase::Tee.new(Factbase::Fact.new(m), params), {}, false), maps, fb)
+      props = maybe.is_a?(Factbase::Prediction) ? maybe.extras(m) : {}
+      r = term.evaluate(Factbase::Accum.new(Factbase::Tee.new(Factbase::Fact.new(m), params), props, false), maps, fb)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
         raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{term}")
       end
-      result << m if r
+      next unless r
+      extras[m] = props
+      result << m
     end
-    result.reverse!
+    Factbase::Prediction.new(result.reverse!, extras)
   end
 end

@@ -6,6 +6,7 @@
 require_relative '../accum'
 require_relative '../fact'
 require_relative '../flatten'
+require_relative '../prediction'
 require_relative '../tee'
 require_relative 'base'
 
@@ -39,15 +40,18 @@ class Factbase::Sorted < Factbase::TermBase
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     maybe = term.predict(maps, fb, Factbase::Tee.new({}, params))
     maybe ||= maps unless maybe.equal?(maps)
+    extras = {}.compare_by_identity
     blank = []
     valued = []
     maybe.each do |m|
-      acc = Factbase::Accum.new(Factbase::Tee.new(Factbase::Fact.new(m), params), {}, false)
+      props = maybe.is_a?(Factbase::Prediction) ? maybe.extras(m) : {}
+      acc = Factbase::Accum.new(Factbase::Tee.new(Factbase::Fact.new(m), params), props, false)
       r = term.evaluate(acc, maps, fb)
       unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
         raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{term}")
       end
       next unless r
+      extras[m] = props
       v = acc[prop]
       if v.nil?
         blank << m
@@ -56,6 +60,6 @@ class Factbase::Sorted < Factbase::TermBase
       end
     end
     valued.sort_by!.with_index { |(_m, v), i| [Factbase::Flatten.key(v.first), i] }
-    valued.map!(&:first).concat(blank)
+    Factbase::Prediction.new(valued.map!(&:first).concat(blank), extras)
   end
 end
