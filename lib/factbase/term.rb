@@ -235,7 +235,7 @@ class Factbase::Term < Factbase::TermBase
   #
   # @return [Boolean] TRUE if static
   def static?
-    return !traced?(self) if @op == :agg
+    return !traced? if @op == :agg
     return false if %i[join as traced unique prev].include?(@op)
     return false if custom?
     @operands.each do |o|
@@ -264,14 +264,6 @@ class Factbase::Term < Factbase::TermBase
     return false if TERMS.key?(@op)
     return false unless Factbase::Term.private_method_defined?(@op, false)
     Factbase::Term.instance_method(@op).source_location&.first != __FILE__
-  end
-
-  def traced?(term)
-    op = term.instance_variable_get(:@op)
-    return true if [:traced, 'traced'].include?(op)
-    children = Array(term.instance_variable_get(:@operands))
-    children << op if op.is_a?(Factbase::TermBase)
-    children.any? { |o| o.is_a?(Factbase::TermBase) && traced?(o) }
   end
 
   def at(fact, maps, fb)

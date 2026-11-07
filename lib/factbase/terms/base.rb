@@ -29,6 +29,16 @@ class Factbase::TermBase
     false
   end
 
+  # Does the term, or any term inside it, trace its evaluation?
+  #
+  # @return [Boolean] TRUE if traced
+  def traced?
+    return true if @op == :traced || @op == 'traced'
+    children = Array(@operands).dup
+    children << @op if @op.is_a?(Factbase::TermBase)
+    children.any? { |o| o.is_a?(Factbase::TermBase) && o.traced? }
+  end
+
   # Does it have any variables (+$foo+, for example) inside?
   #
   # @return [Boolean] TRUE if abstract
