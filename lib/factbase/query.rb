@@ -42,7 +42,7 @@ class Factbase::Query
   # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
-  # @return [Integer] Total number of facts yielded (if block given), otherwise enumerator
+  # @return [Integer, Enumerator] Total number of facts yielded (if block given), otherwise enumerator
   def each(fb = @fb, params = {})
     fb = factbase(fb)
     return to_enum(__method__, fb, params) unless block_given?
