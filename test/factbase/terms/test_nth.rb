@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/nth'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/nth'
+
 require_relative '../../test__helper'
 
-# Test for unique term.
+# Test for nth term.
 # Author:: Volodya Lombrozo (volodya.lombrozo@gmail.com)
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT

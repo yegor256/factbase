@@ -26,11 +26,9 @@ class Factbase::Empty < Factbase::TermBase
     unless term.is_a?(Factbase::Term) || term.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected, but '#{term}' provided")
     end
-    # rubocop:disable Lint/UnreachableLoop
-    fb.query(term, maps).each(fb, fact) do
+    fb.query(term, maps).each(fb, fact) do # rubocop:disable Lint/UnreachableLoop
       return false
     end
-    # rubocop:enable Lint/UnreachableLoop
     true
   end
 end

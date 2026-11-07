@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/cached/cached_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
 
@@ -251,5 +252,13 @@ class TestIndexedQuery < Factbase::Test
     fb.insert.foo = 1
     fb.query('(eq foo 1)').delete!
     assert_equal(0, fb.query('(always)').each.to_a.size)
+  end
+
+  def test_returns_number_of_facts_yielded
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    3.times { |i| fb.insert.x = i }
+    query = fb.query('(exists x)')
+    assert_equal(3, query.each { |f| f })
+    assert_equal(3, query.each { |f| f })
   end
 end

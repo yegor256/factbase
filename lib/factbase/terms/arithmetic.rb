@@ -35,6 +35,7 @@ class Factbase::Arithmetic < Factbase::TermBase
       (num, units, *rest) = r.split
       raise(ArgumentError, "Duration '#{r}' must be just a number and a unit") unless rest.empty?
       begin
+        raise(ArgumentError, 'underscores are not allowed') if num.to_s.include?('_')
         num = Integer(num, 10)
       rescue ArgumentError, TypeError
         raise(ArgumentError, "Amount '#{num}' in '#{r}' must be a whole number")

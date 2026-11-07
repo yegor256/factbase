@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/assert'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/assert'
 
 require_relative '../../test__helper'
 
@@ -60,6 +61,19 @@ class TestAssert < Factbase::Test
       Factbase::Assert.new(['at least one positive', Factbase::Term.new(:gt, [:foo, 0])]).evaluate(
         fact('foo' => [-1, 0, 3]), [], Factbase.new
       )
+    )
+  end
+
+  def test_assert_with_term_base
+    assert(Factbase::Assert.new(['always holds', Factbase::Always.new([])]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_assert_with_failing_term_base
+    t = Factbase::Assert.new(['never holds', Factbase::Never.new([])])
+    assert_includes(
+      assert_raises(StandardError) do
+        t.evaluate(fact, [], Factbase.new)
+      end.message, 'never holds'
     )
   end
 

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/traced'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/traced'
 
 require_relative '../../test__helper'
 
@@ -16,6 +17,20 @@ class TestTraced < Factbase::Test
     t = Factbase::Traced.new([Factbase::Term.new(:defn, [:test_debug, 'self.to_s'])])
     assert_output("(traced (defn test_debug 'self.to_s')) -> true\n") do
       assert(t.evaluate(fact, [], Factbase.new))
+    end
+  end
+
+  def test_traced_with_term_base
+    t = Factbase::Traced.new([Factbase::Always.new([])])
+    assert_output("(traced (always)) -> true\n") do
+      assert(t.evaluate(fact, [], Factbase.new))
+    end
+  end
+
+  def test_traced_with_never_term_base
+    t = Factbase::Traced.new([Factbase::Never.new([])])
+    assert_output("(traced (never)) -> false\n") do
+      refute(t.evaluate(fact, [], Factbase.new))
     end
   end
 

@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
+
 require_relative '../../../lib/factbase'
 require_relative '../../../lib/factbase/indexed/indexed_and'
 require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/taped'
 require_relative '../../../lib/factbase/term'
-# SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
-# SPDX-License-Identifier: MIT
 
 require_relative '../../test__helper'
 
@@ -81,6 +82,31 @@ class TestIndexedAnd < Factbase::Test
     assert_equal(
       [1], Factbase::IndexedFactbase.new(origin).query(query).each.to_a.map(&:amount),
       'the multi-equality index must retain numerically equal Integer and Float values'
+    )
+  end
+
+  def test_answers_like_the_plain_factbase_after_a_scoped_query
+    query = '(and (eq z 7) (eq w 1))'
+    plain = Factbase.new
+    indexed = Factbase::IndexedFactbase.new(Factbase.new)
+    [plain, indexed].each do |fb|
+      4.times do |i|
+        f = fb.insert
+        f.z = 7
+        f.w = i.even? ? 1 : 2
+      end
+      fb.insert.x = 0
+    end
+    assert_equal(
+      1,
+      indexed.query(query, indexed.to_enum(:each).to_a[2..]).each.to_a.size,
+      'the scoped query must find the one fact with z and w in the scope'
+    )
+    assert_equal(2, plain.query(query).each.to_a.size, 'the plain factbase must find both facts with z and w')
+    assert_equal(
+      plain.query(query).each.map { |f| [f['z'], f['w']] },
+      indexed.query(query).each.map { |f| [f['z'], f['w']] },
+      'the scoped query must not poison the multi-equality index of the next full query'
     )
   end
 

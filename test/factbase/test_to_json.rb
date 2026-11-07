@@ -55,6 +55,13 @@ class TestToJSON < Factbase::Test
     assert_equal('2026-09-30T00:00:00.123456789Z', JSON.parse(Factbase::ToJSON.new(fb).json)[0]['when'])
   end
 
+  def test_keeps_offset_of_stored_time
+    time = Time.new(2024, 1, 1, 12, 0, 0, '+03:00')
+    json = Factbase::ToJSON.new(Factbase.new([{ '_id' => [1], 'when' => [time] }])).json
+    assert_equal('2024-01-01T09:00:00.000000000Z', JSON.parse(json)[0]['when'], json)
+    assert_equal(10_800, time.utc_offset, 'printing moved the stored time to UTC')
+  end
+
   def test_string_value
     fb = Factbase.new
     fb.insert.text = 'hello'

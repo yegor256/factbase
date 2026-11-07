@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase/term'
-require_relative '../../../lib/factbase/terms/minus'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../../lib/factbase/term'
+require_relative '../../../lib/factbase/terms/minus'
 
 require_relative '../../test__helper'
 
@@ -46,5 +47,16 @@ class TestMinus < Factbase::Test
         end.message, 'must be a whole number', d
       )
     end
+  end
+
+  def test_rejects_underscores_in_a_duration_of_minus
+    fb = Factbase.new
+    f = fb.insert
+    f.start = Time.utc(2024, 1, 1)
+    f.span = '1_0 hours'
+    assert_includes(
+      assert_raises(StandardError) { fb.query('(as later (minus start span))').each.to_a }.message,
+      "Amount '1_0' in '1_0 hours' must be a whole number"
+    )
   end
 end

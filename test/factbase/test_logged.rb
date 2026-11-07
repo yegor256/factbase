@@ -14,6 +14,23 @@ require_relative '../../lib/factbase/logged'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLogged < Factbase::Test
+  # A log that keeps the level of every message, unlike Loog::Buffer.
+  class Recorder
+    attr_reader :lines
+
+    def initialize
+      @lines = []
+    end
+
+    def debug(msg)
+      @lines << [:debug, msg]
+    end
+
+    def warn(msg)
+      @lines << [:warn, msg]
+    end
+  end
+
   def test_simple_setting
     fb = Factbase::Logged.new(Factbase.new, Loog::NULL)
     fb.insert
@@ -75,6 +92,44 @@ class TestLogged < Factbase::Test
     fb = Factbase::Logged.new(Factbase.new, log, time_tolerate: 0.1)
     fb.txn { sleep(0.4) }
     assert_includes(log.to_s, '(slow!)', log)
+  end
+
+  def test_logs_a_slow_operation_as_a_warning
+    log = Recorder.new
+    Factbase::Logged.new(Factbase.new, log, time_tolerate: 0).insert
+    line = log.lines.find { |l| l[1].include?('Inserted new fact') }
+    refute_nil(line, log.lines.inspect)
+    assert_equal(:warn, line[0], log.lines.inspect)
+    assert_includes(line[1], '(slow!)', log.lines.inspect)
+  end
+
+  def test_logs_a_fast_operation_as_debug
+    log = Recorder.new
+    Factbase::Logged.new(Factbase.new, log).insert
+    line = log.lines.find { |l| l[1].include?('Inserted new fact') }
+    refute_nil(line, log.lines.inspect)
+    assert_equal(:debug, line[0], log.lines.inspect)
+  end
+
+  def test_logs_the_level_of_each_message
+    log = Recorder.new
+    tube = Factbase::Logged::Tube.new(log, time_tolerate: 0.1)
+    tube.say(Process.clock_gettime(Factbase::Logged::MONO) - 1, 'slow')
+    tube.say(Process.clock_gettime(Factbase::Logged::MONO), 'fast')
+    assert_equal([[:warn, 'slow (slow!)'], [:debug, 'fast']], log.lines)
+  end
+
+  def test_logs_the_id_of_a_touched_transaction
+    log = Recorder.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    id = nil
+    fb.txn do |fbt|
+      id = fbt.instance_variable_get(:@origin).object_id
+      fbt.insert.foo = 42
+    end
+    line = log.lines.find { |l| l[1].start_with?('Txn #') }
+    refute_nil(line, log.lines.inspect)
+    assert_includes(line[1], "Txn ##{id} touched ", log.lines.inspect)
   end
 
   def test_with_txn_rollback
@@ -177,6 +232,21 @@ class TestLogged < Factbase::Test
     assert_equal(3 * 60 * 60, t.utc_offset, 'the logged time was moved to UTC')
   end
 
+  def test_logs_the_fraction_of_a_time
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.when = Time.utc(2026, 10, 19, 12, 0, 0.25r)
+    fb.insert.when = Time.utc(2026, 10, 19, 12, 0, 0.75r)
+    assert_includes(buf.to_s, "Set 'when' to 2026-10-19T12:00:00.250000000Z (Time)", buf.to_s)
+    assert_includes(buf.to_s, "Set 'when' to 2026-10-19T12:00:00.750000000Z (Time)", buf.to_s)
+  end
+
+  def test_logs_a_time_of_whole_seconds_without_fraction
+    buf = Loog::Buffer.new
+    Factbase::Logged.new(Factbase.new, buf).insert.when = Time.new(2026, 10, 19, 15, 0, 0, '+03:00')
+    assert_includes(buf.to_s, "Set 'when' to 2026-10-19T12:00:00Z (Time)", buf.to_s)
+  end
+
   def test_reports_the_size_of_the_maps_it_ran_over
     buf = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, buf)
@@ -185,5 +255,21 @@ class TestLogged < Factbase::Test
     fb.query('(gt i 1000)', []).delete!
     assert_includes(buf.to_s, 'Found 2/3 fact(s)', buf.to_s)
     assert_includes(buf.to_s, 'There were no facts', buf.to_s)
+  end
+
+  def test_logs_nothing_happened
+    log = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    assert_equal(0, fb.query('(always)').delete!)
+    assert_nil(fb.query('(agg (exists foo) (first foo))').one)
+    fb.insert.foo = 1
+    assert_equal(0, fb.query('(exists bar)').each.to_a.size)
+    [
+      'There were no facts, nothing deleted by (always)',
+      'Nothing found by \'(agg (exists foo) (first foo))\'',
+      'Zero/1 facts found by (exists bar)'
+    ].each do |s|
+      assert_includes(log.to_s, s, log.to_s)
+    end
   end
 end
