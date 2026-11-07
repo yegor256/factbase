@@ -19,10 +19,8 @@ class TestEnv < Factbase::Test
   end
 
   def teardown
-    if @foo.nil?
-      ENV.delete('FOO')
-    else
-      ENV.store('FOO', @foo)
+    if defined?(@foo)
+      @foo.nil? ? ENV.delete('FOO') : ENV.store('FOO', @foo)
     end
     super
   end
@@ -61,6 +59,30 @@ class TestEnv < Factbase::Test
   def test_keeps_callers_value
     ENV.store('FOO', 'caller')
     TestEnv.new(:test_env).run
+    assert_equal('caller', ENV.fetch('FOO', nil))
+  end
+
+  def test_restores_after_assertion_raises
+    ENV.store('FOO', 'caller')
+    raised =
+      Class.new(TestEnv) do
+        def test_raises
+          ENV.store('FOO', 'changed')
+          flunk('boom')
+        end
+      end.new(:test_raises)
+    raised.run
+    assert_equal(1, raised.failures.size, 'the nested test must actually raise')
+    assert_equal('caller', ENV.fetch('FOO', nil))
+  end
+
+  def test_keeps_callers_value_when_setup_raises
+    ENV.store('FOO', 'caller')
+    Class.new(TestEnv) do
+      def setup
+        raise(RuntimeError, 'setup failed')
+      end
+    end.new(:test_env).run
     assert_equal('caller', ENV.fetch('FOO', nil))
   end
 end

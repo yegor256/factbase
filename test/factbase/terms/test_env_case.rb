@@ -20,7 +20,7 @@ class TestEnvCase < Factbase::Test
   end
 
   def teardown
-    @saved.each { |k, v| v.nil? ? ENV.delete(k) : ENV.store(k, v) }
+    @saved&.each { |k, v| v.nil? ? ENV.delete(k) : ENV.store(k, v) }
     super
   end
 
@@ -41,6 +41,38 @@ class TestEnvCase < Factbase::Test
     TestEnvCase.new(:test_reads_a_lower_case_variable).run
     assert_equal('caller', ENV.fetch('myVar', nil))
     assert_equal('other-caller', ENV.fetch('MYVAR', nil))
+  end
+
+  def test_restores_callers_values_on_raise
+    skip('Windows environment variables are case-insensitive') if Gem.win_platform?
+    ENV.store('myVar', 'caller')
+    ENV.store('MYVAR', 'other-caller')
+    raised =
+      Class.new(TestEnvCase) do
+        def test_raises
+          ENV.store('myVar', 'changed')
+          ENV.delete('MYVAR')
+          flunk('boom')
+        end
+      end.new(:test_raises)
+    raised.run
+    assert_equal(1, raised.failures.size, 'the nested test must actually raise')
+    assert_equal('caller', ENV.fetch('myVar', nil))
+    assert_equal('other-caller', ENV.fetch('MYVAR', nil))
+  end
+
+  def test_does_not_mask_setup_error
+    skip('Windows environment variables are case-insensitive') if Gem.win_platform?
+    ENV.store('myVar', 'caller')
+    raised =
+      Class.new(TestEnvCase) do
+        def setup
+          raise(RuntimeError, 'setup failed')
+        end
+      end.new(:test_reads_a_lower_case_variable)
+    raised.run
+    assert_equal(1, raised.failures.size, 'teardown must not add its own failure')
+    assert_equal('caller', ENV.fetch('myVar', nil))
   end
 
   private
