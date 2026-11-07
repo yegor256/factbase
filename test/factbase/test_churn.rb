@@ -44,7 +44,22 @@ class TestChurn < Factbase::Test
     c1.append(1, 6, 3)
     c2 = Factbase::Churn.new
     c2.append(3, 2, 46)
-    assert_equal('4i/8d/49a', (c1 + c2).to_s)
+    sum = c1 + c2
+    assert_equal('4i/8d/49a', sum.to_s)
+    assert_equal('1i/6d/3a', c1.to_s)
+    assert_equal('3i/2d/46a', c2.to_s)
+    refute_same(c1, sum)
+    refute_same(c2, sum)
+  end
+
+  def test_keeps_the_operands_after_appending_to_the_sum
+    left = Factbase::Churn.new(1, 6, 3)
+    right = Factbase::Churn.new(3, 2, 46)
+    sum = left + right
+    sum.append(1, 1, 1)
+    assert_equal('1i/6d/3a', left.to_s)
+    assert_equal('3i/2d/46a', right.to_s)
+    assert_equal('5i/9d/50a', sum.to_s)
   end
 
   def test_reads_the_counters_under_the_lock_of_append
