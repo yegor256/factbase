@@ -11,6 +11,7 @@ class Factbase::Minus < Factbase::TermBase
   # @param [Array] operands Operands
   def initialize(operands)
     super()
+    @operands = operands
     @minus = Factbase::Arithmetic.new(:-, operands)
   end
 
