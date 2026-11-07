@@ -54,6 +54,8 @@ class Factbase::TermBase
   # Count the decimal digits the fraction needs, or nine when it never ends.
   # @param [Rational] frac The subsecond fraction
   # @return [Integer] The number of digits after the decimal point
+  # shortcut: non-terminating fractions keep nine digits and can share a rounded value's key;
+  # over 107 digits print text Date.iso8601 rejects (128-char cap); upgrade if Time terms must round-trip or key.
   def _frac_digits(frac)
     den = frac.denominator
     twos = 0
