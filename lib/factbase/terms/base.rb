@@ -25,7 +25,7 @@ class Factbase::TermBase
   def forget; end
 
   # Turns it into a string.
-  # @return [String] The string of it
+  # @return [String] A copy of the term text
   def to_s
     @to_s ||=
       begin
@@ -47,6 +47,7 @@ class Factbase::TermBase
           end
         "(#{items.join(' ')})"
       end
+    @to_s.dup
   end
 
   private
