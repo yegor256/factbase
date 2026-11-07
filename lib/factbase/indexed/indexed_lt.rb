@@ -18,7 +18,7 @@ class Factbase::IndexedLt
     return maps || [] if target.nil?
     target = _floored(target)
     return unless sortable?(maps, prop)
-    key = [maps.object_id, prop, :facts]
+    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), prop, :facts]
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
     _feed(maps.to_a, entry, prop)

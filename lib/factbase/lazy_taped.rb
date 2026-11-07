@@ -28,6 +28,13 @@ class Factbase::LazyTaped
     @sources[copy]
   end
 
+  # Identity of the array of facts this list decorates, so an index built for
+  # that array also answers inside a transaction.
+  # @return [Integer] Object ID of the decorated array
+  def index_key
+    @origin.object_id
+  end
+
   def copied?
     @copied
   end

@@ -321,4 +321,9 @@ class TestLazyTaped < Factbase::Test
     assert_equal([[3], [2], [1]], [tape[-1]['a'], tape[-2]['a'], tape[-3]['a']])
     assert_nil(tape[-4])
   end
+
+  def test_index_key_is_the_decorated_array
+    origin = [{ 'a' => [1] }]
+    assert_equal(origin.object_id, Factbase::LazyTaped.new(origin).index_key)
+  end
 end

@@ -89,6 +89,7 @@ Elegant/GoodMethodName:
     - 'find_by_object_id'
     - 'get_copied_array'
     - 'get_copied_map'
+    - 'index_key'
     - 'invalidate_if_dirty!'
     - 'method_missing'
     - 'pull_request'

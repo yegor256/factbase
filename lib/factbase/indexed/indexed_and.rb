@@ -12,12 +12,12 @@ class Factbase::IndexedAnd
 
   def predict(maps, fb, params)
     return if @idx.nil?
-    key = [maps.object_id, @term.operands.first, @term.op]
+    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), @term.operands.first, @term.op]
     r = nil
     if @term.operands.all? { |o| o.op == :eq } && @term.operands.size > 1 \
       && @term.operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
       props = @term.operands.map { |o| o.operands.first }.sort!
-      key = [maps.object_id, props, :multi_and_eq]
+      key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), props, :multi_and_eq]
       entry = @idx[key]
       maps_array = maps.to_a
       if entry.nil? || entry[:indexed_count] > maps_array.size

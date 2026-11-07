@@ -18,7 +18,7 @@ class Factbase::IndexedExists
   def predict(maps, _fb, _params)
     operand = @term.operands.first.to_s
     return if operand.start_with?('$')
-    key = [maps.object_id, operand, @term.op]
+    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), operand, @term.op]
     @idx[key] = { facts: [], count: 0 } if @idx[key].nil?
     entry = @idx[key]
     _feed(maps.to_a, entry, operand)

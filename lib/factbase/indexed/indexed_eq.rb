@@ -19,7 +19,7 @@ class Factbase::IndexedEq
     second_operand = @term.operands[1]
     return unless first_operand.is_a?(Symbol) && _scalar?(second_operand)
     first_operand = first_operand.to_s
-    key = [maps.object_id, first_operand, @term.op]
+    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), first_operand, @term.op]
     @idx[key] ||= { facts: {}, count: 0, pos: {}.compare_by_identity }
     entry = @idx[key]
     _feed(maps.to_a, entry, first_operand)

@@ -12,7 +12,7 @@ class Factbase::IndexedAbsent
 
   def predict(maps, _fb, _params)
     prop = @term.operands[0].to_s
-    key = [maps.object_id, prop, @term.op]
+    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), prop, @term.op]
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
     _feed(maps.to_a, entry, prop)

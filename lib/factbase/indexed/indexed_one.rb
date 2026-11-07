@@ -15,7 +15,7 @@ class Factbase::IndexedOne
     return unless operand.is_a?(Symbol)
     prop = operand.to_s
     return if prop.start_with?('$')
-    key = [maps.object_id, prop, @term.op]
+    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), prop, @term.op]
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
     _feed(maps.to_a, entry, prop)

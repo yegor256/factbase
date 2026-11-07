@@ -9,6 +9,7 @@ require_relative '../lib/factbase/indexed/indexed_factbase'
 # Benchmark for issue #321: index must survive insert-only transactions.
 # With IndexedFactbase wrapping, repeated queries after insert-only txns
 # should reuse the warm index rather than rebuild it from scratch each time.
+# A read-only txn must also cost the same as the same query outside it (issue #1901).
 #
 # To run: bundle exec rake benchmark[bench_indexed_txn]
 def bench_indexed_txn(bmk, _fb, cycles)
@@ -47,6 +48,12 @@ def bench_indexed_txn(bmk, _fb, cycles)
           f.status = 'tmp'
         end
         fb_del.query("(and (eq type 'issue') (eq status 'open'))").each.to_a.size
+      end
+    end
+    bmk.report("#{p_total} facts: read-only txn vs outside") do
+      cycles.times do
+        fb_ins.txn { |fbt| fbt.query("(and (eq type 'issue') (eq status 'open'))").each.to_a.size }
+        fb_ins.query("(and (eq type 'issue') (eq status 'open'))").each.to_a.size
       end
     end
   end
