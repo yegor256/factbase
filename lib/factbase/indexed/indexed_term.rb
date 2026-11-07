@@ -26,8 +26,7 @@ require_relative '../indexed/indexed_unique'
 module Factbase::IndexedTerm
   # Reduces the provided list of facts (maps) to a smaller array, if it's possible.
   #
-  # NIL must be returned if indexing is prohibited in this case. That includes
-  # an incomparable value, where evaluation raises the error exactly once.
+  # NIL must be returned if indexing is prohibited in this case.
   #
   # @param [Array<Hash>] maps Array of facts
   # @param [Factbase] fb Factbase to use for sub-queries
@@ -40,19 +39,26 @@ module Factbase::IndexedTerm
     end
     m = :"#{@op}_predict"
     return __send__(m, maps, fb, params) if respond_to?(m)
-    _init_indexes unless @indexes
-    @indexes[@op].predict(maps, fb, params) if @indexes.key?(@op)
+    index(maps, fb, params)
   rescue Factbase::Term::Wrapped => e
     raise(e)
   rescue NoMethodError => e
     raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
-  rescue ArgumentError
-    nil
   rescue StandardError => e
     raise(RuntimeError, "#{e.message.inspect} at #{self} at #{e.backtrace[0]}")
   end
 
   private
+
+  # Asks the index to reduce the maps. An index that cannot compare the
+  # values returns NIL, so the term is evaluated on all maps and raises
+  # the same error as the plain factbase does.
+  def index(maps, fb, params)
+    _init_indexes unless @indexes
+    @indexes[@op].predict(maps, fb, params) if @indexes.key?(@op)
+  rescue ArgumentError
+    nil
+  end
 
   def _init_indexes
     @indexes = {
