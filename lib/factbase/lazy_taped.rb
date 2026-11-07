@@ -162,10 +162,10 @@ class Factbase::LazyTaped
 
   private
 
-  def installed(original_map)
-    copy = @copies[original_map]
-    return original_map if copy.nil?
-    @maps.any? { |m| m.equal?(copy) } ? copy : original_map
+  def installed(map)
+    source = @sources[map] || map
+    copy = @copies[source] || map
+    @maps.any? { |m| m.equal?(copy) } ? copy : source
   end
 
   def _join(other)
@@ -181,7 +181,6 @@ class Factbase::LazyTaped
   end
 
   def _tape(map)
-    return LazyTapedHash.new(map, self, @added) unless copied?
-    Factbase::Taped::TapedHash.new(@copies[map] || map, @added)
+    LazyTapedHash.new(map, self, @added)
   end
 end
