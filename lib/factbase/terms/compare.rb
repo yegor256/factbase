@@ -64,7 +64,7 @@ class Factbase::Compare < Factbase::TermBase
   # @return [Boolean] The result of the comparison
   def _compare(left, right)
     left.__send__(@op, right)
-  rescue ArgumentError, NoMethodError, TypeError => e
+  rescue ArgumentError, NoMethodError, TypeError, Encoding::CompatibilityError => e
     raise(
       RuntimeError,
       "Cannot compare #{left.inspect} (#{left.class}) " \
