@@ -155,13 +155,17 @@ class Factbase::Term < Factbase::TermBase
   }.freeze
 
   # Ctor.
+  #
+  # The operands are detached and frozen, so the memoized text and the query
+  # cache key can't go stale when the caller edits the array it supplied.
+  #
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
   def initialize(operator, operands)
     super()
     @op = operator
-    @operands = operands
-    @terms = TERMS.slice(@op).to_h { |name, klass| [name, klass.new(operands).tap { |term| term.name = name }] }
+    @operands = operands.map { |o| o.is_a?(String) ? o.dup.freeze : o }.freeze
+    @terms = TERMS.slice(@op).to_h { |name, klass| [name, klass.new(@operands).tap { |term| term.name = name }] }
   end
 
   # Extend it with the module.
