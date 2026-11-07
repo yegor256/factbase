@@ -12,6 +12,20 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestTxnIndexReuse < Factbase::Test
+  # Counts how many times the index feeds on this list of values, and keeps
+  # counting after LazyTaped copies the fact in a transaction (`dup` shares it).
+  class CountingArray < Array
+    def initialize(values, counter)
+      super(values)
+      @counter = counter
+    end
+
+    def each(&)
+      @counter[0] += 1
+      super
+    end
+  end
+
   def test_read_inside_txn_does_not_touch_every_fact
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     10.times { |i| fb.insert.kind = i }
@@ -43,6 +57,36 @@ class TestTxnIndexReuse < Factbase::Test
     fb.insert.kind = 1
     assert_equal(0, fb.query('(eq kind 2)').each.to_a.size)
     assert_equal(2, fb.query('(eq kind 1)').each.to_a.size)
+  end
+
+  def test_insert_and_query_interleaved_in_txn_does_not_rescan
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    10.times { |i| fb.insert.kind = i }
+    feeds = [0]
+    fb.each { |m| m['kind'] = CountingArray.new(m['kind'], feeds) }
+    fb.txn do |fbt|
+      10.times do |i|
+        fbt.insert.kind = i + 10
+        fbt.query("(eq kind #{i})").each.to_a
+      end
+    end
+    assert_equal(
+      10, feeds[0],
+      'Clearing the shared index once per transaction keeps indexing linear; ' \
+      'clearing it on every insert re-feeds every fact inserted so far (quadratic)'
+    )
+  end
+
+  def test_insert_only_txn_keeps_the_factbase_index_warm
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    fb.insert.kind = 1
+    fb.query('(eq kind 1)').each.to_a
+    refute_empty(idx)
+    fb.txn { |fbt| fbt.insert.kind = 2 }
+    refute_empty(idx, 'An insert-only transaction must not empty the factbase index')
+    assert_equal(1, fb.query('(eq kind 1)').each.to_a.size)
+    assert_equal(1, fb.query('(eq kind 2)').each.to_a.size)
   end
 
   def test_scoped_index_does_not_answer_a_whole_factbase_query_in_txn

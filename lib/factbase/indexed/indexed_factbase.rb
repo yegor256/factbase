@@ -37,7 +37,10 @@ class Factbase::IndexedFactbase
   # Insert a new fact and return it.
   # @return [Factbase::Fact] The fact just inserted
   def insert
-    @idx.clear if @shared
+    if @shared
+      @idx.clear
+      @shared = false
+    end
     f = Factbase::IndexedFact.new(@origin.insert, @idx, @fresh)
     @fresh.add(f.object_id)
     f

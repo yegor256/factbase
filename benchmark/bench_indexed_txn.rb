@@ -50,11 +50,12 @@ def bench_indexed_txn(bmk, _fb, cycles)
         fb_del.query("(and (eq type 'issue') (eq status 'open'))").each.to_a.size
       end
     end
-    bmk.report("#{p_total} facts: read-only txn vs outside") do
-      cycles.times do
-        fb_ins.txn { |fbt| fbt.query("(and (eq type 'issue') (eq status 'open'))").each.to_a.size }
-        fb_ins.query("(and (eq type 'issue') (eq status 'open'))").each.to_a.size
-      end
+    query = "(and (eq type 'issue') (eq status 'open'))"
+    bmk.report("#{p_total} facts: read-only txn") do
+      cycles.times { fb_ins.txn { |fbt| fbt.query(query).each.to_a.size } }
+    end
+    bmk.report("#{p_total} facts: query outside txn") do
+      cycles.times { fb_ins.query(query).each.to_a.size }
     end
   end
 end
