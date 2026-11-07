@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase/terms/max'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../../lib/factbase/terms/max'
 
 require_relative '../../test__helper'
 
@@ -37,6 +38,12 @@ class TestMax < Factbase::Test
         nil
       )
     )
+  end
+
+  def test_max_picks_latest_time_within_same_second
+    early = Time.utc(2026, 10, 28) + Rational(1, 1_000_000_000)
+    late = early + Rational(1, 1_000_000_000)
+    assert_equal(late, Factbase::Max.new([:when]).evaluate(nil, [{ 'when' => [early] }, { 'when' => [late] }], nil))
   end
 
   def test_reports_incomparable_values

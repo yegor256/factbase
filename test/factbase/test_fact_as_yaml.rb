@@ -13,6 +13,17 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestFactAsYaml < Factbase::Test
+  def test_preserves_nanoseconds_in_time_values
+    fact = Factbase.new.insert
+    times = [123_456_001, 123_456_999].map { |ns| Time.at(1_700_000_000, ns, :nanosecond).utc }
+    times.each { |time| fact.when = time }
+    fact.single = times.first
+    yaml = YAML.safe_load(Factbase::FactAsYaml.new(fact).to_s, permitted_classes: [Time])
+    assert_equal(times, yaml['when'])
+    assert_equal(times.first, yaml['single'])
+    refute_equal(yaml['when'][0], yaml['when'][1])
+  end
+
   def test_prints_exactly
     f = Factbase.new.insert
     f._id = 1
@@ -125,8 +136,100 @@ class TestFactAsYaml < Factbase::Test
     fb.insert.id = rnd.rand(1..1000)
     assert_includes(
       Factbase::FactAsYaml.new(fb.query("(as t (to_time '2026-01-01T12:00:00.25#{zone}'))").each.first).to_s,
-      "t: #{Time.parse("2026-01-01T12:00:00.25#{zone}").utc.iso8601(6)}",
+      "t: #{Time.parse("2026-01-01T12:00:00.25#{zone}").utc.iso8601(9)}",
       "printed time is not in UTC, seed #{seed}"
+    )
+  end
+
+  def test_keeps_a_newline_escape_whole_in_a_long_string
+    f = Factbase.new.insert
+    f.message = "#{'a' * 29}\n#{'b' * 100}"
+    assert_kind_of(
+      String, YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'],
+      'a long string with a newline is not printed as valid YAML'
+    )
+  end
+
+  def test_keeps_a_control_character_escape_whole_in_a_long_string
+    f = Factbase.new.insert
+    f.message = "#{'a' * 25}\u0001#{'b' * 100}"
+    assert_kind_of(
+      String, YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'],
+      'a long string with a control character is not printed as valid YAML'
+    )
+  end
+
+  def test_keeps_quote_and_backslash_escapes_whole_in_a_long_string
+    f = Factbase.new.insert
+    f.message = "#{'a' * 29}\"\\#{'b' * 100}"
+    assert_kind_of(
+      String, YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'],
+      'a long string with a quote and a backslash is not printed as valid YAML'
+    )
+  end
+
+  def test_prints_long_utf16_string
+    f = Factbase.new.insert
+    f.message = ('ж' * 100).encode('UTF-16LE')
+    message = YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message']
+    assert_kind_of(String, message)
+    assert_includes(message, 'ж')
+  end
+
+  def test_prints_short_utf16_emoji
+    f = Factbase.new.insert
+    f.message = '😀'.encode('UTF-16LE')
+    assert_equal('😀', YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'])
+  end
+
+  def test_prints_windows_1251_string
+    f = Factbase.new.insert
+    f.message = 'Привет'.encode('Windows-1251')
+    assert_equal('Привет', YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'])
+  end
+
+  def test_prints_iso_8859_5_string
+    f = Factbase.new.insert
+    f.message = 'Привет'.encode('ISO-8859-5')
+    assert_equal('Привет', YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'])
+  end
+
+  def test_prints_string_with_invalid_bytes
+    [
+      "\xFF\xFE".b,
+      (+"\x00\xD8\x00").force_encoding('UTF-16LE')
+    ].each do |raw|
+      f = Factbase.new.insert
+      f.message = raw
+      assert_kind_of(
+        String, YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'],
+        "invalid bytes #{raw.inspect} are not printed as valid YAML"
+      )
+    end
+  end
+
+  def test_prints_long_string_with_invalid_bytes
+    [
+      "\xFF".b * 100,
+      ("\x00\xD8\x00" * 50).force_encoding('UTF-16LE')
+    ].each do |raw|
+      f = Factbase.new.insert
+      f.message = raw
+      assert_kind_of(
+        String, YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'],
+        "long invalid bytes #{raw.inspect} are not printed as valid YAML"
+      )
+    end
+  end
+
+  def test_prints_valid_yaml_for_long_strings_full_of_escapes
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    f = Factbase.new.insert
+    f.message = Array.new(rnd.rand(80..300)) { ["\n", "\t", '"', '\\', "\u0002", 'ж', 'z'].sample(random: rnd) }.join
+    assert_kind_of(
+      String, YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['message'],
+      "a long string full of escapes is not printed as valid YAML, seed #{seed}"
     )
   end
 end

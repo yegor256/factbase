@@ -28,6 +28,21 @@ class Factbase::ToYAML
   # Convert the entire factbase into YAML.
   # @return [String] The factbase in YAML format
   def yaml
-    YAML.dump(Factbase::Flatten.new(@fb.each.to_a, @sorter).it)
+    YAML.dump(
+      Factbase::Flatten.new(@fb.each.to_a, @sorter).it.map do |m|
+        m.transform_values { |vv| vv.is_a?(Array) ? vv.map { |v| unicode(v) } : unicode(vv) }
+      end
+    )
+  end
+
+  private
+
+  # Convert a string to UTF-8 if its encoding is not ASCII-compatible,
+  # since YAML can't print such a string (UTF-16, UTF-32).
+  # @param [Object] val The value
+  # @return [Object] The value, with such a string in UTF-8
+  def unicode(val)
+    return val unless val.is_a?(String) && !val.encoding.ascii_compatible?
+    val.encode(Encoding::UTF_8)
   end
 end

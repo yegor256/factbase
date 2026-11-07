@@ -24,6 +24,13 @@ class TestToXML < Factbase::Test
     )
   end
 
+  def test_keeps_offset_of_stored_time
+    time = Time.new(2024, 1, 1, 12, 0, 0, '+03:00')
+    xml = Nokogiri::XML.parse(Factbase::ToXML.new(Factbase.new([{ '_id' => [1], 't' => [time] }])).xml)
+    assert_equal('2024-01-01T09:00:00.000000000Z', xml.xpath('/fb/f/t/text()').text, xml.to_s)
+    assert_equal(10_800, time.utc_offset, 'printing moved the stored time to UTC')
+  end
+
   def test_control_character_rendering
     fb = Factbase.new
     fb.insert.t = "a#{1.chr}b"
@@ -131,6 +138,18 @@ class TestToXML < Factbase::Test
     %w[a c t x].each_with_index do |e, i|
       refute_empty(xml.xpath("/fb/f/#{e}[count(preceding-sibling::*) = #{i}]"), e)
     end
+  end
+
+  def test_custom_sorter
+    fb = Factbase.new
+    f = fb.insert
+    f.name = 'b'
+    f.w = 2
+    f = fb.insert
+    f.name = 'a'
+    f.w = 1
+    out = Factbase::ToXML.new(fb, 'w').xml
+    assert_equal(%w[a b], Nokogiri::XML.parse(out).xpath('/fb/f/name').map(&:text), out)
   end
 
   def test_keeps_nanoseconds_of_time

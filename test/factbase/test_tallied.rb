@@ -40,6 +40,19 @@ class TestTallied < Factbase::Test
     assert_equal(1, fb.churn.added)
   end
 
+  def test_dont_count_reads
+    fb = Factbase::Tallied.new(Factbase.new)
+    fb.insert.x = 1
+    facts = fb.query('(always)').each.to_a
+    assert_equal(1, facts.size)
+    facts.each do |f|
+      assert_equal(1, f.x)
+      assert_equal([1], f['x'])
+    end
+    assert_equal(1, fb.query('(agg (always) (nth 0 x))').one.first)
+    assert_equal('1i/0d/1a', fb.churn.to_s)
+  end
+
   def test_returns_all_props
     f = Factbase::Tallied.new(Factbase.new).insert
     f.bar = 3
@@ -148,5 +161,30 @@ class TestTallied < Factbase::Test
     ensure
       Factbase::Term.new(:undef, [n]).evaluate(nil, [], Factbase.new)
     end
+  end
+
+  def test_dont_count_insertion_that_raises
+    churn = Factbase::Churn.new
+    fb = Factbase::Tallied.new(Factbase.new([].freeze), churn)
+    begin
+      fb.insert
+    rescue FrozenError
+      nil
+    end
+    assert_predicate(churn, :zero?, "churn counts an insertion that never happened: #{churn}")
+  end
+
+  def test_keeps_previous_churn_when_insertion_raises
+    seed = Random.new_seed
+    random = Random.new(seed)
+    churn = Factbase::Churn.new(random.rand(1..1000), random.rand(1..1000), random.rand(1..1000))
+    before = churn.to_s
+    fb = Factbase::Tallied.new(Factbase.new([{ 'x' => [1] }].freeze), churn)
+    begin
+      fb.insert
+    rescue FrozenError
+      nil
+    end
+    assert_equal(before, churn.to_s, "failed insertion changed the churn of #{before}, seed #{seed}")
   end
 end

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase'
-require_relative '../../../lib/factbase/sync/sync_factbase'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/sync/sync_factbase'
 
 require 'benchmark'
 require_relative '../../test__helper'
@@ -27,6 +28,28 @@ class TestSyncQuery < Factbase::Test
     total.times { fb.insert }
     total.times do
       assert_equal(5, fb.query('(always)').each.to_a.size)
+    end
+  end
+
+  def test_each_waits_for_the_monitor
+    monitor = Monitor.new
+    fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
+    monitor.synchronize do
+      t = Thread.new { fb.query('(always)').each { |_f| true } }
+      sleep(0.05)
+      assert_predicate(t, :alive?, 'query iteration went around the monitor')
+      t.kill
+    end
+  end
+
+  def test_delete_waits_for_the_monitor
+    monitor = Monitor.new
+    fb = Factbase::SyncFactbase.new(Factbase.new, monitor)
+    monitor.synchronize do
+      t = Thread.new { fb.query('(always)').delete! }
+      sleep(0.05)
+      assert_predicate(t, :alive?, 'query deletion went around the monitor')
+      t.kill
     end
   end
 

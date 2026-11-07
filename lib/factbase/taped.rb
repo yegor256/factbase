@@ -142,17 +142,14 @@ class Factbase::Taped
       @origin.to_a.dup
     end
 
-    def any?(pattern = nil, &)
-      if pattern.nil?
-        @origin.any?(&)
-      else
-        @origin.any?(pattern)
-      end
+    def any?(*pattern, &)
+      @origin.any?(*pattern, &)
     end
 
     def <<(item)
       @origin << item
       @added.append(@oid)
+      self
     end
 
     def uniq!
