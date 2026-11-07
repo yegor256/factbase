@@ -221,4 +221,12 @@ class TestFact < Factbase::Test
     f.a = 1
     assert_equal('[ a: [1], a0: [2], aa: [3] ]', f.to_s, 'printed fact is not sorted by property name')
   end
+
+  def test_prints_properties_with_non_string_names
+    assert_equal(
+      '[ 1: [2], a: [1] ]',
+      Factbase::Fact.new({ 'a' => [1], 1 => [2] }).to_s,
+      'printed fact is not sorted by the stringified property name'
+    )
+  end
 end
