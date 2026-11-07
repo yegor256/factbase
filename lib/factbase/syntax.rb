@@ -111,7 +111,7 @@ class Factbase::Syntax
       if quotes.include?(c)
         slashes = acc[/\\*\z/].length
         if !opener.nil? && slashes.odd?
-          acc = acc[0..-2]
+          acc = acc[0..-((slashes / 2) + 2)]
         elsif opener.nil?
           opener = c
         elsif opener == c
