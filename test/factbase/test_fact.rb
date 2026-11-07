@@ -213,4 +213,12 @@ class TestFact < Factbase::Test
     f.alpha = 42
     assert_equal('[ alpha: [42], zeta: ["Жора"] ]', f.to_s, 'printed fact is not sorted by property name')
   end
+
+  def test_prints_properties_sorted_by_name_with_a_digit_suffix
+    f = Factbase::Fact.new({})
+    f.aa = 3
+    f.a0 = 2
+    f.a = 1
+    assert_equal('[ a: [1], a0: [2], aa: [3] ]', f.to_s, 'printed fact is not sorted by property name')
+  end
 end

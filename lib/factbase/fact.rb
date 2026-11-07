@@ -37,7 +37,7 @@ class Factbase::Fact
   # Convert it to a string.
   # @return [String] Short human-readable line with all properties, sorted by name
   def to_s
-    "[ #{@map.map { |k, v| "#{k}: #{v}" }.sort!.join(', ')} ]"
+    "[ #{@map.sort_by { |k, _| k }.map { |k, v| "#{k}: #{v}" }.join(', ')} ]"
   end
 
   # Get a list of all props.
