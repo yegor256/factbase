@@ -267,7 +267,11 @@ class Factbase::Term < Factbase::TermBase
   end
 
   def traced?(term)
-    term.op == :traced || term.operands.any? { |o| o.is_a?(Factbase::Term) && traced?(o) }
+    op = term.instance_variable_get(:@op)
+    return true if [:traced, 'traced'].include?(op)
+    children = Array(term.instance_variable_get(:@operands))
+    children << op if op.is_a?(Factbase::TermBase)
+    children.any? { |o| o.is_a?(Factbase::TermBase) && traced?(o) }
   end
 
   def at(fact, maps, fb)

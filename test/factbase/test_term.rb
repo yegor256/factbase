@@ -191,4 +191,26 @@ class TestTerm < Factbase::Test
       'a parameter inside a concrete comparison child is not abstract'
     )
   end
+
+  def test_stateful_concrete_child_is_not_static
+    refute_predicate(
+      Factbase::Term.new(:not, [Factbase::Unique.new([1])]), :static?,
+      'a stateful concrete child is static'
+    )
+  end
+
+  def test_agg_with_concrete_traced_child_is_not_static
+    refute_predicate(
+      Factbase::Term.new(
+        :agg,
+        [Factbase::Term.new(:always, []), Factbase::Traced.new([Factbase::Term.new(:always, [])])]
+      ),
+      :static?,
+      'agg with a concrete traced child is static'
+    )
+  end
+
+  def test_concrete_term_is_not_static
+    refute_predicate(Factbase::Unique.new([1]), :static?, 'a concrete term is static')
+  end
 end

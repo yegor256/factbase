@@ -21,16 +21,12 @@ class Factbase::TermBase
 
   # Does it have any dependencies on a fact?
   #
-  # If a term is static, it will return the same value for +evaluate+,
-  # no matter what is the fact given.
+  # A concrete term may keep state or read the fact even when its operands are
+  # literals or parameters, so it is never reported as static.
   #
-  # @return [Boolean] TRUE if static
+  # @return [Boolean] Always FALSE
   def static?
-    Array(@operands).each do |o|
-      return false if o.is_a?(Factbase::TermBase) && !o.static?
-      return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
-    end
-    @op.is_a?(Factbase::TermBase) ? @op.static? : true
+    false
   end
 
   # Does it have any variables (+$foo+, for example) inside?
