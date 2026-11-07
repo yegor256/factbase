@@ -13,6 +13,20 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestEnv < Factbase::Test
+  def setup
+    super
+    @foo = ENV.fetch('FOO', nil)
+  end
+
+  def teardown
+    if @foo.nil?
+      ENV.delete('FOO')
+    else
+      ENV.store('FOO', @foo)
+    end
+    super
+  end
+
   def test_env
     ENV.store('FOO', 'bar')
     assert_equal('bar', Factbase::Env.new(['FOO', '']).evaluate(fact, [], Factbase.new))
@@ -42,5 +56,11 @@ class TestEnv < Factbase::Test
   def test_missing_default_returns_nil
     ENV.delete('FOO')
     assert_nil(Factbase::Env.new(['FOO', :also_missing]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_keeps_callers_value
+    ENV.store('FOO', 'caller')
+    TestEnv.new(:test_env).run
+    assert_equal('caller', ENV.fetch('FOO', nil))
   end
 end
