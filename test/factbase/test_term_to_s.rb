@@ -58,4 +58,22 @@ class TestTermToS < Factbase::Test
       assert_equal("(#{name} foo)", klass.new([:foo]).to_s, "#{klass} prints no operator")
     end
   end
+
+  def test_comparison_terms_name_their_operator
+    assert_equal('(eq 1 2)', Factbase::Eq.new([1, 2]).to_s)
+    assert_equal('(gt 1 2)', Factbase::Gt.new([1, 2]).to_s)
+    assert_equal('(gte 1 2)', Factbase::Gte.new([1, 2]).to_s)
+    assert_equal('(lt 1 2)', Factbase::Lt.new([1, 2]).to_s)
+    assert_equal('(lte 1 2)', Factbase::Lte.new([1, 2]).to_s)
+    assert_equal("(contains 'abc' 'b')", Factbase::Contains.new(%w[abc b]).to_s)
+    assert_equal("(starts_with 'abc' 'a')", Factbase::StartsWith.new(%w[abc a]).to_s)
+    assert_equal("(ends_with 'abc' 'c')", Factbase::EndsWith.new(%w[abc c]).to_s)
+  end
+
+  def test_text_is_stable_across_name_assignment
+    term = Factbase::Eq.new([1, 2])
+    assert_equal('(eq 1 2)', term.to_s)
+    term.name = :eq
+    assert_equal('(eq 1 2)', term.to_s)
+  end
 end

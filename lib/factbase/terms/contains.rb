@@ -14,6 +14,7 @@ class Factbase::Contains < Factbase::TermBase
   # @param [Array] operands Operands
   def initialize(operands)
     super()
+    @operands = operands
     @op = Factbase::Compare.new(:include?, operands)
   end
 
