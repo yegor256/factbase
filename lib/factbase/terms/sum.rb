@@ -20,7 +20,8 @@ class Factbase::Sum < Factbase::TermBase
   # @param [Factbase::Fact] _fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @param [Factbase] _fb Factbase to use for sub-queries
-  # @return [Integer] The sum of values for the specified key across all maps
+  # @return [Integer, Float] The sum of values for the specified key across all maps,
+  #   a Float if any of the values is a Float
   def evaluate(_fact, maps, _fb)
     assert_args(1)
     k = @operands[0]

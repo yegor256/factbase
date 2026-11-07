@@ -18,7 +18,7 @@ class Factbase::ToInteger < Factbase::TermBase
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @param [Factbase] fb Factbase to use for sub-queries
-  # @return [Integer] Integer representation of the value
+  # @return [Integer, nil] Integer representation of the value, or NIL if the operand is absent
   def evaluate(fact, maps, fb)
     assert_args(1)
     vv = _values(0, fact, maps, fb)
