@@ -35,7 +35,7 @@ class Factbase::TermBase
           @operands.map do |o|
             if o.is_a?(String)
               if o.ascii_only? || (o.encoding == Encoding::UTF_8 && o.valid_encoding?)
-                "'#{o.gsub("'", "\\\\'").gsub('"', '\\\\"').sub(/\\+\z/) { |s| s * 2 }}'"
+                "'#{o.gsub(/\\+(?=['"]|\z)/) { |s| s * 2 }.gsub(/['"]/) { |s| "\\#{s}" }}'"
               else
                 "#{o.b.dump}@#{o.encoding.name}"
               end
