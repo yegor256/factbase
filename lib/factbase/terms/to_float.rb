@@ -30,6 +30,7 @@ class Factbase::ToFloat < Factbase::TermBase
 
   def to_float(value)
     return Float(value) if value.is_a?(Time)
+    raise(ArgumentError, "invalid value for Float(): #{value.to_s.inspect}") if value.to_s.match?(/\A\s*[+-]?0x/i)
     Float(value.to_s)
   rescue ArgumentError, TypeError => e
     raise(RuntimeError, "Cannot convert '#{value}' to Float in (to_float ...): #{e.message}")
