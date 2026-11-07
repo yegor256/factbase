@@ -26,7 +26,8 @@ require_relative '../indexed/indexed_unique'
 module Factbase::IndexedTerm
   # Reduces the provided list of facts (maps) to a smaller array, if it's possible.
   #
-  # NIL must be returned if indexing is prohibited in this case.
+  # NIL must be returned if indexing is prohibited in this case. That includes
+  # an incomparable value, where evaluation raises the error exactly once.
   #
   # @param [Array<Hash>] maps Array of facts
   # @param [Factbase] fb Factbase to use for sub-queries
@@ -45,6 +46,8 @@ module Factbase::IndexedTerm
     raise(e)
   rescue NoMethodError => e
     raise(RuntimeError, "Probably the term '#{@op}' is not defined at #{self}: #{e.message}")
+  rescue ArgumentError
+    nil
   rescue StandardError => e
     raise(RuntimeError, "#{e.message.inspect} at #{self} at #{e.backtrace[0]}")
   end
