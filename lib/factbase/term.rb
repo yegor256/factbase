@@ -239,7 +239,7 @@ class Factbase::Term < Factbase::TermBase
     return false if %i[join as traced unique prev].include?(@op)
     return false if custom?
     @operands.each do |o|
-      return false if o.is_a?(Factbase::Term) && !o.static?
+      return false if o.is_a?(Factbase::TermBase) && !o.static?
       return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
     end
     true
@@ -250,7 +250,7 @@ class Factbase::Term < Factbase::TermBase
   # @return [Boolean] TRUE if abstract
   def abstract?
     @operands.each do |o|
-      return true if o.is_a?(Factbase::Term) && o.abstract?
+      return true if o.is_a?(Factbase::TermBase) && o.abstract?
       return true if o.is_a?(Symbol) && o.to_s.start_with?('$')
     end
     false

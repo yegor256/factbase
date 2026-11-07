@@ -19,6 +19,29 @@ class Factbase::TermBase
     end
   end
 
+  # Does it have any dependencies on a fact?
+  #
+  # If a term is static, it will return the same value for +evaluate+,
+  # no matter what is the fact given.
+  #
+  # @return [Boolean] TRUE if static
+  def static?
+    Array(@operands).each do |o|
+      return false if o.is_a?(Factbase::TermBase) && !o.static?
+      return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
+    end
+    @op.is_a?(Factbase::TermBase) ? @op.static? : true
+  end
+
+  # Does it have any variables (+$foo+, for example) inside?
+  #
+  # @return [Boolean] TRUE if abstract
+  def abstract?
+    Array(@operands).any? do |o|
+      (o.is_a?(Factbase::TermBase) && o.abstract?) || (o.is_a?(Symbol) && o.to_s.start_with?('$'))
+    end || (@op.is_a?(Factbase::TermBase) && @op.abstract?)
+  end
+
   # Forget what was remembered while earlier facts were evaluated.
   #
   # A term that remembers nothing has nothing to forget.
