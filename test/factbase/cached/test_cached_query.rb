@@ -238,6 +238,23 @@ class TestCachedQuery < Factbase::Test
     assert_equal(1, cached.query(Factbase::Term.new(:eq, [:city, bad])).each.to_a.size)
   end
 
+  def test_keeps_time_literals_differing_beyond_nanoseconds_apart
+    fb = Factbase::CachedFactbase.new(Factbase.new, {})
+    fb.insert.x = 2.0e-12
+    assert_in_delta(
+      1.0e-12,
+      fb.query('(minus 1970-01-01T00:00:00.000000000001Z 1970-01-01T00:00:00Z)').one,
+      1.0e-24,
+      'the coarser time literal is not read back'
+    )
+    assert_in_delta(
+      2.0e-12,
+      fb.query('(minus 1970-01-01T00:00:00.000000000002Z 1970-01-01T00:00:00Z)').one,
+      1.0e-24,
+      'the cached answer of the coarser literal is served for the finer one'
+    )
+  end
+
   def test_prints_the_same_bytes_in_different_encodings_apart
     latin = Factbase::Term.new(:eq, [:city, "\xE9".b.force_encoding('ISO-8859-1')]).to_s
     windows = Factbase::Term.new(:eq, [:city, "\xE9".b.force_encoding('Windows-1251')]).to_s

@@ -199,6 +199,39 @@ class TestSyntax < Factbase::Test
     )
   end
 
+  def test_round_trips_a_time_beyond_nanosecond_precision
+    t = Time.iso8601('1970-01-01T00:00:00.000000000001Z')
+    term = Factbase::Term.new(:eq, [:when, t])
+    assert_equal('(eq when 1970-01-01T00:00:00.000000000001Z)', term.to_s)
+    assert_equal(
+      t,
+      Factbase::Syntax.new(term.to_s).to_term.operands[1],
+      'the picosecond time literal does not parse back into the same time'
+    )
+  end
+
+  def test_round_trips_a_time_before_1970_beyond_nanoseconds
+    fb = Factbase.new
+    t = Time.iso8601('1969-12-31T23:59:59.000000000001Z')
+    fb.insert.when = t
+    term = Factbase::Term.new(:eq, [:when, t])
+    assert_equal('(eq when 1969-12-31T23:59:59.000000000001Z)', term.to_s)
+    assert_equal(
+      t,
+      Factbase::Syntax.new(term.to_s).to_term.operands[1],
+      'the pre-1970 time literal does not parse back into the same time'
+    )
+    assert_equal(1, fb.query(term.to_s).each.to_a.size, 'a fact with a pre-1970 time is not found')
+  end
+
+  def test_prints_a_non_terminating_fraction_with_nine_digits
+    assert_equal(
+      '(eq t 1970-01-01T00:00:00.333333333Z)',
+      Factbase::Term.new(:eq, [:t, Time.at(Rational(1, 3))]).to_s,
+      'a fraction without an exact decimal form must keep nine digits'
+    )
+  end
+
   def test_round_trips_a_time_with_a_negative_year
     fb = Factbase.new
     t = Time.utc(-1, 1, 1)
