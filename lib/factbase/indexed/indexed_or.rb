@@ -31,6 +31,21 @@ class Factbase::IndexedOr
       return maps if r.size > maps.size / 4
     end
     return if failed || r.nil?
+    _ordered(maps, seen)
+  end
+
+  private
+
+  # The facts the operands have hit, in the order the factbase holds them.
+  #
+  # The operands are walked one by one, so their hits come out grouped by
+  # operand. A query answers in insertion order, whichever operand matched.
+  #
+  # @param [Array<Hash>] maps All the facts
+  # @param [Hash] seen The facts that were hit, compared by identity
+  # @return [Array<Hash>] The facts, in insertion order
+  def _ordered(maps, seen)
+    r = maps.to_a.select { |m| seen.key?(m) }
     maps.respond_to?(:repack) ? maps.repack(r) : r
   end
 end
