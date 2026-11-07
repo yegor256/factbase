@@ -18,7 +18,7 @@ class Factbase::Flatten
   end
 
   # Improve the maps.
-  # @return [Array<HashMap>] The hashmaps, but improved
+  # @return [Array<Hash>] The hashmaps, but improved
   def it
     @maps
       .sort_by.with_index { |m, i| [Array(m[@sorter]).map { |v| Factbase::Flatten.key(v) }, i] }

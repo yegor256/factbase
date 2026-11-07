@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../lib/factbase/flatten'
 require_relative 'test__helper'
 require 'yard'
 
@@ -22,5 +23,11 @@ class TestYard < Factbase::Test
         )
       end
     end
+  end
+
+  def test_flatten_declares_hash_elements
+    YARD.parse(Dir['lib/**/*.rb'])
+    assert_equal(['Array<Hash>'], YARD::Registry.at('Factbase::Flatten#it').tag(:return).types)
+    assert(Factbase::Flatten.new([{ 'id' => [1] }]).it.all?(Hash))
   end
 end
