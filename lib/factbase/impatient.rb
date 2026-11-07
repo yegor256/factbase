@@ -70,7 +70,16 @@ class Factbase::Impatient
       loop do
         # rubocop:disable Elegant/NoRedundantVariable
         started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        fact = impatient('each', left) { enum.next }
+        begin
+          fact = impatient('each', left) { enum.next }
+        rescue ThreadError
+          facts = impatient('each', @timeout) { @fb.query(@term, @maps).each(fb, params).to_a }
+          facts.each do |f|
+            yield(f)
+            n += 1
+          end
+          return n
+        end
         # rubocop:enable Elegant/NoRedundantVariable
         left -= Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
         begin

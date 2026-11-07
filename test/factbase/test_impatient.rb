@@ -137,6 +137,21 @@ class TestImpatient < Factbase::Test
     assert_equal(1, fb.size)
   end
 
+  def test_each_inside_txn_over_sync_factbase
+    require_relative('../../lib/factbase/sync/sync_factbase')
+    fb = Factbase::Impatient.new(Factbase::SyncFactbase.new(Factbase.new))
+    fb.insert.foo = 42
+    assert_equal(1, fb.query('(always)').each.to_a.size)
+    fb.txn do |fbt|
+      assert_equal(1, fbt.query('(always)').each.to_a.size)
+    end
+    counted = 0
+    fb.txn do |fbt|
+      fbt.query('(always)').each { counted += 1 }
+    end
+    assert_equal(1, counted, 'each with a block must work inside txn over a synchronized factbase')
+  end
+
   def test_returns_int
     fb = Factbase.new
     fb.insert
