@@ -425,6 +425,14 @@ class TestQuery < Factbase::Test
     assert_equal(3, fb.size)
   end
 
+  def test_sum_counts_every_value_of_a_fact
+    fb = Factbase.new
+    f = fb.insert
+    [10, 20, 30].each { |v| f.cost = v }
+    fb.insert.cost = 5
+    assert_equal(65, fb.query('(agg (always) (sum cost))').one)
+  end
+
   def test_error_names_the_term_not_the_object
     fb = Factbase.new
     fb.insert.what = 'issue'
