@@ -55,9 +55,11 @@ class TestWhen < Factbase::Test
     fb = Factbase.new
     fb.insert.id = 1
     assert_equal(1, fb.query('(when (never) (assert "unused consequence" (never)))').each.to_a.size)
-    assert_raises(StandardError, 'consequence must run when condition is true') do
-      fb.query('(when (always) (assert "used consequence" (never)))').each.to_a
-    end
+    assert_includes(
+      assert_raises(StandardError) do
+        fb.query('(when (always) (assert "used consequence" (never)))').each.to_a
+      end.message, 'used consequence'
+    )
   end
 
   def test_rejects_a_non_term_operand
