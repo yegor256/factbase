@@ -34,4 +34,13 @@ class TestAs < Factbase::Test
       end
     end
   end
+
+  def test_rejects_non_symbol_name
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::As.new(['x', 1]).evaluate(fact, [], Factbase.new)
+      end.message,
+      "A symbol is expected as first argument of 'as'"
+    )
+  end
 end
