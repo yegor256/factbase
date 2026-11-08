@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: MIT
 
 require_relative 'base'
-# Evaluates whether a value is inverted within a given factbase context.
+# Reverses the order of the facts returned by the nested term in +predict+.
+# +evaluate+ always returns true.
 class Factbase::Inverted < Factbase::TermBase
   # Constructor.
   # @param [Array] operands Operands

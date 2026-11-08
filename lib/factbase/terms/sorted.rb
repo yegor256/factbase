@@ -6,7 +6,8 @@
 require_relative '../flatten'
 require_relative 'base'
 # This class represents a 'sorted' term in the Factbase.
-# It evaluates whether the given facts satisfy the sorted condition.
+# It sorts the facts returned by the nested term by the given property in +predict+;
+# facts without the property go last. +evaluate+ always returns true.
 class Factbase::Sorted < Factbase::TermBase
   # Constructor.
   # @param [Array] operands Operands

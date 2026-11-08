@@ -5,8 +5,8 @@
 
 require 'date'
 require_relative 'base'
-# Represents a string conversion term 'to_time'.
-# This class is used to evaluate a term and return its time representation.
+# Converts the operand to Time, e.g. <tt>(to_time d)</tt>. Numbers are Unix
+# seconds in UTC; strings are parsed, and an impossible date raises an error.
 class Factbase::ToTime < Factbase::TermBase
   # Constructor.
   # @param [Array] operands Operands
