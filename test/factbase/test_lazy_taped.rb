@@ -130,10 +130,10 @@ class TestLazyTaped < Factbase::Test
     assert_equal(1, t.added.size)
   end
 
-  def test_array_uniq_triggers_copy
+  def test_array_append_triggers_copy
     original = [{ 'foo' => [1, 1, 2] }]
     t = Factbase::LazyTaped.new(original)
-    t.each { |m| m['foo'].uniq! }
+    t.each { |m| m['foo'] << 3 }
     assert_predicate(t, :copied?)
     assert_equal(1, t.added.size)
     assert_equal([1, 1, 2], original[0]['foo'], 'Original should not be modified')
