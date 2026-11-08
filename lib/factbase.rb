@@ -4,8 +4,6 @@
 # SPDX-License-Identifier: MIT
 
 require 'English'
-require 'json'
-require 'yaml'
 
 # A factbase, which essentially is a NoSQL one-table in-memory database
 # with a Lisp-ish query interface.
