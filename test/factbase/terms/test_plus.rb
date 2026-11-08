@@ -19,6 +19,21 @@ class TestPlus < Factbase::Test
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
 
+  def test_plus_concatenates_two_strings
+    fb = Factbase.new
+    fb.insert
+    assert_equal('ab', fb.query("(as z (plus 'a' 'b'))").each.to_a[0].z)
+  end
+
+  def test_does_not_add_a_duration_to_a_number
+    fb = Factbase.new
+    fb.insert
+    assert_includes(
+      assert_raises(StandardError) { fb.query("(as z (plus 1 '2 days'))").each.to_a }.message,
+      "String can't be coerced into Integer"
+    )
+  end
+
   def test_plus_time
     t = Factbase::Plus.new([:foo, '12 days'])
     assert_equal(Time.parse('2024-01-13'), t.evaluate(fact('foo' => Time.parse('2024-01-01')), [], Factbase.new))

@@ -19,6 +19,15 @@ class TestMinus < Factbase::Test
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
 
+  def test_does_not_subtract_a_duration_from_a_number
+    fb = Factbase.new
+    fb.insert
+    assert_includes(
+      assert_raises(StandardError) { fb.query("(as z (minus 10 '1 second'))").each.to_a }.message,
+      "String can't be coerced into Integer"
+    )
+  end
+
   def test_minus_time
     t = Factbase::Minus.new([:foo, '4 hours'])
     assert_equal(
