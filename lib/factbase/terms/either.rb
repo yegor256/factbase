@@ -21,7 +21,6 @@ class Factbase::Either < Factbase::TermBase
   # @param [Array<Factbase::Fact>] maps All maps available
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Object] First operand if not nil, otherwise second operand
-  # @return [Boolean] True if first operand is false OR both are true
   def evaluate(fact, maps, fb)
     assert_args(2)
     v = _values(0, fact, maps, fb)
