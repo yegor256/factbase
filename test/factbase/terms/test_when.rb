@@ -51,6 +51,15 @@ class TestWhen < Factbase::Test
     end
   end
 
+  def test_skips_consequence_when_condition_is_false
+    fb = Factbase.new
+    fb.insert.id = 1
+    assert_equal(1, fb.query('(when (never) (assert "unused consequence" (never)))').each.to_a.size)
+    assert_raises(StandardError, 'consequence must run when condition is true') do
+      fb.query('(when (always) (assert "used consequence" (never)))').each.to_a
+    end
+  end
+
   def test_rejects_a_non_term_operand
     fb = Factbase.new
     fb.insert.foo = 42
