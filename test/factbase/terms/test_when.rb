@@ -13,6 +13,24 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestWhen < Factbase::Test
+  def test_not_enough_args
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase::Term.new(:when, [Factbase::Always.new]).evaluate(fact, [], Factbase.new)
+      end.message, "Too few (1) operands for 'when' (2 expected)"
+    )
+  end
+
+  def test_too_many_args
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase::Term.new(
+          :when, [Factbase::Always.new, Factbase::Always.new, Factbase::Never.new]
+        ).evaluate(fact, [], Factbase.new)
+      end.message, "Too many (3) operands for 'when' (2 expected)"
+    )
+  end
+
   def test_positive
     [
       [Factbase::Always.new, Factbase::Always.new, 'always then always'],
