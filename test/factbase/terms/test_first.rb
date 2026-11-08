@@ -52,4 +52,13 @@ class TestFirst < Factbase::Test
     v[0] = 42
     assert_equal([1, 2, 3], map['num'])
   end
+
+  def test_rejects_non_symbol_key
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::First.new([42]).evaluate(fact, [], Factbase.new)
+      end.message,
+      'A symbol is expected, but 42 provided'
+    )
+  end
 end
