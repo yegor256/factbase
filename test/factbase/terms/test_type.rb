@@ -24,4 +24,22 @@ class TestType < Factbase::Test
     assert_equal('Boolean', t.evaluate(fact('foo' => true), [], Factbase.new))
     assert_equal('Boolean', t.evaluate(fact('foo' => false), [], Factbase.new))
   end
+
+  def test_not_enough_args
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase::Term.new(:type, []).evaluate(fact('a' => 1, 'b' => 0), [], Factbase.new)
+      end.message,
+      "Too few (0) operands for 'type' (1 expected)"
+    )
+  end
+
+  def test_too_many_args
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase::Term.new(:type, %i[a b]).evaluate(fact('a' => 1, 'b' => 0), [], Factbase.new)
+      end.message,
+      "Too many (2) operands for 'type' (1 expected)"
+    )
+  end
 end
