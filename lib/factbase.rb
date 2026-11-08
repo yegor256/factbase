@@ -24,6 +24,7 @@ require 'yaml'
 # Every fact is a key-value hash map. Every value is a non-empty set of values.
 # Consider this example of creating a factbase with a single fact inside:
 #
+#  require 'factbase/to_json'
 #  fb = Factbase.new
 #  f = fb.insert
 #  f.name = 'Jeff'
@@ -31,15 +32,11 @@ require 'yaml'
 #  f.age = 42
 #  f.age = 'unknown'
 #  f.place = 'LA'
-#  puts f.to_json
+#  puts Factbase::ToJSON.new(fb).json
 #
 # This will print the following JSON:
 #
-#  {
-#    'name': ['Jeff', 'Walter'],
-#    'age': [42, 'unknown'],
-#    'place': 'LA'
-#  }
+#  [{"age":[42,"unknown"],"name":["Jeff","Walter"],"place":"LA"}]
 #
 # Value sets, as you can see, allow data of different types. However, there
 # are six allowed types: Integer, Float, String, Time, TrueClass, and FalseClass.
