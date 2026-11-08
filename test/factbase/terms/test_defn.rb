@@ -101,6 +101,24 @@ class TestDefn < Factbase::Test
     end
   end
 
+  def test_defn_without_body_is_refused
+    n = :_defn_without_body
+    fb = Factbase.new
+    fb.insert.foo = 42
+    e = assert_raises(StandardError) { fb.query("(defn #{n})").each.to_a }
+    assert_includes(e.message, "Too few (1) operands for 'defn' (2 expected)", e.message)
+    refute(Factbase::Term.private_method_defined?(n), "The term '#{n}' must not be defined")
+  end
+
+  def test_defn_with_two_bodies_is_refused
+    n = :_defn_two_bodies
+    fb = Factbase.new
+    fb.insert.foo = 42
+    e = assert_raises(StandardError) { fb.query("(defn #{n} 'true' 'false')").each.to_a }
+    assert_includes(e.message, "Too many (3) operands for 'defn' (2 expected)", e.message)
+    refute(Factbase::Term.private_method_defined?(n), "The term '#{n}' must not be defined")
+  end
+
   def test_refuses_to_redefine_a_class_based_term
     fb = Factbase.new
     fb.insert.foo = 42
