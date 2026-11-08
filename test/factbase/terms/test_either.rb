@@ -24,6 +24,14 @@ class TestEither < Factbase::Test
     )
   end
 
+  def test_not_enough_args
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase::Term.new(:either, [:zz]).evaluate(fact, [], Factbase.new)
+      end.message, "Too few (1) operands for 'either' (2 expected)"
+    )
+  end
+
   def test_either_does_not_evaluate_unused_fallback
     assert_equal(
       [42],
