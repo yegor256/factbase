@@ -40,20 +40,24 @@ class TestAssert < Factbase::Test
   end
 
   def test_assert_raises_when_size_of_absent_property_is_zero
-    t = Factbase::Assert.new(['m', Factbase::Term.new(:size, [:zz])])
-    assert_includes(
+    msg = 'size of absent property must not be zero'
+    t = Factbase::Assert.new([msg, Factbase::Term.new(:size, [:zz])])
+    assert_equal(
+      msg,
       assert_raises(StandardError) do
         t.evaluate(fact, [], Factbase.new)
-      end.message, 'm'
+      end.message
     )
   end
 
   def test_assert_raises_when_sum_of_zeros_is_zero
-    t = Factbase::Assert.new(['m', Factbase::Term.new(:plus, [0, 0])])
-    assert_includes(
+    msg = 'sum of zeros must not be zero'
+    t = Factbase::Assert.new([msg, Factbase::Term.new(:plus, [0, 0])])
+    assert_equal(
+      msg,
       assert_raises(StandardError) do
         t.evaluate(fact, [], Factbase.new)
-      end.message, 'm'
+      end.message
     )
   end
 
