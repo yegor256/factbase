@@ -139,4 +139,22 @@ class TestDefn < Factbase::Test
     e = assert_raises(StandardError) { fb.query('(defn warn "999")').each.to_a }
     assert_includes(e.message, "Term 'warn' is already defined", e.message)
   end
+
+  def test_rejects_a_nil_inside_an_array_of_a_defined_term
+    n = @defn_name
+    fb = Factbase.new
+    fb.insert.foo = 42
+    fb.query("(defn #{n} 'return [1, nil]')").each.to_a
+    e = assert_raises(Factbase::Term::Wrapped) { fb.query("(eq (#{n}) 1)").each.to_a }
+    assert_instance_of(ArgumentError, e.cause)
+    assert_includes(e.message, 'Wrong type inside', e.message)
+  end
+
+  def test_compares_a_clean_array_of_a_defined_term
+    n = @defn_name
+    fb = Factbase.new
+    fb.insert.foo = 42
+    fb.query("(defn #{n} 'return [1, 2]')").each.to_a
+    assert_equal(1, fb.query("(eq (#{n}) 1)").each.to_a.size)
+  end
 end
