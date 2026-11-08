@@ -57,4 +57,12 @@ class TestUnique < Factbase::Test
     assert(t.evaluate(fact('foo' => 2, 'bar' => 'x', 'baz' => true), [], Factbase.new))
     refute(t.evaluate(fact('foo' => 1, 'bar' => 'x', 'baz' => true), [], Factbase.new))
   end
+
+  def test_refuses_no_operands
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Unique.new([]).evaluate(fact('foo' => 1), [], Factbase.new)
+      end.message, "Too few operands for 'unique' (at least 1 expected)"
+    )
+  end
 end

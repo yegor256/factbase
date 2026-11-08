@@ -22,4 +22,17 @@ class TestTermAt < Factbase::Test
       end
     assert_includes(e.message, 'A non-negative position is expected, but -1 provided', e.message)
   end
+
+  def test_refuses_several_positions
+    fb = Factbase.new
+    f = fb.insert
+    f.idx = 0
+    f.idx = 1
+    f.foo = 2
+    assert_includes(
+      assert_raises(RuntimeError) do
+        fb.query('(eq 2 (at idx foo))').each.to_a
+      end.message, 'Too many values (2) at first position, one expected'
+    )
+  end
 end
