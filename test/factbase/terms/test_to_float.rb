@@ -24,6 +24,22 @@ class TestToFloat < Factbase::Test
     )
   end
 
+  def test_not_enough_args
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase::Term.new(:to_float, []).evaluate(fact, [], Factbase.new)
+      end.message, "Too few (0) operands for 'to_float' (1 expected)"
+    )
+  end
+
+  def test_too_many_args
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase::Term.new(:to_float, %i[a b]).evaluate(fact('a' => 1, 'b' => 2), [], Factbase.new)
+      end.message, "Too many (2) operands for 'to_float' (1 expected)"
+    )
+  end
+
   def test_converts_time_to_epoch_seconds
     assert_in_delta(
       1_704_103_200.5,
