@@ -257,6 +257,24 @@ class TestLogged < Factbase::Test
     assert_includes(buf.to_s, 'There were no facts', buf.to_s)
   end
 
+  def test_logs_the_params_of_a_query
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.when = Time.utc(2024, 1, 2, 3, 4, 5)
+    fb.insert.foo = 42
+    fb.query('(eq foo $x)').each(fb, x: [42]).to_a
+    assert_includes(buf.to_s, 'Found 1/2 fact(s) by (eq foo $x) with {x=[42]}', buf.to_s)
+  end
+
+  def test_logs_nothing_deleted_when_the_query_matches_no_facts
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.foo = 42
+    fb.insert.foo = 42
+    fb.query('(eq foo 2)').delete!
+    assert_includes(buf.to_s, 'No facts out of 2 deleted by (eq foo 2)', buf.to_s)
+  end
+
   def test_logs_nothing_happened
     log = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, log)
