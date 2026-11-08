@@ -23,10 +23,6 @@ class Factbase::Syntax
 
   # Ctor.
   #
-  # The class provided as the +term+ argument must have a constructor that accepts
-  # an operator, operands array, and a keyword argument fb. Also, it must be
-  # a child of +Factbase::Term+.
-  #
   # @param [String] query The query, for example "(eq id 42)"
   def initialize(query)
     @query = query
