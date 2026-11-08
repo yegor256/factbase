@@ -149,6 +149,12 @@ class TestMatches < Factbase::Test
     end
   end
 
+  def test_keeps_a_literal_bracket_before_anchor
+    t = Factbase::Matches.new([:foo, 'a]$'])
+    assert(t.evaluate(fact('foo' => 'a]'), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => "a]\nb"), [], Factbase.new))
+  end
+
   def test_rejects_invalid_regexp
     t = Factbase::Matches.new([:foo, '[a-'])
     assert_includes(
