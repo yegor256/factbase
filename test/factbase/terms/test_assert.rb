@@ -39,6 +39,32 @@ class TestAssert < Factbase::Test
     )
   end
 
+  def test_assert_raises_when_size_of_absent_property_is_zero
+    t = Factbase::Assert.new(['m', Factbase::Term.new(:size, [:zz])])
+    assert_includes(
+      assert_raises(StandardError) do
+        t.evaluate(fact, [], Factbase.new)
+      end.message, 'm'
+    )
+  end
+
+  def test_assert_raises_when_sum_of_zeros_is_zero
+    t = Factbase::Assert.new(['m', Factbase::Term.new(:plus, [0, 0])])
+    assert_includes(
+      assert_raises(StandardError) do
+        t.evaluate(fact, [], Factbase.new)
+      end.message, 'm'
+    )
+  end
+
+  def test_assert_passes_when_size_of_present_property_is_positive
+    assert(
+      Factbase::Assert.new(['m', Factbase::Term.new(:size, [:a])]).evaluate(
+        fact('a' => [1, 2]), [], Factbase.new
+      )
+    )
+  end
+
   def test_assert_with_array_true_condition
     assert(
       Factbase::Assert.new(['at least one positive', Factbase::Term.new(:gt, [:foo, 0])]).evaluate(
