@@ -51,4 +51,13 @@ class TestJoin < Factbase::Test
       assert_raises(RuntimeError, j) { fb.query("(join '#{j}' (eq id 1))").each.to_a }
     end
   end
+
+  def test_rejects_non_string_mapping
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Join.new([42, Factbase::Syntax.new('(always)').to_term]).evaluate(fact, [], Factbase.new)
+      end.message,
+      "A string is expected as first argument of 'join'"
+    )
+  end
 end
