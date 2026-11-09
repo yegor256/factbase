@@ -89,8 +89,10 @@ class Factbase
 
   # Constructor.
   # @param [Array<Hash>] maps Array of facts to start with
+  # Symbol property keys are converted to Strings in copies of their maps.
+  # Maps that already use String keys retain their original identity.
   def initialize(maps = [])
-    @maps = maps
+    @maps = normalize(maps)
   end
 
   # Size, the total number of facts in the factbase.
@@ -288,6 +290,27 @@ class Factbase
     unless data.is_a?(Array) && data.all?(Hash)
       raise(StandardError, 'The input is not a valid factbase: expected an array of maps')
     end
-    @maps.concat(data)
+    @maps.concat(normalize(data))
+  end
+
+  private
+
+  # Normalize Symbol property keys without changing the caller's maps.
+  # @param [Array<Hash>, Object] maps Maps or a transaction collection
+  # @return [Array<Hash>, Object] Maps with String property names
+  def normalize(maps)
+    return maps unless maps.is_a?(Array)
+    symbolic = ->(map) { map.is_a?(Hash) && map.keys.any?(Symbol) }
+    return maps unless maps.any?(&symbolic)
+    maps.map do |map|
+      next map unless symbolic.call(map)
+      map.each_with_object({}) do |(key, values), normalized|
+        name = key.is_a?(Symbol) ? key.to_s : key
+        if normalized.key?(name)
+          raise(ArgumentError, "The map has a duplicate property #{name.inspect} after normalizing Symbol keys")
+        end
+        normalized[name] = values
+      end
+    end
   end
 end

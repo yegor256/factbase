@@ -61,8 +61,19 @@ class Factbase::FactAsYaml
 
   def v_to_s(val)
     s = val
-    s = s.ellipsized.inspect if s.is_a?(String)
+    s = unicode(s).ellipsized.inspect if s.is_a?(String)
     s = s.getutc.iso8601(9) if s.is_a?(Time)
     s
+  end
+
+  # Convert a string to UTF-8, since YAML can't print one in another encoding;
+  # keep its bytes as binary when they can't be transcoded.
+  # @param [String] val The value
+  # @return [String] The value in UTF-8, or as binary
+  def unicode(val)
+    return val if val.encoding == Encoding::UTF_8
+    val.encode(Encoding::UTF_8)
+  rescue EncodingError
+    val.b
   end
 end

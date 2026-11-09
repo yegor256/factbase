@@ -40,4 +40,64 @@ class TestBoolean < Factbase::Test
       end.message, 'Boolean is expected, while Integer received from test_source'
     )
   end
+
+  def test_hash_value_raises_argument_error
+    b = Factbase::Boolean.new({ foo: 'bar' }, 'test_source')
+    assert_includes(
+      assert_raises(ArgumentError) { b.bool? }.message,
+      'Boolean is expected, while Hash received from test_source'
+    )
+  end
+
+  def test_hash_with_integer_key_raises_argument_error
+    b = Factbase::Boolean.new({ 0 => true }, 'test_source')
+    assert_includes(
+      assert_raises(ArgumentError) { b.bool? }.message,
+      'Boolean is expected, while Hash received from test_source'
+    )
+  end
+
+  def test_empty_hash_raises_argument_error
+    b = Factbase::Boolean.new({}, 'test_source')
+    assert_includes(
+      assert_raises(ArgumentError) { b.bool? }.message,
+      'Boolean is expected, while Hash received from test_source'
+    )
+  end
+
+  def test_string_value_raises_argument_error
+    b = Factbase::Boolean.new('true', 'test_source')
+    assert_includes(
+      assert_raises(ArgumentError) { b.bool? }.message,
+      'Boolean is expected, while String received from test_source'
+    )
+  end
+
+  def test_float_value_raises_argument_error
+    b = Factbase::Boolean.new(3.14, 'test_source')
+    assert_includes(
+      assert_raises(ArgumentError) { b.bool? }.message,
+      'Boolean is expected, while Float received from test_source'
+    )
+  end
+
+  def test_symbol_value_raises_argument_error
+    b = Factbase::Boolean.new(:active, 'test_source')
+    assert_includes(
+      assert_raises(ArgumentError) { b.bool? }.message,
+      'Boolean is expected, while Symbol received from test_source'
+    )
+  end
+
+  def test_array_containing_hash_raises_argument_error
+    b = Factbase::Boolean.new([{ enabled: true }], 'test_source')
+    assert_includes(
+      assert_raises(ArgumentError) { b.bool? }.message,
+      'Boolean is expected, while Hash received from test_source'
+    )
+  end
+
+  def test_empty_array_returns_false
+    refute_predicate(Factbase::Boolean.new([], 'test_source'), :bool?)
+  end
 end
