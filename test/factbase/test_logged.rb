@@ -224,6 +224,7 @@ class TestLogged < Factbase::Test
     ].each do |s|
       assert_includes(log.to_s, s, "#{log}\n")
     end
+    refute_includes(log.to_s, 'with', log.to_s)
   end
 
   def test_keeps_the_offset_of_a_logged_time
@@ -264,6 +265,8 @@ class TestLogged < Factbase::Test
     fb.insert.foo = 42
     fb.query('(eq foo $x)').each(fb, x: [42]).to_a
     assert_includes(buf.to_s, 'Found 1/2 fact(s) by (eq foo $x) with {x=[42]}', buf.to_s)
+    fb.query('(eq foo 2)').each(fb, x: [42]).to_a
+    assert_includes(buf.to_s, 'Zero/2 facts found by (eq foo 2) with {x=[42]}', buf.to_s)
   end
 
   def test_logs_nothing_deleted_when_the_query_matches_no_facts
