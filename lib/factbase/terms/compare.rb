@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../text'
 require_relative 'base'
 # Term 'compare'.
 # Compares two values using a specified operation.
@@ -41,9 +42,9 @@ class Factbase::Compare < Factbase::TermBase
     failure = nil
     comparable = false
     lefts.each do |l|
-      left = l.is_a?(Time) ? l.floor : l
+      left = Factbase::Text.read(l.is_a?(Time) ? l.floor : l)
       rights.each do |r|
-        right = r.is_a?(Time) ? r.floor : r
+        right = Factbase::Text.read(r.is_a?(Time) ? r.floor : r)
         begin
           answer = _compare(left, right)
         rescue RuntimeError => e
