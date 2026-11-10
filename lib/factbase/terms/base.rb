@@ -40,7 +40,7 @@ class Factbase::TermBase
                 "#{o.b.dump}@#{o.encoding.name}"
               end
             elsif o.is_a?(Time)
-              o.getutc.iso8601(o.subsec.zero? ? 0 : [9, _frac_digits(o.subsec)].max)
+              o.getutc.iso8601(o.subsec.zero? ? 0 : [9, the_digits(o.subsec)].max)
             else
               o.to_s
             end
@@ -56,7 +56,7 @@ class Factbase::TermBase
   # @return [Integer] The number of digits after the decimal point
   # shortcut: non-terminating fractions keep nine digits and can share a rounded value's key;
   # over 107 digits print text Date.iso8601 rejects (128-char cap); upgrade if Time terms must round-trip or key.
-  def _frac_digits(frac)
+  def the_digits(frac)
     den = frac.denominator
     twos = 0
     while (den % 2).zero?

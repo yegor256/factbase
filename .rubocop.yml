@@ -69,7 +69,6 @@ Elegant/GoodMethodName:
     - '_feed'
     - '_flatten'
     - '_floored'
-    - '_frac_digits'
     - '_init_indexes'
     - '_join'
     - '_loosest'
