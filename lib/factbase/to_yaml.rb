@@ -38,11 +38,14 @@ class Factbase::ToYAML
   private
 
   # Convert a string to UTF-8 if its encoding is not ASCII-compatible,
-  # since YAML can't print such a string (UTF-16, UTF-32).
+  # since YAML can't print such a string (UTF-16, UTF-32), and turn a string
+  # with invalid bytes into a binary copy, which YAML prints as binary.
   # @param [Object] val The value
-  # @return [Object] The value, with such a string in UTF-8
+  # @return [Object] The value, with such a string in UTF-8 or binary
   def unicode(val)
-    return val unless val.is_a?(String) && !val.encoding.ascii_compatible?
+    return val unless val.is_a?(String)
+    return val.b unless val.valid_encoding?
+    return val if val.encoding.ascii_compatible?
     val.encode(Encoding::UTF_8)
   end
 end
