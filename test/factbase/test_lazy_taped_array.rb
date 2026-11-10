@@ -103,6 +103,7 @@ class TestLazyTapedArray < Factbase::Test
     assert_raises(FrozenError) { arr.to_a[0] << 'bar' }
     assert_raises(FrozenError) { arr[0, 1][0] << 'bar' }
     assert_raises(FrozenError) { arr.any? { |item| item << 'bar' } }
+    assert_raises(FrozenError) { arr.any?(->(item) { item << 'bar' }) }
     assert_equal('foo', arr[0])
     assert_empty(added)
     refute_predicate(hash, :copied?)
