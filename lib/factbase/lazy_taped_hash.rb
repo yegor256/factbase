@@ -112,8 +112,25 @@ class Factbase::LazyTaped
       ensure_copied_map
       before = @copied_map.dup
       before.each_key { |key| before[key] = detached(before[key]) }
-      @copied_map.__send__(method, *, &).tap do
-        @added.append(@copied_map.object_id) unless @copied_map.eql?(before)
+      journal(@copied_map.__send__(method, *, &), before)
+    end
+
+    # Journal a mutation once it has changed the map.
+    #
+    # A mutator without a block, like +transform_values!+, defers the write to
+    # the enumerator it returns, so the comparison happens when that enumerator
+    # is consumed, not when it is created.
+    #
+    # @param [Object] result What the mutator returned
+    # @param [Hash] before The map as it was before the mutator was called
+    # @return [Object] The same result
+    def journal(result, before)
+      append = -> { @added.append(@copied_map.object_id) unless @copied_map.eql?(before) }
+      return result.tap { append.call } unless result.is_a?(Enumerator)
+      Enumerator.new do |y|
+        result.each { |*item| y.yield(*item) }
+      ensure
+        append.call
       end
     end
 

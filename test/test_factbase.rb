@@ -215,8 +215,6 @@ class TestFactbase < Factbase::Test
     f = fb.insert
     f.id = 1
     f.x = 1
-    # rubocop:disable Elegant/NoRedundantVariable
-    before = fb.export
     churn =
       fb.txn do |tx|
         tx.each do |map|
@@ -228,8 +226,16 @@ class TestFactbase < Factbase::Test
         end
       end
     assert_predicate(churn, :zero?, "churn is #{churn}")
-    assert_equal(before, fb.export)
-    # rubocop:enable Elegant/NoRedundantVariable
+    assert_equal({ 'id' => [1], 'x' => [1] }, fb.each.first.to_h)
+  end
+
+  def test_txn_journals_a_consumed_enumerator
+    fb = Factbase.new
+    f = fb.insert
+    f.id = 1
+    f.x = 1
+    assert_equal('0i/0d/1a', fb.txn { |tx| tx.each { |map| map.transform_values!.each { |values| values << 2 } } }.to_s)
+    assert_equal({ 'id' => [1, 2], 'x' => [1, 2] }, fb.each.first.to_h)
   end
 
   def test_txn_delete_of_existing_property_adds_one_fact
