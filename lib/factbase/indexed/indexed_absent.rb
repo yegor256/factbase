@@ -3,8 +3,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative 'keyed'
+
 # Indexed term 'absent'.
 class Factbase::IndexedAbsent
+  include Factbase::Keyed
+
   def initialize(term, idx)
     @term = term
     @idx = idx
@@ -12,7 +16,7 @@ class Factbase::IndexedAbsent
 
   def predict(maps, _fb, _params)
     prop = @term.operands[0].to_s
-    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), prop, @term.op]
+    key = [the_key(maps), prop, @term.op]
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
     _feed(maps.to_a, entry, prop)

@@ -3,6 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative 'keyed'
+
 # Indexed term 'exists'.
 # The @idx[key] structure:
 # {
@@ -10,6 +12,8 @@
 #   facts: Array (facts found),
 # }
 class Factbase::IndexedExists
+  include Factbase::Keyed
+
   def initialize(term, idx)
     @term = term
     @idx = idx
@@ -18,7 +22,7 @@ class Factbase::IndexedExists
   def predict(maps, _fb, _params)
     operand = @term.operands.first.to_s
     return if operand.start_with?('$')
-    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), operand, @term.op]
+    key = [the_key(maps), operand, @term.op]
     @idx[key] = { facts: [], count: 0 } if @idx[key].nil?
     entry = @idx[key]
     _feed(maps.to_a, entry, operand)

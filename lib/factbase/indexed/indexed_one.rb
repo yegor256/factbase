@@ -3,8 +3,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative 'keyed'
+
 # Indexed term 'one'.
 class Factbase::IndexedOne
+  include Factbase::Keyed
+
   def initialize(term, idx)
     @term = term
     @idx = idx
@@ -15,7 +19,7 @@ class Factbase::IndexedOne
     return unless operand.is_a?(Symbol)
     prop = operand.to_s
     return if prop.start_with?('$')
-    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), prop, @term.op]
+    key = [the_key(maps), prop, @term.op]
     @idx[key] ||= { facts: [], count: 0 }
     entry = @idx[key]
     _feed(maps.to_a, entry, prop)

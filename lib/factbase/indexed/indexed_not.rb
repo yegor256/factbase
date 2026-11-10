@@ -3,8 +3,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative 'keyed'
+
 # Indexed term 'not'.
 class Factbase::IndexedNot
+  include Factbase::Keyed
+
   def initialize(term, idx)
     @term = term
     @idx = idx
@@ -12,7 +16,7 @@ class Factbase::IndexedNot
 
   def predict(maps, fb, params)
     sub = @term.operands.first
-    key = [(maps.respond_to?(:index_key) ? maps.index_key : maps.object_id), sub.to_s, @term.op]
+    key = [the_key(maps), sub.to_s, @term.op]
     snap = snapshot(params)
     entry = @idx[key]
     if entry.nil? || entry[:params] != snap
