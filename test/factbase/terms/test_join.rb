@@ -52,12 +52,11 @@ class TestJoin < Factbase::Test
     end
   end
 
-  def test_rejects_non_string_mapping
-    assert_includes(
-      assert_raises(ArgumentError) do
-        Factbase::Join.new([42, Factbase::Syntax.new('(always)').to_term]).evaluate(fact, [], Factbase.new)
-      end.message,
-      "A string is expected as first argument of 'join'"
-    )
+  def test_rejects_a_mapping_that_is_not_a_string
+    fb = Factbase.new
+    fb.insert.id = 1
+    e = assert_raises(StandardError) { fb.query('(join 42 (always))').each.to_a }
+    assert_match(/A string is expected as first argument of 'join'/, e.message)
+    refute_includes(e.message, 'undefined method', 'the term died on a missing method instead of a guard')
   end
 end

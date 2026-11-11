@@ -35,12 +35,16 @@ class TestAs < Factbase::Test
     end
   end
 
-  def test_rejects_non_symbol_name
-    assert_includes(
-      assert_raises(ArgumentError) do
-        Factbase::As.new(['x', 1]).evaluate(fact, [], Factbase.new)
-      end.message,
-      "A symbol is expected as first argument of 'as'"
-    )
+  def test_rejects_a_name_that_is_not_a_symbol
+    fb = Factbase.new
+    fb.insert.a = 1
+    {
+      "(as 'x' 1)" => /A symbol is expected as first argument of 'as'/,
+      '(as 42 1)' => /A symbol is expected as first argument of 'as'/,
+      '(and (always) (as 42 1))' => /A symbol is expected as first argument of 'as'/
+    }.each do |q, msg|
+      assert_match(msg, assert_raises(StandardError, q) { fb.query(q).each.to_a }.message, q)
+      assert_equal(0, fb.query('(not (always))').each.to_a.size, "#{q} left a fact behind")
+    end
   end
 end

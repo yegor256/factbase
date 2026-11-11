@@ -53,12 +53,20 @@ class TestFirst < Factbase::Test
     assert_equal([1, 2, 3], map['num'])
   end
 
-  def test_rejects_non_symbol_key
+  def test_rejects_a_key_that_is_not_a_symbol
+    fb = Factbase.new
+    fb.insert.num = 1
+    {
+      '(first "a")' => /A symbol is expected, but a provided/,
+      '(first (always))' => /A symbol is expected, but \(always\) provided/,
+      '(eq (agg (always) (first 42)) 1)' => /A symbol is expected, but 42 provided/
+    }.each do |q, msg|
+      assert_match(msg, assert_raises(StandardError, q) { fb.query(q).each.to_a }.message, q)
+    end
     assert_includes(
-      assert_raises(ArgumentError) do
-        Factbase::First.new([42]).evaluate(fact, [], Factbase.new)
-      end.message,
-      'A symbol is expected, but 42 provided'
+      assert_raises(ArgumentError) { Factbase::First.new([42]).evaluate(fact, [], Factbase.new) }.message,
+      'A symbol is expected, but 42 provided',
+      'a term built without a query refused the key with an unexpected message'
     )
   end
 end
