@@ -19,10 +19,20 @@ class TestMinus < Factbase::Test
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
 
-  def test_ignores_a_duration_when_the_left_operand_is_a_number
+  def test_rejects_a_duration_when_the_left_operand_is_a_number
     fb = Factbase.new
     fb.insert
-    assert_raises(StandardError) { fb.query("(as z (minus 10 '1 second'))").each.to_a[0].z }
+    {
+      "(minus 10 '1 second')" => /String can't be coerced into Integer/,
+      "(minus 2.5 '1 hour')" => /String can't be coerced into Float/
+    }.each do |q, msg|
+      assert_match(msg, assert_raises(StandardError, q) { fb.query(q).each.to_a }.message, q)
+    end
+    assert_equal(
+      Time.parse('2024-01-01T09:04'),
+      Factbase::Minus.new([Time.parse('2024-01-01T10:04'), '1 hour']).evaluate(fact, [], Factbase.new),
+      'a Time on the left stopped working'
+    )
   end
 
   def test_minus_time
