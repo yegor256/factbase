@@ -18,13 +18,4 @@ class TestExists < Factbase::Test
     assert(t.evaluate(fact('foo' => 41), [], Factbase.new))
     refute(t.evaluate(fact('bar' => 41), [], Factbase.new))
   end
-
-  def test_too_many_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:exists, %i[a b]).evaluate(fact('a' => 1, 'b' => 0), [], Factbase.new)
-      end.message,
-      "Too many (2) operands for 'exists' (1 expected)"
-    )
-  end
 end

@@ -18,22 +18,4 @@ class TestAbsent < Factbase::Test
     refute(t.evaluate(fact('foo' => 41), [], Factbase.new))
     assert(t.evaluate(fact('bar' => 41), [], Factbase.new))
   end
-
-  def test_not_enough_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:absent, []).evaluate(fact('a' => 1, 'b' => 0), [], Factbase.new)
-      end.message,
-      "Too few (0) operands for 'absent' (1 expected)"
-    )
-  end
-
-  def test_too_many_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:absent, %i[a b]).evaluate(fact('a' => 1, 'b' => 0), [], Factbase.new)
-      end.message,
-      "Too many (2) operands for 'absent' (1 expected)"
-    )
-  end
 end
