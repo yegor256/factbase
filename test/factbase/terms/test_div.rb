@@ -44,12 +44,10 @@ class TestDiv < Factbase::Test
 
   def test_div_times_not_supported
     t = Factbase::Div.new([:warranty, Time.new(2024, 1, 1)])
-    assert_includes(
-      assert_raises(NoMethodError) do
-        t.evaluate(fact('warranty' => Time.new(2026, 1, 1)), [], Factbase.new)
-      end.message,
-      'undefined method'
-    )
+    e = assert_raises(ArgumentError) { t.evaluate(fact('warranty' => Time.new(2026, 1, 1)), [], Factbase.new) }
+    assert_includes(e.message, 'Cannot apply div to')
+    assert_includes(e.message, '(Time)')
+    refute_includes(e.message, 'undefined method')
   end
 
   def test_divides_big_integer_exactly
@@ -92,5 +90,15 @@ class TestDiv < Factbase::Test
       1, fb.query("(eq (div id 1) #{big})").each.to_a.size,
       "big integer #{big} divided by one is not itself, seed #{seed}"
     )
+  end
+
+  def test_rejects_a_string_as_the_first_operand
+    fb = Factbase.new
+    f = fb.insert
+    f.a = 3
+    f.b = 'x'
+    e = assert_raises(StandardError) { fb.query('(eq a (div b a))').each.to_a }
+    assert_includes(e.message, 'Cannot apply div to')
+    refute_includes(e.message, 'Probably the term')
   end
 end
