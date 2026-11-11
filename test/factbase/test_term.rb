@@ -60,6 +60,39 @@ class TestTerm < Factbase::Test
     assert_equal(5, t.evaluate(fact('foo' => [4, 5]), [], Factbase.new))
   end
 
+  def test_reports_the_operand_count_of_a_defining_term
+    fb = Factbase.new
+    fb.insert.a = 1
+    queries = {
+      '(defn _few)' => /Too few \(1\) operands for 'defn'/,
+      "(defn _many 'true' 'false')" => /Too many \(3\) operands for 'defn'/,
+      '(undef)' => /Too few \(0\) operands for 'undef'/,
+      '(undef _one _two)' => /Too many \(2\) operands for 'undef'/
+    }
+    queries.each do |query, message|
+      assert_match(
+        message,
+        assert_raises(Factbase::Term::Wrapped, "#{query} was not refused") { fb.query(query).one }.message,
+        "#{query} refused the count with an unexpected message"
+      )
+    end
+    refute(
+      %i[_few _many].any? { |n| Factbase::Term.private_method_defined?(n) },
+      'a term with the wrong count of operands was defined anyway'
+    )
+  end
+
+  def test_accepts_a_bad_count_of_operands_when_it_has_no_facts
+    assert_empty(
+      Factbase.new.query('(defn _no_facts)').each.to_a,
+      'an empty factbase refused a query with a missing operand'
+    )
+    refute(
+      Factbase::Term.private_method_defined?(:_no_facts),
+      'the term was defined by a query that had no facts to run on'
+    )
+  end
+
   def test_report_missing_term
     t = Factbase::Term.new(:something, [])
     msg = assert_raises(StandardError) do

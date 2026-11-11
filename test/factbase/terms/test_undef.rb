@@ -42,24 +42,15 @@ class TestUndef < Factbase::Test
     end
   end
 
-  def test_undef_with_two_names_is_refused
+  def test_undef_keeps_the_term_when_its_count_is_refused
+    n = :_undef_two_names
     fb = Factbase.new
     fb.insert.foo = 42
-    n = :_undef_two_names
-    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
     Factbase::Defn.new([n, 'true']).evaluate(fact, [], Factbase.new)
-    e = assert_raises(StandardError) { fb.query("(undef #{n} _undef_two_names_other)").each.to_a }
-    assert_includes(e.message, "Too many (2) operands for 'undef' (1 expected)", e.message)
+    assert_raises(StandardError) { fb.query("(undef #{n} _undef_two_names_other)").each.to_a }
     assert(Factbase::Term.private_method_defined?(n), "The term '#{n}' must stay defined")
   ensure
     Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
-  end
-
-  def test_undef_without_name_is_refused
-    fb = Factbase.new
-    fb.insert.foo = 42
-    e = assert_raises(StandardError) { fb.query('(undef)').each.to_a }
-    assert_includes(e.message, "Too few (0) operands for 'undef' (1 expected)", e.message)
   end
 
   def test_refuses_to_undefine_a_class_based_term
