@@ -97,7 +97,8 @@ class Factbase::LazyTaped
     private
 
     def detached(value)
-      value.is_a?(Array) ? value.dup : value
+      return value.map { |item| detached(item) } if value.is_a?(Array)
+      value
     end
 
     def current_map
@@ -127,7 +128,7 @@ class Factbase::LazyTaped
     def journal(result, before)
       append = -> { @added.append(@copied_map.object_id) unless @copied_map.eql?(before) }
       return result.tap { append.call } unless result.is_a?(Enumerator)
-      Enumerator.new do |y|
+      Enumerator.new(result.size) do |y|
         result.each { |*item| y.yield(*item) }
       ensure
         append.call

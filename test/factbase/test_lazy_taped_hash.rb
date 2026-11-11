@@ -113,6 +113,44 @@ class TestLazyTapedHash < Factbase::Test
     assert_noop(&:transform_values!)
   end
 
+  def test_noop_after_compare_by_identity_is_not_journaled
+    hash, _origin, added = wrap({ 'a' => 1 })
+    hash.compare_by_identity
+    added.clear
+    hash.merge!({})
+    hash.delete('zzz')
+    hash.delete_if { false }
+    assert_empty(added, 'A no-op on an identity map must not be journaled')
+  end
+
+  def test_noop_enumerator_is_not_journaled
+    assert_noop do |hash|
+      hash.transform_values! { |value| value }.each { |value| value }
+    end
+  end
+
+  def test_nested_write_is_journaled
+    hash, _origin, added = wrap({ 'a' => [[1]] })
+    hash.transform_values! do |value|
+      value[0] << 2
+      value
+    end
+    refute_empty(added, 'A write inside a nested array must be journaled')
+  end
+
+  def test_enumerator_keeps_the_size_of_the_map
+    hash, _origin, = wrap({ 'a' => 1, 'b' => 2 })
+    assert_equal(2, hash.transform_values!.size)
+  end
+
+  def test_second_compare_by_identity_changes_nothing
+    hash, _origin, added = wrap({ 'a' => 1 })
+    hash.compare_by_identity
+    added.clear
+    hash.compare_by_identity
+    assert_empty(added, 'The map is identity already, so there is nothing to journal')
+  end
+
   def test_real_mutators_are_journaled
     assert_journaled { |hash| hash.delete('a') }
     assert_journaled { |hash| hash.store('b', 2) }
@@ -121,17 +159,6 @@ class TestLazyTapedHash < Factbase::Test
     assert_journaled { |hash| hash.delete_if { |key, _| key == 'a' } }
     assert_journaled { |hash| hash.transform_values! { |value| value + 1 } }
     assert_journaled(&:compare_by_identity)
-  end
-
-  def test_noop_after_compare_by_identity_is_not_journaled
-    hash, _origin, added = wrap({ 'a' => 1 })
-    hash.compare_by_identity
-    refute_empty(added, 'compare_by_identity must be journaled')
-    added.clear
-    hash.merge!({})
-    hash.delete('zzz')
-    hash.delete_if { false }
-    assert_empty(added, 'A no-op on an identity map must not be journaled')
   end
 
   def test_value_type_change_is_journaled
