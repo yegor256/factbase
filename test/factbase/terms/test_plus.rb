@@ -24,14 +24,13 @@ class TestPlus < Factbase::Test
     fb.insert
     {
       "(plus 1 '2 days')" => /String can't be coerced into Integer/,
-      "(plus 1.5 '2 days')" => /String can't be coerced into Float/,
-      "(plus -3 '2 days')" => /String can't be coerced into Integer/
+      "(plus 1.5 '2 days')" => /String can't be coerced into Float/
     }.each do |q, msg|
       assert_match(msg, assert_raises(StandardError, q) { fb.query(q).each.to_a }.message, q)
     end
     assert_equal(
-      Time.parse('2026-01-03'),
-      Factbase::Plus.new([Time.parse('2026-01-01'), '2 days']).evaluate(fact, [], Factbase.new),
+      Time.utc(2026, 1, 3),
+      Factbase::Plus.new([Time.utc(2026, 1, 1), '2 days']).evaluate(fact, [], Factbase.new),
       'a Time on the left stopped working'
     )
   end

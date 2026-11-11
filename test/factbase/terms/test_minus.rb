@@ -29,8 +29,8 @@ class TestMinus < Factbase::Test
       assert_match(msg, assert_raises(StandardError, q) { fb.query(q).each.to_a }.message, q)
     end
     assert_equal(
-      Time.parse('2024-01-01T09:04'),
-      Factbase::Minus.new([Time.parse('2024-01-01T10:04'), '1 hour']).evaluate(fact, [], Factbase.new),
+      Time.utc(2024, 1, 1, 9, 4),
+      Factbase::Minus.new([Time.utc(2024, 1, 1, 10, 4), '1 hour']).evaluate(fact, [], Factbase.new),
       'a Time on the left stopped working'
     )
   end
