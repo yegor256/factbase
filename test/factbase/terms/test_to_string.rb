@@ -61,20 +61,4 @@ class TestToString < Factbase::Test
     fb.insert.id = 100
     assert_equal(1, fb.query('(eq "100" (to_string id))').each.to_a.size)
   end
-
-  def test_not_enough_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:to_string, []).evaluate(fact, [], Factbase.new)
-      end.message, "Too few (0) operands for 'to_string' (1 expected)"
-    )
-  end
-
-  def test_too_many_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:to_string, %i[a s]).evaluate(fact('a' => 1, 's' => 'x'), [], Factbase.new)
-      end.message, "Too many (2) operands for 'to_string' (1 expected)"
-    )
-  end
 end

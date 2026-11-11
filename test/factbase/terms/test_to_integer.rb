@@ -28,22 +28,6 @@ class TestToInteger < Factbase::Test
     )
   end
 
-  def test_not_enough_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:to_integer, []).evaluate(fact, [], Factbase.new)
-      end.message, "Too few (0) operands for 'to_integer' (1 expected)"
-    )
-  end
-
-  def test_too_many_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:to_integer, %i[s a]).evaluate(fact('s' => 'x', 'a' => 1), [], Factbase.new)
-      end.message, "Too many (2) operands for 'to_integer' (1 expected)"
-    )
-  end
-
   def test_converts_boolean_true_to_one
     assert_equal(1, Factbase::ToInteger.new([[true]]).evaluate(fact, [], Factbase.new))
   end

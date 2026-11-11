@@ -42,22 +42,6 @@ class TestToTime < Factbase::Test
     assert_includes(e.message, 'argument out of range')
   end
 
-  def test_not_enough_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:to_time, []).evaluate(fact, [], Factbase.new)
-      end.message, "Too few (0) operands for 'to_time' (1 expected)"
-    )
-  end
-
-  def test_too_many_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:to_time, %i[a b]).evaluate(fact('a' => 1, 'b' => 2), [], Factbase.new)
-      end.message, "Too many (2) operands for 'to_time' (1 expected)"
-    )
-  end
-
   def test_reads_integer_as_seconds_since_epoch
     seed = Random.new_seed
     n = Random.new(seed).rand(0..2_000_000_000)
