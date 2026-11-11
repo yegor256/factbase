@@ -60,6 +60,26 @@ class TestTerm < Factbase::Test
     assert_equal(5, t.evaluate(fact('foo' => [4, 5]), [], Factbase.new))
   end
 
+  def test_reports_the_operand_count_of_a_branching_term
+    fb = Factbase.new
+    fb.insert.a = 1
+    queries = {
+      '(either a)' => /Too few \(1\) operands for 'either' \(2 expected\)/,
+      '(either a b c)' => /Too many \(3\) operands for 'either' \(2 expected\)/,
+      '(when (always))' => /Too few \(1\) operands for 'when' \(2 expected\)/,
+      '(when (always) (always) (never))' => /Too many \(3\) operands for 'when' \(2 expected\)/,
+      '(prev)' => /Too few \(0\) operands for 'prev' \(1 expected\)/,
+      '(prev a b)' => /Too many \(2\) operands for 'prev' \(1 expected\)/
+    }
+    queries.each do |query, message|
+      assert_match(
+        message,
+        assert_raises(Factbase::Term::Wrapped, "#{query} was not refused") { fb.query(query).one }.message,
+        "#{query} refused the count with an unexpected message"
+      )
+    end
+  end
+
   def test_report_missing_term
     t = Factbase::Term.new(:something, [])
     msg = assert_raises(StandardError) do

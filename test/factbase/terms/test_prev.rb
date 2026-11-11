@@ -9,14 +9,6 @@ require_relative '../../../lib/factbase/terms/prev'
 require_relative '../../test__helper'
 
 class TestPrev < Factbase::Test
-  def test_too_many_args
-    assert_includes(
-      assert_raises(StandardError) do
-        Factbase::Term.new(:prev, %i[a b]).evaluate(fact, [], Factbase.new)
-      end.message, "Too many (2) operands for 'prev' (1 expected)"
-    )
-  end
-
   def test_prev
     t = Factbase::Prev.new([:foo])
     assert_nil(t.evaluate(fact('foo' => 41), [], Factbase.new))
