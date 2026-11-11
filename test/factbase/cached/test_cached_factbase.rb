@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase'
-require_relative '../../../lib/factbase/cached/cached_factbase'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/cached/cached_factbase'
 
 require_relative '../../test__helper'
 
@@ -48,6 +49,18 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(0, fb.query('(gt foo 5)').each.to_a.size)
     fb.query('(eq foo $x)').each(fb, x: [1]) { |f| f.foo = 9 }
     assert_equal(1, fb.query('(gt foo 5)').each.to_a.size)
+  end
+
+  def test_write_through_a_cached_fact_invalidates_the_cache
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    assert_equal(1, fb.query('(exists x)').each.to_a.size)
+    assert_equal(0, fb.query('(exists y)').each.to_a.size)
+    fb.query('(exists x)').each { |g| g.y = 2 }
+    assert_equal(1, fb.query('(exists y)').each.to_a.size)
+    assert_equal(1, fb.query('(exists x)').each.to_a.size)
+    fb.query('(exists x)').each { |g| g.y = 3 }
+    assert_equal(1, fb.query('(exists y)').each.to_a.size)
   end
 
   def test_queries_after_update_in_txn

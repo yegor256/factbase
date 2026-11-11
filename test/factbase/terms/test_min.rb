@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/factbase/terms/min'
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
+
+require_relative '../../../lib/factbase/terms/min'
 
 require_relative '../../test__helper'
 
@@ -36,6 +37,15 @@ class TestMin < Factbase::Test
         nil, [{ 'weight' => 60 }, { 'weight' => 25 }, { 'weight' => 42 }],
         nil
       )
+    )
+  end
+
+  def test_min_picks_earliest_time_within_same_second
+    early = Time.utc(2026, 10, 28) + Rational(1, 1_000_000_000)
+    late = early + Rational(1, 1_000_000_000)
+    assert_equal(
+      early, Factbase::Min.new([:when]).evaluate(nil, [{ 'when' => [late] }, { 'when' => [early] }], nil),
+      "min of #{early.nsec}ns and #{late.nsec}ns picked the wrong time"
     )
   end
 end

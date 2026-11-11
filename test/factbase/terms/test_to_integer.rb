@@ -22,10 +22,57 @@ class TestToInteger < Factbase::Test
   end
 
   def test_rejects_invalid_value
-    t = Factbase::ToInteger.new(['abc'])
     assert_includes(
-      assert_raises(RuntimeError) { t.evaluate(fact, [], Factbase.new) }.message,
+      assert_raises(RuntimeError) { Factbase::ToInteger.new(['abc']).evaluate(fact, [], Factbase.new) }.message,
       "Cannot convert 'abc' to Integer in (to_integer ...):"
     )
+  end
+
+  def test_converts_boolean_true_to_one
+    assert_equal(1, Factbase::ToInteger.new([[true]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_converts_boolean_false_to_zero
+    assert_equal(0, Factbase::ToInteger.new([[false]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_returns_nil_for_empty_operand_array
+    assert_nil(Factbase::ToInteger.new([[]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_returns_nil_for_absent_property
+    assert_nil(Factbase::ToInteger.new([:non_existent]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_converts_boolean_in_query
+    fb = Factbase.new
+    f = fb.insert
+    f.active = true
+    f.deleted = false
+    assert_equal(1, fb.query('(eq 1 (to_integer active))').each.to_a.size)
+    assert_equal(1, fb.query('(eq 0 (to_integer deleted))').each.to_a.size)
+  end
+
+  def test_converts_comparison_result_to_integer
+    fb = Factbase.new
+    fb.insert.score = 50
+    assert_equal(1, fb.query('(eq 1 (to_integer (gt score 10)))').each.to_a.size)
+    assert_equal(1, fb.query('(eq 0 (to_integer (lt score 10)))').each.to_a.size)
+  end
+
+  def test_converts_string_digits_to_integer
+    assert_equal(123, Factbase::ToInteger.new([['123']]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_converts_negative_string_to_integer
+    assert_equal(-42, Factbase::ToInteger.new([['-42']]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_converts_zero_integer
+    assert_equal(0, Factbase::ToInteger.new([[0]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_converts_positive_integer_directly
+    assert_equal(100, Factbase::ToInteger.new([[100]]).evaluate(fact, [], Factbase.new))
   end
 end
