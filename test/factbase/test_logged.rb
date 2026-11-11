@@ -273,20 +273,23 @@ class TestLogged < Factbase::Test
     end
   end
 
-  def test_returns_a_non_utf8_string_unchanged
+  def test_returns_a_broken_utf16_string_unchanged
     fb = Factbase::Logged.new(Factbase.new, Loog::NULL)
-    fb.insert.text = 'café'.encode('UTF-16LE')
+    broken = (+"\x00\xD8").force_encoding(Encoding::UTF_16LE) + ('café' * 40).encode('UTF-16LE')[2..]
+    fb.insert.text = broken
     r = fb.query('(min text)').one
-    assert_equal('café'.encode('UTF-16LE'), r)
     assert_equal(Encoding::UTF_16LE, r.encoding)
+    assert_equal(broken, r)
   end
 
-  def test_logs_a_long_non_utf8_string
+  def test_logs_a_long_broken_utf16_string
     buf = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, buf)
-    fb.insert.text = ('café' * 40).encode('UTF-16LE')
-    assert_equal(Encoding::UTF_16LE, fb.query('(min text)').one.encoding)
+    fb.insert.text = (+"\x00\xD8").force_encoding(Encoding::UTF_16LE) + ('café' * 40).encode('UTF-16LE')[2..]
+    fb.query('(min text)').one
     assert_predicate(buf.to_s, :valid_encoding?)
-    assert_includes(buf.to_s, 'Found')
+    line = buf.to_s.lines.grep(/Found/).first
+    refute_nil(line, buf.to_s)
+    assert_includes(line, '...', line)
   end
 end
