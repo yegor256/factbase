@@ -135,15 +135,16 @@ class Factbase::Taped
     end
 
     def [](*)
-      @origin[*]
+      item = @origin[*]
+      item.is_a?(Array) ? item.map { |i| value(i) } : value(item)
     end
 
     def to_a
-      @origin.to_a.dup
+      @origin.to_a.map { |i| value(i) }
     end
 
     def any?(*pattern, &)
-      @origin.any?(*pattern, &)
+      @origin.map { |i| value(i) }.any?(*pattern, &)
     end
 
     def <<(item)
@@ -156,6 +157,15 @@ class Factbase::Taped
       changed = @origin.uniq!
       @added.append(@oid) unless changed.nil?
       changed
+    end
+
+    private
+
+    # A value of the array, frozen when it is a string.
+    # @param [Object] item The value as it is stored
+    # @return [Object] The value to give to a caller
+    def value(item)
+      item.is_a?(String) ? -item : item
     end
   end
 

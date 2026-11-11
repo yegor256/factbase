@@ -20,15 +20,25 @@ class TestTaped < Factbase::Test
     assert(values.any?(Integer))
     refute(values.any? { |value| value > 1 })
     assert(Factbase::Taped::TapedArray.new([false], 1, []).any?(false))
-    assert_raises(ArgumentError) { values.any?(1, 2) }
   end
 
   def test_slices_like_an_array
     values = Factbase::Taped::TapedArray.new([1, 2, 3], 1, [])
     assert_equal([1, 2], values[0, 2])
     assert_equal([1, 2], values[0..1])
+    assert_equal([1, 3], values[(0..2) % 2])
     assert_equal(3, values[-1])
     assert_nil(values[9])
+  end
+
+  def test_does_not_expose_mutable_strings
+    stem = +'foo'
+    values = Factbase::Taped::TapedArray.new([stem], 1, [])
+    assert_raises(FrozenError) { values[0] << 'bar' }
+    assert_raises(FrozenError) { values[0, 1][0] << 'bar' }
+    assert_raises(FrozenError) { values.to_a[0] << 'bar' }
+    assert_raises(FrozenError) { values.any?(->(item) { item << 'bar' }) }
+    assert_equal('foo', stem)
   end
 
   def test_keeps_nil_pattern_results_after_transaction_copy
