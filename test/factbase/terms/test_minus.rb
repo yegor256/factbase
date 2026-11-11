@@ -19,7 +19,7 @@ class TestMinus < Factbase::Test
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
 
-  def test_does_not_subtract_a_duration_from_a_number
+  def test_ignores_a_duration_when_the_left_operand_is_a_number
     fb = Factbase.new
     fb.insert
     assert_raises(StandardError) { fb.query("(as z (minus 10 '1 second'))").each.to_a[0].z }
