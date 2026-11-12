@@ -242,6 +242,25 @@ class TestSyntax < Factbase::Test
     end
   end
 
+  def test_explains_empty_and_non_term_queries
+    {
+      '' => 'No tokens',
+      '   ' => 'No tokens',
+      '# only a comment' => 'No tokens',
+      '()' => 'No token found',
+      '(and ())' => 'No token found',
+      ')' => 'Closing too soon',
+      '42' => 'is not an instance of Term',
+      "'hello'" => 'is not an instance of Term',
+      'x' => 'is not an instance of Term'
+    }.each do |query, message|
+      assert_includes(
+        assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new(query).to_term }.message,
+        message, query.inspect
+      )
+    end
+  end
+
   def test_broken_syntax
     [
       '',
