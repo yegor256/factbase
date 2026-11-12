@@ -113,7 +113,7 @@ class TestMatches < Factbase::Test
   def test_anchors_whole_value_around_negated_unicode_property
     seed = Random.new_seed
     rnd = Random.new(seed)
-    text = "#{rnd.rand(0x410..0x42f).chr(Encoding::UTF_8)}\n#{rnd.rand(0x430..0x44f).chr(Encoding::UTF_8)}"
+    text = "#{rnd.rand(0x430..0x44f).chr(Encoding::UTF_8)}\n#{rnd.rand(0x410..0x42f).chr(Encoding::UTF_8)}"
     refute(
       Factbase::Matches.new([:foo, '^\\p{^Lu}$']).evaluate(fact('foo' => text), [], Factbase.new),
       "anchors around a negated property matched a line of #{text.inspect}, seed #{seed}"
