@@ -18,7 +18,7 @@
 
 This Ruby gem manages an in-memory database of facts.
 A fact is simply an associative array of properties and their values.
-The values are either atomic literals or non-empty sets of literals.
+Each property holds one or more literal values in insertion order.
 It is possible to delete a fact, but impossible to delete a property
 from a fact.
 
@@ -267,13 +267,12 @@ The entire database is a single flat [Ruby](https://www.ruby-lang.org/en/)
   programmers must understand that all data vanishes on process exit unless
   `export`/`import` is called explicitly.
 
-Each property of a fact is a non-empty ordered set of values rather than a
-  single value. Assigning `f.foo = 1` then `f.foo = 2` produces
-  `f['foo'] == [1, 2]`; each assignment appends. Reading `f.foo` returns
-  the first element; `f['foo']` returns the full array. This accumulative
+Each property of a fact holds a non-empty list. Assigning `f.foo = 1`
+  twice and then `f.foo = 2` produces `f['foo'] == [1, 1, 2]`.
+  Reading `f.foo` returns the first element. Use `f['foo']` to read the
+  full list, including duplicates. This accumulative
   semantics differs from [SQL](https://www.iso.org/standard/76583.html)
   (one value per column) and most NoSQL stores where assignment overwrites.
-  New programmers must expect multi-element arrays on every property read.
 
 Queries use a custom Lisp-style
   [S-expression](https://en.wikipedia.org/wiki/S-expression) language:
