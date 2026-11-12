@@ -13,6 +13,16 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestSyncFactbase < Factbase::Test
+  def test_preserves_the_decorator_inside_a_transaction
+    fb = Factbase::SyncFactbase.new(Factbase.new)
+    fb.txn do |txn|
+      assert_instance_of(Factbase::SyncFactbase, txn)
+      txn.insert.x = 42
+      assert_equal([42], txn.query('(always)').map(&:x))
+    end
+    assert_equal([42], fb.query('(always)').map(&:x))
+  end
+
   def test_queries_and_inserts
     fb = Factbase::SyncFactbase.new(Factbase.new)
     fb.insert.foo = 42
