@@ -72,6 +72,17 @@ class TestIndexedNot < Factbase::Test
     assert_equal(1, idx.keys.count { |k| k[2] == :not }, 'each run of the same query must reuse one entry')
   end
 
+  def test_shares_one_complement_slot_across_distinct_literals
+    index = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, index)
+    ids = (1..20).to_a
+    ids.each { |id| fb.insert.id = id }
+    (ids + [1]).each do |literal|
+      assert_equal(ids - [literal], fb.query("(not (eq id #{literal}))").map(&:id))
+    end
+    assert_equal(1, index.keys.count { |key| key[2] == :not })
+  end
+
   def test_keeps_one_entry_for_many_params
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
@@ -79,6 +90,24 @@ class TestIndexedNot < Factbase::Test
     q = fb.query('(not (eq x $v))')
     20.times { |i| assert_equal(49, q.each(fb, v: [i]).to_a.size) }
     assert_operator(idx.size, :<, 5, 'a new index entry was kept for every value of the param')
+  end
+
+  def test_reuses_complements_with_nested_and_sibling_negations
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    (1..3).each { |id| fb.insert.id = id }
+    queries = {
+      '(not (not (eq id 1)))' => [1],
+      '(not (eq id 2))' => [1, 3],
+      '(and (not (eq id 1)) (not (eq id 2)))' => [3],
+      '(or (not (eq id 1)) (not (eq id 2)))' => [1, 2, 3]
+    }
+    3.times do
+      queries.each { |query, ids| assert_equal(ids, fb.query(query).map(&:id).sort!) }
+    end
+    fb.insert.id = 4
+    assert_equal([3, 4], fb.query('(and (not (eq id 1)) (not (eq id 2)))').map(&:id))
+    fb.query('(eq id 3)').each { |fact| fact.id = 1 }
+    assert_equal([4], fb.query('(and (not (eq id 1)) (not (eq id 2)))').map(&:id))
   end
 
   private
