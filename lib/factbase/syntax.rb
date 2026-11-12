@@ -98,34 +98,35 @@ class Factbase::Syntax
   # @return [Array] Array of tokens
   def to_tokens
     list = []
-    acc = ''
+    acc = +''
     quotes = ['\'', '"']
     spaces = [' ', '(', ')', "\n", "\t", "\r"]
     breaks = ["\n", "\r"]
     opener = nil
     comment = false
-    @query.to_s.chars.each do |c|
+    @query.to_s.each_char do |c|
       comment = true if opener.nil? && c == '#'
       comment = false if comment && breaks.include?(c)
       next if comment
       if quotes.include?(c)
-        slashes = acc[/\\*\z/].length
+        slashes = 0
+        slashes += 1 while acc.getbyte(-slashes - 1) == '\\'.ord
         if !opener.nil? && slashes.odd?
-          acc = acc[0..-2]
+          acc.chop!
         elsif opener.nil?
           opener = c
         elsif opener == c
-          acc = acc[0..-((slashes / 2) + 1)]
+          acc.slice!(-slashes / 2, slashes / 2) unless slashes.zero?
           opener = nil
         end
       end
       if opener
-        acc += c
+        acc << c
         next
       end
       if !acc.empty? && spaces.include?(c)
         list << acc
-        acc = ''
+        acc = +''
       end
       case c
       when '('
@@ -135,7 +136,7 @@ class Factbase::Syntax
       when ' ', "\n", "\t", "\r"
         next
       else
-        acc += c
+        acc << c
       end
     end
     raise(StandardError, 'String not closed') unless opener.nil?
