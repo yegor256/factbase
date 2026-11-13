@@ -14,6 +14,34 @@ require_relative '../../lib/factbase/logged'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLogged < Factbase::Test
+  class BrokenFailureLog
+    def say(_mono, message)
+      raise(IOError, 'closed log') if message.include?('failed')
+    end
+  end
+
+  def test_a_broken_logger_does_not_replace_the_operation_failure
+    fb = Factbase::Logged.new(Factbase.new, tube: BrokenFailureLog.new)
+    fb.insert.foo = 1
+    failure = RuntimeError.new('transaction failure')
+    assert_same(
+      failure,
+      assert_raises(RuntimeError) do
+        fb.txn do |txn|
+          txn.insert.foo = 42
+          raise(failure)
+        end
+      end
+    )
+    assert_equal(1, fb.size)
+    { each: '(eq 1 (div 1 0))', one: '(div 1 0)', delete!: '(eq 1 (div 1 0))' }.each do |method, query|
+      assert_includes(
+        assert_raises(Factbase::Term::Wrapped) { fb.query(query).public_send(method, &:foo) }.message,
+        'Cannot divide by zero'
+      )
+    end
+  end
+
   # A log that keeps the level of every message, unlike Loog::Buffer.
   class Recorder
     attr_reader :lines
@@ -139,6 +167,54 @@ class TestLogged < Factbase::Test
     assert_equal(0, fb.size)
     assert_includes(log.to_s, 'rolled back', log)
     refute_includes(log.to_s, 'didn\'t touch', log)
+  end
+
+  def test_logs_a_failed_transaction_and_preserves_the_exception
+    log = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    failure = RuntimeError.new('transaction failure')
+    assert_same(
+      failure,
+      assert_raises(RuntimeError) do
+        fb.txn do |txn|
+          txn.insert.foo = 42
+          raise(failure)
+        end
+      end
+    )
+    assert_equal(0, fb.size)
+    assert_includes(log.to_s, 'Txn #')
+    assert_includes(log.to_s, 'failed with RuntimeError')
+    refute_includes(log.to_s, 'touched')
+  end
+
+  def test_logs_failures_in_all_query_operations
+    { each: '(eq 1 (div 1 0))', one: '(div 1 0)', delete!: '(eq 1 (div 1 0))' }.each do |method, query|
+      log = Loog::Buffer.new
+      fb = Factbase::Logged.new(Factbase.new, log)
+      fb.insert.foo = 42
+      assert_includes(
+        assert_raises(Factbase::Term::Wrapped) do
+          fb.query(query).public_send(method, &:foo)
+        end.message,
+        'Cannot divide by zero'
+      )
+      assert_includes(log.to_s, "Query #{query} #{method} failed with Factbase::Term::Wrapped")
+      assert_equal(1, fb.size)
+    end
+  end
+
+  def test_logs_a_consumer_failure_and_preserves_the_exception
+    log = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    fb.insert.foo = 1
+    fb.insert.foo = 42
+    failure = RuntimeError.new('consumer failure')
+    assert_same(
+      failure,
+      assert_raises(RuntimeError) { fb.query('(always)').each { |fact| raise(failure) if fact.foo == 42 } }
+    )
+    assert_includes(log.to_s, 'Query (always) each failed with RuntimeError')
   end
 
   def test_with_txn_thrown_rollback
