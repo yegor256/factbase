@@ -7,6 +7,8 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'benchmark', '~>0.5', require: false
+gem 'logger', '~>1.0', require: false
+gem 'loog', '~>0.6', require: false
 gem 'minitest', '~>6.0', require: false
 gem 'minitest-reporters', '~>1.7', require: false
 gem 'os', '~>1.1', require: false
