@@ -148,6 +148,7 @@ class Factbase::Rules
       text = (@expr.length > 32 ? "#{@expr[0..31]}..." : @expr).inspect
       failed = Check.failed(term, fact, fb)
       text = "#{failed} of the #{text}" unless failed.nil? || failed.to_s == term.to_s
+      fact = Factbase::Fact.new(fact.all_properties.to_h { |name| [name, fact[name]] }.compact)
       raise(ArgumentError, "The fact doesn't match the #{text} rule: #{fact}")
     end
 
