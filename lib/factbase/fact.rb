@@ -3,7 +3,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'json'
 require 'others'
 require 'time'
 require_relative '../factbase'
