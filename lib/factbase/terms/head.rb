@@ -3,7 +3,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../accum'
+require_relative '../fact'
+require_relative '../prediction'
+require_relative '../tee'
 require_relative 'base'
+
 # Represents a 'head' term in the Factbase.
 # It retrieves the first N results from a query.
 class Factbase::Head < Factbase::TermBase
@@ -31,6 +36,24 @@ class Factbase::Head < Factbase::TermBase
     raise(ArgumentError, "A non-negative count is expected by '#{@op}', but #{max} provided") if max.negative?
     term = @operands[1]
     raise(ArgumentError, "A term is expected, but '#{term}' provided") unless term.is_a?(Factbase::Term)
-    _flatten(fb.query(term, maps).each(fb, params).take([max, maps.size].min))
+    return [] if max.zero?
+    term.forget
+    params = params.transform_keys(&:to_s) if params.is_a?(Hash)
+    maybe = term.predict(maps, fb, Factbase::Tee.new({}, params))
+    maybe ||= maps unless maybe.equal?(maps)
+    extras = {}.compare_by_identity
+    result = []
+    maybe.each do |m|
+      break if result.size >= max
+      props = maybe.is_a?(Factbase::Prediction) ? maybe.extras(m) : {}
+      r = term.evaluate(Factbase::Accum.new(Factbase::Tee.new(Factbase::Fact.new(m), params), props, false), maps, fb)
+      unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+        raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{term}")
+      end
+      next unless r
+      extras[m] = props
+      result << m
+    end
+    Factbase::Prediction.new(result, extras)
   end
 end
