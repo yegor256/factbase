@@ -58,7 +58,7 @@ class Factbase::CachedFactbase
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
-    Factbase::CachedQuery.new(@origin.query(term, maps), @cache, self, cacheable: !term.abstract?)
+    Factbase::CachedQuery.new(@origin.query(term, maps), @cache, self, cacheable: !term.abstract? && !defines?(term))
   end
 
   # Run an ACID transaction.
@@ -69,5 +69,14 @@ class Factbase::CachedFactbase
     end
   ensure
     @cache.clear
+  end
+
+  private
+
+  # Does it have a +defn+ or an +undef+ inside, which must run every time?
+  # @param [Factbase::Term] term The term
+  # @return [Boolean] TRUE if it defines or removes a term
+  def defines?(term)
+    %i[defn undef].include?(term.op) || term.operands.any? { |o| o.is_a?(Factbase::Term) && defines?(o) }
   end
 end
