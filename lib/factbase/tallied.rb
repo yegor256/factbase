@@ -43,33 +43,53 @@ class Factbase::Tallied
   end
 
   def txn
-    before = @churn.dup
+    own = Factbase::Churn.new
     commit = false
     @fb.txn do |fbt|
       catch(:rollback) do
         thrown = true
         catch(:commit) do
-          yield(Factbase::Tallied.new(fbt, @churn))
+          yield(Factbase::Tallied.new(fbt, Twin.new(@churn, own)))
           thrown = false
         end
         commit = true
         throw(:commit) if thrown
       end
     rescue Factbase::Rollback => e
-      revert(before)
+      revert(own)
       raise(e)
     ensure
-      revert(before) unless commit
+      revert(own) unless commit
     end
   end
 
-  # Bring the counter back to where it was, in place, so that the object
-  # the caller passed to the constructor sees the rollback too.
-  # @param [Factbase::Churn] before The counter as it was before the transaction
-  def revert(before)
-    @churn.append(before.inserted - @churn.inserted, before.deleted - @churn.deleted, before.added - @churn.added)
+  # Take back, in place, only what the transaction itself counted, so that
+  # the object the caller passed to the constructor sees the rollback too,
+  # while the changes counted there by someone else stay.
+  # @param [Factbase::Churn] own What the transaction counted
+  def revert(own)
+    back = [-own.inserted, -own.deleted, -own.added]
+    @churn.append(*back)
+    own.append(*back)
   end
   private :revert
+
+  # Two counters, where every change goes into both of them.
+  #
+  # This is an internal class, it is not supposed to be instantiated directly.
+  class Twin
+    decoor(:main)
+
+    def initialize(main, own)
+      @main = main
+      @own = own
+    end
+
+    def append(ins, del, add)
+      @main.append(ins, del, add)
+      @own.append(ins, del, add)
+    end
+  end
 
   # Fact decorator.
   #
