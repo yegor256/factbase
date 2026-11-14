@@ -13,6 +13,16 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestCachedFactbase < Factbase::Test
+  def test_preserves_the_decorator_inside_a_transaction
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.txn do |txn|
+      assert_instance_of(Factbase::CachedFactbase, txn)
+      txn.insert.x = 42
+      assert_equal([42], txn.query('(always)').map(&:x))
+    end
+    assert_equal([42], fb.query('(always)').map(&:x))
+  end
+
   def test_inserts_and_queries
     fb = Factbase::CachedFactbase.new(Factbase.new)
     f = fb.insert
