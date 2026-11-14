@@ -31,6 +31,7 @@ class Factbase::Join < Factbase::TermBase
           pieces = j.split('<=', -1).map(&:strip)
           raise(ArgumentError, "A join mapping can contain at most one '<=': '#{j}'") if pieces.size > 2
           raise(ArgumentError, "A join mapping can't have an empty side: '#{j}'") if pieces.any?(&:empty?)
+          raise(ArgumentError, "A join mapping can't use a '$' name: '#{j}'") if pieces.any? { |p| p.start_with?('$') }
           pieces
         end
         .map! { |j| j.size == 1 ? [j[0], j[0]] : j }
