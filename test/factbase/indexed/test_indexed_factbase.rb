@@ -139,6 +139,20 @@ class TestIndexedFactbase < Factbase::Test
     assert_equal(1, fb2.query('(eq bar 13)').each.to_a.size)
   end
 
+  def test_import_repoints_index_entries_to_recipient_maps
+    fb1 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb1.insert.foo = 42
+    fb1.query('(eq foo 42)').each.to_a
+    fb2 = Factbase::IndexedFactbase.new(Factbase.new)
+    fb2.import(fb1.export)
+    index = fb2.instance_variable_get(:@idx)
+    key = index.keys.find { |item| item[1] == 'foo' && item[2] == :eq }
+    maps = fb2.instance_variable_get(:@origin).instance_variable_get(:@maps)
+    assert_equal(maps.object_id, key.first)
+    fact = index[key][:facts][42].first
+    assert(maps.any? { |map| map.equal?(fact) })
+  end
+
   def test_export_preserves_index
     populate =
       lambda do |fb|
