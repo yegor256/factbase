@@ -18,7 +18,7 @@ class Factbase::ToFloat < Factbase::TermBase
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @param [Factbase] fb Factbase to use for sub-queries
-  # @return [Float] Float representation of the value
+  # @return [Float, nil] Float representation of the value, or NIL if the operand is absent
   def evaluate(fact, maps, fb)
     assert_args(1)
     vv = _values(0, fact, maps, fb)

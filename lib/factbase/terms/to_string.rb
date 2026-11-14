@@ -18,7 +18,7 @@ class Factbase::ToString < Factbase::TermBase
   # @param [Factbase::Fact] fact The fact
   # @param [Array<Factbase::Fact>] maps All maps available
   # @param [Factbase] fb Factbase to use for sub-queries
-  # @return [String] The same value as string
+  # @return [String, nil] The same value as string, or NIL if the operand is absent
   def evaluate(fact, maps, fb)
     assert_args(1)
     vv = _values(0, fact, maps, fb)
