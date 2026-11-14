@@ -24,17 +24,23 @@ class Factbase::IndexedFactbase
   # @param [Factbase] origin Original factbase to decorate
   # @param [Hash] idx Index to use
   # @param [Set] fresh The set of IDs of newly inserted facts
-  def initialize(origin, idx = {}, fresh = Set.new)
+  # @param [Boolean] shared TRUE if the index belongs to the factbase outside this one
+  def initialize(origin, idx = {}, fresh = Set.new, shared: false)
     raise(ArgumentError, 'Wrong type of original') unless origin.respond_to?(:query)
     @origin = origin
     raise(ArgumentError, 'Wrong type of index') unless idx.is_a?(Hash)
     @idx = idx
     @fresh = fresh
+    @shared = shared
   end
 
   # Insert a new fact and return it.
   # @return [Factbase::Fact] The fact just inserted
   def insert
+    if @shared
+      @idx.clear
+      @shared = false
+    end
     f = Factbase::IndexedFact.new(@origin.insert, @idx, @fresh)
     @fresh.add(f.object_id)
     f
@@ -60,10 +66,9 @@ class Factbase::IndexedFactbase
   # Run an ACID transaction.
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
-    inner_idx = {}
     result =
       @origin.txn do |fbt|
-        yield(Factbase::IndexedFactbase.new(fbt, inner_idx, @fresh))
+        yield(Factbase::IndexedFactbase.new(fbt, @idx.dup, @fresh, shared: true))
       end
     @idx.clear if result.deleted.positive? || result.added.positive?
     @fresh.clear
