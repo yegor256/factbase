@@ -29,8 +29,7 @@ class Factbase::TermBase
   def to_s
     @to_s ||=
       begin
-        items = []
-        items << @op
+        items = [name]
         items +=
           @operands.map do |o|
             if o.is_a?(String)
@@ -50,6 +49,16 @@ class Factbase::TermBase
   end
 
   private
+
+  # A directly instantiated term has no name, so its class names it.
+  def name
+    return @name if @name
+    return @op if @op.is_a?(Symbol) || @op.is_a?(String)
+    self.class.name.delete_prefix('Factbase::')
+      .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+      .gsub(/([a-z\d])([A-Z])/, '\1_\2')
+      .downcase
+  end
 
   def assert_args(num)
     c = @operands.size
