@@ -24,6 +24,11 @@ class Factbase::CachedFact
     @origin.to_s
   end
 
+  # Original map behind the decorated fact.
+  def _source
+    @origin._source
+  end
+
   others do |*args|
     @cache.clear if args[0].to_s.end_with?('=')
     @origin.public_send(*args)
