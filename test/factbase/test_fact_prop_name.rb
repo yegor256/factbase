@@ -16,4 +16,15 @@ class TestFactPropName < Factbase::Test
     assert_raises(ArgumentError) { f.public_send(:"weird\nProp!!!=", 42) }
     assert_empty(f.all_properties)
   end
+
+  def test_refuses_names_a_query_cannot_read
+    f = Factbase::Fact.new({})
+    %w[Name 1abc my-name].each do |n|
+      assert_includes(
+        assert_raises(ArgumentError, n) { f.public_send(:"#{n}=", 42) }.message,
+        "Invalid prop name '#{n}'"
+      )
+    end
+    assert_empty(f.all_properties, 'a name no query can read is stored in the fact')
+  end
 end
