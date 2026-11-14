@@ -580,6 +580,14 @@ class TestFactbase < Factbase::Test
     end
   end
 
+  def test_import_of_a_marshal_with_an_oversized_table
+    assert_includes(
+      assert_raises(StandardError) do
+        Factbase.new.import("\x04\b{\xfc\x00\x00\x00\x40".b)
+      end.message, 'The input is not a valid factbase'
+    )
+  end
+
   def test_import_rejects_a_valid_marshal_with_the_wrong_shape
     assert_includes(
       assert_raises(StandardError) do
