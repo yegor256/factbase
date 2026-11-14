@@ -143,11 +143,30 @@ class Factbase::LazyTaped
   end
 
   def get_copied_map(original_map)
+    return installed(original_map) if @maps
     ensure_copied!
     @copies[original_map] || original_map
   end
 
+  # Tells that the transaction is over and its maps are now in +maps+.
+  # From now on a write through a fact of this transaction goes to the map
+  # that is really in the factbase, not to a copy that nobody reads.
+  # @param [Array<Hash>] maps The maps of the factbase after the transaction
+  def finish!(maps)
+    @maps = maps
+  end
+
+  def finished?
+    !@maps.nil?
+  end
+
   private
+
+  def installed(map)
+    source = @sources[map] || map
+    copy = @copies[source] || map
+    @maps.any? { |m| m.equal?(copy) } ? copy : source
+  end
 
   def _join(other)
     ensure_copied!
@@ -162,7 +181,6 @@ class Factbase::LazyTaped
   end
 
   def _tape(map)
-    return LazyTapedHash.new(map, self, @added) unless copied?
-    Factbase::Taped::TapedHash.new(@copies[map] || map, @added)
+    LazyTapedHash.new(map, self, @added)
   end
 end
