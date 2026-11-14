@@ -15,7 +15,7 @@ class Factbase::CachedFact
   # Ctor.
   # @param [Factbase::Fact] origin The original fact
   # @param [Hash] cache Cache of queries (to clean it on attribute addition)
-  def initialize(origin, cache, **)
+  def initialize(origin, cache)
     @origin = origin
     @cache = cache
   end
