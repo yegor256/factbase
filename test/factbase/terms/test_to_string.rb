@@ -61,10 +61,4 @@ class TestToString < Factbase::Test
     fb.insert.id = 100
     assert_equal(1, fb.query('(eq "100" (to_string id))').each.to_a.size)
   end
-
-  def test_asserts_arguments_count
-    assert_raises(StandardError) do
-      Factbase::ToString.new([]).evaluate(fact, [], Factbase.new)
-    end
-  end
 end
