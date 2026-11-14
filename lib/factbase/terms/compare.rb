@@ -41,11 +41,9 @@ class Factbase::Compare < Factbase::TermBase
     failure = nil
     comparable = false
     lefts.each do |l|
-      left = l.is_a?(Time) ? l.floor : l
       rights.each do |r|
-        right = r.is_a?(Time) ? r.floor : r
         begin
-          answer = _compare(left, right)
+          answer = _compare(l, r)
         rescue RuntimeError => e
           failure ||= e
           next

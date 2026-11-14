@@ -38,7 +38,7 @@ class TestMath < Factbase::Test
   end
 
   def test_eq_time
-    now = Time.now
+    now = Time.now.floor
     t = Factbase::Term.new(:eq, [:foo, Time.parse(now.iso8601)])
     assert(t.evaluate(fact('foo' => now), [], Factbase.new))
     assert(t.evaluate(fact('foo' => [now, Time.now]), [], Factbase.new))
