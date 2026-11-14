@@ -91,6 +91,31 @@ class Factbase::Taped
   class TapedHash
     decoor(:origin)
 
+    MUTATING_METHODS = %i[
+      clear
+      compare_by_identity
+      delete
+      delete_if
+      filter!
+      keep_if
+      merge!
+      rehash
+      reject!
+      replace
+      select!
+      shift
+      store
+      transform_keys!
+      transform_values!
+      update
+    ].freeze
+
+    MUTATING_METHODS.each do |m|
+      define_method(m) do |*args, &blk|
+        @origin.public_send(m, *args, &blk).tap { @added.append(@origin.object_id) }
+      end
+    end
+
     def initialize(origin, added)
       @origin = origin
       @added = added
