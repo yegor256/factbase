@@ -235,11 +235,11 @@ class Factbase::Term < Factbase::TermBase
   #
   # @return [Boolean] TRUE if static
   def static?
-    return !traced?(self) if @op == :agg
+    return !traced? if @op == :agg
     return false if %i[join as traced unique prev].include?(@op)
     return false if custom?
     @operands.each do |o|
-      return false if o.is_a?(Factbase::Term) && !o.static?
+      return false if o.is_a?(Factbase::TermBase) && !o.static?
       return false if o.is_a?(Symbol) && !o.to_s.start_with?('$')
     end
     true
@@ -250,7 +250,7 @@ class Factbase::Term < Factbase::TermBase
   # @return [Boolean] TRUE if abstract
   def abstract?
     @operands.each do |o|
-      return true if o.is_a?(Factbase::Term) && o.abstract?
+      return true if o.is_a?(Factbase::TermBase) && o.abstract?
       return true if o.is_a?(Symbol) && o.to_s.start_with?('$')
     end
     false
@@ -264,10 +264,6 @@ class Factbase::Term < Factbase::TermBase
     return false if TERMS.key?(@op)
     return false unless Factbase::Term.private_method_defined?(@op, false)
     Factbase::Term.instance_method(@op).source_location&.first != __FILE__
-  end
-
-  def traced?(term)
-    term.op == :traced || term.operands.any? { |o| o.is_a?(Factbase::Term) && traced?(o) }
   end
 
   def at(fact, maps, fb)

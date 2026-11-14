@@ -19,6 +19,35 @@ class Factbase::TermBase
     end
   end
 
+  # Does it have any dependencies on a fact?
+  #
+  # A concrete term may keep state or read the fact even when its operands are
+  # literals or parameters, so it is never reported as static.
+  #
+  # @return [Boolean] Always FALSE
+  def static?
+    false
+  end
+
+  # Does the term, or any term inside it, trace its evaluation?
+  #
+  # @return [Boolean] TRUE if traced
+  def traced?
+    return true if @op == :traced || @op == 'traced'
+    children = Array(@operands).dup
+    children << @op if @op.is_a?(Factbase::TermBase)
+    children.any? { |o| o.is_a?(Factbase::TermBase) && o.traced? }
+  end
+
+  # Does it have any variables (+$foo+, for example) inside?
+  #
+  # @return [Boolean] TRUE if abstract
+  def abstract?
+    Array(@operands).any? do |o|
+      (o.is_a?(Factbase::TermBase) && o.abstract?) || (o.is_a?(Symbol) && o.to_s.start_with?('$'))
+    end || (@op.is_a?(Factbase::TermBase) && @op.abstract?)
+  end
+
   # Forget what was remembered while earlier facts were evaluated.
   #
   # A term that remembers nothing has nothing to forget.

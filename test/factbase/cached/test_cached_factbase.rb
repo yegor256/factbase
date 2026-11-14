@@ -153,4 +153,13 @@ class TestCachedFactbase < Factbase::Test
       fb.query('(and (exists x) (traced (always)))').each.to_a
     end
   end
+
+  def test_caches_parameterized_concrete_terms_per_value
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    fb.insert.x = 2
+    term = Factbase::Term.new(:eq, [:x, Factbase::ToInteger.new([:$wanted])])
+    assert_equal([1], fb.query(term).each(fb, { 'wanted' => 1 }).map(&:x))
+    assert_equal([2], fb.query(term).each(fb, { 'wanted' => 2 }).map(&:x))
+  end
 end
