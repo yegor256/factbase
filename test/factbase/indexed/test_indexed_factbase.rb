@@ -139,52 +139,31 @@ class TestIndexedFactbase < Factbase::Test
     assert_equal(1, fb2.query('(eq bar 13)').each.to_a.size)
   end
 
-  def test_export_preserves_index
-    populate =
-      lambda do |fb|
-        1000.times do |i|
-          fb.insert.then do |f|
-            f.id = i
-            f.value = i * 2
-          end
-        end
-      end
-    fb1 = Factbase::IndexedFactbase.new(Factbase.new)
-    populate.call(fb1)
-    fb1.query('(eq value 100)').each.to_a
-    fb1.query('(gt id 500)').each.to_a
-    fb1.query('(exists value)').each.to_a
-    data_with_index = fb1.export
-    unmarshalled = Marshal.load(data_with_index)
-    assert(unmarshalled.key?(:idx), 'Exported data should contain :idx key')
-    assert_kind_of(Hash, unmarshalled[:idx], 'Index should be a Hash')
-    refute_empty(unmarshalled[:idx], 'Index should not be empty after queries')
-    fb2 = Factbase::IndexedFactbase.new(Factbase.new)
-    fb2.import(data_with_index)
-    assert_equal(1, fb2.query('(eq value 100)').each.to_a.size)
-    assert_equal(499, fb2.query('(gt id 500)').each.to_a.size)
-    assert_equal(1000, fb2.query('(exists value)').each.to_a.size)
-    fb3 = Factbase::IndexedFactbase.new(Factbase.new)
-    populate.call(fb3)
-    data_without_index = fb3.export
-    assert_empty(Marshal.load(data_without_index)[:idx], 'Index should be empty without queries')
-    assert_operator(data_with_index.size, :>, data_without_index.size, 'Export with index should be larger')
+  def test_exports_same_bytes_before_and_after_queries
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    total = rnd.rand(10..500)
+    total.times { |i| fb.insert.id = i }
+    assert_equal(
+      fb.export,
+      fb.tap do |f|
+        f.query("(eq id #{rnd.rand(total)})").each.to_a
+        f.query("(gt id #{rnd.rand(total)})").each.to_a
+      end.export,
+      "queries made the export of #{total} facts differ, seed #{seed}"
+    )
   end
 
-  def test_insert_preserves_index
+  def test_imports_export_that_carries_index
+    seed = Random.new_seed
+    rnd = Random.new(seed)
+    origin = Factbase.new
+    total = rnd.rand(1..100)
+    total.times { |i| origin.insert.id = i }
     fb = Factbase::IndexedFactbase.new(Factbase.new)
-    fb.insert.foo = 42
-    fb.query('(eq foo 42)').each.to_a
-    data = fb.export
-    unmarshalled = Marshal.load(data)
-    assert_kind_of(Hash, unmarshalled[:idx], 'Index should be a Hash after export')
-    refute_empty(unmarshalled[:idx], 'Index should not be empty after query')
-    fb2 = Factbase::IndexedFactbase.new(Factbase.new)
-    fb2.import(data)
-    fb2.insert.bar = 13
-    unmarshalled2 = Marshal.load(fb2.export)
-    assert_kind_of(Hash, unmarshalled2[:idx], 'Index should remain a Hash after insert')
-    refute_empty(unmarshalled2[:idx], 'Index should be preserved after insert (incremental indexing)')
+    fb.import(Marshal.dump({ maps: origin.export, idx: { [rnd.rand, 'id'] => [] } }))
+    assert_equal(total, fb.query('(exists id)').each.to_a.size, "facts of export with index were lost, seed #{seed}")
   end
 
   def test_insert_allows_incremental_query
