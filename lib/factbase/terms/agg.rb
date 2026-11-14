@@ -21,6 +21,7 @@ class Factbase::Agg < Factbase::TermBase
   # @return [Object] The result of evaluation
   def evaluate(fact, maps, fb)
     assert_args(2)
+    raise(ArgumentError, "The 'agg' term needs a fact and cannot be used as an aggregate") if fact.nil?
     selector = @operands[0]
     unless selector.is_a?(Factbase::Term) || selector.is_a?(Factbase::TermBase)
       raise(ArgumentError, "A term is expected, but '#{selector}' provided")
