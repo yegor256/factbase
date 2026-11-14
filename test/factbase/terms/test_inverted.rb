@@ -21,6 +21,16 @@ class TestInverted < Factbase::Test
     assert_equal('12 54 33', list.map { |m| m['x'].first }.join(' '))
   end
 
+  def test_refuses_a_non_term_operand
+    e = assert_raises(ArgumentError) { Factbase.new.query('(inverted 5)').each.to_a }
+    assert_includes(e.message, "A term is expected, but '5' provided", e.message)
+  end
+
+  def test_refuses_a_second_operand
+    e = assert_raises(ArgumentError) { Factbase.new.query('(inverted (always) (always))').each.to_a }
+    assert_includes(e.message, "Too many (2) operands for 'inverted' (1 expected)", e.message)
+  end
+
   def test_does_not_turn_a_param_into_a_property
     list = Factbase::Syntax.new('(inverted (eq y $who))').to_term.predict(
       [{ 'y' => ['first'] }], Factbase.new, { 'who' => ['first'] }
