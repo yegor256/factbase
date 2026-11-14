@@ -56,7 +56,23 @@ class Factbase::Arithmetic < Factbase::TermBase
           raise(ArgumentError, "Unknown time unit '#{units}' in '#{r}'")
         end
     end
+    if misplaced?(v, r)
+      raise(
+        ArgumentError,
+        "A Time can only be on the left of 'plus' or 'minus', while " \
+        "'#{{ '+': 'plus', '-': 'minus', '*': 'times', quo: 'div' }[@op]}' got " \
+        "#{v.inspect} (#{v.class}) and #{r.inspect} (#{r.class})"
+      )
+    end
     raise(ArgumentError, 'Cannot divide by zero') if @op == :quo && r.is_a?(Numeric) && r.zero?
     v.__send__(@op, r)
+  end
+
+  private
+
+  def misplaced?(left, right)
+    return false unless [left, right].any?(Time)
+    return true unless left.is_a?(Time)
+    @op != :- && (@op != :+ || right.is_a?(Time))
   end
 end
