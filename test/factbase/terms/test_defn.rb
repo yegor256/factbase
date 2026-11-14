@@ -129,7 +129,7 @@ class TestDefn < Factbase::Test
     fb = Factbase.new
     fb.insert.foo = 42
     e = assert_raises(StandardError) { fb.query('(defn _values "999")').each.to_a }
-    assert_includes(e.message, "Term '_values' is already defined", e.message)
+    assert_includes(e.message, "Can't use '_values' name as a term", e.message)
     assert_equal(1, fb.query('(eq foo (at 0 foo))').each.to_a.size)
   end
 
@@ -137,6 +137,25 @@ class TestDefn < Factbase::Test
     fb = Factbase.new
     fb.insert.foo = 42
     e = assert_raises(StandardError) { fb.query('(defn warn "999")').each.to_a }
-    assert_includes(e.message, "Term 'warn' is already defined", e.message)
+    assert_includes(e.message, "Can't use 'warn' name as a term", e.message)
+  end
+
+  def test_refuses_kernel_names_without_calling_them_defined_terms
+    fb = Factbase.new
+    fb.insert.foo = 42
+    %w[test select].each do |n|
+      e = assert_raises(StandardError) { fb.query("(defn #{n} 'true')").each.to_a }
+      assert_includes(e.message, "Can't use '#{n}' name as a term", e.message)
+      refute_includes(e.message, 'already defined', e.message)
+    end
+  end
+
+  def test_still_says_already_defined_for_a_custom_term
+    fb = Factbase.new
+    fb.insert.foo = 42
+    n = @defn_name
+    fb.query("(defn #{n} 'true')").each.to_a
+    e = assert_raises(StandardError) { Factbase::Defn.new([n, 'false']).evaluate(fact, [], Factbase.new) }
+    assert_includes(e.message, "Term '#{n}' is already defined", e.message)
   end
 end
