@@ -75,4 +75,12 @@ class TestToFloat < Factbase::Test
   def test_converts_multiple_values_array_picks_first_float
     assert_in_delta(7.5, Factbase::ToFloat.new([[7.5, 9.9]]).evaluate(fact, [], Factbase.new))
   end
+
+  def test_rejects_hexadecimal_value
+    t = Factbase::ToFloat.new(['0x1A'])
+    assert_includes(
+      assert_raises(RuntimeError) { t.evaluate(fact, [], Factbase.new) }.message,
+      "Cannot convert '0x1A' to Float in (to_float ...):"
+    )
+  end
 end
