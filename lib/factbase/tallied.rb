@@ -8,6 +8,7 @@ require 'others'
 require_relative '../factbase'
 require_relative 'churn'
 require_relative 'enumerated'
+require_relative 'no_conversion'
 
 # A decorator of a Factbase, that counts all operations and then returns
 # an instance of Factbase::Churn.
@@ -93,6 +94,8 @@ class Factbase::Tallied
       @churn.append(0, 0, 1) if args[0].to_s.end_with?('=')
       r
     end
+
+    prepend Factbase::NoConversion
   end
 
   # Query decorator.
