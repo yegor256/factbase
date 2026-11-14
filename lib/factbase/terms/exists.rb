@@ -5,8 +5,8 @@
 
 require_relative 'base'
 
-# Represents a term that checks if a certain condition exists within the factbase.
-# This class evaluates whether a specific term exists in the given context of facts.
+# Checks that the operand has a value for the current fact: a property name,
+# e.g. <tt>(exists x)</tt>, or a term, e.g. <tt>(exists (eq x 1))</tt>.
 class Factbase::Exists < Factbase::TermBase
   # Constructor.
   # @param [Array] operands Operands
