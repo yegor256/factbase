@@ -51,6 +51,15 @@ class Factbase::Query
     params = params.transform_keys(&:to_s) if params.is_a?(Hash)
     maybe = @term.predict(@maps, fb, Factbase::Tee.new({}, params))
     maybe ||= @maps unless maybe.equal?(@maps)
+    if maybe.empty?
+      extras = {}
+      f = Factbase::Tee.new(Factbase::Fact.new({}), params)
+      r = @term.evaluate(Factbase::Accum.new(f, extras, false), @maps, fb)
+      unless r.is_a?(TrueClass) || r.is_a?(FalseClass)
+        raise(ArgumentError, "Unexpected evaluation result of type #{r.class}, must be Boolean at #{@term}")
+      end
+      return yielded
+    end
     maybe.each do |m|
       extras = {}
       f = Factbase::Fact.new(m)
