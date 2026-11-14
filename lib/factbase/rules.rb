@@ -132,6 +132,14 @@ class Factbase::Rules
         yield(Fact.new(f, @check, fb))
       end
     end
+
+    def one(fb = @fb, params = {})
+      @query.one(fb, params)
+    end
+
+    def delete!(fb = @fb)
+      @query.delete!(fb)
+    end
   end
 
   # Check one fact.
