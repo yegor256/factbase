@@ -13,6 +13,8 @@ class Factbase::IndexedOr
   # Merge by identity: hashing fact maps (Time included) costs more than the merge.
   def predict(maps, fb, params)
     return if @idx.nil?
+    copying = %i[head sorted inverted]
+    return if @term.operands.any? { |o| copying.include?(o.op) }
     r = nil
     seen = {}.compare_by_identity
     failed = false
