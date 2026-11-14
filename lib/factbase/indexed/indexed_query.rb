@@ -36,7 +36,7 @@ class Factbase::IndexedQuery
   # @param [Factbase] fb The factbase
   # @param [Hash] params Optional params accessible in the query via the "$" symbol
   # @yield [Fact] Facts one-by-one
-  # @return [Integer] Total number of facts yielded
+  # @return [Integer, Enumerator] Total number of facts yielded
   # @todo #1017:60min Yield the facts one by one, the way the plain query does.
   #  The facts are collected before any of them is yielded, so a caller that
   #  breaks out of the loop still pays for every remaining fact, and a term

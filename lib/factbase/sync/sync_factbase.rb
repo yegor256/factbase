@@ -36,7 +36,7 @@ class Factbase::SyncFactbase
 
   # Iterate the maps, taken together under the monitor.
   # @yield [Hash] Maps one by one
-  # @return [Integer] How many maps there were
+  # @return [Integer, Enumerator] How many maps there were
   def each(&)
     return to_enum(__method__) unless block_given?
     maps = try_lock { @origin.to_enum(:each).to_a }
