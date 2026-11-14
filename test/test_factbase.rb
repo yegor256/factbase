@@ -328,6 +328,19 @@ class TestFactbase < Factbase::Test
     assert_equal(1, fb.query('(eq foo 1)').each.to_a.size)
   end
 
+  def test_counts_inserted_facts_once_after_modifying_them_in_txn
+    fb = Factbase.new
+    changes =
+      fb.txn do |txn|
+        10.times { |id| txn.insert.id = id }
+        txn.query('(always)').each { |fact| fact.ready = true }
+      end
+    assert_equal(10, changes.inserted)
+    assert_equal(0, changes.deleted)
+    assert_equal(0, changes.added)
+    assert_equal(10, fb.query('(eq ready true)').count)
+  end
+
   def test_keeps_order_when_modifying_a_fact_in_txn
     fb = Factbase.new
     3.times { |i| fb.insert.then { |f| f.num = i } }
