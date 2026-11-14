@@ -49,4 +49,14 @@ class TestUndef < Factbase::Test
     assert_includes(e.message, "Term 'eq' is built-in and cannot be undefined", e.message)
     assert_equal(1, fb.query('(eq foo 42)').each.to_a.size)
   end
+
+  def test_refuses_to_undefine_a_method_of_the_engine
+    fb = Factbase.new
+    fb.insert.x = 1
+    %w[at initialize].each do |fn|
+      e = assert_raises(StandardError, fn) { fb.query("(undef #{fn})").each.to_a }
+      assert_includes(e.message, "Term '#{fn}' was not made by 'defn'", e.message)
+    end
+    assert_equal(1, fb.query('(eq 1 (at 0 x))').each.to_a.size)
+  end
 end
