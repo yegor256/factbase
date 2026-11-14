@@ -78,4 +78,8 @@ class TestInv < Factbase::Test
     assert_raises(StandardError) { fb.query('(exists a)').find { |f| f.x = -5 } }
     assert_raises(StandardError) { fb.query('(exists a)').select { |f| f.x = -10 } }
   end
+
+  def test_refuses_a_missing_block
+    assert_raises(ArgumentError) { Factbase::Inv.new(Factbase.new) }
+  end
 end
