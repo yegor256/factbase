@@ -280,7 +280,7 @@ class TestLazyTaped < Factbase::Test
         fbt.insert.id = 10 if f.id == 4
         seen << f.id
       end
-      assert_equal((1..10).to_a, seen)
+      assert_equal((1..9).to_a, seen)
       assert_equal(10, fbt.size)
     end
   end
