@@ -30,6 +30,23 @@ class TestSum < Factbase::Test
     )
   end
 
+  def test_sums_all_values_of_one_fact
+    assert_equal(
+      65,
+      Factbase::Sum.new([:cost]).evaluate(
+        fact, [{ 'cost' => [10, 20, 30] }, { 'cost' => 5 }], Factbase.new
+      )
+    )
+  end
+
+  def test_refuses_non_number_after_the_first_value
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Sum.new([:cost]).evaluate(fact, [{ 'cost' => [10, 'oops'] }], Factbase.new)
+      end.message, "The value 'oops' of the 'cost' property is not a number"
+    )
+  end
+
   def test_refuses_extra_operands
     assert_includes(
       assert_raises(ArgumentError) do
