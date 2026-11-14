@@ -53,4 +53,24 @@ class TestSimplified < Factbase::Test
     fb.insert.x = 1
     assert_equal([[1, 1]], fb.query('(and (as y x) (as y x))').each.map { |f| f['y'] })
   end
+
+  def test_keeps_a_repeated_unique
+    fb = Factbase.new
+    [1, 2].each do |y|
+      f = fb.insert
+      f.x = 5
+      f.y = y
+    end
+    assert_equal([1, 2], fb.query('(or (unique x) (eq y 1) (unique x))').each.map(&:y))
+  end
+
+  def test_keeps_a_repeated_operand_with_a_nested_unique
+    fb = Factbase.new
+    [1, 2].each do |y|
+      f = fb.insert
+      f.x = 5
+      f.y = y
+    end
+    assert_equal([1, 2], fb.query('(or (not (not (unique x))) (eq y 1) (not (not (unique x))))').each.map(&:y))
+  end
 end
