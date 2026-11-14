@@ -15,8 +15,8 @@ Gem::Specification.new do |s|
   s.summary = 'Factbase'
   s.description =
     'A primitive in-memory collection of key-value records ' \
-    'known as "facts," with an ability to insert facts, add properties ' \
-    'to facts, and delete facts. There is no ability to modify facts. ' \
+    'known as "facts." Insert and delete facts or append property values ' \
+    'to an existing fact. Each property preserves order and duplicates. ' \
     'It is also possible to find facts using Lisp-alike query predicates. ' \
     'An entire factbase may be exported to a binary file and imported back.'
   s.authors = ['Yegor Bugayenko']

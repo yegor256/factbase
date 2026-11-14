@@ -40,14 +40,14 @@ class TestFact < Factbase::Test
     assert_equal([42, 256], f['foo'], f.to_s)
   end
 
-  def test_keeps_values_unique
+  def test_keeps_repeated_values_in_insertion_order
     map = {}
     f = Factbase::Fact.new(map)
     f.foo = 42
     f.foo = 'Hello'
     assert_equal(2, map['foo'].size)
     f.foo = 42
-    assert_equal(3, map['foo'].size)
+    assert_equal([42, 'Hello', 42], f['foo'])
   end
 
   def test_fails_when_empty

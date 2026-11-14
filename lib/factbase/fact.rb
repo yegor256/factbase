@@ -19,8 +19,8 @@ require_relative '../factbase'
 #  f = Factbase::Fact.new({ 'foo' => [42, 256, 'Hello, world!'] })
 #  assert_equal(42, f.foo)
 #
-# A fact is basically a key/value hash map, where values are non-empty
-# sets of values.
+# A fact maps property names to non-empty lists of values.
+# Assignment appends a value, preserving order and duplicates.
 #
 # It is NOT thread-safe!
 #
