@@ -28,7 +28,8 @@ class Factbase::IndexedAbsent
     end
     return unless entry[:count] < facts.size
     facts[entry[:count]..].each do |f|
-      entry[:facts] << f if f[prop].nil?
+      v = f[prop]
+      entry[:facts] << f if v.nil? || (v.is_a?(Array) && v.empty?)
     end
     entry[:count] = facts.size
   end
