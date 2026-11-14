@@ -42,8 +42,16 @@ class Factbase::Pre
   def import(bytes)
     probe = Factbase.new
     probe.import(bytes)
-    probe.query('(always)').each { |f| @block.call(f, self) }
-    @fb.import(probe.export)
+    @fb.txn do |fbt|
+      context = Factbase::Pre.new(fbt, &@block)
+      probe.query('(always)').each do |source|
+        fact = fbt.insert
+        source.all_properties.each do |property|
+          source[property].each { |value| fact.public_send(:"#{property}=", value) }
+        end
+        @block.call(fact, context)
+      end
+    end
   end
 
   def txn
