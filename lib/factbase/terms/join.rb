@@ -29,6 +29,7 @@ class Factbase::Join < Factbase::TermBase
         .map(&:strip)
         .map! do |j|
           pieces = j.split('<=', -1).map(&:strip)
+          raise(ArgumentError, "A join mapping can't be empty in '#{@operands[0]}'") if pieces.empty?
           raise(ArgumentError, "A join mapping can contain at most one '<=': '#{j}'") if pieces.size > 2
           raise(ArgumentError, "A join mapping can't have an empty side: '#{j}'") if pieces.any?(&:empty?)
           pieces
