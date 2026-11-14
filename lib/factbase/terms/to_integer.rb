@@ -16,7 +16,7 @@ class Factbase::ToInteger < Factbase::TermBase
 
   # Evaluate term on a fact.
   # @param [Factbase::Fact] fact The fact
-  # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Array<Hash>] maps All maps available
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Integer] Integer representation of the value
   def evaluate(fact, maps, fb)
