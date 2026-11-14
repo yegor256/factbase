@@ -155,13 +155,19 @@ class Factbase::Term < Factbase::TermBase
   }.freeze
 
   # Ctor.
+  #
+  # String operands are duplicated and frozen; Array operands are duplicated
+  # and frozen recursively, Strings inside them too. The memoized text and the
+  # query cache key thus can't go stale when the caller edits the data it
+  # supplied. Term operands are left as they are, so +redress!+ keeps working.
+  #
   # @param [Symbol] operator Operator
   # @param [Array] operands Operands
   def initialize(operator, operands)
     super()
     @op = operator
-    @operands = operands
-    @terms = TERMS.slice(@op).to_h { |name, klass| [name, klass.new(operands).tap { |term| term.name = name }] }
+    @operands = operands.map { |o| detach(o) }.freeze
+    @terms = TERMS.slice(@op).to_h { |name, klass| [name, klass.new(@operands).tap { |term| term.name = name }] }
   end
 
   # Extend it with the module.
@@ -257,6 +263,20 @@ class Factbase::Term < Factbase::TermBase
   end
 
   private
+
+  # Duplicate and freeze mutable operand data; terms stay untouched.
+  # @param [Object] operand The operand to detach
+  # @return [Object] The detached operand
+  def detach(operand)
+    case operand
+    when String
+      operand.dup.freeze
+    when Array
+      operand.map { |o| detach(o) }.freeze
+    else
+      operand
+    end
+  end
 
   # Is it a term made by +defn+? Its Ruby body may read the fact and the factbase,
   # so its result can't be known from its operands alone.
