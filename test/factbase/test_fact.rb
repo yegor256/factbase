@@ -213,4 +213,25 @@ class TestFact < Factbase::Test
     f.alpha = 42
     assert_equal('[ alpha: [42], zeta: ["Жора"] ]', f.to_s, 'printed fact is not sorted by property name')
   end
+
+  def test_stores_a_binary_string_as_utf8
+    f = Factbase::Fact.new({})
+    f.city = 'Zürich'.b
+    assert_equal('Zürich', f.city)
+    assert_equal(Encoding::UTF_8, f.city.encoding)
+  end
+
+  def test_stores_a_latin1_string_as_utf8
+    f = Factbase::Fact.new({})
+    f.city = 'Zürich'.encode('ISO-8859-1')
+    assert_equal('Zürich', f.city)
+    assert_equal(Encoding::UTF_8, f.city.encoding)
+  end
+
+  def test_keeps_invalid_bytes_of_a_binary_string
+    f = Factbase::Fact.new({})
+    f.city = "\xFF\xFE".b
+    assert_equal("\xFF\xFE".b, f.city)
+    assert_equal(Encoding::BINARY, f.city.encoding)
+  end
 end

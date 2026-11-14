@@ -3,6 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../text'
+
 # Indexed term 'eq' that uses the hash-based inverted index for fast equality lookups.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -76,6 +78,6 @@ class Factbase::IndexedEq
 
   def normalize(value)
     return Rational(value) if value.is_a?(Integer) || (value.is_a?(Float) && value.finite?)
-    value
+    Factbase::Text.read(value)
   end
 end
