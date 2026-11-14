@@ -177,12 +177,7 @@ class Factbase::Logged
       unless r.is_a?(Integer)
         raise(StandardError, ".query(#{@termtext.inspect}).each() of #{qry.class} returned #{r.class}")
       end
-      if params.is_a?(Hash) && !params.empty?
-        q = "#{@termtext} with {#{params.map do |k, v|
-          "#{k}=#{v}"
-        end.join(', ')}}"
-      end
-      q ||= @termtext
+      q = describe(@termtext, params)
       if r.zero?
         @tube.say(mono, "Zero/#{total} facts found by #{q} #{tail}")
       else
@@ -198,13 +193,11 @@ class Factbase::Logged
         Factbase::Logged.elapsed do
           r = @fb.query(@term, @maps).one(fb, params)
         end
+      q = describe("'#{@termtext}'", params)
       if r.nil?
-        @tube.say(mono, "Nothing found by '#{@termtext}' #{tail}")
+        @tube.say(mono, "Nothing found by #{q} #{tail}")
       else
-        @tube.say(
-          mono,
-          "Found #{r.to_s.ellipsized(Factbase::Logged::Fact::MAX_LENGTH)} (#{r.class}) by '#{@termtext}' #{tail}"
-        )
+        @tube.say(mono, "Found #{r.to_s.ellipsized(Factbase::Logged::Fact::MAX_LENGTH)} (#{r.class}) by #{q} #{tail}")
       end
       r
     end
@@ -229,6 +222,11 @@ class Factbase::Logged
     end
 
     private
+
+    def describe(term, params)
+      return term unless params.is_a?(Hash) && !params.empty?
+      "#{term} with {#{params.map { |key, value| "#{key}=#{value}" }.join(', ')}}"
+    end
 
     def total
       @maps.nil? ? @fb.size : @maps.size
