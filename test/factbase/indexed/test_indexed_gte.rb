@@ -17,6 +17,12 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestIndexedGte < Factbase::Test
+  def test_falls_back_to_evaluation_for_a_computed_operand
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    (0..2).each { |value| fb.insert.x = value }
+    assert_equal([1, 2], fb.query('(gte (plus x 0) 1)').map(&:x))
+  end
+
   def test_keeps_the_order_the_facts_were_inserted_in
     term = Factbase::Term.new(:gte, [:num, 2])
     term.redress!(Factbase::IndexedTerm, idx: {})
