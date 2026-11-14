@@ -90,4 +90,12 @@ class TestBest < Factbase::Test
       Factbase::Best.new { |a, b| a > b }.evaluate(:ok, maps)
     end
   end
+
+  def test_refuses_a_string_as_property
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Best.new { |a, b| a > b }.evaluate('age', [{ 'age' => 1 }])
+      end.message, 'A symbol is expected, but age provided'
+    )
+  end
 end

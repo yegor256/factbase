@@ -66,4 +66,20 @@ class TestSorted < Factbase::Test
     ).query('(join "f<=foo" (head 1 (sorted foo (eq foo $foo))))').each.to_a
     assert_equal('888 111 444', ff.map { |m| m['f'].first }.join(' '))
   end
+
+  def test_refuses_a_string_as_property
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Syntax.new('(sorted "x" (always))').to_term.predict([], Factbase.new, {})
+      end.message, "A symbol is expected as first argument of 'sorted'"
+    )
+  end
+
+  def test_refuses_a_symbol_instead_of_a_term
+    assert_includes(
+      assert_raises(ArgumentError) do
+        Factbase::Syntax.new('(sorted x y)').to_term.predict([], Factbase.new, {})
+      end.message, "A term is expected, but 'y' provided"
+    )
+  end
 end
