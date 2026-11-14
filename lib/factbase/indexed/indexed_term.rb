@@ -39,8 +39,7 @@ module Factbase::IndexedTerm
     end
     m = :"#{@op}_predict"
     return __send__(m, maps, fb, params) if respond_to?(m)
-    _init_indexes unless @indexes
-    @indexes[@op].predict(maps, fb, params) if @indexes.key?(@op)
+    index(maps, fb, params)
   rescue Factbase::Term::Wrapped => e
     raise(e)
   rescue NoMethodError => e
@@ -50,6 +49,16 @@ module Factbase::IndexedTerm
   end
 
   private
+
+  # Asks the index to reduce the maps. An index that cannot compare the
+  # values returns NIL, so the term is evaluated on all maps and raises
+  # the same error as the plain factbase does.
+  def index(maps, fb, params)
+    _init_indexes unless @indexes
+    @indexes[@op].predict(maps, fb, params) if @indexes.key?(@op)
+  rescue ArgumentError
+    nil
+  end
 
   def _init_indexes
     @indexes = {
