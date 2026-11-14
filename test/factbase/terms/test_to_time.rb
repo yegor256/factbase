@@ -22,6 +22,34 @@ class TestToTime < Factbase::Test
     assert_equal(t, Factbase::ToTime.new([t]).evaluate(fact, [], Factbase.new))
   end
 
+  def test_applies_offset_of_zone_name
+    assert_equal(
+      Time.utc(2024, 7, 1, 3, 0, 0),
+      Factbase::ToTime.new(['2024-07-01 12:00 JST']).evaluate(fact, [], Factbase.new)
+    )
+    assert_equal(
+      Time.utc(2024, 7, 1, 11, 0, 0),
+      Factbase::ToTime.new(['2024-07-01 12:00 CET']).evaluate(fact, [], Factbase.new)
+    )
+  end
+
+  def test_applies_offset_written_after_utc
+    assert_equal(
+      Time.utc(2024, 7, 1, 9, 0, 0, 500_000),
+      Factbase::ToTime.new(['2024-07-01 12:00:00.5 UTC+03:00']).evaluate(fact, [], Factbase.new)
+    )
+  end
+
+  def test_keeps_offset_that_was_already_applied
+    t = Factbase::ToTime.new(['2024-07-01 12:00 EST']).evaluate(fact, [], Factbase.new)
+    assert_equal(Time.utc(2024, 7, 1, 17, 0, 0), t)
+    assert_equal(-18_000, t.utc_offset)
+    assert_equal(
+      Time.utc(2024, 7, 1, 3, 0, 0),
+      Factbase::ToTime.new(['2024-07-01 12:00 +09:00']).evaluate(fact, [], Factbase.new)
+    )
+  end
+
   def test_rejects_unparsable_value
     t = Factbase::ToTime.new(['hello'])
     e =
