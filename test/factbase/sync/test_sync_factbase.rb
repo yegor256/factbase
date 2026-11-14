@@ -94,6 +94,26 @@ class TestSyncFactbase < Factbase::Test
     assert_equal(1, fb.each { |_m| true })
   end
 
+  def test_lock_is_reentrant_across_fibers_of_one_thread
+    lock = Factbase::SyncFactbase::Lock.new
+    entered = nil
+    lock.synchronize do
+      entered = Fiber.new { lock.synchronize { :entered } }.resume
+    end
+    assert_equal(:entered, entered)
+  end
+
+  def test_nested_txn_on_the_same_thread
+    fb = Factbase::SyncFactbase.new(Factbase.new)
+    fb.txn do |outer|
+      assert_includes(
+        assert_raises(StandardError) { outer.txn { :nested } }.message,
+        'A transaction cannot be started inside a transaction'
+      )
+    end
+    assert_equal(0, fb.size)
+  end
+
   def test_refuses_a_nil_factbase
     assert_raises(ArgumentError) { Factbase::SyncFactbase.new(nil) }
   end

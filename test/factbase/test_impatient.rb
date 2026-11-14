@@ -7,6 +7,7 @@ require 'benchmark'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/impatient'
 require_relative '../../lib/factbase/query'
+require_relative '../../lib/factbase/sync/sync_factbase'
 
 require_relative '../test__helper'
 
@@ -54,6 +55,11 @@ class TestImpatient < Factbase::Test
           yield(f)
         end
       end
+    end
+
+    # Stay slow inside a transaction, where Factbase#txn would drop this class.
+    def txn
+      yield(self)
     end
 
     def query(term, maps = nil)
@@ -229,6 +235,37 @@ class TestImpatient < Factbase::Test
         Factbase::Impatient.new(nil)
       end.message
     )
+  end
+
+  def test_each_inside_txn_over_sync_factbase
+    fb = Factbase::Impatient.new(Factbase::SyncFactbase.new(Factbase.new))
+    fb.insert.foo = 42
+    fb.txn do |fbt|
+      assert_equal(1, fbt.query('(exists foo)').each.to_a.size)
+      seen = []
+      assert_equal(1, fbt.query('(exists foo)').each { |f| seen << f.foo })
+      assert_equal([42], seen)
+    end
+  end
+
+  def test_subquery_term_inside_txn_over_sync_factbase
+    fb = Factbase::Impatient.new(Factbase::SyncFactbase.new(Factbase.new))
+    fb.insert.foo = 42
+    fb.txn do |fbt|
+      assert_equal(0, fbt.query('(not (empty (eq foo 43)))').each.to_a.size)
+      assert_equal(1, fbt.query('(not (empty (eq foo 42)))').each.to_a.size)
+    end
+  end
+
+  def test_query_after_timeout_inside_txn_over_sync_factbase
+    slow = SlowStepsFactbase.new
+    5.times { slow.insert.x = 1 }
+    fb = Factbase::Impatient.new(Factbase::SyncFactbase.new(slow), timeout: 0.05)
+    assert_includes(
+      assert_raises(StandardError) { fb.txn { |fbt| fbt.query('(always)').each.to_a } }.message,
+      'timed out'
+    )
+    assert_equal(5, fb.size)
   end
 
   def test_lets_stop_iteration_from_the_block_through
