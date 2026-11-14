@@ -225,6 +225,15 @@ class TestIndexedFactbase < Factbase::Test
     assert_equal(1, fb2.query('(eq bar 13)').each.to_a.size)
   end
 
+  def test_does_not_grow_index_for_every_array_of_maps
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
+    100.times { |i| fb.insert.foo = i }
+    maps = fb.each.to_a
+    100.times { assert_equal(1, fb.query('(eq foo 1)', maps.dup).each.to_a.size) }
+    assert_operator(idx.size, :<, 20, 'the index kept an entry for every array of maps')
+  end
+
   def test_import_empty_raises_error
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     assert_raises(StandardError) do
