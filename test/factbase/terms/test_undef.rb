@@ -42,6 +42,17 @@ class TestUndef < Factbase::Test
     end
   end
 
+  def test_undef_keeps_the_term_when_its_count_is_refused
+    n = :_undef_two_names
+    fb = Factbase.new
+    fb.insert.foo = 42
+    Factbase::Defn.new([n, 'true']).evaluate(fact, [], Factbase.new)
+    assert_raises(StandardError) { fb.query("(undef #{n} _undef_two_names_other)").each.to_a }
+    assert(Factbase::Term.private_method_defined?(n), "The term '#{n}' must stay defined")
+  ensure
+    Factbase::Undef.new([n]).evaluate(fact, [], Factbase.new)
+  end
+
   def test_refuses_to_undefine_a_class_based_term
     fb = Factbase.new
     fb.insert.foo = 42
