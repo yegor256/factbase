@@ -6,7 +6,9 @@
 require 'decoor'
 require 'others'
 require_relative '../factbase'
+require_relative 'accum'
 require_relative 'enumerated'
+require_relative 'fact'
 
 # A decorator of a Factbase, that checks invariants on every set.
 #
@@ -44,9 +46,12 @@ class Factbase::Inv
   def import(bytes)
     probe = Factbase.new
     probe.import(bytes)
-    probe.query('(always)').each do |f|
-      f.all_properties.each do |p|
-        f[p].each { |v| @block.call(p, v) }
+    probe.each do |map|
+      map.each do |property, values|
+        unless property.is_a?(String) && values.is_a?(Array) && !values.empty?
+          values = Factbase::Accum.new(Factbase::Fact.new(map), {}, true)[property]
+        end
+        values.each { |value| @block.call(property, value) }
       end
     end
     @fb.import(bytes)
