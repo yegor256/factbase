@@ -85,7 +85,6 @@ class Factbase::Syntax
       raise(StandardError, "End of token stream at ##{at}") if tokens[at].nil?
       break if tokens[at] == :')'
       (operand, at1) = to_ast(tokens, at)
-      raise(StandardError, "Stuck at position ##{at}") if at == at1
       raise(StandardError, "Jump back at position ##{at}") if at1 < at
       at = at1
       operands << operand
@@ -155,7 +154,6 @@ class Factbase::Syntax
       if t.is_a?(Symbol)
         t
       elsif t.start_with?('\'', '"')
-        raise(ArgumentError, 'String literal is not closed') if t.length < 2
         t[1..-2]
       elsif t.match?(/^(\+|-)?[0-9]+$/)
         Integer(t, 10)

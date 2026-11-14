@@ -352,6 +352,13 @@ class TestSyntax < Factbase::Test
     end
   end
 
+  def test_rejects_an_unclosed_string_literal
+    assert_includes(
+      assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new("(eq x 'abc)").to_term }.message,
+      'String not closed'
+    )
+  end
+
   def test_raises_on_broken_syntax
     100.times do
       q = [
