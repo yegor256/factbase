@@ -47,6 +47,90 @@ class TestSyntax < Factbase::Test
     assert_equal(0, fb.query('(eq foo "")').each.to_a.size)
   end
 
+  def test_refuses_text_glued_to_a_closing_quote
+    [
+      "(eq foo 'a'bar)",
+      '(eq foo "a"bar)',
+      "(eq foo ''bar)",
+      '(eq foo ""bar)',
+      "(eq foo 'hello'world)",
+      '(eq foo "hello"world)'
+    ].each do |q|
+      assert_includes(
+        assert_raises(StandardError) { Factbase::Syntax.new(q).to_term }.message,
+        'glued',
+        "Query #{q} should reject glued text"
+      )
+    end
+  end
+
+  def test_refuses_adjacent_glued_string_literals
+    [
+      "(concat 'foo''bar')",
+      '(concat "foo""bar")',
+      '(concat "foo"\'bar\')',
+      '(concat \'foo\'"bar")'
+    ].each do |q|
+      assert_includes(
+        assert_raises(StandardError) { Factbase::Syntax.new(q).to_term }.message,
+        'glued',
+        "Query #{q} should reject glued string literals"
+      )
+    end
+  end
+
+  def test_refuses_digits_or_symbols_glued_to_string
+    [
+      "(eq foo 'hello'123)",
+      '(eq foo "hello"456)',
+      "(eq foo 'hello'_bar)",
+      "(eq foo 'hello'$bar)"
+    ].each do |q|
+      assert_includes(
+        assert_raises(StandardError) { Factbase::Syntax.new(q).to_term }.message,
+        'glued',
+        "Query #{q} should reject glued tokens"
+      )
+    end
+  end
+
+  def test_refuses_glued_text_after_escaped_quote_or_slash
+    [
+      "(eq foo 'it\\'s'glued)",
+      '(eq foo "tail\\\\"glued)'
+    ].each do |q|
+      assert_includes(
+        assert_raises(StandardError) { Factbase::Syntax.new(q).to_term }.message,
+        'glued',
+        "Query #{q} should reject glued text after escape"
+      )
+    end
+  end
+
+  def test_still_ends_a_literal_at_a_bracket
+    assert_equal("(eq foo 'a')", Factbase::Syntax.new("(eq foo 'a')").to_term.to_s)
+    assert_equal("(not (eq foo 'a'))", Factbase::Syntax.new("(not (eq foo 'a'))").to_term.to_s)
+  end
+
+  def test_accepts_valid_delimiters_after_closing_quote
+    [
+      "(foo 'a' 'b')",
+      "(foo 'a'\t'b')",
+      "(foo 'a'\n'b')",
+      "(foo 'a'\r\n'b')",
+      "(and (eq foo 'a')(eq bar 'b'))"
+    ].each do |q|
+      assert_instance_of(Factbase::Term, Factbase::Syntax.new(q).to_term)
+    end
+  end
+
+  def test_queries_with_properly_delimited_strings
+    fb = Factbase.new
+    fb.insert.foo = 'a'
+    assert_equal(1, fb.query("(eq foo 'a')").each.to_a.size)
+    assert_equal(0, fb.query("(eq foo 'b')").each.to_a.size)
+  end
+
   def test_makes_abstract_terms
     {
       '(foo $bar)' => true,
