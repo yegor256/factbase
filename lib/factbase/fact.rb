@@ -28,6 +28,8 @@ require_relative '../factbase'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::Fact
+  NAME = /\A[a-z_][_a-zA-Z0-9]*\z/
+
   # Ctor.
   # @param [Hash] map A map of key/value pairs
   def initialize(map)
@@ -50,7 +52,7 @@ class Factbase::Fact
     k = args[0].to_s
     if k.end_with?('=')
       kk = k[0..-2]
-      raise(ArgumentError, "Invalid prop name '#{kk}'") unless kk.match?(/\A[a-z_][_a-zA-Z0-9]*\z/)
+      raise(ArgumentError, "Invalid prop name '#{kk}'") unless kk.match?(NAME)
       raise(ArgumentError, "Prohibited prop name '#{kk}'") if methods.include?(kk.to_sym)
       raise(ArgumentError, "The prop name '#{kk}' would be read as a boolean in a query") if %w[true false].include?(kk)
       v = args[1]
