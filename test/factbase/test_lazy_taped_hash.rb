@@ -15,6 +15,20 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLazyTapedHash < Factbase::Test
+  def test_hash_views_do_not_expose_mutable_times
+    stamp = Time.utc(2026, 10, 13, 12)
+    map = { 'when' => [stamp] }
+    added = []
+    hash = Factbase::LazyTaped::LazyTapedHash.new(map, Factbase::LazyTaped.new([map]), added)
+    hash.map { |pair| pair.last.first.localtime('+03:00') }
+    hash.values.first.first.localtime('+03:00')
+    hash.to_h['when'].first.localtime('+03:00')
+    hash.to_h { |key, values| [key, values.first.localtime('+03:00')] }
+    assert_equal(0, stamp.utc_offset)
+    assert_empty(added)
+    refute_predicate(hash, :copied?)
+  end
+
   def test_keys
     hash, origin = wrap({ 'foo' => 1, 'bar' => [2] })
     assert_read(hash, origin, %w[foo bar], hash.keys)
