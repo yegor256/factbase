@@ -60,6 +60,35 @@ class TestTerm < Factbase::Test
     assert_equal(5, t.evaluate(fact('foo' => [4, 5]), [], Factbase.new))
   end
 
+  def test_reports_the_operand_count_of_a_one_name_term
+    fb = Factbase.new
+    fb.insert.a = 1
+    queries = {
+      '(absent)' => /Too few \(0\) operands for 'absent'/,
+      '(absent a b)' => /Too many \(2\) operands for 'absent'/,
+      '(exists)' => /Too few \(0\) operands for 'exists'/,
+      '(exists a b)' => /Too many \(2\) operands for 'exists'/,
+      '(type)' => /Too few \(0\) operands for 'type'/,
+      '(type a b)' => /Too many \(2\) operands for 'type'/
+    }
+    queries.each do |query, message|
+      assert_match(
+        message,
+        assert_raises(Factbase::Term::Wrapped, "#{query} was not refused") { fb.query(query).one }.message,
+        "#{query} refused the count with an unexpected message"
+      )
+    end
+  end
+
+  def test_refuses_a_non_symbol_operand_of_type
+    fb = Factbase.new
+    fb.insert.a = 1
+    assert_includes(
+      assert_raises(Factbase::Term::Wrapped) { fb.query('(type 42)').one }.message,
+      "A symbol expected at #0, but '42' (Integer) provided"
+    )
+  end
+
   def test_report_missing_term
     t = Factbase::Term.new(:something, [])
     msg = assert_raises(StandardError) do
