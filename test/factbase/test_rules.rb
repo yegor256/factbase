@@ -14,6 +14,37 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestRules < Factbase::Test
+  def test_renders_the_same_failed_fact_inside_and_outside_a_transaction
+    fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
+    message = 'The fact doesn\'t match the "(exists foo)" rule: [ bar: [1] ]'
+    assert_equal(message, assert_raises(ArgumentError) { fb.insert.bar = 1 }.message)
+    fb = Factbase::Rules.new(Factbase.new, '(exists foo)')
+    assert_equal(message, assert_raises(ArgumentError) { fb.txn { |txn| txn.insert.bar = 1 } }.message)
+  end
+
+  def test_renders_existing_and_proposed_values_in_a_query_failure
+    base = Factbase.new
+    base.insert.foo = 1
+    fb = Factbase::Rules.new(base, '(one foo)')
+    assert_includes(
+      assert_raises(ArgumentError) { fb.query('(always)').each { |fact| fact.foo = 2 } }.message,
+      '[ foo: [1, 2] ]'
+    )
+    assert_equal([1], base.query('(always)').first['foo'])
+  end
+
+  def test_omits_query_parameters_from_the_failed_fact
+    base = Factbase.new
+    base.insert.foo = 1
+    fb = Factbase::Rules.new(base, '(one foo)')
+    assert_includes(
+      assert_raises(ArgumentError) do
+        fb.query('(eq foo $expected)').each(fb, expected: 1) { |fact| fact.foo = 2 }
+      end.message,
+      '[ foo: [1, 2] ]'
+    )
+  end
+
   def test_simple_checking
     fb = Factbase::Rules.new(Factbase.new, '(when (exists first) (exists second))')
     f1 = fb.insert
