@@ -315,6 +315,43 @@ class TestLazyTaped < Factbase::Test
     assert_equal(0, fb.size)
   end
 
+  def test_deletes_a_fact_inserted_in_txn_while_walking_with_each
+    fb = Factbase.new
+    3.times { |i| fb.insert.id = i + 1 }
+    fb.txn do |fbt|
+      fbt.insert.id = 4
+      fbt.each { |m| fbt.query("(eq id #{m['id'][0]})").delete! }
+    end
+    assert_equal(0, fb.size, 'a fact inserted in the txn was skipped by each after a delete')
+  end
+
+  def test_deletes_a_fact_inserted_in_txn_while_walking_a_query
+    fb = Factbase.new
+    3.times { |i| fb.insert.id = i + 1 }
+    fb.txn do |fbt|
+      fbt.insert.id = 4
+      fbt.query('(always)').each { |f| fbt.query("(eq id #{f.id})").delete! }
+    end
+    assert_equal(0, fb.size, 'a fact inserted in the txn was skipped by a query after a delete')
+  end
+
+  def test_visits_every_inserted_fact_after_deleting_many_ahead
+    seed = Random.new_seed
+    total = Random.new(seed).rand(2..20)
+    fb = Factbase.new
+    total.times { |i| fb.insert.id = i }
+    seen = []
+    fb.txn do |fbt|
+      fbt.insert.id = -1
+      fbt.insert.id = -2
+      fbt.each do |m|
+        fbt.query("(gt id #{m['id'][0]})").delete! if m['id'][0].zero?
+        seen << m['id'][0]
+      end
+    end
+    assert_equal([-1, -2], seen.last(2), "facts inserted in txn were skipped, seed #{seed}")
+  end
+
   def test_reads_negative_positions_across_the_staged_maps
     tape = Factbase::LazyTaped.new([{ 'a' => [1] }, { 'a' => [2] }])
     tape << { 'a' => [3] }
