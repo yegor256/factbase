@@ -101,7 +101,12 @@ class Factbase::IndexedFactbase
   def import(bytes)
     raise(StandardError, 'The input is nil, cannot load a factbase') if bytes.nil?
     raise(StandardError, 'Empty input, cannot load a factbase') if bytes.empty?
-    data = Marshal.load(bytes)
+    data =
+      begin
+        Marshal.load(bytes)
+      rescue TypeError, ArgumentError => e
+        raise(StandardError, "The input is not a valid factbase: #{e.message}")
+      end
     if data.is_a?(Hash) && data.key?(:maps)
       @origin.import(data[:maps])
       @idx.merge!(data[:idx]) if data[:idx].is_a?(Hash)
