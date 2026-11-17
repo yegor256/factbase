@@ -7,6 +7,10 @@ require_relative 'base'
 
 # Factbase::Arithmetic is a class for performing arithmetic operations.
 class Factbase::Arithmetic < Factbase::TermBase
+  NAMES = { :+ => 'plus', :- => 'minus', :* => 'times', quo: 'div' }.freeze
+
+  TIMES = %i[+ -].freeze
+
   # Constructor.
   # @param [Symbol] operation The arithmetic operation (e.g., :+, :-, :*, :quo)
   # @param [Array] operands Operands
@@ -31,6 +35,9 @@ class Factbase::Arithmetic < Factbase::TermBase
     raise(ArgumentError, 'Too many values at second position, one expected') unless rights.size == 1
     v = lefts[0]
     r = rights[0]
+    unless v.is_a?(Numeric) || (v.is_a?(Time) && TIMES.include?(@op))
+      raise(ArgumentError, "Cannot apply #{NAMES[@op]} to #{v} (#{v.class})")
+    end
     if v.is_a?(Time) && r.is_a?(String)
       (num, units, *rest) = r.split
       raise(ArgumentError, "Duration '#{r}' must be just a number and a unit") unless rest.empty?
@@ -57,6 +64,10 @@ class Factbase::Arithmetic < Factbase::TermBase
         end
     end
     raise(ArgumentError, 'Cannot divide by zero') if @op == :quo && r.is_a?(Numeric) && r.zero?
-    v.__send__(@op, r)
+    begin
+      v.__send__(@op, r)
+    rescue ArgumentError, TypeError => e
+      raise(ArgumentError, "Cannot apply #{NAMES[@op]} to #{v} (#{v.class}) and #{r} (#{r.class}): #{e.message}")
+    end
   end
 end

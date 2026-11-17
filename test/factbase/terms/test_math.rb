@@ -143,11 +143,8 @@ class TestMath < Factbase::Test
 
   def test_div_times_not_supported
     t = Factbase::Term.new(:div, [:birth, Time.new(2024, 1, 1)])
-    assert_includes(
-      assert_raises(StandardError) do
-        t.evaluate(fact('birth' => Time.new(2026, 1, 1)), [], Factbase.new)
-      end.message,
-      'undefined method'
-    )
+    e = assert_raises(StandardError) { t.evaluate(fact('birth' => Time.new(2026, 1, 1)), [], Factbase.new) }
+    assert_includes(e.message, 'Cannot apply div to')
+    refute_includes(e.message, 'Probably the term')
   end
 end

@@ -195,6 +195,10 @@ Also, some simple arithmetic:
 * `(times v1 v2)` is a multiplication of `∏v1` and `∏v2`
 * `(div v1 v2)` is a division of `∏v1` by `∏v2`
 
+The left operand must be a number, or a time for `plus` and `minus`, where the
+time goes first and a number or a duration string follows it; anything else
+raises `ArgumentError`, so `plus` never concatenates strings.
+
 It's possible to add and deduct string values to time values, like
 `(plus t '2 days')` or `(minus t '14 hours')`.
 
