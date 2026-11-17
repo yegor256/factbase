@@ -78,6 +78,37 @@ class TestImpatient < Factbase::Test
     end
   end
 
+  class DeadlockFactbase < Factbase
+    class DeadlockQuery < Factbase::Query
+      def each(fb = @fb, params = {})
+        return to_enum(__method__, fb, params) unless block_given?
+        i = 0
+        super do |f|
+          i += 1
+          if @fb.raise_on == i && @fb.fired.nil?
+            @fb.fired = true
+            raise(ThreadError, @fb.message)
+          end
+          yield(f)
+        end
+      end
+    end
+
+    attr_accessor :message, :raise_on, :fired
+
+    def initialize(maps = [])
+      super
+      @message = 'deadlock; lock already owned by another fiber belonging to the same thread'
+      @raise_on = 1
+    end
+
+    def query(term, maps = nil)
+      maps ||= @maps
+      term = to_term(term) if term.is_a?(String)
+      DeadlockQuery.new(maps, term, self)
+    end
+  end
+
   def test_simple_query
     fb = Factbase::Impatient.new(Factbase.new)
     fb.insert
@@ -257,5 +288,47 @@ class TestImpatient < Factbase::Test
       end
     end
     assert_equal(2, seen)
+  end
+
+  def test_rethrows_unrelated_thread_error_from_first_pull
+    fb = Factbase::Impatient.new(DeadlockFactbase.new)
+    fb.insert.x = 1
+    fb.message = 'unknown lock failure'
+    counted = 0
+    assert_raises(ThreadError) do
+      fb.query('(always)').each { counted += 1 }
+    end
+    assert_equal(0, counted, 'an unrelated ThreadError from the first pull must propagate')
+  end
+
+  def test_rethrows_thread_error_after_a_successful_yield
+    fb = Factbase::Impatient.new(DeadlockFactbase.new)
+    fb.insert.x = 1
+    fb.insert.x = 2
+    fb.raise_on = 2
+    counted = 0
+    assert_raises(ThreadError) do
+      fb.query('(always)').each { counted += 1 }
+    end
+    assert_equal(
+      1, counted,
+      'a deadlock-looking ThreadError after a successful yield must propagate, not re-materialize'
+    )
+  end
+
+  def test_lets_stop_iteration_from_the_block_through_txn_over_sync_factbase
+    require_relative('../../lib/factbase/sync/sync_factbase')
+    fb = Factbase::Impatient.new(Factbase::SyncFactbase.new(Factbase.new))
+    3.times { fb.insert.x = 1 }
+    seen = 0
+    fb.txn do |fbt|
+      assert_raises(StopIteration) do
+        fbt.query('(always)').each do |_f|
+          seen += 1
+          raise(StopIteration) if seen == 2
+        end
+      end
+    end
+    assert_equal(2, seen, 'each inside txn over a sync factbase must let StopIteration from the block through')
   end
 end
