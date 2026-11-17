@@ -60,14 +60,13 @@ class Factbase::IndexedFactbase
   # Run an ACID transaction.
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
-    inner_idx = {}
-    result =
-      @origin.txn do |fbt|
-        yield(Factbase::IndexedFactbase.new(fbt, inner_idx, @fresh))
-      end
-    @idx.clear if result.deleted.positive? || result.added.positive?
+    before = @idx.keys
+    @origin.txn do |fbt|
+      yield(Factbase::IndexedFactbase.new(fbt, @idx, @fresh))
+    end.tap { |r| @idx.clear if r.deleted.positive? || r.added.positive? }
+  ensure
+    (@idx.keys - before).each { |k| @idx.delete(k) }
     @fresh.clear
-    result
   end
 
   # Export it into a chain of bytes, including both data and index.
