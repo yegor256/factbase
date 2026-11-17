@@ -25,7 +25,9 @@ jobs:
       - run: bundle install --no-color
       - run: bundle exec rake benchmark > stdout.txt
       - run: .github/publish-benchmark.sh
+        if: github.repository == 'yegor256/factbase'
       - uses: peter-evans/create-pull-request@v8
+        if: github.repository == 'yegor256/factbase'
         with:
           sign-commits: true
           branch: benchmark-results
