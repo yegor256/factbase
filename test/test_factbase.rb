@@ -570,14 +570,50 @@ class TestFactbase < Factbase::Test
     end
   end
 
-  def test_import_of_a_marshal_with_a_broken_regexp
-    ["\x04\b[\x06/\x06[\x00", "\x04\b[\x06/\x06(\x00"].each do |bytes|
+  def test_import_explains_the_reason_of_every_broken_input_of_the_issue
+    {
+      "\x04\b[\x06" => 'marshal data too short',
+      "\x04\b[\x06/\x06[\x00" => 'premature end of char-class: /[/',
+      "\x04\b[\x06/\x06(\x00" => 'end pattern with unmatched parenthesis: /(/',
+      "\x04\b[\x06/\x06" => 'marshal data too short'
+    }.each do |bytes, reason|
+      fb = Factbase.new
       assert_includes(
-        assert_raises(StandardError) do
-          Factbase.new.import(bytes.b)
-        end.message, 'The input is not a valid factbase'
+        assert_raises(StandardError) { fb.import(bytes.b) }.message,
+        "The input is not a valid factbase: #{reason}",
+        "Leaks a raw error on #{bytes.inspect}"
       )
+      assert_equal(0, fb.size, "A refused import must not add facts for #{bytes.inspect}")
     end
+  end
+
+  def test_import_refuses_a_negative_length_without_adding_facts
+    ["\x04\b[\x06{\xfc\x00\x00\x00\x40", "\x04\b{\xfc\x00\x00\x00\x40"].each do |bytes|
+      fb = Factbase.new
+      error = assert_raises(StandardError, NoMemoryError) { fb.import(bytes.b) }
+      assert_includes(error.message, 'The input is not a valid factbase:') if error.is_a?(StandardError)
+      assert_equal(0, fb.size, "A refused import must not add facts for #{bytes.inspect}")
+    end
+  end
+
+  def test_import_wraps_a_runtime_error_of_marshal_load
+    assert_includes(
+      assert_raises(StandardError) { Factbase.new.import(unloadable(RuntimeError.new('st_table too big'))) }.message,
+      'The input is not a valid factbase: st_table too big'
+    )
+  end
+
+  def test_import_does_not_swallow_an_unrecoverable_error_of_marshal_load
+    assert_raises(NoMemoryError) { Factbase.new.import(unloadable(NoMemoryError.new('out of memory'))) }
+  end
+
+  # An object that Marshal.load must accept and fail on with the given error,
+  # so import never has to patch the global Marshal.load.
+  def unloadable(err)
+    bytes = Object.new
+    bytes.define_singleton_method(:empty?) { false }
+    bytes.define_singleton_method(:to_str) { raise(err) }
+    bytes
   end
 
   def test_import_rejects_a_valid_marshal_with_the_wrong_shape
