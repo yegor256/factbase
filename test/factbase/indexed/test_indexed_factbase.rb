@@ -268,6 +268,27 @@ class TestIndexedFactbase < Factbase::Test
     assert_equal(2, fb.query('(absent scope)').each.to_a.size)
   end
 
+  def test_absent_and_not_exists_match_empty_property_like_plain
+    data = Marshal.dump([{ 'foo' => [], 'id' => [1] }, { 'foo' => [42], 'id' => [2] }])
+    ['(absent foo)', '(not (exists foo))'].each do |q|
+      plain = Factbase.new
+      plain.import(data)
+      indexed = Factbase::IndexedFactbase.new(Factbase.new)
+      indexed.import(data)
+      assert_equal(
+        plain.query(q).each.map(&:id),
+        indexed.query(q).each.map(&:id),
+        "#{q} must agree with a plain factbase when a property holds an empty array"
+      )
+      assert_equal(
+        plain.query(q).delete!,
+        indexed.query(q).delete!,
+        "#{q} delete! must remove the same facts as a plain factbase"
+      )
+      assert_equal(plain.size, indexed.size, "#{q} must leave the same factbase size after delete!")
+    end
+  end
+
   def test_indexed_term_absent_keeps_duplicates
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     fb.insert.cost = 10
