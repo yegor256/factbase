@@ -51,4 +51,12 @@ class TestJoin < Factbase::Test
       assert_raises(RuntimeError, j) { fb.query("(join '#{j}' (eq id 1))").each.to_a }
     end
   end
+
+  def test_rejects_a_mapping_that_is_not_a_string
+    fb = Factbase.new
+    fb.insert.id = 1
+    e = assert_raises(StandardError) { fb.query('(join 42 (always))').each.to_a }
+    assert_match(/A string is expected as first argument of 'join'/, e.message)
+    refute_includes(e.message, 'undefined method', 'the term died on a missing method instead of a guard')
+  end
 end
