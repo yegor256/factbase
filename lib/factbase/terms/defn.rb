@@ -34,7 +34,9 @@ class Factbase::Defn < Factbase::TermBase
     end
     raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term.private_method_defined?(fn)
     raise(ArgumentError, "Term '#{fn}' is already defined") if Factbase::Term::TERMS.key?(fn)
-    raise(ArgumentError, "The '#{fn}' is a bad name for a term") unless fn.match?(/^[a-z_]+$/)
+    unless fn.match?(/\A[_a-z][a-zA-Z0-9_]*\z/)
+      raise(ArgumentError, "The '#{fn}' is a bad name for a term (must match /\\A[_a-z][a-zA-Z0-9_]*\\z/)")
+    end
     begin
       # rubocop:disable Security/Eval
       eval(
