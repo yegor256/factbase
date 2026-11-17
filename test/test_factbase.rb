@@ -598,7 +598,8 @@ class TestFactbase < Factbase::Test
   end
 
   def test_import_rejects_invalid_property_names
-    [:foo, 42, '', 'Foo', 'foo-bar', "foo\nbar", 'all_properties', 'true', 'false'].each do |name|
+    names = ['', 'Foo', 'foo-bar', "foo\nbar", 'all_properties', 'true', 'false']
+    [42, *names, *names.map(&:to_sym)].each do |name|
       assert_includes(
         assert_raises(StandardError) do
           Factbase.new.import(Marshal.dump([{ name => [42] }]))
@@ -631,29 +632,34 @@ class TestFactbase < Factbase::Test
   end
 
   def test_import_validates_all_maps_before_appending
-    maps = Marshal.dump([{ 'foo' => [42] }, { 'bar' => [7], 'broken' => [nil] }])
+    maps = Marshal.dump([{ foo: [42] }, { 'bar' => [7], 'broken' => [nil] }])
+    expected = Factbase.new
+    expected.insert.foo = 13
     [maps, Marshal.dump({ maps: maps, idx: {} })].each do |bytes|
       fb = Factbase.new
       fb.insert.foo = 13
-      before = fb.export # rubocop:disable Elegant/NoRedundantVariable -- Capture the bytes before import.
       query = fb.query('(always)')
       assert_equal([13], query.each.map(&:foo))
       assert_includes(assert_raises(StandardError) { fb.import(bytes) }.message, 'The input is not a valid factbase')
-      assert_equal(before, fb.export)
+      assert_equal(expected.export, fb.export)
       assert_equal([13], query.each.map(&:foo))
     end
   end
 
   def test_import_rejection_preserves_existing_index
     require_relative('../lib/factbase/indexed/indexed_factbase')
-    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    idx = {}
+    fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
     fb.insert.foo = 13
     query = fb.query('(eq foo 13)')
     assert_equal([13], query.each.map(&:foo))
-    before = fb.export # rubocop:disable Elegant/NoRedundantVariable -- Capture the bytes before import.
-    maps = Marshal.dump([{ 'foo' => [42] }, { bar: [7] }])
+    refute_empty(idx)
+    maps = Marshal.dump([{ 'foo' => [42] }, { bar: 7 }])
     assert_raises(StandardError) { fb.import(Marshal.dump({ maps: maps, idx: {} })) }
-    assert_equal(before, fb.export)
+    expected = Factbase.new
+    expected.insert.foo = 13
+    assert_equal(expected.export, Marshal.load(fb.export)[:maps])
+    refute_empty(idx)
     assert_equal([13], query.each.map(&:foo))
     assert_equal(0, fb.query('(eq foo 42)').each.to_a.size)
   end
