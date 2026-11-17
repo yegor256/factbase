@@ -73,6 +73,7 @@ Elegant/GoodMethodName:
     - '_join'
     - '_loosest'
     - '_operand'
+    - '_property?'
     - '_resolve'
     - '_scalar?'
     - '_search'
