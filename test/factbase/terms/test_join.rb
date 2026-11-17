@@ -51,4 +51,12 @@ class TestJoin < Factbase::Test
       assert_raises(RuntimeError, j) { fb.query("(join '#{j}' (eq id 1))").each.to_a }
     end
   end
+
+  def test_rejects_mapping_with_a_param_name
+    fb = Factbase.new
+    fb.insert.id = 1
+    %w[x<=$y $x<=y $y].each do |j|
+      assert_includes(assert_raises(RuntimeError) { fb.query("(join '#{j}' (eq id 1))").each.to_a }.message, j)
+    end
+  end
 end
