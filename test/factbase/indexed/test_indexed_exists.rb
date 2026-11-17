@@ -78,4 +78,16 @@ class TestIndexedExists < Factbase::Test
     params = { 'param' => ['yes'] }
     assert_equal(plain.query(q).each(plain, params).to_a.size, indexed.query(q).each(indexed, params).to_a.size)
   end
+
+  def test_skips_a_subterm_operand
+    term = Factbase::Term.new(:exists, [Factbase::Term.new(:eq, [:kind, 'a'])])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    assert_nil(term.predict([{ 'kind' => ['a'] }], nil, {}))
+  end
+
+  def test_skips_a_literal_operand
+    term = Factbase::Term.new(:exists, [42])
+    term.redress!(Factbase::IndexedTerm, idx: {})
+    assert_nil(term.predict([{ 'kind' => ['a'] }], nil, {}))
+  end
 end
