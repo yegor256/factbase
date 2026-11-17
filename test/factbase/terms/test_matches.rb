@@ -157,4 +157,13 @@ class TestMatches < Factbase::Test
       end.message, "Invalid regexp '[a-'"
     )
   end
+
+  def test_refuses_several_regexps
+    t = Factbase::Matches.new(%i[foo pattern])
+    assert_includes(
+      assert_raises(RuntimeError) do
+        t.evaluate(fact('foo' => 'hello', 'pattern' => %w[h e]), [], Factbase.new)
+      end.message, 'Exactly one regexp is expected'
+    )
+  end
 end
