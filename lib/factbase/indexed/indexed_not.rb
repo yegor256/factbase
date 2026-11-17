@@ -12,16 +12,17 @@ class Factbase::IndexedNot
 
   def predict(maps, fb, params)
     sub = @term.operands.first
-    key = [maps.object_id, sub.to_s, @term.op]
+    key = [maps.object_id, nil, @term.op]
+    expression = sub.to_s
     snap = snapshot(params)
     entry = @idx[key]
-    if entry.nil? || entry[:params] != snap
-      entry = { facts: nil, count: 0, yes_set: nil, params: snap }
-      @idx[key] = entry
+    if entry.nil? || entry[:expression] != expression || entry[:params] != snap
+      entry = { facts: nil, count: 0, yes_set: nil, params: snap, expression: }
     end
     _feed(maps.to_a, entry) do
       sub.predict(maps, fb, params)
     end
+    @idx[key] = entry
     return if entry[:facts].nil?
     maps.respond_to?(:repack) ? maps.repack(entry[:facts]) : entry[:facts]
   end
