@@ -256,15 +256,17 @@ class Factbase::Term < Factbase::TermBase
     false
   end
 
-  private
-
   # Is it a term made by +defn+? Its Ruby body may read the fact and the factbase,
   # so its result can't be known from its operands alone.
+  #
+  # @return [Boolean] TRUE if custom
   def custom?
     return false if TERMS.key?(@op)
     return false unless Factbase::Term.private_method_defined?(@op, false)
     Factbase::Term.instance_method(@op).source_location&.first != __FILE__
   end
+
+  private
 
   def traced?(term)
     term.op == :traced || term.operands.any? { |o| o.is_a?(Factbase::Term) && traced?(o) }

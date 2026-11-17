@@ -18,7 +18,8 @@ class Factbase::Simplified
   end
 
   # Removes duplicate operands, except the ones that write into the fact,
-  # such as +as+ and +join+, since each of them adds its value again
+  # such as +as+ and +join+, since each of them adds its value again, and
+  # the terms made by +defn+, since their Ruby body may write too
   def unique
     strs = []
     ops = []
@@ -36,6 +37,6 @@ class Factbase::Simplified
 
   def writer?(term)
     term.is_a?(Factbase::Term) &&
-      (WRITERS.include?(term.op) || term.operands.any? { |operand| writer?(operand) })
+      (WRITERS.include?(term.op) || term.custom? || term.operands.any? { |operand| writer?(operand) })
   end
 end
