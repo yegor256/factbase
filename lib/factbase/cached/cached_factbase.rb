@@ -58,7 +58,7 @@ class Factbase::CachedFactbase
   # @param [Array<Hash>] maps Possible maps to use
   def query(term, maps = nil)
     term = to_term(term) if term.is_a?(String)
-    Factbase::CachedQuery.new(@origin.query(term, maps), @cache, self, cacheable: !term.abstract?)
+    Factbase::CachedQuery.new(@origin.query(term, maps), @cache, self, cacheable: cacheable?(term))
   end
 
   # Run an ACID transaction.
@@ -69,5 +69,23 @@ class Factbase::CachedFactbase
     end
   ensure
     @cache.clear
+  end
+
+  private
+
+  # Check whether a term can be cached.
+  # @param [Factbase::Term] term The term to inspect
+  # @return [Boolean] TRUE if cacheable
+  def cacheable?(term)
+    !term.abstract? && !traced?(term)
+  end
+
+  # Check whether the term or any of its sub-terms is traced.
+  # @param [Object] term The term or operand to inspect
+  # @return [Boolean] TRUE if traced
+  def traced?(term)
+    return false unless term.is_a?(Factbase::Term)
+    return true if term.op == :traced
+    term.operands.any? { |operand| traced?(operand) }
   end
 end
