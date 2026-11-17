@@ -475,4 +475,15 @@ class TestIndexedFactbase < Factbase::Test
     a.foo = 1
     assert_equal(1, fb.query('(exists foo)').each.to_a.size)
   end
+
+  def test_range_terms_skip_the_index_when_the_target_cannot_be_compared
+    %w[gt gte lt lte].each do |op|
+      fb = Factbase::IndexedFactbase.new(Factbase.new)
+      4.times { fb.insert.bar = 1 }
+      f = fb.insert
+      f.foo = 1
+      f.time = Time.now
+      assert_equal(1, fb.query("(or (exists foo) (#{op} time 3))").each.to_a.size, op)
+    end
+  end
 end
