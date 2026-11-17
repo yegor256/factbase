@@ -61,13 +61,18 @@ class Factbase::IndexedFactbase
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
     inner_idx = {}
+    saved = @fresh.dup
+    done = false
     result =
       @origin.txn do |fbt|
         yield(Factbase::IndexedFactbase.new(fbt, inner_idx, @fresh))
       end
+    done = true
     @idx.clear if result.deleted.positive? || result.added.positive?
     @fresh.clear
     result
+  ensure
+    @fresh.replace(saved) unless done
   end
 
   # Export it into a chain of bytes, including both data and index.

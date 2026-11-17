@@ -91,6 +91,34 @@ class TestIncrementalIndexing < Factbase::Test
     assert_equal(0, fresh.size)
   end
 
+  def test_failed_transaction_discards_fresh_ids
+    fresh = Set.new
+    fb = Factbase::IndexedFactbase.new(Factbase.new, {}, fresh)
+    assert_raises(RuntimeError) do
+      fb.txn do |fbt|
+        fbt.insert.foo = 1
+        fbt.insert.foo = 2
+        raise(RuntimeError, 'boom')
+      end
+    end
+    assert_empty(fresh)
+    assert_equal(0, fb.size)
+  end
+
+  def test_failed_transaction_keeps_earlier_fresh_ids
+    fresh = Set.new
+    fb = Factbase::IndexedFactbase.new(Factbase.new, {}, fresh)
+    fb.insert.foo = 42
+    assert_equal(1, fresh.size)
+    assert_raises(RuntimeError) do
+      fb.txn do |fbt|
+        fbt.insert.bar = 1
+        raise(RuntimeError, 'boom')
+      end
+    end
+    assert_equal(1, fresh.size)
+  end
+
   def test_query_consistency_after_property_update
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     f = fb.insert
