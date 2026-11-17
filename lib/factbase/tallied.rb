@@ -45,6 +45,7 @@ class Factbase::Tallied
   def txn
     before = @churn.dup
     commit = false
+    completed = false
     @fb.txn do |fbt|
       catch(:rollback) do
         thrown = true
@@ -55,12 +56,9 @@ class Factbase::Tallied
         commit = true
         throw(:commit) if thrown
       end
-    rescue Factbase::Rollback => e
-      revert(before)
-      raise(e)
-    ensure
-      revert(before) unless commit
-    end
+    end.tap { completed = true }
+  ensure
+    revert(before) unless completed && commit
   end
 
   # Bring the counter back to where it was, in place, so that the object
