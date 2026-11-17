@@ -15,6 +15,14 @@ require_relative '../factbase/flatten'
 #  fb = Factbase.new
 #  puts Factbase::ToYAML.new(fb).yaml
 #
+# Time properties are emitted as native YAML timestamps. To read this output
+# with Psych's safe loader, explicitly permit Time:
+#
+#  facts = YAML.safe_load(Factbase::ToYAML.new(fb).yaml, permitted_classes: [Time])
+#
+# Without this option, a timestamp raises Psych::DisallowedClass. This reads
+# the rendered data; use Factbase#export and Factbase#import for persistence.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
