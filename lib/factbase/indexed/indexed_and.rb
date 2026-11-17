@@ -3,8 +3,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative 'keyed'
+
 # Indexed term 'and'.
 class Factbase::IndexedAnd
+  include Factbase::Keyed
+
   def initialize(term, idx)
     @term = term
     @idx = idx
@@ -12,12 +16,12 @@ class Factbase::IndexedAnd
 
   def predict(maps, fb, params)
     return if @idx.nil?
-    key = [maps.object_id, @term.operands.first, @term.op]
+    key = [the_key(maps), @term.operands.first, @term.op]
     r = nil
     if @term.operands.all? { |o| o.op == :eq } && @term.operands.size > 1 \
       && @term.operands.all? { |o| o.operands.first.is_a?(Symbol) && _scalar?(o.operands[1]) }
       props = @term.operands.map { |o| o.operands.first }.sort!
-      key = [maps.object_id, props, :multi_and_eq]
+      key = [the_key(maps), props, :multi_and_eq]
       entry = @idx[key]
       maps_array = maps.to_a
       if entry.nil? || entry[:indexed_count] > maps_array.size

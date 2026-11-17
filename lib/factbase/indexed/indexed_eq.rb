@@ -3,12 +3,16 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative 'keyed'
+
 # Indexed term 'eq' that uses the hash-based inverted index for fast equality lookups.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class Factbase::IndexedEq
+  include Factbase::Keyed
+
   def initialize(term, idx)
     @term = term
     @idx = idx
@@ -19,7 +23,7 @@ class Factbase::IndexedEq
     second_operand = @term.operands[1]
     return unless first_operand.is_a?(Symbol) && _scalar?(second_operand)
     first_operand = first_operand.to_s
-    key = [maps.object_id, first_operand, @term.op]
+    key = [the_key(maps), first_operand, @term.op]
     @idx[key] ||= { facts: {}, count: 0, pos: {}.compare_by_identity }
     entry = @idx[key]
     _feed(maps.to_a, entry, first_operand)
