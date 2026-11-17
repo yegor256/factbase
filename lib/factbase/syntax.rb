@@ -3,8 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-require 'backtrace'
 require 'date'
+require 'ellipsized'
 require 'time'
 require_relative '../factbase'
 require_relative 'fact'
@@ -20,6 +20,8 @@ require_relative 'term'
 class Factbase::Syntax
   # If the syntax is broken.
   class Broken < StandardError; end
+
+  MAX_LENGTH = 200
 
   # Ctor.
   #
@@ -42,9 +44,7 @@ class Factbase::Syntax
         t
       end
   rescue StandardError, SystemStackError => e
-    err = "#{e.message} (#{Backtrace.new(e)}) in \"#{@query}\""
-    err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
-    raise(Broken, err)
+    raise(Broken, "#{e.message.ellipsized(MAX_LENGTH)} in #{@query.inspect.ellipsized(MAX_LENGTH)}")
   end
 
   private
