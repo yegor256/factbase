@@ -18,7 +18,7 @@ class Factbase::Either < Factbase::TermBase
 
   # Evaluate term on a fact.
   # @param [Factbase::Fact] fact The fact
-  # @param [Array<Factbase::Fact>] maps All maps available
+  # @param [Array<Hash>] maps All maps available
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Object] First operand if not nil, otherwise second operand
   # @return [Boolean] True if first operand is false OR both are true

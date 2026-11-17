@@ -18,7 +18,7 @@ class Factbase::Undef < Factbase::TermBase
 
   # Evaluate term on a fact.
   # @param [Factbase::Fact] _fact The fact
-  # @param [Array<Factbase::Fact>] _maps All maps available
+  # @param [Array<Hash>] _maps All maps available
   # @param [Factbase] _fb Factbase to use for sub-queries
   # @return [Boolean] True if definition is successfully removed.
   def evaluate(_fact, _maps, _fb)
