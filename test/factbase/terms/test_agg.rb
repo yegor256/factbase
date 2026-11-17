@@ -92,9 +92,46 @@ class TestAgg < Factbase::Test
   def test_names_the_term_that_needs_a_fact_in_an_aggregate
     fb = Factbase.new
     fb.insert.x = 1
-    { '(exists x)' => 'exists', '(eq x 1)' => 'eq', '(plus x 1)' => 'plus' }.each do |inner, name|
+    {
+      '(exists x)' => 'exists',
+      '(eq x 1)' => 'eq',
+      '(plus x 1)' => 'plus',
+      '(as foo 1)' => 'as',
+      "(join 'k' (always))" => 'join',
+      '(empty (always))' => 'empty'
+    }.each do |inner, name|
       e = assert_raises(StandardError) { fb.query("(agg (always) #{inner})").one }
-      assert_includes(e.message, "The '#{name}' term needs a fact", e.message)
+      assert_includes(e.message, "The '#{name}' term needs a fact and cannot be used as an aggregate", e.message)
     end
+  end
+
+  def test_as_term_in_agg_needs_a_fact
+    fb = Factbase.new
+    fb.insert.x = 1
+    e =
+      assert_raises(StandardError) do
+        fb.query('(agg (always) (as foo 1))').one
+      end
+    assert_includes(e.message, "The 'as' term needs a fact and cannot be used as an aggregate", e.message)
+  end
+
+  def test_join_term_in_agg_needs_a_fact
+    fb = Factbase.new
+    fb.insert.x = 1
+    e =
+      assert_raises(StandardError) do
+        fb.query("(agg (always) (join 'foo<=x' (always)))").one
+      end
+    assert_includes(e.message, "The 'join' term needs a fact and cannot be used as an aggregate", e.message)
+  end
+
+  def test_empty_term_in_agg_needs_a_fact
+    fb = Factbase.new
+    fb.insert.x = 1
+    e =
+      assert_raises(StandardError) do
+        fb.query('(agg (always) (empty (always)))').one
+      end
+    assert_includes(e.message, "The 'empty' term needs a fact and cannot be used as an aggregate", e.message)
   end
 end
