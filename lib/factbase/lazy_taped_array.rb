@@ -52,13 +52,6 @@ class Factbase::LazyTaped
       @taped_hash.get_copied_array(@key) << item
     end
 
-    def uniq!
-      return if current_array.uniq.size == current_array.size
-      @taped_hash.ensure_copied_map
-      @added.append(@taped_hash.tracking_id)
-      @taped_hash.get_copied_array(@key).uniq!
-    end
-
     private
 
     def current_array
