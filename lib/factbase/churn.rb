@@ -3,6 +3,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
+require_relative '../factbase'
+
 # A churn.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
