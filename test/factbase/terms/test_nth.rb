@@ -96,4 +96,10 @@ class TestNth < Factbase::Test
     v[0] = 42
     assert_equal([1, 2, 3], map['num'])
   end
+
+  def test_takes_the_position_from_a_sub_term
+    fb = Factbase.new
+    [5, 7, 9].each { |i| fb.insert.v = i }
+    assert_equal([7], fb.query('(agg (always) (nth (minus 2 1) v))').one)
+  end
 end
