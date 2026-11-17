@@ -29,7 +29,7 @@ class Factbase::Syntax
   #
   # @param [String] query The query, for example "(eq id 42)"
   def initialize(query)
-    @query = query
+    @query = unicode(query.to_s)
   end
 
   # Convert it to a term.
@@ -42,12 +42,22 @@ class Factbase::Syntax
         t
       end
   rescue StandardError, SystemStackError => e
-    err = "#{e.message} (#{Backtrace.new(e)}) in \"#{@query}\""
+    err = "#{e.message} (#{Backtrace.new(e)}) in \"#{@query.scrub}\""
     err = "#{err}, tokens: #{@tokens}" unless @tokens.nil?
     raise(Broken, err)
   end
 
   private
+
+  # Convert a string to UTF-8, reading the bytes of a binary one as UTF-8.
+  # @param [String] val The string
+  # @return [String] The string in UTF-8, maybe with invalid bytes
+  def unicode(val)
+    return val.dup.force_encoding(Encoding::UTF_8) if val.encoding == Encoding::BINARY
+    val.encode(Encoding::UTF_8)
+  rescue EncodingError
+    val.dup.force_encoding(Encoding::UTF_8)
+  end
 
   # Convert it to a term.
   # @return [Term] The term detected
@@ -97,6 +107,7 @@ class Factbase::Syntax
   # Turns a query into an array of tokens.
   # @return [Array] Array of tokens
   def to_tokens
+    raise(ArgumentError, 'The query is not valid UTF-8') unless @query.valid_encoding?
     list = []
     acc = ''
     quotes = ['\'', '"']

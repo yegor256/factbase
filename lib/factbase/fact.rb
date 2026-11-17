@@ -7,6 +7,7 @@ require 'json'
 require 'others'
 require 'time'
 require_relative '../factbase'
+require_relative 'text'
 
 # A single fact in a factbase.
 #
@@ -62,7 +63,7 @@ class Factbase::Fact
       ].include?(v.class)
       raise(ArgumentError, "The value of '#{kk}' can't be #{v}") if v.is_a?(Float) && !v.finite?
       v = v.getutc if v.is_a?(Time)
-      v = -v if v.is_a?(String)
+      v = -Factbase::Text.read(v) if v.is_a?(String)
       @map[kk] = [] if @map[kk].nil?
       @map[kk] << v
       nil

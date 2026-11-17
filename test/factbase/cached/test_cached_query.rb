@@ -224,7 +224,7 @@ class TestCachedQuery < Factbase::Test
     fb = Factbase::CachedFactbase.new(Factbase.new, {})
     fb.insert.foo = 'дуб'.encode('UTF-16LE')
     assert_equal(1, fb.query(Factbase::Term.new(:eq, [:foo, 'дуб'.encode('UTF-16LE')])).each.to_a.size)
-    assert_equal(0, fb.query(Factbase::Term.new(:eq, [:foo, 'дуб'])).each.to_a.size)
+    assert_equal(1, fb.query(Factbase::Term.new(:eq, [:foo, 'дуб'])).each.to_a.size, 'the same text in UTF-8')
   end
 
   def test_queries_an_invalid_utf8_string_operand

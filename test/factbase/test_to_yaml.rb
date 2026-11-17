@@ -79,6 +79,13 @@ class TestToYAML < Factbase::Test
     assert_equal(%w[a b], YAML.load(out).map { |m| m['name'] }, out)
   end
 
+  def test_prints_invalid_bytes_as_binary
+    fb = Factbase.new
+    fb.insert.name = "\xFF\xFE".b
+    yaml = Factbase::ToYAML.new(fb).yaml
+    assert_includes(yaml, '!binary', yaml)
+  end
+
   def test_prints_facts_modified_inside_txn
     seed = Random.new_seed
     fb = Factbase.new
