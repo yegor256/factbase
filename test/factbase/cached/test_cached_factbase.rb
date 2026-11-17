@@ -102,6 +102,16 @@ class TestCachedFactbase < Factbase::Test
     assert_nil(fb.query('(agg (not (exists bar)) (max value))').one)
   end
 
+  def test_an_empty_insertion_invalidates_a_cached_query
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 1
+    query = fb.query('(always)')
+    assert_equal(1, query.count)
+    fb.insert
+    assert_equal(2, query.count)
+    assert_equal(1, fb.query('(not (exists foo))').count)
+  end
+
   def test_insert_after_query_returns_new_facts
     fb = Factbase::CachedFactbase.new(Factbase.new)
     fb.insert.foo = 1
