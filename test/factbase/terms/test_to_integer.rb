@@ -18,7 +18,75 @@ class TestToInteger < Factbase::Test
   end
 
   def test_truncates_float
-    assert_equal(5_961_600, Factbase::ToInteger.new([[5_961_600.0]]).evaluate(fact, [], Factbase.new))
+    assert_equal(5_961_600, Factbase::ToInteger.new([[5_961_600.7]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_truncates_positive_float_with_fraction
+    assert_equal(1, Factbase::ToInteger.new([[1.9]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_truncates_negative_float_with_fraction
+    assert_equal(-1, Factbase::ToInteger.new([[-1.9]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_truncates_positive_float_near_one
+    assert_equal(0, Factbase::ToInteger.new([[0.9999]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_truncates_negative_float_near_minus_one
+    assert_equal(0, Factbase::ToInteger.new([[-0.9999]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_truncates_positive_float_forty_two
+    assert_equal(42, Factbase::ToInteger.new([[42.7]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_truncates_negative_float_forty_two
+    assert_equal(-42, Factbase::ToInteger.new([[-42.7]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_truncates_positive_float_near_zero
+    assert_equal(0, Factbase::ToInteger.new([[0.1]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_truncates_negative_float_near_zero
+    assert_equal(0, Factbase::ToInteger.new([[-0.1]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_truncates_positive_float_with_query
+    fb = Factbase.new
+    fb.insert.f = 1.9
+    assert_equal([1], fb.query('(as r (to_integer f))').each.to_a.first['r'])
+  end
+
+  def test_truncates_negative_float_with_query
+    fb = Factbase.new
+    fb.insert.f = -1.9
+    assert_equal([-1], fb.query('(as r (to_integer f))').each.to_a.first['r'])
+  end
+
+  def test_truncates_float_near_one_with_query
+    fb = Factbase.new
+    fb.insert.f = 0.9999
+    assert_equal([0], fb.query('(as r (to_integer f))').each.to_a.first['r'])
+  end
+
+  def test_truncates_negative_float_near_minus_one_with_query
+    fb = Factbase.new
+    fb.insert.f = -0.9999
+    assert_equal([0], fb.query('(as r (to_integer f))').each.to_a.first['r'])
+  end
+
+  def test_truncates_float_forty_two_with_query
+    fb = Factbase.new
+    fb.insert.f = 42.7
+    assert_equal([42], fb.query('(as r (to_integer f))').each.to_a.first['r'])
+  end
+
+  def test_truncates_negative_float_forty_two_with_query
+    fb = Factbase.new
+    fb.insert.f = -42.7
+    assert_equal([-42], fb.query('(as r (to_integer f))').each.to_a.first['r'])
   end
 
   def test_rejects_invalid_value
