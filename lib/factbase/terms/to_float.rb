@@ -22,7 +22,11 @@ class Factbase::ToFloat < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(1)
     vv = _values(0, fact, maps, fb)
-    return if vv.nil? || vv.empty? || vv[0].nil?
+    return if vv.nil? || vv.empty?
+    if vv.size > 1 && !@operands[0].is_a?(Array)
+      raise(ArgumentError, 'Too many values at first position, one expected')
+    end
+    return if vv[0].nil?
     to_float(vv[0])
   end
 
