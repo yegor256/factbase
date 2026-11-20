@@ -126,9 +126,14 @@ class Factbase::Tallied
     end
 
     def delete!(fb = @fb)
-      c = @query.delete!(fb)
-      @churn.append(0, c, 0)
-      c
+      removed = 0
+      removed =
+        @query.delete!(fb) do
+          removed += 1
+          yield if block_given?
+        end
+    ensure
+      @churn.append(0, removed, 0) if removed.positive?
     end
   end
 end

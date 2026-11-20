@@ -214,13 +214,13 @@ class Factbase::Logged
       r
     end
 
-    def delete!(fb = @fb)
+    def delete!(fb = @fb, &)
       r = nil
       mono = Process.clock_gettime(Factbase::Logged::MONO)
       before = total
       tail =
         Factbase::Logged.elapsed do
-          r = @fb.query(@term, @maps).delete!(fb)
+          r = @fb.query(@term, @maps).delete!(fb, &)
         end
       raise(StandardError, ".delete! of #{@term.class} returned #{r.class}") unless r.is_a?(Integer)
       if before.zero?
