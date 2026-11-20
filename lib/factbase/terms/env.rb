@@ -30,7 +30,7 @@ class Factbase::Env < Factbase::TermBase
     if value.nil? || value.empty?
       d = _values(1, fact, maps, fb)
       return if d.nil?
-      d[0]
+      d[0].to_s
     else
       value
     end
