@@ -60,6 +60,35 @@ class TestTerm < Factbase::Test
     assert_equal(5, t.evaluate(fact('foo' => [4, 5]), [], Factbase.new))
   end
 
+  def test_reports_the_operand_count_of_a_conversion_term
+    fb = Factbase.new
+    fb.insert.a = 1
+    queries = {
+      '(to_float)' => /Too few \(0\) operands for 'to_float'/,
+      "(to_float 'x' 'y')" => /Too many \(2\) operands for 'to_float'/,
+      '(to_integer)' => /Too few \(0\) operands for 'to_integer'/,
+      "(to_integer 'x' 'y')" => /Too many \(2\) operands for 'to_integer'/,
+      '(to_string)' => /Too few \(0\) operands for 'to_string'/,
+      "(to_string 'x' 'y')" => /Too many \(2\) operands for 'to_string'/,
+      '(to_time)' => /Too few \(0\) operands for 'to_time'/,
+      "(to_time 'x' 'y')" => /Too many \(2\) operands for 'to_time'/
+    }
+    queries.each do |query, message|
+      assert_match(
+        message,
+        assert_raises(Factbase::Term::Wrapped, "#{query} was not refused") { fb.query(query).one }.message,
+        "#{query} refused the count with an unexpected message"
+      )
+    end
+  end
+
+  def test_names_itself_when_it_is_constructed_without_a_query
+    assert_includes(
+      assert_raises(ArgumentError) { Factbase::ToString.new([]).evaluate(fact, [], Factbase.new) }.message,
+      "Too few (0) operands for '' (1 expected)"
+    )
+  end
+
   def test_report_missing_term
     t = Factbase::Term.new(:something, [])
     msg = assert_raises(StandardError) do
