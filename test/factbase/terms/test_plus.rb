@@ -19,6 +19,24 @@ class TestPlus < Factbase::Test
     assert_nil(t.evaluate(fact, [], Factbase.new))
   end
 
+  def test_rejects_a_duration_when_the_left_operand_is_a_number
+    {
+      [1, '2 days'] => "String can't be coerced into Integer",
+      [1.5, '2 days'] => "String can't be coerced into Float"
+    }.each do |operands, msg|
+      assert_includes(
+        assert_raises(StandardError, operands.inspect) do
+          Factbase::Plus.new(operands).evaluate(fact, [], Factbase.new)
+        end.message, msg, operands.inspect
+      )
+    end
+    assert_equal(
+      Time.utc(2026, 1, 3),
+      Factbase::Plus.new([Time.utc(2026, 1, 1), '2 days']).evaluate(fact, [], Factbase.new),
+      'a Time on the left stopped working'
+    )
+  end
+
   def test_plus_time
     t = Factbase::Plus.new([:foo, '12 days'])
     assert_equal(Time.parse('2024-01-13'), t.evaluate(fact('foo' => Time.parse('2024-01-01')), [], Factbase.new))
