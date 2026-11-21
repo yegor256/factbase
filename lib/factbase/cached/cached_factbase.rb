@@ -62,12 +62,18 @@ class Factbase::CachedFactbase
   end
 
   # Run an ACID transaction.
+  #
+  # The cache is dropped only when the transaction changed something, or
+  # when it failed, since then it is not known what it changed.
+  #
   # @return [Factbase::Churn] How many facts have been changed (zero if rolled back)
   def txn
-    @origin.txn do |fbt|
-      yield(Factbase::CachedFactbase.new(fbt, {}))
-    end
+    churn = nil
+    churn =
+      @origin.txn do |fbt|
+        yield(Factbase::CachedFactbase.new(fbt, {}))
+      end
   ensure
-    @cache.clear
+    @cache.clear if churn.nil? || !churn.zero?
   end
 end
