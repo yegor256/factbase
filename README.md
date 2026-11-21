@@ -176,8 +176,9 @@ There are a few terms that return non-boolean values:
 
 * `(at i v)` is the `i`-th value of `v`
 * `(size v)` is the cardinality of `v` (zero if `v` is `nil`)
-* `(type v)` is the type of `v`
-(`"String"`, `"Integer"`, `"Float"`, `"Time"`, `"Boolean"`, or `"Array"`)
+* `(type v)` is the type of `v`: `"String"`, `"Integer"`, `"Float"`,
+`"Time"`, `"Boolean"`, `"Array"`, or the string `"nil"` for a missing
+property, unlike the `(nil v)` term: `(eq "nil" (type missing))` is `true`
 * `(either v1 v2)` is `v2` if `v1` is `nil`
 
 It's possible to modify the facts retrieved, on fly:
