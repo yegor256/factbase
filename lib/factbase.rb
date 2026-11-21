@@ -118,7 +118,7 @@ class Factbase
   def insert
     map = {}
     @maps << map
-    require_relative('factbase/fact')
+    require_relative('factbase/fact') unless defined?(Factbase::Fact)
     Factbase::Fact.new(map)
   end
 
@@ -148,7 +148,7 @@ class Factbase
       raise(ArgumentError, "A query must be a String or a Factbase::Term, while #{term.class} provided")
     end
     maps ||= @maps
-    require_relative('factbase/query')
+    require_relative('factbase/query') unless defined?(Factbase::Query)
     Factbase::Query.new(maps, term, self)
   end
 
