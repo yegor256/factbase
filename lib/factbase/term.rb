@@ -75,14 +75,12 @@ require_relative 'terms/zero'
 #  t = Factbase::Term.new(:lt, [:foo, 50])
 #  assert(t.evaluate(f, [], Factbase.new))
 #
-# The design of this class may look ugly, since it has a large number of
-# methods, each of which corresponds to a different type of a +Term+. A much
-# better design would definitely involve many classes, one per each type
-# of a term. It's not done this way because of an experimental nature of
-# the project. Most probably we should keep current design intact, since it
-# works well and is rather simple to extend (by adding new term types).
-# Moreover, it looks like the number of possible term types is rather limited
-# and currently we implement most of them.
+# Every term type is a class under +lib/factbase/terms/+, listed in
+# +TERMS+. The constructor instantiates the one matching the operator and
+# +evaluate+ and +predict+ delegate to it. This is not a class hierarchy:
+# adding a term type means a new file there and a new line in +TERMS+, not
+# a new method here. The only term operations left in this class are +at+
+# and the ones made by +defn+.
 #
 # It is NOT thread-safe!
 #
