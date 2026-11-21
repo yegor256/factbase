@@ -198,14 +198,19 @@ class Factbase
     done = true
     seen = {}.compare_by_identity
     garbage = {}.compare_by_identity
-    taped.deleted.each do |oid|
-      original = @maps.find { |m| m.object_id == oid }
-      next if original.nil?
-      garbage[original] = true
-      churn.append(0, 1, 0)
+    deleted = taped.deleted.to_h { |oid| [oid, true] }
+    unless deleted.empty?
+      @maps.each do |original|
+        next unless deleted.delete(original.object_id)
+        garbage[original] = true
+        churn.append(0, 1, 0)
+      end
     end
-    taped.inserted.each do |oid|
-      b = taped.find_by_object_id(oid)
+    inserted = taped.inserted
+    added = taped.added
+    changed = taped.lookup(inserted + added)
+    inserted.each do |oid|
+      b = changed[oid]
       next if b.nil?
       next if seen.key?(b)
       seen[b] = true
@@ -213,8 +218,8 @@ class Factbase
       churn.append(1, 0, 0)
     end
     positions = nil
-    taped.added.each do |oid|
-      b = taped.find_by_object_id(oid)
+    added.each do |oid|
+      b = changed[oid]
       next if b.nil?
       next if seen.key?(b)
       original = taped.source_of(b)
