@@ -11,6 +11,7 @@ class Factbase::Times < Factbase::TermBase
   # @param [Array] operands Operands
   def initialize(operands)
     super()
+    @operands = operands
     @times = Factbase::Arithmetic.new(:*, operands)
   end
 

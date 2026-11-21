@@ -13,6 +13,7 @@ class Factbase::StartsWith < Factbase::TermBase
   # @param [Array] operands Operands
   def initialize(operands)
     super()
+    @operands = operands
     @op = Factbase::Compare.new(:start_with?, operands)
   end
 

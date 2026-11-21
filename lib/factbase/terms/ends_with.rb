@@ -13,6 +13,7 @@ class Factbase::EndsWith < Factbase::TermBase
   # @param [Array] operands Operands
   def initialize(operands)
     super()
+    @operands = operands
     @op = Factbase::Compare.new(:end_with?, operands)
   end
 
