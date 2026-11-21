@@ -53,6 +53,14 @@ class TestInv < Factbase::Test
     assert_equal(0, fb.size, 'A refused fact must not be imported')
   end
 
+  def test_checks_values_from_a_legacy_scalar_import
+    seen = []
+    fb = Factbase::Inv.new(Factbase.new) { |property, value| seen << [property, value] }
+    fb.import(Marshal.dump([{ ready: false, 'n' => [1, 2] }]))
+    assert_equal(1, fb.size)
+    assert_equal([['ready', false], ['n', 1], ['n', 2]], seen)
+  end
+
   def test_refuses_a_nil_factbase
     assert_raises(ArgumentError) { Factbase::Inv.new(nil) { |_p, _v| true } }
   end
