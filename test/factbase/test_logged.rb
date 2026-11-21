@@ -272,4 +272,24 @@ class TestLogged < Factbase::Test
       assert_includes(log.to_s, s, log.to_s)
     end
   end
+
+  def test_returns_a_broken_utf16_string_unchanged
+    fb = Factbase::Logged.new(Factbase.new, Loog::NULL)
+    broken = (+"\x00\xD8").force_encoding(Encoding::UTF_16LE) + ('café' * 40).encode('UTF-16LE')[2..]
+    fb.insert.text = broken
+    r = fb.query('(min text)').one
+    assert_equal(Encoding::UTF_16LE, r.encoding)
+    assert_equal(broken, r)
+  end
+
+  def test_logs_a_long_broken_utf16_string
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.text = (+"\x00\xD8").force_encoding(Encoding::UTF_16LE) + ('café' * 40).encode('UTF-16LE')[2..]
+    fb.query('(min text)').one
+    assert_predicate(buf.to_s, :valid_encoding?)
+    line = buf.to_s.lines.grep(/Found/).first
+    refute_nil(line, buf.to_s)
+    assert_includes(line, '...', line)
+  end
 end
