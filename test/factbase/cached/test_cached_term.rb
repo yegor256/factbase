@@ -12,6 +12,22 @@ require_relative '../../test__helper'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestCachedTerm < Factbase::Test
+  def test_scopes_static_results_to_the_evaluation_context
+    first = Factbase.new
+    first.insert.foo = 42
+    second = Factbase.new
+    second.insert.foo = 24
+    [first, second].each do |context|
+      context.define_singleton_method(:query) { |query, _maps| super(query) }
+    end
+    term = Factbase::CachedFactbase.new(first, {}).to_term('(agg (exists foo) (min foo))')
+    maps = []
+    row = fact
+    assert_equal(42, term.evaluate(row, maps, first))
+    assert_equal(24, term.evaluate(row, maps, second))
+    assert_equal(42, term.evaluate(row, maps, first))
+  end
+
   def test_caches_static_terms
     cache = {}
     fb = Factbase::CachedFactbase.new(Factbase.new, cache)

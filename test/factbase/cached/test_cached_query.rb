@@ -29,6 +29,23 @@ class TestCachedQuery < Factbase::Test
     assert_equal([1, 2], seen)
   end
 
+  def test_scopes_one_cache_to_the_factbase
+    first = Factbase.new
+    second = Factbase.new
+    calls = []
+    origin = Object.new
+    origin.define_singleton_method(:one) do |context, _params|
+      calls << context
+      context.object_id
+    end
+    query = Factbase::CachedQuery.new(origin, {}, first)
+    assert_equal(first.object_id, query.one)
+    assert_equal(second.object_id, query.one(second))
+    assert_equal(first.object_id, query.one)
+    assert_equal(second.object_id, query.one(second))
+    assert_equal([first, second], calls)
+  end
+
   def test_queries_many_times
     fb = Factbase::CachedFactbase.new(Factbase.new)
     total = 5
