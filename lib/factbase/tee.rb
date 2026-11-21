@@ -5,6 +5,7 @@
 
 require 'others'
 require_relative '../factbase'
+require_relative 'no_conversion'
 
 # Tee of two facts.
 #
@@ -47,4 +48,6 @@ class Factbase::Tee
       @fact.public_send(*args)
     end
   end
+
+  prepend Factbase::NoConversion
 end
