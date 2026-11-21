@@ -18,4 +18,11 @@ class TestExists < Factbase::Test
     assert(t.evaluate(fact('foo' => 41), [], Factbase.new))
     refute(t.evaluate(fact('bar' => 41), [], Factbase.new))
   end
+
+  def test_refuses_a_non_symbol_operand
+    fb = Factbase.new
+    fb.insert.x = 1
+    e = assert_raises(RuntimeError) { fb.query('(exists 42)').each.to_a }
+    assert_includes(e.message, "A symbol expected at #0, but '42' (Integer) provided", e.message)
+  end
 end
