@@ -129,21 +129,37 @@ You can use `$name` variables in queries and pass values at runtime:
 fb = Factbase.new
 fb.insert.foo = 42
 fb.insert.foo = 99
-fb.query('(eq foo $bar)').each(Factbase.new, bar: [42]).to_a
+fb.query('(eq foo $bar)').each(fb, bar: 42).to_a
 # Returns the fact with foo = 42
 ```
 
 Variables are passed as a `Hash`, the second argument of `each` or `one`,
-right after the factbase. The value must
-be an array (even for a single value). This works with any term:
+right after the factbase. Pass a scalar for a single value, or an array
+for one or more values. For example, `bar: [42, 99]` matches both facts
+above. The same parameters are available inside an aggregate:
 
 ```ruby
 fb.query(
-  '(eq salary (agg (eq dept $dept) (avg salary)))'
-).each(Factbase.new, dept: ['eng']).to_a
+  '(eq salary (agg (eq dept $dept) (max salary)))'
+).each(fb, dept: ['eng']).to_a
 ```
 
 ## Terms
+
+### Query literals
+
+Use single or double quotes for strings, as in `(eq kind 'book')` or
+`(eq title "A #1 pick")`. Escape a matching quote with a backslash:
+`(eq author 'O\'Brien')`. Outside a string, `#` starts a comment that
+continues to the end of the line.
+
+Write numbers and booleans without quotes, for example `(eq balance -2)`,
+`(gt weight 1.5e-3)`, `(eq enabled true)`, or `(eq enabled false)`.
+For a `Time`, supply the UTC date and time with seconds and a final `Z`,
+as in `(eq published 2024-01-01T12:00:00Z)`. Fractional seconds are
+allowed. Quoting the timestamp compares a string instead.
+
+### Operators
 
 There are some boolean terms available in a query
 (they return either `true` or `false`):
@@ -226,8 +242,8 @@ the property they are asked about:
 * `(lt age (agg (eq gender 'F') (max age)))` selects all facts where
 the `age` is smaller than the maximum `age` of all women
 * `(eq id (agg (always) (max id)))` selects the fact with the largest `id`
-* `(eq salary (agg (eq dept $dept) (avg salary)))` selects the facts
-with the salary average in their departments
+* `(eq salary (agg (eq dept $dept) (max salary)))` selects facts whose
+salary matches the highest salary in the department supplied as `$dept`
 
 There are also terms that match the entire factbase
 and must be used primarily inside the `(agg ..)` term:
