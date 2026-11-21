@@ -94,6 +94,19 @@ class TestSyncFactbase < Factbase::Test
     assert_equal(1, fb.each { |_m| true })
   end
 
+  def test_skips_facts_deleted_while_iterating_the_factbase
+    fb = Factbase::SyncFactbase.new(Factbase.new)
+    fb.insert.id = 1
+    fb.insert.id = 2
+    seen = []
+    fb.each do |f|
+      seen << f['id'].first
+      fb.query("(eq id #{f['id'].first})").delete!(fb) if f['id'].first == 1
+    end
+    assert_equal([1], seen)
+    assert_equal(1, fb.size)
+  end
+
   def test_refuses_a_nil_factbase
     assert_raises(ArgumentError) { Factbase::SyncFactbase.new(nil) }
   end
