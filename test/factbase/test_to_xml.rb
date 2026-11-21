@@ -123,6 +123,8 @@ class TestToXML < Factbase::Test
     f.time = Time.now
     xml = Nokogiri::XML.parse(Factbase::ToXML.new(fb).xml)
     %w[truth lie].each { |name| refute_empty(xml.xpath("/fb/f/#{name}[@t=\"L\"]")) }
+    assert_equal('true', xml.xpath('/fb/f/truth').text)
+    assert_equal('false', xml.xpath('/fb/f/lie').text)
     refute_empty(xml.xpath('/fb/f/float[@t="F"]'))
     refute_empty(xml.xpath('/fb/f/time[@t="T"]'))
   end
