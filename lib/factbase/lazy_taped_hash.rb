@@ -96,7 +96,7 @@ class Factbase::LazyTaped
     end
 
     def copied?
-      !@copied_map.nil?
+      @lazy_taped.copied?
     end
 
     private
