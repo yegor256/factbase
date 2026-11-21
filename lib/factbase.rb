@@ -263,6 +263,7 @@ class Factbase
   #
   # The facts that existed in the factbase before importing will remain there.
   # The facts from the incoming byte stream will be added to them.
+  # All incoming properties are validated before any facts are added.
   #
   # This method supports both the original format (Array of maps) and
   # the IndexedFactbase format (Hash with :maps and :idx keys).
@@ -290,10 +291,28 @@ class Factbase
     unless data.is_a?(Array) && data.all?(Hash)
       raise(StandardError, 'The input is not a valid factbase: expected an array of maps')
     end
-    @maps.concat(normalize(data))
+    @maps.concat(validated(normalize(data)))
   end
 
   private
+
+  # Check every property of normalized maps the way a +Fact+ checks a write.
+  # @param [Array<Hash>] maps Maps with String property names
+  # @return [Array<Hash>] The same maps, if all their properties are valid
+  def validated(maps)
+    require_relative('factbase/fact')
+    maps.each do |map|
+      fact = Factbase::Fact.new({})
+      map.each do |key, values|
+        unless key.is_a?(String) && values.is_a?(Array) && !values.empty?
+          raise(ArgumentError, 'expected string properties with non-empty arrays of values')
+        end
+        values.each { |value| fact.__send__("#{key}=", value) }
+      end
+    end
+  rescue ArgumentError => e
+    raise(StandardError, "The input is not a valid factbase: #{e.message}")
+  end
 
   # Normalize Symbol property keys without changing the caller's maps.
   # @param [Array<Hash>, Object] maps Maps or a transaction collection

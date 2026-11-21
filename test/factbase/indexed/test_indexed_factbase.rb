@@ -271,10 +271,8 @@ class TestIndexedFactbase < Factbase::Test
   def test_absent_and_not_exists_match_empty_property_like_plain
     data = Marshal.dump([{ 'foo' => [], 'id' => [1] }, { 'foo' => [42], 'id' => [2] }])
     ['(absent foo)', '(not (exists foo))'].each do |q|
-      plain = Factbase.new
-      plain.import(data)
-      indexed = Factbase::IndexedFactbase.new(Factbase.new)
-      indexed.import(data)
+      plain = Factbase.new(Marshal.load(data))
+      indexed = Factbase::IndexedFactbase.new(Factbase.new(Marshal.load(data)))
       assert_equal(
         plain.query(q).each.map(&:id),
         indexed.query(q).each.map(&:id),
