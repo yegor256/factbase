@@ -148,7 +148,7 @@ class Factbase::Taped
     end
 
     def any?(*pattern, &)
-      to_a.any?(*pattern, &)
+      each.any?(*pattern, &)
     end
 
     def <<(item)
@@ -166,6 +166,7 @@ class Factbase::Taped
     private
 
     def value(item)
+      return item.dup if item.is_a?(Time)
       item.is_a?(String) ? -item : item
     end
   end
