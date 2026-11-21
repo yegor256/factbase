@@ -89,6 +89,10 @@ class TestToInteger < Factbase::Test
     assert_equal([-42], fb.query('(as r (to_integer f))').each.to_a.first['r'])
   end
 
+  def test_rejects_underscores
+    assert_raises(RuntimeError) { Factbase::ToInteger.new(['1_000']).evaluate(fact, [], Factbase.new) }
+  end
+
   def test_rejects_invalid_value
     assert_includes(
       assert_raises(RuntimeError) { Factbase::ToInteger.new(['abc']).evaluate(fact, [], Factbase.new) }.message,
