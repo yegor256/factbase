@@ -48,6 +48,19 @@ class TestSimplified < Factbase::Test
     )
   end
 
+  def test_keeps_or_branches_differing_beyond_nanoseconds
+    fb = Factbase.new
+    fb.insert.x = 2.0e-12
+    assert_equal(
+      1,
+      fb.query(
+        '(or (eq x (minus 1970-01-01T00:00:00.000000000001Z 1970-01-01T00:00:00Z)) ' \
+        '(eq x (minus 1970-01-01T00:00:00.000000000002Z 1970-01-01T00:00:00Z)))'
+      ).each.to_a.size,
+      'an or branch differing only beyond nanoseconds is dropped'
+    )
+  end
+
   def test_keeps_a_repeated_as
     fb = Factbase.new
     fb.insert.x = 1
