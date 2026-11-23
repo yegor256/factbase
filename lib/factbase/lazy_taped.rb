@@ -58,6 +58,17 @@ class Factbase::LazyTaped
     r
   end
 
+  # Resolve the journal's object IDs against the final transaction contents.
+  # An insert-only transaction needs only its staged facts.
+  def lookup(ids)
+    return {} if ids.empty?
+    maps = @staged.to_h { |m| [m.object_id, m] }
+    unless copied? || ids.all? { |oid| maps.key?(oid) }
+      maps.merge!(@origin.to_h { |m| [m.object_id, m] })
+    end
+    maps
+  end
+
   def size
     copied? ? @staged.size : (@origin.size + @staged.size)
   end
