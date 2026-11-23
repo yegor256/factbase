@@ -57,4 +57,24 @@ class TestUnique < Factbase::Test
     assert(t.evaluate(fact('foo' => 2, 'bar' => 'x', 'baz' => true), [], Factbase.new))
     refute(t.evaluate(fact('foo' => 1, 'bar' => 'x', 'baz' => true), [], Factbase.new))
   end
+
+  def test_asks_for_a_property_when_there_is_none
+    fb = Factbase.new
+    (0..2).each { |i| fb.insert.a = i }
+    e =
+      assert_raises(Factbase::Term::Wrapped) do
+        fb.query('(unique)').each.to_a
+      end
+    assert_includes(e.message, "Too few operands for 'unique' (at least 1 expected)", e.message)
+  end
+
+  def test_asks_for_a_property_inside_and
+    fb = Factbase.new
+    (0..2).each { |i| fb.insert.a = i }
+    e =
+      assert_raises(Factbase::Term::Wrapped) do
+        fb.query('(and (exists a) (unique))').each.to_a
+      end
+    assert_includes(e.message, "Too few operands for 'unique' (at least 1 expected)", e.message)
+  end
 end
