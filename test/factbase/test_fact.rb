@@ -116,6 +116,15 @@ class TestFact < Factbase::Test
     assert_raises(StandardError) { f.class = 42 }
   end
 
+  def test_rejects_a_property_that_would_shadow_an_instance_specific_method
+    fact = Factbase::Fact.new({})
+    fact.define_singleton_method(:special) { 1 }
+    assert_raises(ArgumentError) { fact.special = 2 }
+    other = Factbase::Fact.new({})
+    other.special = 2
+    assert_equal(2, other.special)
+  end
+
   def test_refuses_names_read_as_booleans
     f = Factbase::Fact.new({})
     %w[true false].each do |n|
