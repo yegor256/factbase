@@ -92,10 +92,12 @@ class Factbase::Query
   # @param [Factbase] fb The factbase to delete from
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
+    fb = factbase(fb)
     @term.forget
     deleted = 0
     maybe = (@term.predict(@maps, fb, Factbase::Tee.new({}, {})) || @maps).to_a.dup
     before = @maps.to_a.dup
+    removed = []
     @maps.delete_if do |m|
       original = @maps.source_of(m) if @maps.respond_to?(:source_of)
       pos =
@@ -105,8 +107,15 @@ class Factbase::Query
         end
       d = !pos.nil? && @term.evaluate(Factbase::Accum.new(Factbase::Fact.new(m), {}, false), before, fb)
       maybe.delete_at(pos) if d
-      deleted += 1 if d
+      if d
+        removed << m
+        deleted += 1
+      end
       d
+    end
+    origin = fb.instance_variable_get(:@maps) if fb.is_a?(Factbase)
+    if origin && !origin.equal?(@maps)
+      removed.each { |m| origin.delete(m) }
     end
     deleted
   end
