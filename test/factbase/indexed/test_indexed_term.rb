@@ -38,6 +38,15 @@ class TestIndexedTerm < Factbase::Test
     end
   end
 
+  def test_does_not_swallow_an_invalid_argument_of_a_term
+    query = '(sorted 42 (exists x))'
+    [Factbase.new, Factbase::IndexedFactbase.new(Factbase.new)].each do |fb|
+      fb.insert.x = 1
+      e = assert_raises(StandardError) { fb.query(query).each.to_a }
+      assert_includes(e.message, "A symbol is expected as first argument of 'sorted'", e.message)
+    end
+  end
+
   def test_predicts_on_others
     term = Factbase::Term.new(:boom, [])
     term.redress!(Factbase::IndexedTerm, idx: {})

@@ -77,6 +77,25 @@ class TestIndexedQuery < Factbase::Test
     end
   end
 
+  def test_range_queries_with_incomparable_target_match_plain_factbase_errors
+    maps = [{ 'n' => [1] }, { 'n' => [3] }]
+    queries = [
+      "(gt n 'x')",
+      "(gte n 'x')",
+      "(lt n 'x')",
+      "(lte n 'x')",
+      "(and (and (gt n 'x') (exists n)) (exists n))"
+    ]
+    queries.each do |query|
+      plain = Factbase.new(Marshal.load(Marshal.dump(maps)))
+      indexed = Factbase::IndexedFactbase.new(Factbase.new(Marshal.load(Marshal.dump(maps))))
+      assert_equal(
+        assert_raises(RuntimeError) { plain.query(query).each.to_a }.message,
+        assert_raises(RuntimeError) { indexed.query(query).each.to_a }.message
+      )
+    end
+  end
+
   def test_fills_up_the_index
     idx = {}
     fb = Factbase::IndexedFactbase.new(Factbase.new, idx)
