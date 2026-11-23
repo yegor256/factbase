@@ -112,7 +112,8 @@ class TestFactAsYaml < Factbase::Test
     fb.insert.id = rnd.rand(1..1000)
     f = fb.query("(as t (to_time '2026-01-01T12:00:00#{zone}'))").each.first
     Factbase::FactAsYaml.new(f).to_s
-    assert_equal(zone, f.t.strftime('%:z'), "printing changed the zone of the time, seed #{seed}")
+    assert_equal(Time.parse("2026-01-01T12:00:00#{zone}"), f.t, "printing changed the time, seed #{seed}")
+    assert_predicate(f.t, :utc?, "the time is not in UTC, seed #{seed}")
   end
 
   def test_keeps_zones_of_printed_times
@@ -125,7 +126,7 @@ class TestFactAsYaml < Factbase::Test
       "(and (as t (to_time '2026-01-01T12:00:00#{zones[0]}')) (as t (to_time '2026-02-01T12:00:00#{zones[1]}')))"
     ).each.first
     Factbase::FactAsYaml.new(f).to_s
-    assert_equal(zones, f['t'].map { |t| t.strftime('%:z') }, "printing changed the zones of the times, seed #{seed}")
+    assert_equal(['+00:00'] * 2, f['t'].map { |t| t.strftime('%:z') }, "printing changed the times, seed #{seed}")
   end
 
   def test_prints_time_in_utc
