@@ -19,8 +19,8 @@ class Factbase::SyncFactbase
 
   # Constructor.
   # @param [Factbase] origin Original factbase to decorate
-  # @param [Monitor] monitor Monitor to use for synchronization
-  def initialize(origin, monitor = Monitor.new)
+  # @param [#synchronize] monitor Lock to use for synchronization
+  def initialize(origin, monitor = Lock.new)
     raise(ArgumentError, 'The "origin" is nil') if origin.nil?
     @origin = origin
     @monitor = monitor
@@ -93,5 +93,30 @@ class Factbase::SyncFactbase
 
   def try_lock(&)
     @monitor.synchronize(&)
+  end
+
+  # A reentrant lock owned by the thread, not by the fiber.
+  #
+  # A +Monitor+ reenters only within one fiber, so a query that
+  # {Factbase::Impatient} pulls through +Enumerator#next+ cannot take the lock
+  # again while {#txn} holds it in the caller's fiber (#1890). Fibers of one
+  # thread never run at the same time, so a thread-owned lock reenters for a
+  # nested fiber and still excludes other threads. +Mutex#owned?+ cannot tell
+  # that: since Ruby 4.0 it is fiber-scoped, so the owner thread is tracked here.
+  class Lock
+    def initialize
+      @mutex = Mutex.new
+      @owner = nil
+    end
+
+    def synchronize(&)
+      return yield if @owner.equal?(Thread.current)
+      @mutex.synchronize do
+        @owner = Thread.current
+        yield
+      ensure
+        @owner = nil
+      end
+    end
   end
 end
