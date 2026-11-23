@@ -6,6 +6,7 @@
 require_relative '../test__helper'
 require 'loog'
 require 'time'
+require 'yaml'
 require_relative '../../lib/factbase'
 require_relative '../../lib/factbase/cached/cached_factbase'
 require_relative '../../lib/factbase/impatient'
