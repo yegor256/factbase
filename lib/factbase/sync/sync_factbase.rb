@@ -39,9 +39,15 @@ class Factbase::SyncFactbase
   # @return [Integer] How many maps there were
   def each(&)
     return to_enum(__method__) unless block_given?
-    maps = try_lock { @origin.to_enum(:each).to_a }
-    maps.each(&)
-    maps.size
+    enum = try_lock { @origin.to_enum(:each) }
+    n = 0
+    loop do
+      fact = try_lock { enum.next }
+      yield(fact)
+      n += 1
+    end
+  rescue StopIteration
+    n
   end
 
   # Size of the factbase.
