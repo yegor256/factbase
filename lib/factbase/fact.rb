@@ -74,7 +74,11 @@ class Factbase::Fact
       nil
     elsif k == '[]'
       vv = @map[args[1].to_s]
-      vv.is_a?(Array) ? vv.dup : vv
+      if vv.is_a?(Array)
+        vv.map { |value| value.is_a?(Time) ? value.dup : value }
+      else
+        vv
+      end
     else
       v = @map[k]
       if v.nil?
@@ -82,6 +86,7 @@ class Factbase::Fact
         raise(ArgumentError, "Can't find '#{k}' attribute out of [#{@map.keys.join(', ')}]")
       end
       value = v[0]
+      value = value.dup if value.is_a?(Time)
       value.is_a?(String) ? -value : value
     end
   end
