@@ -29,8 +29,9 @@ class Factbase::ToFloat < Factbase::TermBase
   private
 
   def to_float(value)
-    return Float(value) if value.is_a?(Time)
-    Float(value.to_s)
+    result = value.is_a?(Time) ? Float(value) : Float(value.to_s)
+    raise(ArgumentError, "#{result} is not a finite number") unless result.finite?
+    result
   rescue ArgumentError, TypeError => e
     raise(RuntimeError, "Cannot convert '#{value}' to Float in (to_float ...): #{e.message}")
   end
