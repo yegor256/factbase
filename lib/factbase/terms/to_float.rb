@@ -30,6 +30,7 @@ class Factbase::ToFloat < Factbase::TermBase
 
   def to_float(value)
     return Float(value) if value.is_a?(Time)
+    raise(ArgumentError, 'underscores are not allowed') if value.to_s.include?('_')
     Float(value.to_s)
   rescue ArgumentError, TypeError => e
     raise(RuntimeError, "Cannot convert '#{value}' to Float in (to_float ...): #{e.message}")
