@@ -79,6 +79,13 @@ class Factbase::Logged
       @tube.say(mono, "Txn ##{id} touched #{r} in #{start.ago}")
     end
     r
+  rescue StandardError => e
+    begin
+      @tube.say(mono, "Txn ##{id} failed with #{e.class} in #{start.ago}")
+    rescue StandardError
+      nil
+    end
+    raise(e)
   end
 
   # Printer of log messages.
@@ -194,6 +201,13 @@ class Factbase::Logged
         @tube.say(mono, "Found #{r}/#{total} fact(s) by #{q} #{tail}")
       end
       r
+    rescue StandardError => e
+      begin
+        @tube.say(mono, "Query #{@termtext} each failed with #{e.class}")
+      rescue StandardError
+        nil
+      end
+      raise(e)
     end
 
     def one(fb = @fb, params = {})
@@ -212,6 +226,13 @@ class Factbase::Logged
         )
       end
       r
+    rescue StandardError => e
+      begin
+        @tube.say(mono, "Query #{@termtext} one failed with #{e.class}")
+      rescue StandardError
+        nil
+      end
+      raise(e)
     end
 
     def delete!(fb = @fb)
@@ -231,6 +252,13 @@ class Factbase::Logged
         @tube.say(mono, "Deleted #{r} fact(s) out of #{before} by #{@term} #{tail}")
       end
       r
+    rescue StandardError => e
+      begin
+        @tube.say(mono, "Query #{@termtext} delete! failed with #{e.class}")
+      rescue StandardError
+        nil
+      end
+      raise(e)
     end
 
     private
