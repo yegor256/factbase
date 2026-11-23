@@ -246,4 +246,23 @@ class TestCachedQuery < Factbase::Test
     refute_equal(latin, binary, 'ISO-8859-1 and binary bytes printed identically')
     refute_equal(windows, binary, 'Windows-1251 and binary bytes printed identically')
   end
+
+  def test_cached_query_matches_plain_for_a_nested_term
+    [false, true].each do |cached|
+      fb = Factbase.new
+      fb = Factbase::CachedFactbase.new(fb, {}) if cached
+      fb.insert.x = 10
+      assert_equal(1, fb.query(Factbase::Term.new(:eq, [Factbase::Plus.new([1, 2]), 3])).each.to_a.size, cached.to_s)
+    end
+  end
+
+  def test_conversion_operators_do_not_share_a_cache_entry
+    [false, true].each do |cached|
+      fb = Factbase.new
+      fb = Factbase::CachedFactbase.new(fb, {}) if cached
+      fb.insert.a = 1.5
+      assert_equal(1, fb.query(Factbase::Term.new(:eq, [Factbase::ToInteger.new([:a]), 1])).each.to_a.size, cached.to_s)
+      assert_equal(0, fb.query(Factbase::Term.new(:eq, [Factbase::ToFloat.new([:a]), 1])).each.to_a.size, cached.to_s)
+    end
+  end
 end
