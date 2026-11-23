@@ -5,7 +5,7 @@ PATH
       backtrace (~> 0.4)
       decoor (~> 0.1)
       ellipsized (~> 0.3)
-      json (~> 3.0)
+      json (>= 2.7, < 4)
       logger (~> 1.0)
       loog (~> 0.6)
       nokogiri (~> 1.10)
