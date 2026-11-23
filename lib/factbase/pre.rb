@@ -42,13 +42,32 @@ class Factbase::Pre
   def import(bytes)
     probe = Factbase.new
     probe.import(bytes)
-    probe.query('(always)').each { |f| @block.call(f, self) }
-    @fb.import(probe.export)
+    txn { |context| probe.query('(always)').each { |source| context.imported(source) } }
   end
 
   def txn
     @fb.txn do |fbt|
       yield(Factbase::Pre.new(fbt, &@block))
     end
+  end
+
+  protected
+
+  # Append a complete fact before running any composed initializer.
+  # @param [Factbase::Fact] source The imported fact
+  # @return [Factbase::Fact] The inserted fact
+  def imported(source)
+    fact =
+      if @fb.is_a?(Factbase::Pre)
+        @fb.imported(source)
+      else
+        @fb.insert.tap do |inserted|
+          source.all_properties.each do |property|
+            source[property].each { |value| inserted.public_send(:"#{property}=", value) }
+          end
+        end
+      end
+    @block.call(fact, self)
+    fact
   end
 end
