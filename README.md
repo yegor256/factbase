@@ -328,13 +328,18 @@ Persistence uses Ruby's
   out-of-band before being imported, as described in the
   [Ruby security notes](https://docs.ruby-lang.org/en/3.3/security_rdoc.html#label-Marshal.load).
 
-`Factbase::IndexedFactbase` lazily builds a hash-based inverted index for
-  equality queries, keyed by array `object_id`, property name, and
-  operator. The index is built incrementally on each query and invalidated
-  entirely on any mutation (delete or property addition). Without this
-  decorator every `query#each` call performs a full linear scan over all
-  facts. New programmers should add `IndexedFactbase` whenever the
-  factbase holds more than a few thousand facts.
+`Factbase::IndexedFactbase` narrows the facts a query needs to evaluate.
+  Equality lookups use an inverted index. Range comparisons (`lt`, `lte`,
+  `gt`, and `gte`) use sorted values. The decorator can also narrow
+  candidates for `exists`, `absent`, and `one`, and combine predictions
+  for `and`, `or`, and `not`. A query falls back to ordinary evaluation
+  when its operands do not support a prediction.
+
+  Appending a new fact lets an index pick up the new entries on demand.
+  Assignments through a freshly inserted fact leave the index in place
+  until the next query is evaluated. Later writes through that
+  handle invalidate the index, as do writes through query results.
+  Calling `delete!` on an indexed query clears the index.
 
 ## How to contribute
 
