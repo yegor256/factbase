@@ -254,7 +254,7 @@ It's possible to post-process a list of facts, for `agg` and `join`:
 There are some system-level terms:
 
 * `(env v1 v2)` returns the value of environment variable `v1` or the string
-`v2` if it's not set
+`v2` if it's not set or set to an empty string
 
 ## Architecture
 
