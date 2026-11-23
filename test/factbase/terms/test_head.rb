@@ -42,6 +42,21 @@ class TestHead < Factbase::Test
     assert_includes(e.message, "A non-negative count is expected by 'head', but -1 provided", e.message)
   end
 
+  def test_refuses_a_non_integer_count
+    e = assert_raises(ArgumentError) { Factbase.new.query('(head "a" (always))').each.to_a }
+    assert_includes(e.message, "An integer is expected as first argument of 'head'", e.message)
+  end
+
+  def test_refuses_a_non_term_second_operand
+    e = assert_raises(ArgumentError) { Factbase.new.query('(head 1 5)').each.to_a }
+    assert_includes(e.message, "A term is expected, but '5' provided", e.message)
+  end
+
+  def test_refuses_a_third_operand
+    e = assert_raises(ArgumentError) { Factbase.new.query('(head 1 (always) (always))').each.to_a }
+    assert_includes(e.message, "Too many (3) operands for 'head' (2 expected)", e.message)
+  end
+
   def test_keeps_the_order_of_the_first_ones
     fb = Factbase.new
     fb.insert.x = 3
