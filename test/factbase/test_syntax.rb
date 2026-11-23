@@ -212,11 +212,27 @@ class TestSyntax < Factbase::Test
   end
 
   def test_names_the_term_with_too_few_operands
-    %w[size contains gte plus].each do |name|
+    %w[size contains gte plus nil one many zero].each do |name|
       fb = Factbase.new
       fb.insert.foo = 42
       error = assert_raises(RuntimeError) { fb.query("(#{name})").each.to_a }
-      assert_includes(error.message, "for '#{name}'", error.message)
+      assert_includes(error.message, "Too few (0) operands for '#{name}'", error.message)
+    end
+  end
+
+  def test_names_the_term_with_too_many_operands
+    {
+      'nil' => '(nil zz a)',
+      'one' => '(one a b)',
+      'many' => '(many a b)',
+      'zero' => '(zero b a)'
+    }.each do |name, query|
+      fb = Factbase.new
+      f = fb.insert
+      f.a = 1
+      f.b = 0
+      error = assert_raises(RuntimeError) { fb.query(query).each.to_a }
+      assert_includes(error.message, "Too many (2) operands for '#{name}'", error.message)
     end
   end
 
