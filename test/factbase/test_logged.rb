@@ -224,6 +224,7 @@ class TestLogged < Factbase::Test
     ].each do |s|
       assert_includes(log.to_s, s, "#{log}\n")
     end
+    refute_includes(log.to_s, 'with', log.to_s)
   end
 
   def test_keeps_the_offset_of_a_logged_time
@@ -251,10 +252,33 @@ class TestLogged < Factbase::Test
     buf = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, buf)
     10.times { |i| fb.insert.i = i }
-    fb.query('(gt i 0)', fb.each.to_a.first(3)).each.to_a
+    maps = fb.each.to_a.first(3)
+    fb.query('(gt i 0)', maps).each.to_a
     fb.query('(gt i 1000)', []).delete!
+    fb.query('(gt i 1000)', maps).delete!
     assert_includes(buf.to_s, 'Found 2/3 fact(s)', buf.to_s)
     assert_includes(buf.to_s, 'There were no facts', buf.to_s)
+    assert_includes(buf.to_s, 'No facts out of 3 deleted by (gt i 1000)', buf.to_s)
+  end
+
+  def test_logs_the_params_of_a_query
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.bar = 1
+    fb.insert.foo = 42
+    fb.query('(eq foo $x)').each(fb, x: [42], y: [7]).to_a
+    assert_includes(buf.to_s, 'Found 1/2 fact(s) by (eq foo $x) with {x=[42], y=[7]}', buf.to_s)
+    fb.query('(eq foo 2)').each(fb, x: [42]).to_a
+    assert_includes(buf.to_s, 'Zero/2 facts found by (eq foo 2) with {x=[42]}', buf.to_s)
+  end
+
+  def test_logs_nothing_deleted_when_the_query_matches_no_facts
+    buf = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, buf)
+    fb.insert.foo = 42
+    fb.insert.foo = 42
+    assert_equal(0, fb.query('(eq foo 2)').delete!)
+    assert_includes(buf.to_s, 'No facts out of 2 deleted by (eq foo 2)', buf.to_s)
   end
 
   def test_logs_nothing_happened
