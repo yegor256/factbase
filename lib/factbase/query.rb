@@ -89,7 +89,7 @@ class Factbase::Query
   # alone, while a term that remembers, like `unique`, is not asked the
   # same question twice (#694).
   #
-  # @param [Factbase] fb The factbase to delete from
+  # @param [Factbase] fb The factbase, for evaluating sub-queries only; facts are deleted from this query's maps
   # @return [Integer] Total number of facts deleted
   def delete!(fb = @fb)
     @term.forget
