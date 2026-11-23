@@ -53,6 +53,82 @@ class TestInv < Factbase::Test
     assert_equal(0, fb.size, 'A refused fact must not be imported')
   end
 
+  def test_checks_a_write_inside_a_txn
+    fb =
+      Factbase::Inv.new(Factbase.new) do |p, v|
+        raise(StandardError, "no #{p}=#{v}") if p == 'b' && v == 42
+      end
+    assert_equal(
+      'no b=42',
+      assert_raises(StandardError) do
+        fb.txn do |t|
+          f = t.insert
+          f.b = 1
+          f.b = 42
+        end
+      end.message,
+      'The write inside a txn was never checked'
+    )
+    assert_equal(0, fb.size, 'A refused fact must not be committed')
+  end
+
+  def test_commits_a_permitted_write_inside_a_txn
+    fb = Factbase::Inv.new(Factbase.new) { |p, v| raise(StandardError, "no #{p}=#{v}") if v == 42 }
+    fb.txn { |t| t.insert.a = 1 }
+    assert_equal(1, fb.size, 'A permitted write inside a txn must be committed')
+    assert_equal(1, fb.query('(eq a 1)').each.to_a.size)
+  end
+
+  def test_checks_every_value_of_an_imported_property
+    src = Factbase.new
+    f = src.insert
+    f.b = 1
+    f.b = 7
+    f.b = 42
+    fb =
+      Factbase::Inv.new(Factbase.new) do |p, v|
+        raise(StandardError, 'oops') if p == 'b' && v == 42
+      end
+    assert_raises(StandardError) { fb.import(src.export) }
+    assert_equal(0, fb.size, 'A refused fact must not be imported')
+  end
+
+  def test_checks_the_last_property_of_an_imported_fact
+    src = Factbase.new
+    f = src.insert
+    f.a = 1
+    f.b = 42
+    fb =
+      Factbase::Inv.new(Factbase.new) do |p, v|
+        raise(StandardError, 'oops') if p == 'b' && v == 42
+      end
+    assert_raises(StandardError) { fb.import(src.export) }
+    assert_equal(0, fb.size, 'A refused fact must not be imported')
+  end
+
+  def test_imports_when_every_value_is_permitted
+    src = Factbase.new
+    f = src.insert
+    f.a = 1
+    f.b = 2
+    fb = Factbase::Inv.new(Factbase.new) { |_p, _v| true }
+    fb.import(src.export)
+    assert_equal(1, fb.size, 'A permitted fact must be imported')
+  end
+
+  def test_checks_a_fact_imported_from_many
+    src = Factbase.new
+    src.insert.a = 1
+    src.insert.b = 42
+    src.insert.c = 3
+    fb =
+      Factbase::Inv.new(Factbase.new) do |p, v|
+        raise(StandardError, 'oops') if p == 'b' && v == 42
+      end
+    assert_raises(StandardError) { fb.import(src.export) }
+    assert_equal(0, fb.size, 'A refused fact must not be imported')
+  end
+
   def test_refuses_a_nil_factbase
     assert_raises(ArgumentError) { Factbase::Inv.new(nil) { |_p, _v| true } }
   end
