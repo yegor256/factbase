@@ -14,6 +14,16 @@ require_relative '../../lib/factbase/logged'
 # Copyright:: Copyright (c) 2024-2026 Yegor Bugayenko
 # License:: MIT
 class TestLogged < Factbase::Test
+  def test_preserves_the_decorator_inside_a_transaction
+    fb = Factbase::Logged.new(Factbase.new, Loog::NULL)
+    fb.txn do |txn|
+      assert_instance_of(Factbase::Logged, txn)
+      txn.insert.x = 42
+      assert_equal([42], txn.query('(always)').map(&:x))
+    end
+    assert_equal([42], fb.query('(always)').map(&:x))
+  end
+
   # A log that keeps the level of every message, unlike Loog::Buffer.
   class Recorder
     attr_reader :lines
