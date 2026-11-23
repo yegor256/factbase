@@ -14,7 +14,7 @@ require_relative '../../test__helper'
 # License:: MIT
 class TestToFloat < Factbase::Test
   def test_to_float
-    assert_equal('Float', Factbase::ToFloat.new([[3.14, 'hello']]).evaluate(fact, [], Factbase.new).class.to_s)
+    assert_in_delta(3.14, Factbase::ToFloat.new([[3.14, 'hello']]).evaluate(fact, [], Factbase.new))
   end
 
   def test_rejects_invalid_value
@@ -74,5 +74,11 @@ class TestToFloat < Factbase::Test
 
   def test_converts_multiple_values_array_picks_first_float
     assert_in_delta(7.5, Factbase::ToFloat.new([[7.5, 9.9]]).evaluate(fact, [], Factbase.new))
+  end
+
+  def test_converts_numbers_in_query
+    fb = Factbase.new
+    assert_in_delta(1.25, fb.query('(to_float 1.25)').one)
+    assert_in_delta(1.25, fb.query("(to_float '1.25')").one)
   end
 end
