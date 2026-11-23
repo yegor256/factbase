@@ -54,6 +54,18 @@ class TestLogged < Factbase::Test
     assert_equal([42], fb.query('(agg (exists bar) (first bar))').one)
   end
 
+  def test_logs_parameters_for_hits_and_misses_from_one
+    log = Loog::Buffer.new
+    fb = Factbase::Logged.new(Factbase.new, log)
+    fb.insert.foo = 42
+    term = '(agg (eq foo $wanted) (first foo))'
+    query = fb.query(term)
+    assert_equal([42], query.one(fb, wanted: [42]))
+    assert_nil(query.one(fb, wanted: [7]))
+    assert_includes(log.to_s, "Found [42] (Array) by '#{term}' with {wanted=[42]}")
+    assert_includes(log.to_s, "Nothing found by '#{term}' with {wanted=[7]}")
+  end
+
   def test_shortens_the_value_found_by_one
     buf = Loog::Buffer.new
     fb = Factbase::Logged.new(Factbase.new, buf)
