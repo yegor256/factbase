@@ -23,4 +23,29 @@ class TestYard < Factbase::Test
       end
     end
   end
+
+  def test_return_types_match_returned_values
+    YARD.parse(Dir['lib/**/*.rb'])
+    fb = Factbase.new
+    fb.insert.price = 1.25
+    fb.insert.qty = 7
+    {
+      '(sum price)' => 'Factbase::Sum',
+      '(sum qty)' => 'Factbase::Sum',
+      '(to_integer missing)' => 'Factbase::ToInteger',
+      '(to_float missing)' => 'Factbase::ToFloat',
+      '(to_string missing)' => 'Factbase::ToString',
+      '(to_time missing)' => 'Factbase::ToTime'
+    }.each do |query, name|
+      value = fb.query(query).one
+      declared = YARD::Registry.at("#{name}#evaluate").tag(:return).types
+      declared = declared.map { |t| t == 'NilClass' ? 'nil' : t }
+      assert_includes(
+        declared,
+        value.nil? ? 'nil' : value.class.name,
+        "#{name}#evaluate returns #{value.inspect} (#{value.class}) for #{query}, " \
+        "but @return declares #{declared.join(', ')}"
+      )
+    end
+  end
 end
