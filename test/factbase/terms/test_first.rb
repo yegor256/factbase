@@ -30,7 +30,9 @@ class TestFirst < Factbase::Test
     f = fb.insert
     f.x = 10
     f.x = 20
-    fb.query('(first x)').one << 99
+    v = fb.query('(first x)').one
+    assert_equal([10, 20], v)
+    v << 99
     assert_equal([10, 20], f['x'])
     assert_equal(10, f.x)
   end
@@ -40,7 +42,9 @@ class TestFirst < Factbase::Test
     f = fb.insert
     f.x = 10
     f.x = 20
-    fb.query('(first x)').one[0] = 99
+    v = fb.query('(first x)').one
+    assert_equal([10, 20], v)
+    v[0] = 99
     assert_equal([10, 20], f['x'])
     assert_equal(10, f.x)
   end
