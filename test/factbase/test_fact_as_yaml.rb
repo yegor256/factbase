@@ -232,4 +232,68 @@ class TestFactAsYaml < Factbase::Test
       "a long string full of escapes is not printed as valid YAML, seed #{seed}"
     )
   end
+
+  def test_ruby_interpolation_syntax
+    f = Factbase.new.insert
+    f.msg = "\#{name}"
+    f.ivar = "\#@name"
+    f.gvar = "\#$name"
+    yaml_str = Factbase::FactAsYaml.new(f).to_s
+    assert_includes(yaml_str, 'msg:')
+    assert_equal("\#{name}", YAML.safe_load(yaml_str)['msg'])
+    assert_equal("\#@name", YAML.safe_load(yaml_str)['ivar'])
+    assert_equal("\#$name", YAML.safe_load(yaml_str)['gvar'])
+  end
+
+  def test_interpolation_syntax_in_array
+    f = Factbase.new.insert
+    f.items = "\#{first}"
+    f.items = "\#@second"
+    f.items = "\#$third"
+    yaml_str = Factbase::FactAsYaml.new(f).to_s
+    assert_includes(yaml_str, 'items: [')
+    assert_equal(["\#{first}", "\#@second", "\#$third"], YAML.safe_load(yaml_str)['items'])
+  end
+
+  def test_literal_backslash_followed_by_hash
+    f = Factbase.new.insert
+    f.raw = '\#abc'
+    f.mid = 'foo\#bar'
+    yaml_str = Factbase::FactAsYaml.new(f).to_s
+    assert_equal('\#abc', YAML.safe_load(yaml_str)['raw'])
+    assert_equal('foo\#bar', YAML.safe_load(yaml_str)['mid'])
+  end
+
+  def test_long_string_with_newline_does_not_break_yaml_syntax
+    f = Factbase.new.insert
+    f.message = "#{'a' * 29}\n#{'b' * 100}"
+    parsed = YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)
+    assert_includes(parsed['message'], '...')
+    assert_includes(parsed['message'], "\n")
+  end
+
+  def test_long_string_with_quotes_and_backslashes
+    f = Factbase.new.insert
+    f.text = "#{'x' * 20}\"quoted\"\\backslash\t#{'y' * 80}"
+    assert_includes(YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['text'], '...')
+  end
+
+  def test_round_trips_del_c1_controls_and_nel
+    f = Factbase.new.insert
+    f.del = "a\u007Fb"
+    f.c1_low = "a\u0080b"
+    f.nel = "a\u0085b"
+    f.c1_high = "a\u009Fb"
+    f.ls = "a\u2028b"
+    f.ps = "a\u2029b"
+    f.emoji = 'hello 😀 world'
+    yaml = YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)
+    assert_equal("a\u007Fb", yaml['del'])
+    assert_equal("a\u0080b", yaml['c1_low'])
+    assert_equal("a\u0085b", yaml['nel'])
+    assert_equal("a\u009Fb", yaml['c1_high'])
+    assert_equal("a\u2028b", yaml['ls'])
+    assert_equal("a\u2029b", yaml['ps'])
+    assert_equal('hello 😀 world', yaml['emoji'])
+  end
 end
