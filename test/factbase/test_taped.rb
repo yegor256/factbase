@@ -163,6 +163,19 @@ class TestTaped < Factbase::Test
     )
   end
 
+  def test_reads_elements_by_index
+    taped = Factbase::Taped.new([{ 'x' => [10] }, { 'x' => [20] }])
+    assert_equal({ 'x' => [10] }, taped[0])
+    assert_equal({ 'x' => [20] }, taped[-1])
+    assert_nil(taped[5])
+  end
+
+  def test_evaluates_first_and_nth_on_taped_maps
+    fb = Factbase.new(Factbase::Taped.new([{ 'x' => [10] }, { 'x' => [20] }]))
+    assert_equal([10], fb.query('(first x)').one)
+    assert_equal([20], fb.query('(nth 1 x)').one)
+  end
+
   private
 
   def mutated

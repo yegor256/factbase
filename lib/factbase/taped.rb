@@ -44,6 +44,10 @@ class Factbase::Taped
     @origin.empty?
   end
 
+  def [](pos)
+    @origin[pos]
+  end
+
   def <<(map)
     @origin << map
     @inserted.append(map.object_id)
