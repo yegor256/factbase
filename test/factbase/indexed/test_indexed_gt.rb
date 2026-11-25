@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 require_relative '../../../lib/factbase'
+require_relative '../../../lib/factbase/indexed/indexed_factbase'
 require_relative '../../../lib/factbase/indexed/indexed_gt'
 require_relative '../../../lib/factbase/indexed/indexed_term'
 require_relative '../../../lib/factbase/lazy_taped'
@@ -95,5 +96,22 @@ class TestIndexedGt < Factbase::Test
         {}
       )
     )
+  end
+
+  def test_short_circuits_with_incompatible_target
+    fb = Factbase::IndexedFactbase.new(Factbase.new, {})
+    f1 = fb.insert
+    f1.a = 'hello'
+    f1.b = 1
+    fb.insert.b = 2
+    %w[gt lt gte lte].each do |op|
+      assert_equal([1], fb.query("(or (eq b 1) (#{op} a 5))").each.map(&:b), op)
+      assert_equal([1], fb.query("(or (eq b 1) (#{op} a $lim))").each(fb, lim: 5).map(&:b), op)
+      assert_includes(
+        assert_raises(Factbase::Term::Wrapped, op) { fb.query("(and (#{op} a 5) (eq b 2))").each.to_a }.message,
+        'Cannot compare',
+        op
+      )
+    end
   end
 end
