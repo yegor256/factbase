@@ -23,13 +23,11 @@ class Factbase::Simplified
   # and the ones with a stateful term, such as +unique+, anywhere inside,
   # since each copy of such a term remembers its own facts
   def unique
-    strs = []
+    seen = Set.new
     ops = []
     @operands.each do |o|
       o = o.simplify if o.is_a?(Factbase::Term)
-      s = o.to_s
-      next if strs.include?(s) && !kept?(o)
-      strs << s
+      next if !kept?(o) && !seen.add?([o.class, o.to_s])
       ops << o
     end
     ops
