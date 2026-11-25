@@ -207,4 +207,55 @@ class TestCachedFactbase < Factbase::Test
     assert_equal(42, fb.query('(agg (always) (max bar))').one)
     refute(cache.keys.any? { |k| k.is_a?(Array) && k.last == '(max bar)' })
   end
+
+  def test_query_in_txn_sees_write_through_fact_before_txn
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    f = fb.insert
+    f.foo = 42
+    fb.txn do |t|
+      assert_equal(1, t.query('(eq foo 42)').each.to_a.size)
+      assert_equal(0, t.query('(exists bar)').each.to_a.size)
+      f.bar = 100
+      assert_equal(1, t.query('(exists bar)').each.to_a.size)
+      assert_equal(100, t.query('(exists bar)').each.to_a.first.bar)
+    end
+    assert_equal(1, fb.query('(exists bar)').each.to_a.size)
+  end
+
+  def test_query_in_txn_sees_write_through_query_fact_before_txn
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.foo = 42
+    f = fb.query('(eq foo 42)').each.to_a.first
+    fb.txn do |t|
+      assert_equal(0, t.query('(exists bar)').each.to_a.size)
+      f.bar = 99
+      assert_equal(1, t.query('(exists bar)').each.to_a.size)
+    end
+    assert_equal(1, fb.query('(exists bar)').each.to_a.size)
+  end
+
+  def test_txn_scalar_query_does_not_leak_to_outer_factbase
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    fb.txn do |t|
+      t.insert.x = 2
+      assert_equal(2, t.query('(count)').one)
+      assert_equal(1, fb.query('(count)').one)
+      raise(Factbase::Rollback)
+    end
+    assert_equal(1, fb.query('(count)').one)
+  end
+
+  def test_outer_scalar_query_does_not_leak_into_txn
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    assert_equal(1, fb.query('(count)').one)
+    fb.txn do |t|
+      t.insert.x = 2
+      assert_equal(1, fb.query('(count)').one)
+      assert_equal(2, t.query('(count)').one)
+      raise(Factbase::Rollback)
+    end
+    assert_equal(1, fb.query('(count)').one)
+  end
 end

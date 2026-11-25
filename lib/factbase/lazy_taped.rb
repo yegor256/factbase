@@ -111,9 +111,38 @@ class Factbase::LazyTaped
     (copied? ? @staged : (@origin + @staged)).to_a
   end
 
+  # Slice of LazyTaped that maintains copy-on-write semantics.
+  class LazyRepacked < Factbase::Taped
+    def initialize(lazy_taped, other)
+      super(other, inserted: lazy_taped.inserted, deleted: lazy_taped.deleted, added: lazy_taped.added)
+      @lazy_taped = lazy_taped
+    end
+
+    def each
+      return to_enum(__method__) unless block_given?
+      @origin.each do |m|
+        yield(@lazy_taped._tape(m))
+      end
+    end
+
+    def to_a
+      @origin.map { |m| @lazy_taped.get_copied_map(m) }
+    end
+
+    def repack(other)
+      LazyRepacked.new(@lazy_taped, other)
+    end
+
+    private
+
+    def join(other)
+      guard(other)
+      Factbase::Taped.new(yield(to_a, other.to_a), inserted: @inserted, deleted: @deleted, added: @added)
+    end
+  end
+
   def repack(other)
-    ensure_copied!
-    Factbase::Taped.new(other.map { |o| @copies[o] || o }, inserted: @inserted, deleted: @deleted, added: @added)
+    LazyRepacked.new(self, other)
   end
 
   def &(other)
@@ -141,6 +170,11 @@ class Factbase::LazyTaped
     @copies[original_map] || original_map
   end
 
+  def _tape(map)
+    return LazyTapedHash.new(map, self, @added) unless copied?
+    Factbase::Taped::TapedHash.new(@copies[map] || map, @added)
+  end
+
   private
 
   def _join(other)
@@ -153,10 +187,5 @@ class Factbase::LazyTaped
   def _track(copy, original)
     @copies[original] = copy
     @sources[copy] = original
-  end
-
-  def _tape(map)
-    return LazyTapedHash.new(map, self, @added) unless copied?
-    Factbase::Taped::TapedHash.new(@copies[map] || map, @added)
   end
 end
