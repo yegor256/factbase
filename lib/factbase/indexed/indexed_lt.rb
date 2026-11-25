@@ -25,6 +25,7 @@ class Factbase::IndexedLt
     entry = @idx[key]
     _feed(maps.to_a, entry, prop)
     matched = _search(entry, target)
+    return if matched.nil?
     maps.respond_to?(:repack) ? maps.repack(matched) : matched
   end
 
@@ -89,5 +90,7 @@ class Factbase::IndexedLt
     facts = res.sort_by { |pair| pair[2] }.map { |pair| pair[1] }
     facts.uniq!(&:object_id)
     facts
+  rescue ArgumentError, TypeError
+    nil
   end
 end
