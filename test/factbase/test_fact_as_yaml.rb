@@ -277,4 +277,23 @@ class TestFactAsYaml < Factbase::Test
     f.text = "#{'x' * 20}\"quoted\"\\backslash\t#{'y' * 80}"
     assert_includes(YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)['text'], '...')
   end
+
+  def test_round_trips_del_c1_controls_and_nel
+    f = Factbase.new.insert
+    f.del = "a\u007Fb"
+    f.c1_low = "a\u0080b"
+    f.nel = "a\u0085b"
+    f.c1_high = "a\u009Fb"
+    f.ls = "a\u2028b"
+    f.ps = "a\u2029b"
+    f.emoji = 'hello 😀 world'
+    yaml = YAML.safe_load(Factbase::FactAsYaml.new(f).to_s)
+    assert_equal("a\u007Fb", yaml['del'])
+    assert_equal("a\u0080b", yaml['c1_low'])
+    assert_equal("a\u0085b", yaml['nel'])
+    assert_equal("a\u009Fb", yaml['c1_high'])
+    assert_equal("a\u2028b", yaml['ls'])
+    assert_equal("a\u2029b", yaml['ps'])
+    assert_equal('hello 😀 world', yaml['emoji'])
+  end
 end
