@@ -31,15 +31,31 @@ class Factbase::Matches < Factbase::TermBase
     re = _values(1, fact, maps, fb)
     raise(RuntimeError, 'Regexp is nil') if re.nil?
     raise(RuntimeError, 'Exactly one regexp is expected') unless re.size == 1
-    rx = regexp(re[0])
-    str.any? { |s| matched(s, rx) }
+    _search(str, regexp(re[0]))
   end
 
   private
 
+  def _search(values, rx)
+    failure = nil
+    comparable = false
+    values.each do |v|
+      begin
+        answer = matched(v, rx)
+      rescue RuntimeError => e
+        failure ||= e
+        next
+      end
+      comparable = true
+      return true if answer
+    end
+    raise(failure) unless comparable || failure.nil?
+    false
+  end
+
   def matched(value, rx)
     value.match?(rx)
-  rescue NoMethodError => e
+  rescue NoMethodError, ArgumentError, Encoding::CompatibilityError => e
     raise(
       RuntimeError,
       "Cannot match #{value.inspect} (#{value.class}) with #{rx.inspect} using (matches): #{e.message}"

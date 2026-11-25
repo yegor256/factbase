@@ -217,4 +217,20 @@ class TestMatches < Factbase::Test
   def test_anchors_the_whole_value_after_a_negative_lookbehind
     refute(Factbase::Matches.new([:foo, '(?<!x)OK$']).evaluate(fact('foo' => "OK\nFAIL"), [], Factbase.new))
   end
+
+  def test_skips_unmatchable_values_when_another_matches
+    t = Factbase::Matches.new([:foo, 'hello'])
+    assert(t.evaluate(fact('foo' => [42, 'hello']), [], Factbase.new))
+    refute(t.evaluate(fact('foo' => [42, 'world']), [], Factbase.new))
+  end
+
+  def test_skips_invalid_utf8_when_another_matches_and_wraps_failure
+    t = Factbase::Matches.new([:foo, 'hello'])
+    bad = (+"\xFF").force_encoding(Encoding::UTF_8)
+    assert(t.evaluate(fact('foo' => [bad, 'hello']), [], Factbase.new))
+    assert_includes(
+      assert_raises(RuntimeError) { t.evaluate(fact('foo' => [bad]), [], Factbase.new) }.message,
+      'Cannot match'
+    )
+  end
 end
