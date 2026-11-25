@@ -23,7 +23,7 @@ class Factbase::Simplified
   # and the ones with a stateful term, such as +unique+, anywhere inside,
   # since each copy of such a term remembers its own facts
   def unique
-    strs = []
+    strs = Set.new
     ops = []
     @operands.each do |o|
       o = o.simplify if o.is_a?(Factbase::Term)
