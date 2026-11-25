@@ -37,7 +37,7 @@ class Factbase::ToTime < Factbase::TermBase
       next if date.nil? || Date.valid_date?(*date.captures.map { |i| Integer(i, 10) })
       raise(ArgumentError, 'there is no such date')
     end
-  rescue ArgumentError => e
+  rescue ArgumentError, RangeError => e
     raise(RuntimeError, "Cannot parse '#{value}' as Time in (to_time ...): #{e.message}")
   end
 end

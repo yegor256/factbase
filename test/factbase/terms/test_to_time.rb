@@ -144,4 +144,15 @@ class TestToTime < Factbase::Test
     fb.insert.t1 = '2026-06-01T00:00:00Z'
     assert_equal(2, fb.query('(gt (to_time t1) (to_time "2025-01-01T00:00:00Z"))').each.to_a.size)
   end
+
+  def test_rejects_non_finite_float_values
+    [Float::INFINITY, -Float::INFINITY, Float::NAN].each do |val|
+      assert_includes(
+        assert_raises(RuntimeError) do
+          Factbase::ToTime.new([val]).evaluate(fact, [], Factbase.new)
+        end.message,
+        "Cannot parse '#{val}' as Time in (to_time ...):"
+      )
+    end
+  end
 end
