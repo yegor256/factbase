@@ -38,6 +38,7 @@ class Factbase::Agg < Factbase::TermBase
   # @param [Factbase::Fact] fact The fact being evaluated
   # @return [Hash] Parameters indexed by their names
   def params(fact)
+    return {} if fact.nil?
     Context.new(fact, fact.all_properties.to_h { |name| [name, fact["$#{name}"]] }.compact)
   end
 
