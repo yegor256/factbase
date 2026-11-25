@@ -9,7 +9,6 @@ require_relative '../../../lib/factbase/terms/never'
 require_relative '../../../lib/factbase/terms/or'
 require_relative '../../../lib/factbase/terms/simplified'
 
-require 'benchmark'
 require_relative '../../test__helper'
 
 # Test for the 'Simplified' class.
@@ -99,25 +98,41 @@ class TestSimplified < Factbase::Test
     assert_equal(2, Factbase::Simplified.new([join, join]).unique.size)
   end
 
-  def test_performance_with_large_operands
-    ops = (1..2_000).map { |i| Factbase::Term.new(:eq, [:x, i]) }
-    assert_operator(
-      Benchmark.realtime do
-        assert_equal(ops.size, Factbase::Simplified.new(ops).unique.size)
-      end,
-      :<,
-      1.0
-    )
+  def test_avoids_quadratic_lookups_for_distinct_operands
+    [200, 400].each do |count|
+      comparisons = 0
+      assert_equal(count, Factbase::Simplified.new(tracked_operands(count) { comparisons += 1 }).unique.size)
+      assert_operator(comparisons, :<=, count)
+    end
   end
 
-  def test_performance_simplifying_long_or
-    ops = (1..2_000).map { |i| Factbase::Term.new(:eq, [:x, i]) }
-    assert_operator(
-      Benchmark.realtime do
-        assert_equal(ops.size, Factbase::Or.new(ops).simplify.operands.size)
-      end,
-      :<,
-      1.0
-    )
+  def test_simplifying_long_or_avoids_quadratic_lookups
+    [200, 400].each do |count|
+      comparisons = 0
+      assert_equal(count, Factbase::Or.new(tracked_operands(count) { comparisons += 1 }).simplify.operands.size)
+      assert_operator(comparisons, :<=, count)
+    end
+  end
+
+  private
+
+  def tracked_operands(count, &)
+    klass =
+      Class.new(String) do
+        define_method(:==) do |other|
+          yield
+          super(other)
+        end
+        define_method(:eql?) do |other|
+          yield
+          super(other)
+        end
+      end
+    (1..count).map do |i|
+      term = Factbase::Term.new(:eq, [:x, i])
+      text = klass.new(term.to_s)
+      term.define_singleton_method(:to_s) { text }
+      term
+    end
   end
 end
