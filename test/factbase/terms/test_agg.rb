@@ -134,4 +134,18 @@ class TestAgg < Factbase::Test
       end
     assert_includes(e.message, "The 'empty' term needs a fact and cannot be used as an aggregate", e.message)
   end
+
+  def test_nested_agg_with_nil_fact
+    fb = Factbase.new
+    fb.insert.x = 10
+    fb.insert.x = 20
+    assert_equal(20, fb.query('(agg (always) (agg (always) (max x)))').one)
+    assert_equal([20], fb.query('(eq x (agg (always) (agg (always) (max x))))').each.map(&:x))
+    assert_equal(
+      10,
+      Factbase::Agg.new([Factbase::Term.new(:always, []), Factbase::Term.new(:min, [:x])]).evaluate(
+        nil, [{ 'x' => [10] }, { 'x' => [20] }], fb
+      )
+    )
+  end
 end
