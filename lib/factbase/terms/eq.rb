@@ -15,6 +15,7 @@ class Factbase::Eq < Factbase::TermBase
   def initialize(operands)
     super()
     @op = Factbase::Compare.new(:==, operands)
+    @operands = operands
   end
 
   # Evaluate term on a fact.
@@ -23,6 +24,27 @@ class Factbase::Eq < Factbase::TermBase
   # @param [Factbase] fb Factbase to use for sub-queries
   # @return [Boolean] The result of the equality comparison
   def evaluate(fact, maps, fb)
-    @op.evaluate(fact, maps, fb)
+    assert_args(2)
+    lefts = _values(0, fact, maps, fb)
+    rights = _values(1, fact, maps, fb)
+    return false if lefts.nil? || rights.nil?
+    if lefts.size > 8 || rights.size > 8
+      target, pool = lefts.size <= rights.size ? [lefts, rights] : [rights, lefts]
+      set = pool.to_set { |v| normalize(v) }
+      target.any? { |v| set.include?(normalize(v)) }
+    else
+      @op.search(lefts, rights)
+    end
+  end
+
+  private
+
+  # Normalize value for equality comparison.
+  # @param [Object] val Value to normalize
+  # @return [Object] Normalized value
+  def normalize(val)
+    return val.floor if val.is_a?(Time)
+    return Rational(val) if val.is_a?(Integer) || (val.is_a?(Float) && val.finite?)
+    val
   end
 end
