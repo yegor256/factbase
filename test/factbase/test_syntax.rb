@@ -515,45 +515,59 @@ class TestSyntax < Factbase::Test
   def test_reports_extra_closing_parenthesis
     assert_includes(
       assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new('(and (eq a 1)))').to_term }.message,
-      'Unexpected closing parenthesis at #8'
+      'Unexpected closing parenthesis at character 14'
     )
     assert_includes(
       assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new('(and (eq a 1))))').to_term }.message,
-      'Unexpected closing parenthesis at #8'
+      'Unexpected closing parenthesis at character 14'
     )
     assert_includes(
       assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new(')foo').to_term }.message,
-      'Unexpected closing parenthesis at #0'
+      'Unexpected closing parenthesis at character 0'
     )
     assert_includes(
       assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new(')').to_term }.message,
-      'Unexpected closing parenthesis at #0'
+      'Unexpected closing parenthesis at character 0'
+    )
+    assert_includes(
+      assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new("# comment\n  (eq a 1))").to_term }.message,
+      'Unexpected closing parenthesis at character 20'
     )
   end
 
   def test_reports_missing_closing_parenthesis
     assert_includes(
       assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new('(and (eq a 1)').to_term }.message,
-      'Unclosed parenthesis at #0'
+      'Unclosed parenthesis at character 0'
     )
     assert_includes(
       assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new('(and (eq a 1').to_term }.message,
-      'Unclosed parenthesis at #2'
+      'Unclosed parenthesis at character 5'
     )
     assert_includes(
       assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new('(').to_term }.message,
-      'Unclosed parenthesis at #0'
+      'Unclosed parenthesis at character 0'
     )
     assert_includes(
       assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new('(foo 7').to_term }.message,
-      'Unclosed parenthesis at #0'
+      'Unclosed parenthesis at character 0'
+    )
+    assert_includes(
+      assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new("# lead\n  (and   (eq a 1").to_term }.message,
+      'Unclosed parenthesis at character 16'
     )
   end
 
   def test_reports_unexpected_extra_token
     assert_includes(
       assert_raises(Factbase::Syntax::Broken) { Factbase::Syntax.new('(eq a 1) 42').to_term }.message,
-      "unexpected token '42' at #5"
+      "unexpected token '42' at character 9"
+    )
+    assert_includes(
+      assert_raises(Factbase::Syntax::Broken) do
+        Factbase::Syntax.new("# head\n (eq a 1) # tail\n  42").to_term
+      end.message,
+      "unexpected token '42' at character 26"
     )
   end
 end

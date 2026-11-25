@@ -57,10 +57,11 @@ class Factbase::Syntax
     @ast ||= to_ast(@tokens, 0)
     if @ast[1] != @tokens.size
       token = @tokens[@ast[1]]
-      raise(StandardError, "Unexpected closing parenthesis at ##{@ast[1]}") if token == :')'
+      pos = @offsets[@ast[1]]
+      raise(StandardError, "Unexpected closing parenthesis at character #{pos}") if token == :')'
       raise(
         ArgumentError,
-        "Too many terms: unexpected token '#{token}' at ##{@ast[1]} (#{@ast[1]} != #{@tokens.size})"
+        "Too many terms: unexpected token '#{token}' at character #{pos} (#{@ast[1]} != #{@tokens.size})"
       )
     end
     t = @ast[0]
@@ -81,21 +82,21 @@ class Factbase::Syntax
   # @param [Integer] at Position to start parsing from
   # @return [Array<Factbase::Term,Integer>] The term detected and ending position
   def to_ast(tokens, at)
-    raise(StandardError, "Unexpected closing parenthesis at ##{at}") if tokens[at] == :')'
+    raise(StandardError, "Unexpected closing parenthesis at character #{@offsets[at]}") if tokens[at] == :')'
     return [tokens[at], at + 1] unless tokens[at] == :'('
     open = at
     at += 1
-    raise(StandardError, "Unclosed parenthesis at ##{open}") if tokens[at].nil?
+    raise(StandardError, "Unclosed parenthesis at character #{@offsets[open]}") if tokens[at].nil?
     op = tokens[at]
-    raise(StandardError, "Unexpected closing parenthesis at ##{at}") if op == :')'
+    raise(StandardError, "Unexpected closing parenthesis at character #{@offsets[at]}") if op == :')'
     operands = []
     at += 1
     loop do
-      raise(StandardError, "Unclosed parenthesis at ##{open}") if tokens[at].nil?
+      raise(StandardError, "Unclosed parenthesis at character #{@offsets[open]}") if tokens[at].nil?
       break if tokens[at] == :')'
       (operand, at1) = to_ast(tokens, at)
-      raise(StandardError, "Stuck at position ##{at}") if at == at1
-      raise(StandardError, "Jump back at position ##{at}") if at1 < at
+      raise(StandardError, "Stuck at character #{@offsets[at]}") if at == at1
+      raise(StandardError, "Jump back at character #{@offsets[at]}") if at1 < at
       at = at1
       operands << operand
       break if tokens[at] == :')'
@@ -107,14 +108,16 @@ class Factbase::Syntax
   # @return [Array] Array of tokens
   def to_tokens
     list = []
+    offsets = []
     acc = ''
+    start = nil
     quotes = ['\'', '"']
     spaces = [' ', '(', ')', "\n", "\t", "\r"]
     breaks = ["\n", "\r"]
     opener = nil
     comment = false
     closed = false
-    @query.to_s.chars.each do |c|
+    @query.to_s.chars.each_with_index do |c, idx|
       comment = true if opener.nil? && c == '#'
       comment = false if comment && breaks.include?(c)
       next if comment
@@ -134,32 +137,44 @@ class Factbase::Syntax
           acc = acc[0..-((slashes / 2) + 1)]
           opener = nil
           list << (acc + c)
+          offsets << start
           acc = ''
+          start = nil
           closed = true
           next
         end
       end
       if opener
+        start ||= idx
         acc += c
         next
       end
       if !acc.empty? && spaces.include?(c)
         list << acc
+        offsets << start
         acc = ''
+        start = nil
       end
       case c
       when '('
         list << :'('
+        offsets << idx
       when ')'
         list << :')'
+        offsets << idx
       when ' ', "\n", "\t", "\r"
         next
       else
+        start ||= idx
         acc += c
       end
     end
     raise(StandardError, 'String not closed') unless opener.nil?
-    list << acc unless acc.empty?
+    unless acc.empty?
+      list << acc
+      offsets << start
+    end
+    @offsets = offsets
     list.map do |t|
       if t.is_a?(Symbol)
         t
