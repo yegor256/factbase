@@ -164,7 +164,6 @@ class TestCachedFactbase < Factbase::Test
     end
   end
 
-<<<<<<< HEAD
   def test_running_agg_always_count_one_repeatedly_does_not_grow_cache
     cache = {}
     fb = Factbase::CachedFactbase.new(Factbase.new, cache)
@@ -233,5 +232,30 @@ class TestCachedFactbase < Factbase::Test
       assert_equal(1, t.query('(exists bar)').each.to_a.size)
     end
     assert_equal(1, fb.query('(exists bar)').each.to_a.size)
+  end
+
+  def test_txn_scalar_query_does_not_leak_to_outer_factbase
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    fb.txn do |t|
+      t.insert.x = 2
+      assert_equal(2, t.query('(count)').one)
+      assert_equal(1, fb.query('(count)').one)
+      raise(Factbase::Rollback)
+    end
+    assert_equal(1, fb.query('(count)').one)
+  end
+
+  def test_outer_scalar_query_does_not_leak_into_txn
+    fb = Factbase::CachedFactbase.new(Factbase.new)
+    fb.insert.x = 1
+    assert_equal(1, fb.query('(count)').one)
+    fb.txn do |t|
+      t.insert.x = 2
+      assert_equal(1, fb.query('(count)').one)
+      assert_equal(2, t.query('(count)').one)
+      raise(Factbase::Rollback)
+    end
+    assert_equal(1, fb.query('(count)').one)
   end
 end

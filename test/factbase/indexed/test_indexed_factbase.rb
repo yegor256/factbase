@@ -497,7 +497,6 @@ class TestIndexedFactbase < Factbase::Test
     assert_equal(1, fb.query('(exists foo)').each.to_a.size)
   end
 
-<<<<<<< HEAD
   def test_finds_a_fact_inserted_in_txn_and_changed_after_commit
     fb = Factbase::IndexedFactbase.new(Factbase.new)
     f = nil
@@ -534,5 +533,15 @@ class TestIndexedFactbase < Factbase::Test
       assert_equal(1, t.query('(exists bar)').each.to_a.size)
     end
     assert_equal(1, fb.query('(exists bar)').each.to_a.size)
+  end
+
+  def test_txn_rollback_with_selective_or_does_not_mutate_outer_fact
+    fb = Factbase::IndexedFactbase.new(Factbase.new)
+    (1..8).each { |i| fb.insert.id = i }
+    fb.txn do |t|
+      t.query('(or (eq id 1) (eq id 1))').each { |f| f.bar = 9 }
+      raise(Factbase::Rollback)
+    end
+    assert_empty(fb.query('(exists bar)').each.to_a)
   end
 end

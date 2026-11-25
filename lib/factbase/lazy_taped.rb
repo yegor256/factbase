@@ -125,8 +125,19 @@ class Factbase::LazyTaped
       end
     end
 
+    def to_a
+      @origin.map { |m| @lazy_taped.get_copied_map(m) }
+    end
+
     def repack(other)
       LazyRepacked.new(@lazy_taped, other)
+    end
+
+    private
+
+    def join(other)
+      guard(other)
+      Factbase::Taped.new(yield(to_a, other.to_a), inserted: @inserted, deleted: @deleted, added: @added)
     end
   end
 
