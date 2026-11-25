@@ -426,4 +426,14 @@ class TestRules < Factbase::Test
     assert_raises(ArgumentError) { f.x = 2 }
     assert_equal(0, fb.query('(eq x 2)').each.to_a.size)
   end
+
+  def test_error_message_names_failed_symbol_in_conjunction
+    fb = Factbase::Rules.new(Factbase.new, '(and (exists a) active)')
+    assert_includes(assert_raises(ArgumentError) { fb.insert.a = 1 }.message, 'active')
+  end
+
+  def test_error_message_names_failed_boolean_literal_in_conjunction
+    fb = Factbase::Rules.new(Factbase.new, '(and (exists a) false)')
+    assert_includes(assert_raises(ArgumentError) { fb.insert.a = 1 }.message, 'false')
+  end
 end

@@ -174,7 +174,13 @@ class Factbase::Rules
 
     def self.failed(term, fact, fb)
       return term unless term.op == :and
-      term.operands.find { |operand| !operand.evaluate(fact, [], fb) }
+      term.operands.find do |operand|
+        if operand.is_a?(Factbase::Term) || operand.is_a?(Factbase::TermBase)
+          !operand.evaluate(fact, [], fb)
+        else
+          !Factbase::Boolean.new(operand.is_a?(Symbol) ? fact[operand.to_s] : operand, operand).bool?
+        end
+      end
     end
   end
 
