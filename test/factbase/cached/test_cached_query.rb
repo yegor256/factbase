@@ -246,4 +246,32 @@ class TestCachedQuery < Factbase::Test
     refute_equal(latin, binary, 'ISO-8859-1 and binary bytes printed identically')
     refute_equal(windows, binary, 'Windows-1251 and binary bytes printed identically')
   end
+
+  def test_keeps_rows_apart_for_different_params
+    fb = Factbase::CachedFactbase.new(Factbase.new, {})
+    fb.insert.foo = 1
+    fb.insert.foo = 2
+    fb.insert.foo = '1'
+    Factbase::Term.new(
+      :defn, [:match_param, 'fact["foo"]&.include?(fact["$val"]&.first) || false']
+    ).evaluate(nil, [], fb)
+    begin
+      query = fb.query('(match_param)')
+      assert_equal([1], query.each(fb, val: 1).map(&:foo))
+      assert_equal([2], query.each(fb, val: 2).map(&:foo))
+      assert_equal(['1'], query.each(fb, 'val' => '1').map(&:foo))
+    ensure
+      Factbase::Term.new(:undef, [:match_param]).evaluate(nil, [], fb)
+    end
+  end
+
+  def test_keeps_direct_cached_query_rows_apart_for_different_params
+    base = Factbase.new
+    base.insert.foo = 10
+    base.insert.foo = 20
+    query = Factbase::CachedQuery.new(base.query('(eq foo $val)'), {}, base)
+    assert_equal([10], query.each(base, val: 10).map(&:foo))
+    assert_equal([20], query.each(base, val: 20).map(&:foo))
+    assert_equal([10], query.each(base, 'val' => 10).map(&:foo))
+  end
 end

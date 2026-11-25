@@ -41,7 +41,7 @@ class Factbase::CachedQuery
     return to_enum(__method__, fb, params) unless block_given?
     invalidate_if_dirty!
     c = 0
-    key = "each #{fb.object_id} #{@origin}"
+    key = "each #{fb.object_id} #{@origin} #{normalized(params)}"
     if @cacheable && !@cache[key].nil?
       @cache[key].each do |f|
         c += 1
@@ -80,6 +80,21 @@ class Factbase::CachedQuery
   end
 
   private
+
+  # Normalize query parameters into a canonical cache key string.
+  # @param [Object] params Query parameters
+  # @return [String] Canonical key representation
+  def normalized(params)
+    if params.is_a?(Hash)
+      pairs = params.transform_keys(&:to_s).sort_by { |k, _| k }
+      return pairs.map { |k, v| [k, v.class.name, v] }.inspect
+    end
+    if params.respond_to?(:all_properties)
+      props = params.all_properties.sort
+      return props.map! { |k| [k, params[k].class.name, params[k]] }.inspect
+    end
+    params.inspect
+  end
 
   # Clear cache if it was marked dirty by a fresh fact insertion.
   # This implements lazy invalidation: we don't clear on every insert,
