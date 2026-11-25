@@ -29,6 +29,14 @@ class Factbase::Compare < Factbase::TermBase
     _search(lefts, rights)
   end
 
+  # Compare already-evaluated arrays of left and right values.
+  # @param [Array] lefts Left values
+  # @param [Array] rights Right values
+  # @return [Boolean] The result of the comparison
+  def search(lefts, rights)
+    _search(lefts, rights)
+  end
+
   private
 
   # Look for a pairing that answers true, skipping the ones that cannot be

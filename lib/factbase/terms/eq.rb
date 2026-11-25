@@ -26,15 +26,14 @@ class Factbase::Eq < Factbase::TermBase
   def evaluate(fact, maps, fb)
     assert_args(2)
     lefts = _values(0, fact, maps, fb)
-    return false if lefts.nil?
     rights = _values(1, fact, maps, fb)
-    return false if rights.nil?
+    return false if lefts.nil? || rights.nil?
     if lefts.size > 8 || rights.size > 8
       target, pool = lefts.size <= rights.size ? [lefts, rights] : [rights, lefts]
       set = pool.to_set { |v| normalize(v) }
       target.any? { |v| set.include?(normalize(v)) }
     else
-      @op.evaluate(fact, maps, fb)
+      @op.search(lefts, rights)
     end
   end
 

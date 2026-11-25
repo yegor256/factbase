@@ -20,7 +20,6 @@ class TestEq < Factbase::Test
     refute(Factbase::Eq.new([:number, 42]).evaluate(fact('number' => 100), [], Factbase.new))
   end
 
-<<<<<<< HEAD
   def test_returns_false_when_left_absent_with_literal
     refute(Factbase::Eq.new([:number, 42]).evaluate(fact('other' => 42), [], Factbase.new))
   end
@@ -176,5 +175,19 @@ class TestEq < Factbase::Test
     fb = Factbase.new
     100.times { |i| fb.insert.code = i }
     assert_equal(50, fb.query('(eq code $sel)').each(fb, 'sel' => (50..150).to_a).to_a.size)
+  end
+
+  def test_evaluates_stateful_operand_once_in_small_fallback
+    fb = Factbase.new
+    [1, 1, 2].each { |id| fb.insert.id = id }
+    assert_equal([1, 2], fb.query('(eq (unique id) true)').each.to_a.map(&:id))
+    assert_equal([1, 2], fb.query('(eq true (unique id))').each.to_a.map(&:id))
+  end
+
+  def test_evaluates_right_stateful_operand_when_left_absent
+    fb = Factbase.new
+    prev = Factbase::Term.new(:prev, [:score])
+    refute(Factbase::Eq.new([:missing, prev]).evaluate(fact('score' => 10), [], fb))
+    assert_equal([10], prev.evaluate(fact('score' => 20), [], fb))
   end
 end
