@@ -20,8 +20,10 @@ module Factbase::CachedTerm
     return super unless static? && !abstract?
     return super if %i[head unique].include?(@op)
     return super if fact.nil?
+    cache = fb.respond_to?(:cache) ? fb.cache : @cache
+    return super if cache.nil?
     key = [maps.object_id, to_s]
-    @cache[key] = super unless @cache.key?(key)
-    @cache[key]
+    cache[key] = super unless cache.key?(key)
+    cache[key]
   end
 end
