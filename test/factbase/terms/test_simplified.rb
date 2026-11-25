@@ -73,4 +73,25 @@ class TestSimplified < Factbase::Test
     end
     assert_equal([1, 2], fb.query('(or (not (not (unique x))) (eq y 1) (not (not (unique x))))').each.map(&:y))
   end
+
+  def test_preserves_distinct_types_with_same_string_representation
+    assert_equal(2, Factbase::Simplified.new([false, 'false']).unique.size)
+    assert_equal(2, Factbase::Simplified.new([:x, 'x']).unique.size)
+    assert_equal(2, Factbase::Simplified.new([true, 'true']).unique.size)
+    assert_equal(2, Factbase::Simplified.new([1, '1']).unique.size)
+    assert_equal(2, Factbase::Simplified.new([Factbase::Or.new([]), '(or)']).unique.size)
+  end
+
+  def test_query_with_boolean_and_string_literal_raises_error
+    fb = Factbase.new
+    fb.insert.x = 1
+    assert_includes(
+      assert_raises(Factbase::Term::Wrapped) { fb.query("(or false 'false')").each.to_a }.message,
+      'Boolean is expected, while String received'
+    )
+    assert_includes(
+      assert_raises(Factbase::Term::Wrapped) { fb.query("(and true 'true')").each.to_a }.message,
+      'Boolean is expected, while String received'
+    )
+  end
 end
