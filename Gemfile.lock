@@ -23,7 +23,7 @@ GEM
     builder (3.3.0)
     concurrent-ruby (1.3.8)
     date (3.6.0)
-    decoor (0.1.0)
+    decoor (0.1.1)
     drb (2.2.3)
     elapsed (0.3.1)
       loog (~> 0.6)
